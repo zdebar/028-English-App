@@ -63,9 +63,14 @@ describe('loadHome', () => {
     resolveSnapshot({
       grammarReviewReadyAt: '2026-07-21T10:00:00.000Z',
       vocabularyReviewReadyAt: '2026-07-21T11:00:00.000Z',
+      grammarReviewDueCount: 0,
+      vocabularyReviewDueCount: 0,
+      nextReviewAt: null,
       initialTrainingAvailable: true,
-      activeSession: null,
-      requiresSessionReconciliation: false,
+      continuingInitialLessonToday: false,
+      dailyNewLessonLimitReached: false,
+      newLessonsStartedTodayCount: 0,
+      maxNewLessonsPerDay: 1,
     });
     await loading;
 
@@ -80,7 +85,7 @@ describe('loadHome', () => {
   });
 
   it('reuses the snapshot when returning Home', async () => {
-    mocks.loadPracticeAvailabilitySnapshot.mockResolvedValue({ grammarReviewReadyAt: null, vocabularyReviewReadyAt: null, initialTrainingAvailable: true, activeSession: null, requiresSessionReconciliation: false });
+    mocks.loadPracticeAvailabilitySnapshot.mockResolvedValue({ grammarReviewReadyAt: null, vocabularyReviewReadyAt: null, grammarReviewDueCount: 0, vocabularyReviewDueCount: 0, nextReviewAt: null, initialTrainingAvailable: true, continuingInitialLessonToday: false, dailyNewLessonLimitReached: false, newLessonsStartedTodayCount: 0, maxNewLessonsPerDay: 1 });
     await loadHome();
     await loadHome();
     expect(mocks.loadPracticeAvailabilitySnapshot).toHaveBeenCalledOnce();

@@ -15,6 +15,8 @@ vi.mock('@/locales/cs', () => ({
   TEXTS: {
     notAvailable: 'N/A',
     czech: 'Czech',
+    czechDescription: 'Czech description',
+    noCzechDescription: 'no description',
     english: 'English',
     pronunciation: 'Pronunciation',
     progress: 'Progress',
@@ -27,7 +29,12 @@ vi.mock('@/locales/cs', () => ({
     practiceSchedule: 'Practice schedule',
     notScheduled: 'Not scheduled',
     directionCzToEn: 'CZ to EN',
+    directionEnToCz: 'EN to CZ',
     restartItemProgress: 'Restart item',
+    restartDirectionProgressDescription: 'Reset this direction?',
+    restartProgressHelp: 'Restart progress',
+    confirm: 'Confirm',
+    cancel: 'Cancel',
     audio: 'Audio',
     noAudio: 'No audio',
     tooltipNotes: 'Notes',
@@ -71,23 +78,30 @@ vi.mock('@/features/vocabulary/vocabulary.utils', () => ({
 }));
 
 vi.mock('@/components/UI/OverviewCard', () => ({
-  default: ({ buttonTitle, onClose, handleReset, children }: any) => (
+  default: ({ buttonTitle, onClose, handleReset, showResetAction = true, children }: any) => (
     <div>
-      <h1>{buttonTitle}</h1>
+      <div data-testid="card-title">{buttonTitle}</div>
+      {showResetAction && (
+        <button data-testid="header-reset" disabled={!handleReset}>
+          {buttonTitle}
+        </button>
+      )}
       <button data-testid="close" onClick={onClose}>
         close
       </button>
-      <button data-testid="reset" onClick={() => handleReset?.()}>
-        reset
-      </button>
+      {showResetAction && (
+        <button data-testid="reset" onClick={() => handleReset?.()}>
+          reset
+        </button>
+      )}
       {children}
     </div>
   ),
 }));
 
 vi.mock('@/components/UI/PropertyView', () => ({
-  default: ({ label, children }: any) => (
-    <div>
+  default: ({ label, children, alignTop, classNameValue }: any) => (
+    <div data-testid={`property-${label}`} data-align-top={alignTop ? 'true' : 'false'} data-value-class={classNameValue}>
       {label}:{String(children)}
     </div>
   ),
@@ -118,29 +132,64 @@ describe('VocabularyDetailCard', () => {
   });
 
   it('calls onClose and onReset handlers', () => {
+    const portal = document.createElement('div');
+    portal.id = 'root';
+    document.body.append(portal);
     const onClose = vi.fn();
     const onReset = vi.fn();
     render(
       <VocabularyDetailCard
         selectedWord={{ item_id: 1, czech: 'ahoj' } as any}
-        selectedTitle="ahoj"
         onClose={onClose}
         onReset={onReset}
       />,
     );
 
     fireEvent.click(screen.getByTestId('close'));
-    fireEvent.click(screen.getByTestId('reset'));
+    fireEvent.click(screen.getByRole('button', { name: 'cZ to EN' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Confirm' }));
 
     expect(onClose).toHaveBeenCalledTimes(1);
-    expect(onReset).toHaveBeenCalledTimes(1);
+    expect(onReset).toHaveBeenCalledWith('cz_to_en');
+  });
+
+  it('keeps the English title while omitting the header reset action and makes direction buttons full width', () => {
+    render(
+      <VocabularyDetailCard
+        selectedWord={{ item_id: 1, czech: 'ahoj', english: 'hello' } as any}
+        onClose={vi.fn()}
+        onReset={vi.fn()}
+      />,
+    );
+
+    expect(screen.getByTestId('card-title').textContent).toBe('hello');
+    expect(screen.queryByTestId('header-reset')).toBeNull();
+    const resetButton = screen.getByRole('button', { name: 'cZ to EN' });
+    expect(resetButton.className).toContain('h-input');
+    expect(resetButton.className).toContain('w-full');
+    expect(resetButton.className).not.toContain('mx-4');
+  });
+
+  it('top-aligns and wraps long vocabulary descriptions', () => {
+    const longDescription = 'unbroken-description-'.repeat(10);
+    render(
+      <VocabularyDetailCard
+        selectedWord={{ item_id: 1, czech: 'ahoj', english: 'hello', czech_description: longDescription } as any}
+        onClose={vi.fn()}
+        onReset={vi.fn()}
+      />,
+    );
+
+    const description = screen.getByTestId('property-czech description');
+    expect(description.dataset.alignTop).toBe('true');
+    expect(description.dataset.valueClass).toContain('break-words');
+    expect(description.dataset.valueClass).toContain('[overflow-wrap:anywhere]');
   });
 
   it('formats item progress with the configured SRS length', () => {
     render(
       <VocabularyDetailCard
         selectedWord={{ item_id: 1, czech: 'ahoj', progress_cz_to_en: 2 } as any}
-        selectedTitle="ahoj"
         onClose={vi.fn()}
         onReset={vi.fn()}
       />,
@@ -149,13 +198,34 @@ describe('VocabularyDetailCard', () => {
     expect(screen.getByText('progress:2 / 9')).toBeTruthy();
   });
 
+  it('shows the Czech description below Czech and leaves it blank when missing', () => {
+    const { rerender } = render(
+      <VocabularyDetailCard
+        selectedWord={{ item_id: 1, czech: 'ahoj', czech_description: 'Greeting' } as any}
+        onClose={vi.fn()}
+        onReset={vi.fn()}
+      />,
+    );
+
+    expect(screen.getByText('czech description:Greeting')).toBeTruthy();
+
+    rerender(
+      <VocabularyDetailCard
+        selectedWord={{ item_id: 1, czech: 'ahoj', czech_description: null } as any}
+        onClose={vi.fn()}
+        onReset={vi.fn()}
+      />,
+    );
+
+    expect(screen.getByText('czech description:')).toBeTruthy();
+  });
+
   it('disables play and volume buttons when audio is not ready', () => {
     audioMocks.audioReady = false;
 
     render(
       <VocabularyDetailCard
         selectedWord={{ item_id: 1, czech: 'ahoj', audio: 'a.opus' } as any}
-        selectedTitle="ahoj"
         onClose={vi.fn()}
         onReset={vi.fn()}
       />,
@@ -178,7 +248,6 @@ describe('VocabularyDetailCard', () => {
     render(
       <VocabularyDetailCard
         selectedWord={{ item_id: 1, czech: 'ahoj', audio: 'a.opus' } as any}
-        selectedTitle="ahoj"
         onClose={vi.fn()}
         onReset={vi.fn()}
       />,

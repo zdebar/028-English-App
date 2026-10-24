@@ -14,14 +14,27 @@ const config = {
   },
 
   progress: {
-    simulationItemCount: 400,
+    simulationLessonCount: 10,
     simulationItemProgress: 1,
-    simulationStartedBlockCount: 8,
   },
 
   srs: {
     // Spaced Repetition System configuration
-    intervals: [150, 14400, 28800, 86400, 172800, 345600, 691200, 1382400],
+    intervals: [
+      10 * 60,
+      24 * 60 * 60,
+      3 * 24 * 60 * 60,
+      7 * 24 * 60 * 60,
+      14 * 24 * 60 * 60,
+      30 * 24 * 60 * 60,
+      60 * 24 * 60 * 60,
+    ],
+    ratingProgressDelta: {
+      repeat: -1,
+      hard: 0,
+      good: 1,
+      easy: 3,
+    },
     randomness: 0.2, // Randomness of SRS algorithm
   },
 
@@ -31,10 +44,9 @@ const config = {
   },
 
   practice: {
-    initialTrainingBatchSize: 8, // Maximum size of an automatically assembled initial-training batch
     grammarReviewLimitSize: 50, // New training locks only above this grammar review count
     vocabularyReviewLimitSize: 50, // New training locks only above this vocabulary review count
-    dailyStartedGoal: 50, // Daily started-item goal shown on the home page
+    dailyStartedGoal: 50, // Daily started-item goal used in the practice overview
     audioDelay: 100, // Delay in milliseconds for automatically playing audio
     holdDuration: 300, // Duration in milliseconds for which the practice card is held before moving to the next item
     maxReviewReadyTimerDelayMs: 2_147_483_647, // Maximum setTimeout delay supported by browsers

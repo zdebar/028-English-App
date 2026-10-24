@@ -15,89 +15,47 @@ GRANT EXECUTE ON FUNCTION public.is_non_demo_user() TO authenticated;
 -- Catalog tables are shared content. Anonymous app users still read these
 -- through Supabase Auth, so the direct table grants target authenticated only.
 REVOKE ALL PRIVILEGES ON TABLE
-  public.blocks,
-  public.grammar_topics,
-  public.grammar_groups,
-  public.grammar_chunks,
-  public.grammar_chunk_examples,
   public.items,
   public.lessons,
   public.levels,
   public.notes,
-  public.pronunciation_groups,
-  public.pronunciation_group_items,
-  public.topics
+  public.groups,
+  public.group_items,
+  public.group_relations
 FROM PUBLIC, anon, authenticated;
 
 GRANT SELECT ON TABLE
-  public.blocks,
-  public.grammar_topics,
-  public.grammar_groups,
-  public.grammar_chunks,
-  public.grammar_chunk_examples,
   public.items,
   public.lessons,
   public.levels,
   public.notes,
-  public.pronunciation_groups,
-  public.pronunciation_group_items,
-  public.topics
+  public.groups,
+  public.group_items,
+  public.group_relations
 TO authenticated;
 
-ALTER TABLE public.blocks ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.grammar_topics ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.grammar_groups ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.grammar_chunks ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.grammar_chunk_examples ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.items ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.lessons ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.levels ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.notes ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.pronunciation_groups ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.pronunciation_group_items ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.topics ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.groups ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.group_items ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.group_relations ENABLE ROW LEVEL SECURITY;
 
-DROP POLICY IF EXISTS "Enable read access for all users" ON public.blocks;
-DROP POLICY IF EXISTS "Enable read access for all users" ON public.grammar_topics;
-DROP POLICY IF EXISTS "Enable read access for all users" ON public.grammar_groups;
-DROP POLICY IF EXISTS "Enable read access for all users" ON public.grammar_chunks;
+DROP POLICY IF EXISTS catalog_select_authenticated ON public.groups;
+DROP POLICY IF EXISTS catalog_select_authenticated ON public.group_items;
+DROP POLICY IF EXISTS catalog_select_authenticated ON public.group_relations;
+CREATE POLICY catalog_select_authenticated ON public.groups FOR SELECT TO authenticated USING (true);
+CREATE POLICY catalog_select_authenticated ON public.group_items FOR SELECT TO authenticated USING (true);
+CREATE POLICY catalog_select_authenticated ON public.group_relations FOR SELECT TO authenticated USING (true);
 DROP POLICY IF EXISTS "Enable read access for all users" ON public.items;
 DROP POLICY IF EXISTS "Enable read access for all users" ON public.lessons;
 DROP POLICY IF EXISTS "Enable read access for all users" ON public.levels;
 DROP POLICY IF EXISTS "Enable read access for all users" ON public.notes;
-DROP POLICY IF EXISTS catalog_select_authenticated ON public.blocks;
-DROP POLICY IF EXISTS catalog_select_authenticated ON public.grammar_topics;
-DROP POLICY IF EXISTS catalog_select_authenticated ON public.grammar_groups;
-DROP POLICY IF EXISTS catalog_select_authenticated ON public.grammar_chunks;
-DROP POLICY IF EXISTS catalog_select_authenticated ON public.grammar_chunk_examples;
 DROP POLICY IF EXISTS catalog_select_authenticated ON public.items;
 DROP POLICY IF EXISTS catalog_select_authenticated ON public.lessons;
 DROP POLICY IF EXISTS catalog_select_authenticated ON public.levels;
 DROP POLICY IF EXISTS catalog_select_authenticated ON public.notes;
-DROP POLICY IF EXISTS catalog_select_authenticated ON public.pronunciation_groups;
-DROP POLICY IF EXISTS catalog_select_authenticated ON public.pronunciation_group_items;
-DROP POLICY IF EXISTS catalog_select_authenticated ON public.topics;
-
-CREATE POLICY catalog_select_authenticated ON public.grammar_topics
-  FOR SELECT TO authenticated
-  USING (TRUE);
-
-CREATE POLICY catalog_select_authenticated ON public.blocks
-  FOR SELECT TO authenticated
-  USING (TRUE);
-
-CREATE POLICY catalog_select_authenticated ON public.grammar_groups
-  FOR SELECT TO authenticated
-  USING (TRUE);
-
-CREATE POLICY catalog_select_authenticated ON public.grammar_chunks
-  FOR SELECT TO authenticated
-  USING (TRUE);
-
-CREATE POLICY catalog_select_authenticated ON public.grammar_chunk_examples
-  FOR SELECT TO authenticated
-  USING (TRUE);
-
 CREATE POLICY catalog_select_authenticated ON public.items
   FOR SELECT TO authenticated
   USING (TRUE);
@@ -114,20 +72,9 @@ CREATE POLICY catalog_select_authenticated ON public.notes
   FOR SELECT TO authenticated
   USING (TRUE);
 
-CREATE POLICY catalog_select_authenticated ON public.pronunciation_groups
-  FOR SELECT TO authenticated
-  USING (TRUE);
-
-CREATE POLICY catalog_select_authenticated ON public.pronunciation_group_items
-  FOR SELECT TO authenticated
-  USING (TRUE);
-
-CREATE POLICY catalog_select_authenticated ON public.topics
-  FOR SELECT TO authenticated
-  USING (TRUE);
-
 REVOKE ALL PRIVILEGES ON TABLE public.users FROM PUBLIC, anon, authenticated;
 GRANT SELECT ON TABLE public.users TO authenticated;
+GRANT UPDATE (max_new_lessons_per_day) ON TABLE public.users TO authenticated;
 
 ALTER TABLE public.users ENABLE ROW LEVEL SECURITY;
 
@@ -137,6 +84,25 @@ DROP POLICY IF EXISTS users_select_own ON public.users;
 CREATE POLICY users_select_own ON public.users
   FOR SELECT TO authenticated
   USING (id = (SELECT auth.uid()));
+
+DROP POLICY IF EXISTS users_update_own_settings ON public.users;
+CREATE POLICY users_update_own_settings ON public.users
+  FOR UPDATE TO authenticated
+  USING (id = (SELECT auth.uid()) AND public.is_non_demo_user())
+  WITH CHECK (id = (SELECT auth.uid()) AND public.is_non_demo_user());
+
+REVOKE ALL PRIVILEGES ON TABLE public.user_lessons FROM PUBLIC, anon, authenticated;
+GRANT SELECT, INSERT ON TABLE public.user_lessons TO authenticated;
+ALTER TABLE public.user_lessons ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS user_lessons_select_own ON public.user_lessons;
+DROP POLICY IF EXISTS user_lessons_insert_own ON public.user_lessons;
+CREATE POLICY user_lessons_select_own ON public.user_lessons
+  FOR SELECT TO authenticated
+  USING (user_id = (SELECT auth.uid()));
+CREATE POLICY user_lessons_insert_own ON public.user_lessons
+  FOR INSERT TO authenticated
+  WITH CHECK (user_id = (SELECT auth.uid()) AND public.is_non_demo_user());
 
 REVOKE ALL PRIVILEGES ON TABLE
   public.user_items

@@ -9,12 +9,12 @@ import { loadHome } from '@/routing/home-loader';
 import { reportError } from '@/features/logging/monitoring-handler';
 import { useToastStore } from '@/features/toast/use-toast-store';
 import { TEXTS } from '@/locales/cs';
-import InitialTrainingPractice from '@/pages/BlockTrainingPractice';
+import InitialTrainingPractice from '@/pages/InitialTrainingPractice';
 import Grammar from '@/pages/Grammar';
 import Guide from '@/pages/Guide';
 import Home from '@/pages/Home';
-import Levels from '@/pages/Levels';
 import Overviews from '@/pages/Overviews';
+import LessonsOverview from '@/pages/LessonsOverview';
 import Practice from '@/pages/Practice';
 import PracticeOverview from '@/pages/PracticeOverview';
 import PrivacyPolicy from '@/pages/PrivacyPolicy';
@@ -24,6 +24,8 @@ import PronunciationOverviewPage from '@/pages/PronunciationOverviewPage';
 import TopicItems from '@/pages/TopicItems';
 import Topics from '@/pages/Topics';
 import Vocabulary from '@/pages/Vocabulary';
+import Sounds from '@/pages/Sounds';
+import SoundGroupPage from '@/pages/SoundGroupPage';
 import Notification from '@/components/UI/Notification';
 import type { RouteDataDescriptor } from '@/routing/route-data';
 import {
@@ -32,6 +34,8 @@ import {
   overviewAvailabilityDescriptor,
   practiceOverviewDescriptor,
   reviewPracticeDescriptor,
+  soundsDescriptor,
+  soundGroupDetailDescriptor,
   pronunciationGroupDetailDescriptor,
   topicDetailDescriptor,
   topicsDescriptor,
@@ -42,6 +46,10 @@ import { createHashRouter, redirect, type LoaderFunctionArgs } from 'react-route
 export async function protectedLoader() {
   await requireUserId();
   return null;
+}
+
+function InitialLoadingFallback() {
+  return <DelayedMessage className="mt-20" />;
 }
 
 async function requireUserId(): Promise<string> {
@@ -102,6 +110,22 @@ async function loadPronunciationGroupDetail({ params }: LoaderFunctionArgs) {
   }
 }
 
+async function loadSoundGroupDetail({ params }: LoaderFunctionArgs) {
+  const groupId = parsePositiveId(params.groupId);
+  if (!groupId) throw redirect(ROUTES.sounds);
+  const userId = await requireUserId();
+  try {
+    const data = await soundGroupDetailDescriptor(userId, groupId).load();
+    if (!data) throw redirect(ROUTES.sounds);
+    return data;
+  } catch (error) {
+    if (error instanceof Response) throw error;
+    reportError('Failed to load sound group detail route data', error);
+    useToastStore.getState().showToast(TEXTS.loadingError, 'error');
+    throw error;
+  }
+}
+
 async function loadInitialTraining() {
   const userId = await requireUserId();
   try {
@@ -120,7 +144,7 @@ export const router = createHashRouter([
   {
     path: ROUTES.home,
     Component: App,
-    HydrateFallback: DelayedMessage,
+    HydrateFallback: InitialLoadingFallback,
     errorElement: <RouteDataError />,
     children: [
       { index: true, loader: loadHome, Component: Home },
@@ -129,7 +153,7 @@ export const router = createHashRouter([
       {
         Component: ProtectedLayout,
         loader: protectedLoader,
-        HydrateFallback: DelayedMessage,
+        HydrateFallback: InitialLoadingFallback,
         children: [
           {
             path: ROUTES.practice,
@@ -170,11 +194,8 @@ export const router = createHashRouter([
             loader: () => loadProtectedData('overviews', overviewAvailabilityDescriptor),
             Component: Overviews,
           },
+          { path: ROUTES.lessonsOverview, Component: LessonsOverview },
           { path: ROUTES.profile, Component: Profile },
-          {
-            path: ROUTES.levels,
-            Component: Levels,
-          },
           {
             path: ROUTES.topics,
             loader: () => loadProtectedData('topics', topicsDescriptor),
@@ -190,6 +211,16 @@ export const router = createHashRouter([
             path: ROUTES.vocabulary,
             loader: () => loadProtectedData('vocabulary', vocabularyDescriptor),
             Component: Vocabulary,
+          },
+          {
+            path: ROUTES.sounds,
+            loader: () => loadProtectedData('sound groups', soundsDescriptor),
+            Component: Sounds,
+          },
+          {
+            path: ROUTES.soundDetail,
+            loader: loadSoundGroupDetail,
+            Component: SoundGroupPage,
           },
           {
             path: ROUTES.pronunciationGroups,

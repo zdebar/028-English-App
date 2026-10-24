@@ -64,7 +64,6 @@ enabled = true
 schema_paths = [
   "./schemas/00_tables.sql",
   "./schemas/10_updated_at_triggers.sql",
-  "./schemas/11_block_lesson_validation.sql",
   "./schemas/20_auth_helpers.sql",
   "./schemas/30_rpc_fetch_user_items.sql",
   "./schemas/31_rpc_upsert_user_items.sql",
@@ -82,7 +81,10 @@ enabled = true
 # Specifies an ordered list of seed files to load during db reset.
 # Supports glob patterns relative to supabase directory: "./seeds/*.sql"
 sql_paths = [
+  "./seeds/01_legacy_group_import.sql",
   "./seeds/remote_data.sql",
+  "./seeds/02_unified_groups.sql",
+  "./seeds/03_cleanup_legacy_group_import.sql",
 ]
 
 [db.network_restrictions]

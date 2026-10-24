@@ -99,7 +99,7 @@ describe('anonymous session fallback', () => {
     expect(mocks.setSession).not.toHaveBeenCalled();
   });
 
-  it('removes only authentication error parameters from the URL', () => {
+  it('removes authentication errors and returns to the home hash route', () => {
     history.replaceState(
       { retained: true },
       '',
@@ -110,7 +110,7 @@ describe('anonymous session fallback', () => {
 
     expect(location.pathname).toBe('/callback');
     expect(location.search).toBe('?keep=yes');
-    expect(location.hash).toBe('#part');
+    expect(location.hash).toBe('#/');
     expect(history.state).toEqual({ retained: true });
   });
 

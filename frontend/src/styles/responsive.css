@@ -29,6 +29,18 @@
   gap: 0;
 }
 
+.secondary-controls-after-list {
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+  margin-top: var(--spacing);
+}
+
+.secondary-controls-after-list .pos-bottom-right-control,
+.secondary-controls-after-list .pos-bottom-left-control {
+  position: static;
+}
+
 .pos-help-top-right {
   position: absolute;
   top: -0px;
@@ -75,6 +87,10 @@
   );
   bottom: 0;
   flex-direction: column-reverse;
+}
+
+.app-shell[data-secondary-layout='side'] .secondary-controls-after-list {
+  display: contents;
 }
 
 .pos-home-dashboard-help {

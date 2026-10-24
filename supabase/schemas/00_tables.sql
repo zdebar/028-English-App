@@ -12,47 +12,9 @@ SET search_path TO public;
 
 CREATE TABLE IF NOT EXISTS users (
   id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
+  max_new_lessons_per_day INTEGER NOT NULL DEFAULT 1 CHECK (max_new_lessons_per_day >= 1),
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-);
-
-CREATE TABLE IF NOT EXISTS grammar_topics (
-  id SERIAL PRIMARY KEY,
-  name TEXT NOT NULL UNIQUE,
-  note TEXT,
-  sort_order INTEGER NOT NULL CHECK (sort_order >= 1),
-  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-  deleted_at TIMESTAMPTZ,
-  CONSTRAINT grammar_topics_sort_order_key
-    UNIQUE (sort_order) DEFERRABLE INITIALLY DEFERRED
-);
-
-CREATE TABLE IF NOT EXISTS grammar_groups (
-  id SERIAL PRIMARY KEY,
-  name TEXT NOT NULL,
-  note TEXT,
-  grammar_topic_id INTEGER NOT NULL REFERENCES grammar_topics(id) ON DELETE RESTRICT,
-  sort_order INTEGER NOT NULL CHECK (sort_order >= 1),
-  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-  deleted_at TIMESTAMPTZ,
-  CONSTRAINT grammar_groups_topic_name_key
-    UNIQUE (grammar_topic_id, name),
-  CONSTRAINT grammar_groups_topic_sort_order_key
-    UNIQUE (grammar_topic_id, sort_order) DEFERRABLE INITIALLY DEFERRED
-);
-
-CREATE TABLE IF NOT EXISTS grammar_chunks (
-  id SERIAL PRIMARY KEY,
-  name TEXT NOT NULL,
-  note TEXT,
-  grammar_group_id INTEGER NOT NULL REFERENCES grammar_groups(id) ON DELETE RESTRICT,
-  sort_order INTEGER NOT NULL CHECK (sort_order >= 1),
-  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-  deleted_at TIMESTAMPTZ,
-  CONSTRAINT grammar_chunks_group_name_key
-    UNIQUE (grammar_group_id, name),
-  CONSTRAINT grammar_chunks_sort_order_key
-    UNIQUE (grammar_group_id, sort_order) DEFERRABLE INITIALLY DEFERRED
 );
 
 CREATE TABLE IF NOT EXISTS levels (
@@ -66,11 +28,22 @@ CREATE TABLE IF NOT EXISTS levels (
     UNIQUE (sort_order) DEFERRABLE INITIALLY DEFERRED
 );
 
+CREATE TABLE IF NOT EXISTS groups (
+  id SERIAL PRIMARY KEY,
+  type TEXT NOT NULL CHECK (type IN ('topic', 'grammar', 'sound', 'pronunciation')),
+  name TEXT NOT NULL,
+  note TEXT,
+  sort_order INTEGER NOT NULL CHECK (sort_order >= 1),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  deleted_at TIMESTAMPTZ
+);
+
 CREATE TABLE IF NOT EXISTS lessons (
   id SERIAL PRIMARY KEY,
   name TEXT NOT NULL UNIQUE,
   note TEXT,
   level_id INTEGER NOT NULL REFERENCES levels(id) ON DELETE RESTRICT,
+  group_id INTEGER REFERENCES groups(id) ON DELETE SET NULL,
   sort_order INTEGER NOT NULL CHECK (sort_order >= 1),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   deleted_at TIMESTAMPTZ,
@@ -78,27 +51,15 @@ CREATE TABLE IF NOT EXISTS lessons (
     UNIQUE (level_id, sort_order) DEFERRABLE INITIALLY DEFERRED
 );
 
-CREATE TABLE IF NOT EXISTS blocks (
-  id SERIAL PRIMARY KEY,
-  name TEXT NOT NULL UNIQUE,
-  note TEXT,
+CREATE TABLE IF NOT EXISTS user_lessons (
+  user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   lesson_id INTEGER NOT NULL REFERENCES lessons(id) ON DELETE RESTRICT,
-  grammar_chunk_id INTEGER REFERENCES grammar_chunks(id) ON DELETE RESTRICT,
-  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-  deleted_at TIMESTAMPTZ,
-  CONSTRAINT blocks_id_lesson_id_key UNIQUE (id, lesson_id)
+  started_at TIMESTAMPTZ NOT NULL,
+  PRIMARY KEY (user_id, lesson_id, started_at)
 );
 
-CREATE TABLE IF NOT EXISTS topics (
-  id SERIAL PRIMARY KEY,
-  name TEXT NOT NULL UNIQUE,
-  note TEXT,
-  sort_order INTEGER NOT NULL CHECK (sort_order >= 1),
-  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-  deleted_at TIMESTAMPTZ,
-  CONSTRAINT topics_sort_order_key
-    UNIQUE (sort_order) DEFERRABLE INITIALLY DEFERRED
-);
+CREATE INDEX IF NOT EXISTS idx_user_lessons_user_started_at
+  ON public.user_lessons (user_id, started_at);
 
 CREATE TABLE IF NOT EXISTS notes (
   id SERIAL PRIMARY KEY,
@@ -114,69 +75,57 @@ CREATE TABLE IF NOT EXISTS notes (
 CREATE TABLE IF NOT EXISTS items (
   id SERIAL PRIMARY KEY,
   czech TEXT NOT NULL,
+  czech_description TEXT DEFAULT NULL,
+  is_cz_to_en_enabled BOOLEAN NOT NULL DEFAULT TRUE,
+  is_en_to_cz_enabled BOOLEAN NOT NULL DEFAULT TRUE,
   english TEXT NOT NULL,
   pronunciation TEXT,
   audio TEXT,
   note_id INTEGER REFERENCES notes(id) ON DELETE SET NULL,
-  grammar_chunk_id INTEGER REFERENCES grammar_chunks(id) ON DELETE RESTRICT,
   is_vocabulary BOOLEAN NOT NULL,
   sort_order INTEGER NOT NULL CHECK (sort_order >= 1),
   lesson_id INTEGER NOT NULL REFERENCES lessons(id) ON DELETE RESTRICT,
-  block_id INTEGER,
-  topic_id INTEGER REFERENCES topics(id) ON DELETE SET NULL,
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   deleted_at TIMESTAMPTZ,
   CONSTRAINT items_lesson_sort_order_key
-    UNIQUE (lesson_id, sort_order) DEFERRABLE INITIALLY DEFERRED,
-  CONSTRAINT items_block_lesson_fkey
-    FOREIGN KEY (block_id, lesson_id)
-    REFERENCES blocks(id, lesson_id) ON DELETE RESTRICT
+    UNIQUE (lesson_id, sort_order) DEFERRABLE INITIALLY DEFERRED
 );
 
-CREATE TABLE IF NOT EXISTS pronunciation_groups (
+CREATE TABLE IF NOT EXISTS group_items (
   id SERIAL PRIMARY KEY,
-  name TEXT NOT NULL UNIQUE,
-  note TEXT,
-  sort_order INTEGER NOT NULL CHECK (sort_order >= 1),
-  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-  deleted_at TIMESTAMPTZ,
-  CONSTRAINT pronunciation_groups_sort_order_key
-    UNIQUE (sort_order) DEFERRABLE INITIALLY DEFERRED
-);
-
-CREATE TABLE IF NOT EXISTS pronunciation_group_items (
-  pronunciation_group_id INTEGER NOT NULL
-    REFERENCES pronunciation_groups(id) ON DELETE CASCADE,
-  item_id INTEGER NOT NULL REFERENCES items(id) ON DELETE CASCADE,
-  contrast_set INTEGER CHECK (contrast_set >= 1),
-  sort_order INTEGER NOT NULL CHECK (sort_order >= 1),
-  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-  deleted_at TIMESTAMPTZ,
-  PRIMARY KEY (pronunciation_group_id, item_id),
-  CONSTRAINT pronunciation_group_items_group_sort_order_key
-    UNIQUE (pronunciation_group_id, sort_order) DEFERRABLE INITIALLY DEFERRED
-);
-
-CREATE TABLE IF NOT EXISTS grammar_chunk_examples (
-  grammar_chunk_id INTEGER NOT NULL
-    REFERENCES grammar_chunks(id) ON DELETE CASCADE,
+  group_id INTEGER NOT NULL REFERENCES groups(id) ON DELETE CASCADE,
   item_id INTEGER NOT NULL REFERENCES items(id) ON DELETE CASCADE,
   sort_order INTEGER NOT NULL CHECK (sort_order >= 1),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   deleted_at TIMESTAMPTZ,
-  PRIMARY KEY (grammar_chunk_id, item_id),
-  CONSTRAINT grammar_chunk_examples_chunk_sort_order_key
-    UNIQUE (grammar_chunk_id, sort_order) DEFERRABLE INITIALLY DEFERRED
+  UNIQUE (group_id, item_id),
+  CONSTRAINT group_items_group_sort_order_key UNIQUE (group_id, sort_order) DEFERRABLE INITIALLY DEFERRED
+);
+
+CREATE TABLE IF NOT EXISTS group_relations (
+  id SERIAL PRIMARY KEY,
+  parent_group_id INTEGER NOT NULL REFERENCES groups(id) ON DELETE CASCADE,
+  child_group_id INTEGER NOT NULL REFERENCES groups(id) ON DELETE CASCADE,
+  relation_type TEXT NOT NULL CHECK (relation_type IN ('hierarchy', 'detail', 'contrast')),
+  sort_order INTEGER NOT NULL CHECK (sort_order >= 1),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  deleted_at TIMESTAMPTZ,
+  UNIQUE (parent_group_id, child_group_id),
+  CHECK (parent_group_id <> child_group_id),
+  CONSTRAINT group_relations_parent_type_order_key UNIQUE (parent_group_id, relation_type, sort_order) DEFERRABLE INITIALLY DEFERRED
 );
 
 CREATE TABLE IF NOT EXISTS user_items (
   user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   item_id INTEGER NOT NULL REFERENCES items(id) ON DELETE CASCADE,
   progress_cz_to_en INTEGER NOT NULL DEFAULT 0 CHECK (progress_cz_to_en >= 0),
+  progress_en_to_cz INTEGER NOT NULL DEFAULT 0 CHECK (progress_en_to_cz >= 0),
   started_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   next_at_cz_to_en TIMESTAMPTZ,
+  next_at_en_to_cz TIMESTAMPTZ,
   mastered_at_cz_to_en TIMESTAMPTZ,
+  mastered_at_en_to_cz TIMESTAMPTZ,
   PRIMARY KEY (user_id, item_id)
 );
 
@@ -209,32 +158,32 @@ EXECUTE FUNCTION public.handle_new_auth_user();
 CREATE INDEX IF NOT EXISTS idx_items_updated_at ON public.items (updated_at);
 CREATE INDEX IF NOT EXISTS idx_items_lesson_id ON public.items (lesson_id);
 CREATE INDEX IF NOT EXISTS idx_lessons_level_id ON public.lessons (level_id);
-CREATE INDEX IF NOT EXISTS idx_blocks_grammar_chunk_id ON public.blocks (grammar_chunk_id);
 CREATE INDEX IF NOT EXISTS idx_items_note_id ON public.items (note_id);
-CREATE INDEX IF NOT EXISTS idx_items_block_id ON public.items (block_id);
-CREATE INDEX IF NOT EXISTS idx_items_topic_id ON public.items (topic_id);
-CREATE INDEX IF NOT EXISTS idx_items_grammar_chunk_id ON public.items (grammar_chunk_id);
-CREATE INDEX IF NOT EXISTS idx_pronunciation_group_items_item_id
-  ON public.pronunciation_group_items (item_id);
-CREATE INDEX IF NOT EXISTS idx_pronunciation_group_items_group_contrast_sort
-  ON public.pronunciation_group_items (pronunciation_group_id, contrast_set, sort_order);
-CREATE INDEX IF NOT EXISTS idx_grammar_chunk_examples_item_id
-  ON public.grammar_chunk_examples (item_id);
+CREATE INDEX IF NOT EXISTS idx_groups_type_sort_order ON public.groups (type, sort_order);
+CREATE INDEX IF NOT EXISTS idx_group_items_item_id ON public.group_items (item_id);
+CREATE INDEX IF NOT EXISTS idx_group_items_group_sort_order ON public.group_items (group_id, sort_order);
+CREATE INDEX IF NOT EXISTS idx_group_relations_child_id ON public.group_relations (child_group_id);
 
 CREATE INDEX IF NOT EXISTS idx_user_items_user_updated_item
   ON public.user_items (user_id, updated_at, item_id)
   INCLUDE (
     progress_cz_to_en,
+    progress_en_to_cz,
     started_at,
     next_at_cz_to_en,
-    mastered_at_cz_to_en
+    mastered_at_cz_to_en,
+    next_at_en_to_cz,
+    mastered_at_en_to_cz
   );
 CREATE INDEX IF NOT EXISTS idx_user_items_item_user
   ON public.user_items (item_id, user_id)
   INCLUDE (
     progress_cz_to_en,
+    progress_en_to_cz,
     started_at,
     updated_at,
     next_at_cz_to_en,
-    mastered_at_cz_to_en
+    mastered_at_cz_to_en,
+    next_at_en_to_cz,
+    mastered_at_en_to_cz
   );

@@ -78,4 +78,12 @@ describe('OverviewCard', () => {
       expect(onClose).toHaveBeenCalledTimes(1);
     });
   });
+
+  it('keeps the card title visible while disabling its reset action', () => {
+    render(<OverviewCard buttonTitle="English title" showResetAction={false} onClose={vi.fn()} />);
+
+    const titleButton = screen.getByRole('button', { name: 'English title' }) as HTMLButtonElement;
+    expect(titleButton.disabled).toBe(true);
+    expect(screen.getByTestId('close-button')).toBeTruthy();
+  });
 });

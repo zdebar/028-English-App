@@ -1,7 +1,6 @@
 import { useAuthStore } from '@/features/auth/use-auth-store';
 import DelayedMessage from '@/components/UI/DelayedMessage';
 import Dashboard from '@/features/dashboard/Dashboard';
-import { useUserStore } from '@/features/user-stats/use-user-store';
 import { TEXTS } from '@/locales/cs';
 import type { JSX } from 'react';
 import { Link } from 'react-router-dom';
@@ -11,12 +10,9 @@ import { ROUTES } from '@/config/routes.config';
 import GoogleAuthButton from '@/features/auth/GoogleAuthButton';
 import AnonymousSigninButton from '@/features/auth/AnonymousSigninButton';
 import ConvertAnonymousUserButton from '@/features/auth/ConvertAnonymousUserButton';
-import PropertyView from '@/components/UI/PropertyView';
-import PracticeOverviewButton from '@/features/practice-overview/PracticeOverviewButton';
 import SimulateDataButton from '@/features/synchronization/SimulateDataButton';
 import PracticeButton from '@/features/practice/PracticeButton';
 import HelpButton from '@/features/help/HelpButton';
-import config from '@/config/config';
 
 const HOME_TEXT_ACTION_CLASS_NAME =
   'color-info font-headings text-center text-lg decoration-current underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2';
@@ -39,12 +35,9 @@ function HomeActionLinks(): JSX.Element {
  */
 export default function Home(): JSX.Element {
   const userId = useAuthStore((state) => state.userId);
-  const userFullName = useAuthStore((state) => state.userFullName);
   const isAnonymousUser = useAuthStore((state) => state.isAnonymousUser);
   const authLoading = useAuthStore((state) => state.loading);
-  const startedTodayCount = useUserStore((state) => state.startedTodayCount);
   const isSyncError = useSyncStore((state) => state.isSyncError);
-
 
   if (authLoading) {
     return (
@@ -57,44 +50,34 @@ export default function Home(): JSX.Element {
   return (
     <>
       {userId ? (
-        <div className="card-width relative flex h-full w-full grow flex-col justify-start gap-1 sm:gap-4">
-          <div className="landscape:mt-6">
-            <PropertyView
-              label={TEXTS.profileNameLabel}
-              className="justify-center"
-              classNameLabel="w-20"
-              classNameValue="wrap-break-word"
-            >
-              {userFullName ?? TEXTS.notAvailable}
-            </PropertyView>
-            <HomeActionLinks />
-          </div>
-          <p className={`text-error-light dark:text-error-dark px-4 text-center text-sm`}>
-            Aplikace v testovacím režimu! V tuto chvíli Vaše tréninková data nebudou zachována.
-          </p>
-          {isAnonymousUser && (
-            <div className="flex flex-col gap-1">
-              <ConvertAnonymousUserButton />
-              <SimulateDataButton />
+        <div className="card-width relative flex h-full w-full grow flex-col justify-start gap-1">
+          <div className="flex flex-col gap-0">
+            <div className="mt-2 landscape:mt-6">
+              <HomeActionLinks />
             </div>
-          )}
-          <PracticeOverviewButton
-            count={startedTodayCount}
-            goal={config.practice.dailyStartedGoal}
-            to={ROUTES.practiceOverview}
-            ariaLabel={TEXTS.practiceOverviewOpen}
-            helpText={TEXTS.dailyStartedGoal}
-          />
-          <div className="flex w-full flex-col gap-1">
+            <p className={`text-error-light dark:text-error-dark px-4 text-center text-sm`}>
+              Aplikace v testovacím režimu! V tuto chvíli Vaše tréninková data nebudou zachována.
+            </p>
+            {isAnonymousUser && (
+              <div className="flex flex-col gap-1">
+                <ConvertAnonymousUserButton />
+                <SimulateDataButton />
+              </div>
+            )}
+            <Link to={ROUTES.practiceOverview} className={HOME_TEXT_ACTION_CLASS_NAME}>
+              {TEXTS.practiceOverviewTitle}
+            </Link>
+          </div>
+          <div className="my-4 flex w-full flex-col">
             <PracticeButton />
           </div>
           <div className="relative">
             <p
-              className={`text-error-light dark:text-error-dark px-4 py-2 text-center text-sm ${isSyncError ? 'visible' : 'invisible'}`}
+              className={`text-error-light dark:text-error-dark px-4 py-2 text-center text-sm ${isSyncError ? 'visible' : 'hidden'}`}
             >
               {TEXTS.syncWarning}
             </p>
-            <div className="home-bottom-controls-clearance relative">
+            <div className="home-bottom-controls-clearance relative mt-2">
               <Dashboard />
               <div className="pos-home-dashboard-help">
                 <HelpButton />

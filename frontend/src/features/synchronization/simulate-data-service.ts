@@ -8,7 +8,7 @@ import { invalidateReviewArrays } from '@/features/practice/review-prefetch';
  * Atomically creates the anonymous-user progress fixture.
  *
  * @param userId Non-empty anonymous user id whose local progress should be simulated.
- * @param dateTime Shared ISO timestamp for every simulated item and block transition.
+ * @param dateTime Shared ISO timestamp for every simulated item transition.
  * @returns Number of user items updated.
  */
 export async function simulateUserProgress(
@@ -17,10 +17,26 @@ export async function simulateUserProgress(
 ): Promise<number> {
   assertNonEmptyString(userId, 'userId');
 
-  const itemCount = await db.transaction('rw', db.user_items, async () => {
-    const items = await UserItem.getSimulationCandidates(userId);
-    return UserItem.simulateData(items, dateTime);
-  });
+  const itemCount = await db.transaction(
+    'rw',
+    db.user_items,
+    db.user_lessons,
+    db.lessons,
+    db.levels,
+    async () => {
+      const items = await UserItem.getSimulationCandidates(userId);
+      const itemCount = await UserItem.simulateData(items, dateTime);
+      const startedLessonIds = [...new Set(items.map((item) => item.lesson_id))];
+      await db.user_lessons.bulkPut(
+        startedLessonIds.map((lessonId) => ({
+          user_id: userId,
+          lesson_id: lessonId,
+          started_at: dateTime,
+        })),
+      );
+      return itemCount;
+    },
+  );
 
   invalidateReviewArrays(userId);
   void refreshPracticeAvailability(userId);

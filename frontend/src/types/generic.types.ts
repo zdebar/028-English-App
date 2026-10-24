@@ -11,38 +11,10 @@ export interface RecordType extends SyncEntityType {}
 
 export interface LessonType extends SyncEntityType {
   level_id: number;
+  group_id: number | null;
 }
 export interface LevelType extends SyncEntityType {}
 
-export interface GrammarTopicType extends SyncEntityType {}
-
-export interface GrammarGroupType extends SyncEntityType {
-  grammar_topic_id: number;
-}
-
-export interface GrammarChunkType extends SyncEntityType {
-  grammar_group_id: number;
-}
-
-export interface GrammarChunkExampleType {
-  grammar_chunk_id: number;
-  item_id: number;
-  sort_order: number;
-  updated_at: string;
-  deleted_at: string | null;
-}
-
-export interface BlockType {
-  id: number;
-  name: string;
-  note: string | null;
-  lesson_id: number;
-  grammar_chunk_id: number | null;
-  updated_at: string;
-  deleted_at: string | null;
-}
-
-export interface TopicType extends SyncEntityType {}
 
 export interface NoteType extends Omit<SyncEntityType, 'sort_order'> {
   note: string;
@@ -56,7 +28,9 @@ export interface ProgressCountsType {
   totalCount: number;
 }
 
-export interface LessonOverviewType extends LessonType, ProgressCountsType {}
+export interface LessonOverviewType extends LessonType, ProgressCountsType {
+  isStarted: boolean;
+}
 
 export interface LevelOverviewType extends LevelType, ProgressCountsType {
   lessons: LessonOverviewType[];
@@ -75,6 +49,18 @@ export interface UserInfoType {
   name: string | null; // User's full name
   email: string | null; // User's email address
   picture_url: string | null; // URL to the user's profile picture
+}
+
+export interface UserSettingsType {
+  id: string;
+  max_new_lessons_per_day: number;
+  updated_at: string;
+}
+
+export interface UserLessonType {
+  user_id: string;
+  lesson_id: number;
+  started_at: string;
 }
 
 export interface MetadataType {

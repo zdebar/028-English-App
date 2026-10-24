@@ -76,8 +76,11 @@ vi.mock('@/features/vocabulary/use-vocabulary', () => ({
 }));
 
 vi.mock('@/features/toast/use-toast-store', () => ({
-  useToastStore: (selector: (state: { showToast: typeof mocks.showToast }) => unknown) =>
-    selector({ showToast: mocks.showToast }),
+  useToastStore: Object.assign(
+    (selector: (state: { showToast: typeof mocks.showToast }) => unknown) =>
+      selector({ showToast: mocks.showToast }),
+    { getState: () => ({ showToast: mocks.showToast }) },
+  ),
 }));
 
 vi.mock('@/features/logging/monitoring-handler', () => ({
@@ -181,8 +184,8 @@ describe('VocabularyOverview', () => {
 
     fireEvent.click(screen.getByTestId('detail-reset'));
     await waitFor(() => {
-      expect(mocks.resetItemById).toHaveBeenCalledWith('u1', 3);
-      expect(mocks.vocab.setSelectedWord).toHaveBeenCalledWith(null);
+      expect(mocks.resetItemById).toHaveBeenCalledWith('u1', 3, expect.any(String), 'cz_to_en');
+      expect(mocks.vocab.setSelectedWord).not.toHaveBeenCalledWith(null);
       expect(mocks.showToast).toHaveBeenCalledWith('Reset success', 'success');
       expect(mocks.reportInfo).toHaveBeenCalledWith('Vocabulary item reset completed: item 3.');
     });

@@ -1,4 +1,3 @@
-import type { PracticeSessionType } from '@/types/practice-session.types';
 import { create } from 'zustand';
 import type { PracticeAvailabilitySnapshot } from './practice-availability';
 
@@ -10,7 +9,10 @@ type PracticeAvailabilityValues = Pick<
   | 'vocabularyReviewDueCount'
   | 'nextReviewAt'
   | 'initialTrainingAvailable'
-  | 'activeSession'
+  | 'continuingInitialLessonToday'
+  | 'dailyNewLessonLimitReached'
+  | 'newLessonsStartedTodayCount'
+  | 'maxNewLessonsPerDay'
 >;
 
 export type PracticeAvailabilityState = {
@@ -21,11 +23,15 @@ export type PracticeAvailabilityState = {
   vocabularyReviewDueCount: number;
   nextReviewAt: string | null;
   initialTrainingAvailable: boolean;
-  activeSession: PracticeSessionType | null;
+  continuingInitialLessonToday: boolean;
+  dailyNewLessonLimitReached: boolean;
+  newLessonsStartedTodayCount: number;
+  maxNewLessonsPerDay: number;
   practiceLoading: boolean;
   practiceError: Error | null;
   setLoading: (userId: string) => void;
   setSnapshot: (userId: string, values: PracticeAvailabilityValues) => void;
+  setMaxNewLessonsPerDay: (limit: number) => void;
   setError: (userId: string, error: Error) => void;
   reset: () => void;
 };
@@ -38,7 +44,10 @@ const EMPTY_AVAILABILITY = {
   vocabularyReviewDueCount: 0,
   nextReviewAt: null,
   initialTrainingAvailable: false,
-  activeSession: null,
+  continuingInitialLessonToday: false,
+  dailyNewLessonLimitReached: false,
+  newLessonsStartedTodayCount: 0,
+  maxNewLessonsPerDay: 1,
   practiceLoading: true,
   practiceError: null,
 };
@@ -55,7 +64,10 @@ export const usePracticeAvailabilityStore = create<PracticeAvailabilityState>((s
       vocabularyReviewDueCount: 0,
       nextReviewAt: null,
       initialTrainingAvailable: false,
-      activeSession: null,
+      continuingInitialLessonToday: false,
+      dailyNewLessonLimitReached: false,
+      newLessonsStartedTodayCount: 0,
+      maxNewLessonsPerDay: 1,
       practiceLoading: true,
       practiceError: null,
     }),
@@ -68,10 +80,19 @@ export const usePracticeAvailabilityStore = create<PracticeAvailabilityState>((s
       vocabularyReviewDueCount: values.vocabularyReviewDueCount,
       nextReviewAt: values.nextReviewAt,
       initialTrainingAvailable: values.initialTrainingAvailable,
-      activeSession: values.activeSession,
+      continuingInitialLessonToday: values.continuingInitialLessonToday,
+      dailyNewLessonLimitReached: values.dailyNewLessonLimitReached,
+      newLessonsStartedTodayCount: values.newLessonsStartedTodayCount,
+      maxNewLessonsPerDay: values.maxNewLessonsPerDay,
       practiceLoading: false,
       practiceError: null,
     }),
+  setMaxNewLessonsPerDay: (limit) =>
+    set((state) => ({
+      maxNewLessonsPerDay: limit,
+      dailyNewLessonLimitReached:
+        state.newLessonsStartedTodayCount >= limit && !state.continuingInitialLessonToday,
+    })),
   setError: (userId, error) =>
     set({
       availabilityUserId: userId,
@@ -81,7 +102,10 @@ export const usePracticeAvailabilityStore = create<PracticeAvailabilityState>((s
       vocabularyReviewDueCount: 0,
       nextReviewAt: null,
       initialTrainingAvailable: false,
-      activeSession: null,
+      continuingInitialLessonToday: false,
+      dailyNewLessonLimitReached: false,
+      newLessonsStartedTodayCount: 0,
+      maxNewLessonsPerDay: 1,
       practiceLoading: false,
       practiceError: error,
     }),

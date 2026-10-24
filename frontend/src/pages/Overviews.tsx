@@ -10,7 +10,6 @@ import type { JSX } from 'react';
 import { useLoaderData } from 'react-router-dom';
 import type { OverviewAvailabilityData } from '@/routing/route-data';
 import { NavigationButton } from '@/routing/data-navigation';
-import { usePronunciationGroupsStore } from '@/features/pronunciation/use-pronunciation-groups-store';
 
 function getButtonState(
   availability: OverviewAvailability,
@@ -29,9 +28,6 @@ export default function Overviews(): JSX.Element {
   const userId = useAuthStore((state) => state.userId);
   const initialAvailability = useLoaderData() as OverviewAvailabilityData;
   const availability = useOverviewAvailability(userId, initialAvailability);
-  const pronunciationGroups = usePronunciationGroupsStore((state) => state.groups);
-  const pronunciationLoading = usePronunciationGroupsStore((state) => state.loading);
-  const pronunciationError = usePronunciationGroupsStore((state) => state.error);
   const grammarButton = getButtonState(
     availability.grammar,
     TEXTS.grammarOverviewTooltip,
@@ -47,33 +43,22 @@ export default function Overviews(): JSX.Element {
     TEXTS.vocabularyOverviewTooltip,
     TEXTS.noStartedVocabulary,
   );
-  const pronunciationButton = getButtonState(
-    {
-      hasData: pronunciationGroups.length > 0,
-      loading: pronunciationLoading,
-      error: pronunciationError,
-    },
-    TEXTS.pronunciationGroupsTooltip,
-    TEXTS.noPronunciationGroups,
-  );
+  const soundsButton = { disabled: false, title: TEXTS.soundsOverview };
+  const pronunciationButton = { disabled: false, title: TEXTS.pronunciationGroupsTooltip };
   return (
     <div className="card-width grow-0 gap-1">
       <h1 className="sr-only">{TEXTS.overviews}</h1>
       <section aria-label={TEXTS.progressOverviews}>
         <div className="flex flex-col gap-1">
-          <NavigationButton
-            className="h-button w-full"
-            to={ROUTES.grammar}
-            {...grammarButton}
-          >
-            <MenuButtonText>{TEXTS.grammarOverview}</MenuButtonText>
+          <NavigationButton className="h-button w-full" to={ROUTES.sounds} {...soundsButton}>
+            <MenuButtonText>{TEXTS.soundsOverview}</MenuButtonText>
           </NavigationButton>
           <NavigationButton
             className="h-button w-full"
-            to={ROUTES.topics}
-            {...topicsButton}
+            to={ROUTES.pronunciationGroups}
+            {...pronunciationButton}
           >
-            <MenuButtonText>{TEXTS.topicsOverview}</MenuButtonText>
+            <MenuButtonText>{TEXTS.pronunciationSettings}</MenuButtonText>
           </NavigationButton>
           <NavigationButton
             className="h-button w-full"
@@ -82,12 +67,14 @@ export default function Overviews(): JSX.Element {
           >
             <MenuButtonText>{TEXTS.vocabularyOverview}</MenuButtonText>
           </NavigationButton>
-          <NavigationButton
-            className="h-button w-full"
-            to={ROUTES.pronunciationGroups}
-            {...pronunciationButton}
-          >
-            <MenuButtonText>{TEXTS.pronunciationSettings}</MenuButtonText>
+          <NavigationButton className="h-button w-full" to={ROUTES.topics} {...topicsButton}>
+            <MenuButtonText>{TEXTS.topicsOverview}</MenuButtonText>
+          </NavigationButton>
+          <NavigationButton className="h-button w-full" to={ROUTES.grammar} {...grammarButton}>
+            <MenuButtonText>{TEXTS.grammarOverview}</MenuButtonText>
+          </NavigationButton>
+          <NavigationButton className="h-button w-full" to={ROUTES.lessonsOverview}>
+            <MenuButtonText>{TEXTS.lessonsOverview}</MenuButtonText>
           </NavigationButton>
         </div>
       </section>

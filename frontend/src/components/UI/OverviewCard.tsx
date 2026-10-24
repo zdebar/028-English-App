@@ -11,6 +11,7 @@ const DEFAULT_OVERVIEW_CARD_PROPS = {
   modalText: TEXTS.restartDescription,
   helpText: TEXTS.restartProgressHelp,
   loading: false,
+  showResetAction: true,
   className: '',
 } as const;
 
@@ -41,6 +42,8 @@ type OverviewCardProps = Readonly<{
   onClose?: () => void;
   className?: string;
   children?: ReactNode;
+  showResetAction?: boolean;
+  titleAlignment?: 'left' | 'center';
 }>;
 
 /**
@@ -71,23 +74,29 @@ export default function OverviewCard(props: OverviewCardProps): JSX.Element {
     onClose,
     className,
     children,
+    showResetAction,
+    titleAlignment = 'left',
   } = { ...DEFAULT_OVERVIEW_CARD_PROPS, ...props };
   const isDisabled = !handleReset || loading;
   return (
     <Card className={className}>
       <CardHeader onClose={onClose} className="relative">
-        <ButtonWithModal
-          modalTitle={modalTitle}
-          modalText={modalText}
-          title={isDisabled ? '' : TEXTS.restartProgressHelp}
-          onConfirm={() => confirmOverviewCardAction(handleReset, onClose)}
-          disabled={isDisabled}
-          preserveEnabledTextColorWhenDisabled
-          className="justify-start px-4"
-        >
-          {getOverviewCardButtonContent(buttonTitle, loading)}
-        </ButtonWithModal>
-        <HelpText className="-bottom-2 left-2">{helpText}</HelpText>
+        <>
+          <ButtonWithModal
+            modalTitle={modalTitle}
+            modalText={modalText}
+            title={showResetAction && !isDisabled ? TEXTS.restartProgressHelp : ''}
+            onConfirm={() => confirmOverviewCardAction(handleReset, onClose)}
+            disabled={isDisabled || !showResetAction}
+            preserveEnabledTextColorWhenDisabled
+            className={`${titleAlignment === 'center' ? 'justify-center text-center' : 'justify-start'} px-4`}
+          >
+            {getOverviewCardButtonContent(buttonTitle, loading)}
+          </ButtonWithModal>
+          {showResetAction && (
+            <HelpText className="-bottom-2 left-2">{helpText}</HelpText>
+          )}
+        </>
       </CardHeader>
       {children}
     </Card>

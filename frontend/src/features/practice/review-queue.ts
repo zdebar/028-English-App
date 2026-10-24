@@ -47,16 +47,18 @@ export function answerCurrentReviewItem(
   queue.dueCount = Math.max(0, queue.dueCount - 1);
   queue.completedCount += 1;
 
-  if (isReviewItemCandidate(updatedItem, queue.reviewKind)) {
+  const direction = updatedItem.review_direction ?? currentEntry.item.review_direction;
+  const directionalItem = { ...updatedItem, review_direction: direction };
+  if (isReviewItemCandidate(directionalItem, queue.reviewKind, direction)) {
     const updatedEntry: PracticeDeckEntry = {
-      item: updatedItem,
+      item: directionalItem,
       note: currentEntry.note,
       grammar: currentEntry.grammar,
     };
     const insertionIndex = findInsertionIndex(queue.items, updatedEntry);
     queue.items.splice(insertionIndex, 0, updatedEntry);
 
-    if (isReviewItemDue(updatedItem, new Date().toISOString())) {
+    if (isReviewItemDue(directionalItem, new Date().toISOString(), direction)) {
       queue.dueCount += 1;
       queue.sessionTotalCount += 1;
     }
@@ -101,7 +103,7 @@ function extendValidStretch(queue: ReviewQueue): void {
   const nowIso = new Date().toISOString();
   while (queue.dueCount < queue.items.length) {
     const entry = queue.items[queue.dueCount];
-    if (!entry || !isReviewItemDue(entry.item, nowIso)) break;
+    if (!entry || !isReviewItemDue(entry.item, nowIso, entry.item.review_direction)) break;
     queue.dueCount += 1;
     queue.sessionTotalCount += 1;
   }
@@ -112,9 +114,9 @@ function compareEntries(left: PracticeDeckEntry, right: PracticeDeckEntry): numb
 }
 
 function uniqueEntries(entries: readonly PracticeDeckEntry[]): PracticeDeckEntry[] {
-  const entriesById = new Map<number, PracticeDeckEntry>();
+  const entriesById = new Map<string, PracticeDeckEntry>();
   for (const entry of entries) {
-    entriesById.set(entry.item.item_id, entry);
+    entriesById.set(`${entry.item.item_id}:${entry.item.review_direction ?? 'cz_to_en'}`, entry);
   }
   return [...entriesById.values()];
 }

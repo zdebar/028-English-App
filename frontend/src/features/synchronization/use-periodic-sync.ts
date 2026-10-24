@@ -91,7 +91,7 @@ export function usePeriodicSync(userId: string | null): { loading: boolean } {
         await inFlightSync.current;
         return;
       }
-
+      if (useSyncStore.getState().isManualSyncing) return;
       inFlightSync.current = (async () => {
         try {
           await performSync();

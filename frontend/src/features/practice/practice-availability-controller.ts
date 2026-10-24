@@ -1,4 +1,3 @@
-import PracticeSession from '@/database/models/practice-sessions';
 import config from '@/config/config';
 import { reportError } from '@/features/logging/monitoring-handler';
 import { useToastStore } from '@/features/toast/use-toast-store';
@@ -83,11 +82,6 @@ async function updateSnapshot(context: AvailabilityContext): Promise<void> {
     context.dirty = true;
     return;
   }
-  if (snapshot.requiresSessionReconciliation) {
-    await PracticeSession.reconcileActive(context.userId);
-    context.dirty = true;
-    return;
-  }
   if (!context.dirty) {
     usePracticeAvailabilityStore.getState().setSnapshot(context.userId, snapshot);
     scheduleReviewAvailabilityRefresh(context, snapshot.nextReviewAt);
@@ -99,14 +93,15 @@ function scheduleReviewAvailabilityRefresh(
   nextReviewAt: string | null,
 ): void {
   clearReviewAvailabilityTimer(context);
-  if (nextReviewAt === null) return;
-
-  const nextReviewTime = Date.parse(nextReviewAt);
-  if (!Number.isFinite(nextReviewTime) || nextReviewTime <= Date.now()) return;
-
+  const now = new Date();
+  const nextLocalDay = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1).getTime();
+  const nextReviewTime = nextReviewAt === null ? Number.POSITIVE_INFINITY : Date.parse(nextReviewAt);
+  const reviewDelay = Number.isFinite(nextReviewTime) && nextReviewTime > now.getTime()
+    ? nextReviewTime - now.getTime() + 1
+    : Number.POSITIVE_INFINITY;
   const delay = Math.min(
     config.practice.maxReviewReadyTimerDelayMs,
-    Math.max(1, nextReviewTime - Date.now() + 1),
+    Math.max(1, Math.min(reviewDelay, nextLocalDay - now.getTime())),
   );
   context.reviewTimer = globalThis.setTimeout(() => {
     context.reviewTimer = null;

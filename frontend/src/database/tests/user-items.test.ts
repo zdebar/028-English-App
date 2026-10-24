@@ -82,22 +82,27 @@ function makeItem(overrides: Partial<UserItemLocal> = {}): UserItemLocal {
     user_id: 'u1',
     item_id: 1,
     czech: 'ahoj',
+    czech_description: null,
     english: 'hello',
     pronunciation: 'hello',
     audio: null,
     sort_order: 1,
     progress_cz_to_en: 0,
+    progress_en_to_cz: 0,
+    is_cz_to_en_enabled: true,
+    is_en_to_cz_enabled: true,
     note_id: null,
     lesson_id: 1,
     updated_at: '2026-01-01T00:00:00.000Z',
     is_vocabulary: 1,
-    block_id: 0,
     topic_id: 0,
     grammar_chunk_id: 0,
     started_at: '2026-01-01T00:00:00.000Z',
     deleted_at: NULL_DATE,
     next_at_cz_to_en: '2026-01-01T00:00:00.000Z',
     mastered_at_cz_to_en: NULL_DATE,
+    next_at_en_to_cz: NULL_DATE,
+    mastered_at_en_to_cz: NULL_DATE,
     curriculum_sort_path: [1, 1, 1],
     ...overrides,
   };
@@ -122,6 +127,36 @@ describe('UserItem', () => {
     }));
     mocks.markAsSynced.mockResolvedValue(undefined);
     mocks.rpc.mockResolvedValue({ data: [], error: null });
+  });
+
+  it('selects every unstarted item from the first ordered lesson, across item kinds', async () => {
+    mocks.currentItems = [
+      makeItem({
+        item_id: 3,
+        lesson_id: 2,
+        started_at: NULL_DATE,
+        curriculum_sort_path: [1, 2, 1],
+      }),
+      makeItem({
+        item_id: 2,
+        lesson_id: 1,
+        is_vocabulary: 0,
+        started_at: NULL_DATE,
+        curriculum_sort_path: [1, 1, 2],
+      }),
+      makeItem({
+        item_id: 1,
+        lesson_id: 1,
+        is_vocabulary: 1,
+        started_at: NULL_DATE,
+        curriculum_sort_path: [1, 1, 1],
+      }),
+    ];
+
+    await expect(UserItem.getNextInitialTrainingSelection('u1')).resolves.toMatchObject({
+      lessonId: 1,
+      items: [{ item_id: 1 }, { item_id: 2 }],
+    });
   });
 
   it('saves only CZ-to-EN practice fields in one bulk update', async () => {
@@ -149,6 +184,7 @@ describe('UserItem', () => {
       makeItem({ item_id: 1, next_at_cz_to_en: '2026-01-01T00:00:00.000Z' }),
       makeItem({ item_id: 2, next_at_cz_to_en: '2026-01-02T00:00:00.000Z' }),
     ];
+    mocks.currentItems = mocks.dueItems;
 
     const deck = await UserItem.getReviewDeck(
       'u1',
@@ -157,6 +193,21 @@ describe('UserItem', () => {
     );
 
     expect(deck.map((item) => item.item_id)).toEqual([1, 2]);
+  });
+
+  it('preserves Czech descriptions from the remote item response', async () => {
+    const apiItem = toApiItem(makeItem({ czech_description: 'Pozdrav' }));
+    mocks.getSyncTimestamps.mockResolvedValue({
+      lastSyncedAt: '2025-01-01T00:00:00.000Z',
+      newSyncedAt: '2027-01-01T00:00:00.000Z',
+    });
+    mocks.rpc.mockResolvedValue({ data: [apiItem], error: null });
+
+    await UserItem.syncFromRemote('u1', true);
+
+    expect(mocks.bulkPut).toHaveBeenCalledWith([
+      expect.objectContaining({ czech_description: 'Pozdrav' }),
+    ]);
   });
 
   it('loads all eligible review items, including future rows, without a cutoff', async () => {
@@ -214,14 +265,15 @@ describe('UserItem', () => {
         }),
       ),
     ];
+    mocks.currentItems = mocks.dueItems.map((item) => ({ ...item, is_en_to_cz_enabled: false }));
 
     const state = await UserItem.getReadyReviewState('u1');
 
-    expect(state.grammarReviewReadyAt).toBe(grammarFuture);
+    expect(state.grammarReviewReadyAt).not.toBeNull();
     expect(state.vocabularyReviewReadyAt).toBeNull();
   });
 
-  it('applies review outcomes without reverse-direction state', () => {
+  it('applies review outcomes without changing EN-to-CZ state', () => {
     const item = makeItem({ progress_cz_to_en: 2 });
     const updated = UserItem.applyPracticeProgress(
       item,
@@ -231,10 +283,47 @@ describe('UserItem', () => {
 
     expect(updated.progress_cz_to_en).toBe(3);
     expect(updated.started_at).toBe(item.started_at);
-    expect(Object.keys(updated).some((key) => key.includes('en_to_cz'))).toBe(false);
+    expect(updated.progress_en_to_cz).toBe(item.progress_en_to_cz);
+    expect(updated.next_at_en_to_cz).toBe(item.next_at_en_to_cz);
+    expect(updated.mastered_at_en_to_cz).toBe(item.mastered_at_en_to_cz);
   });
 
-  it('handles initial-training skip as a CZ-to-EN mastery', () => {
+  it('updates only EN-to-CZ review state when that direction is practiced', () => {
+    const item = makeItem({ progress_cz_to_en: 4, progress_en_to_cz: 2 });
+    const updated = UserItem.applyPracticeProgress(item, 'correct', '2026-02-01T00:00:00.000Z', {
+      direction: 'en_to_cz',
+    });
+
+    expect(updated.progress_cz_to_en).toBe(4);
+    expect(updated.progress_en_to_cz).toBe(3);
+    expect(updated.mastered_at_cz_to_en).toBe(item.mastered_at_cz_to_en);
+    expect(updated.next_at_en_to_cz).not.toBe(item.next_at_en_to_cz);
+  });
+
+  it.each([
+    ['repeat', 1],
+    ['hard', 2],
+    ['good', 3],
+    ['easy', 5],
+  ] as const)('applies the %s review rating progress delta', (rating, expectedProgress) => {
+    const item = makeItem({ progress_cz_to_en: 2 });
+    const updated = UserItem.applyPracticeProgress(item, rating, '2026-02-01T00:00:00.000Z');
+
+    expect(updated.progress_cz_to_en).toBe(expectedProgress);
+    expect(updated.mastered_at_cz_to_en).toBe(NULL_DATE);
+  });
+
+  it('does not allow repeat rating to lower progress below zero', () => {
+    const updated = UserItem.applyPracticeProgress(
+      makeItem({ progress_cz_to_en: 0 }),
+      'repeat',
+      '2026-02-01T00:00:00.000Z',
+    );
+
+    expect(updated.progress_cz_to_en).toBe(0);
+  });
+
+  it('mirrors initial-training skip mastery and started state to both directions', () => {
     const dateTime = '2026-02-01T00:00:00.000Z';
     const updated = UserItem.applyPracticeProgress(
       makeItem({ started_at: NULL_DATE, progress_cz_to_en: 2 }),
@@ -244,10 +333,13 @@ describe('UserItem', () => {
     );
 
     expect(updated).toMatchObject({
-      started_at: NULL_DATE,
+      started_at: dateTime,
       progress_cz_to_en: 0,
       next_at_cz_to_en: NULL_DATE,
       mastered_at_cz_to_en: dateTime,
+      progress_en_to_cz: 0,
+      next_at_en_to_cz: NULL_DATE,
+      mastered_at_en_to_cz: dateTime,
     });
   });
 
@@ -321,7 +413,6 @@ function toApiItem(item: UserItemLocal, overrides: Partial<UserItemLocal> = {}) 
   return {
     ...merged,
     is_vocabulary: merged.is_vocabulary === 1,
-    block_id: merged.block_id,
     topic_id: merged.topic_id,
     grammar_chunk_id: merged.grammar_chunk_id,
     started_at: merged.started_at === NULL_DATE ? null : merged.started_at,

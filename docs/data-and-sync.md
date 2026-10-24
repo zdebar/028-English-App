@@ -65,7 +65,7 @@ User models include `UserScore` and `UserItem`.
 | `theme_${userId}` / guest key | `theme-utils`, `useThemeStore` | Persist selected theme. |
 | `volume-${userId}` | `useAudioStore` | Persist audio volume. |
 | `vocabulary_search_term_${userId}` | vocabulary overview | Persist vocabulary search UI state. |
-| `simulate-data-${userId}` | `SimulateDataButton` | Persist simulation toggle for anonymous/test workflows. |
+| `simulate-data-v2-${userId}` | `SimulateDataButton` | Persist simulation toggle for the first-ten-lessons fixture. |
 
 ## Reactive Refresh After Data Changes
 

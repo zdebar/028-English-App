@@ -22,11 +22,14 @@ vi.mock('@/locales/cs', () => ({
     noAudio: 'No audio',
     restartGrammarTitle: 'Restart grammar',
     restartGrammarDescription: 'Restart grammar description',
+    restartGrammarDirectionTitle: 'Restart grammar direction',
+    restartDirectionProgressDescription: 'Reset only this direction?',
+    restartProgressHelp: 'Restart progress',
+    restartProgressCzToEn: 'reset postupu cz to en',
+    restartProgressEnToCz: 'reset postupu en to cz',
+    directionCzToEn: 'Czech to English',
+    directionEnToCz: 'English to Czech',
   },
-}));
-
-vi.mock('@/features/help/HelpButton', () => ({
-  default: () => <div data-testid="help" />,
 }));
 
 vi.mock('@/features/audio/VolumeSlider', () => ({
@@ -45,11 +48,18 @@ vi.mock('@/features/audio/use-audio-manager', () => ({
 }));
 
 vi.mock('@/components/UI/OverviewCard', () => ({
-  default: ({ buttonTitle, children, className }: any) => (
+  default: ({ buttonTitle, children, className, handleReset }: any) => (
     <div className={className}>
       <h1>{buttonTitle}</h1>
+      <button data-testid="header-reset" disabled={!handleReset}>reset</button>
       <div>{children}</div>
     </div>
+  ),
+}));
+
+vi.mock('@/features/modal/ButtonWithModal', () => ({
+  default: ({ children, onConfirm, className }: any) => (
+    <button className={className} onClick={() => onConfirm?.()}>{children}</button>
   ),
 }));
 
@@ -58,23 +68,26 @@ import GrammarDetailCard from '@/features/grammar/GrammarDetailCard';
 const exampleItem: UserItemLocal = {
   user_id: 'user-1',
   item_id: 41,
+  czech_description: null,
   czech: 'já jsem',
   english: 'I am',
   pronunciation: 'aɪ æm',
   audio: 'i-am.opus',
   sort_order: 1,
   progress_cz_to_en: 0,
+  progress_en_to_cz: 0,
+  is_cz_to_en_enabled: true,
+  is_en_to_cz_enabled: true,
   note_id: null,
   lesson_id: 1,
   updated_at: '2026-08-02T00:00:00.000Z',
   is_vocabulary: 0,
-  block_id: 1,
-  topic_id: -1,
-  grammar_chunk_id: 1,
   started_at: '2026-08-02T00:00:00.000Z',
   deleted_at: '',
   next_at_cz_to_en: '',
   mastered_at_cz_to_en: '',
+  next_at_en_to_cz: '',
+  mastered_at_en_to_cz: '',
   curriculum_sort_path: [1, 1, 1],
 };
 
@@ -103,6 +116,34 @@ describe('GrammarDetailCard', () => {
     expect(container.innerHTML).toContain('<b>sanitized</b>');
   });
 
+  it('keeps the top reset disabled and renders one reset button per enabled direction', () => {
+    const onReset = vi.fn().mockResolvedValue(undefined);
+    const grammarItem = { ...exampleItem, is_en_to_cz_enabled: false };
+    render(
+      <GrammarDetailCard
+        grammar={{
+          kind: 'group',
+          id: 2,
+          name: 'Articles',
+          chunks: [{ id: 1, name: 'Articles', items: [grammarItem] }],
+        }}
+        onClose={vi.fn()}
+        onReset={onReset}
+      />,
+    );
+
+    expect((screen.getByTestId('header-reset') as HTMLButtonElement).disabled).toBe(true);
+    const resetCzToEn = screen.getByRole('button', { name: 'reset postupu cz to en' });
+    expect(resetCzToEn.className).toContain('h-input');
+    expect(resetCzToEn.className).toContain('w-full');
+    expect(screen.queryByRole('button', { name: 'reset postupu en to cz' })).toBeNull();
+    expect(screen.queryByText('Restart progress')).toBeNull();
+    expect(screen.queryByTestId('help')).toBeNull();
+
+    fireEvent.click(resetCzToEn);
+    expect(onReset).toHaveBeenCalledWith(1, 'cz_to_en');
+  });
+
   it('loads and plays examples of a chunk detail', async () => {
     render(
       <GrammarDetailCard
@@ -113,7 +154,6 @@ describe('GrammarDetailCard', () => {
           items: [exampleItem],
         }}
         onClose={vi.fn()}
-        showHelpButton
       />,
     );
 

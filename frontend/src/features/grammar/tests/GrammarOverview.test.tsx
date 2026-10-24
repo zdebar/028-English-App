@@ -14,7 +14,13 @@ function createGrammarTopicData() {
       note: null,
       grammar_topic_id: 1,
       sort_order: 1,
-      chunks: [],
+      chunks: [{
+        id: 9,
+        name: 'Reported speech forms',
+        note: null,
+        items: [],
+        sort_order: 1,
+      }],
     }],
   }];
 }
@@ -22,7 +28,7 @@ function createGrammarTopicData() {
 function openReportedSpeechReset(): void {
   fireEvent.click(screen.getByText('Present Simple'));
   fireEvent.click(screen.getByText('Reported speech'));
-  fireEvent.click(screen.getByTestId('overview-reset'));
+  fireEvent.click(screen.getByTestId('grammar-reset-cz'));
 }
 
 const mocks = vi.hoisted(() => ({
@@ -61,8 +67,11 @@ vi.mock('@/database/models/user-items', () => ({
 }));
 
 vi.mock('@/features/toast/use-toast-store', () => ({
-  useToastStore: (selector: (state: { showToast: typeof mocks.showToast }) => unknown) =>
-    selector({ showToast: mocks.showToast }),
+  useToastStore: Object.assign(
+    (selector: (state: { showToast: typeof mocks.showToast }) => unknown) =>
+      selector({ showToast: mocks.showToast }),
+    { getState: () => ({ showToast: mocks.showToast }) },
+  ),
 }));
 
 vi.mock('@/features/logging/monitoring-handler', () => ({
@@ -90,6 +99,8 @@ vi.mock('@/locales/cs', () => ({
     noGrammar: 'No grammar',
     notAvailable: 'Not available',
     restartGrammarProgress: 'Restart grammar progress',
+    directionCzToEn: 'Czech to English',
+    directionEnToCz: 'English to Czech',
     resetProgressSuccessToast: 'Reset success',
     resetProgressErrorToast: 'Reset error',
   },
@@ -134,10 +145,25 @@ vi.mock('@/components/UI/OverviewCard', () => ({
       <button data-testid="overview-close" onClick={onClose}>
         close
       </button>
-      <button data-testid="overview-reset" onClick={() => handleReset?.()}>
+      <button data-testid="overview-reset" disabled={!handleReset} onClick={() => handleReset?.()}>
         reset
       </button>
       {children}
+    </div>
+  ),
+}));
+
+vi.mock('@/features/grammar/GrammarDetailCard', () => ({
+  default: ({ grammar, onClose, onReset }: any) => (
+    <div>
+      <div>{grammar.name}</div>
+      <button data-testid="grammar-reset-cz" onClick={() => onReset?.(grammar.chunks[0].id, 'cz_to_en')}>
+        Czech to English
+      </button>
+      <button data-testid="grammar-reset-en" onClick={() => onReset?.(grammar.chunks[0].id, 'en_to_cz')}>
+        English to Czech
+      </button>
+      <button data-testid="grammar-detail-close" onClick={onClose}>close</button>
     </div>
   ),
 }));
@@ -170,9 +196,9 @@ describe('GrammarOverview', () => {
     openReportedSpeechReset();
 
     await waitFor(() => {
-      expect(mocks.resetItemsByGrammarGroupId).toHaveBeenCalledWith('u1', 8);
+      expect(mocks.resetItemsByGrammarGroupId).toHaveBeenCalledWith('u1', 9, 'cz_to_en');
       expect(mocks.reportInfo).toHaveBeenCalledWith(
-        'Grammar 8 reset completed: 4 items reset.',
+        'Grammar 9 cz_to_en reset completed: 4 items reset.',
       );
       expect(mocks.showToast).toHaveBeenCalledWith('Reset success', 'success');
     });
@@ -187,7 +213,7 @@ describe('GrammarOverview', () => {
     openReportedSpeechReset();
 
     await waitFor(() => {
-      expect(mocks.resetItemsByGrammarGroupId).toHaveBeenCalledWith('u1', 8);
+      expect(mocks.resetItemsByGrammarGroupId).toHaveBeenCalledWith('u1', 9, 'cz_to_en');
       expect(mocks.showToast).toHaveBeenCalledWith('Reset error', 'error');
       expect(mocks.reportError).toHaveBeenCalledWith('Failed to reset grammar progress', error);
     });

@@ -2,22 +2,19 @@ import { loadSharedQuery } from '@/hooks/shared-query-store';
 import { hasReachedReviewLimit } from '@/features/practice/practice-availability';
 import { loadReviewAvailabilityFromArrays } from '@/features/practice/review-prefetch';
 import {
-  getPrefetchedNextInitialBlock,
-  type PreparedInitialBlock,
+  getPrefetchedNextInitialLesson,
+  type PreparedInitialLesson,
 } from '@/features/practice/practice-prefetch';
 import { usePracticeAvailabilityStore } from '@/features/practice/use-practice-availability-store';
 import PronunciationGroup from '@/database/models/pronunciation-groups';
-import Block from '@/database/models/blocks';
-import PracticeSession from '@/database/models/practice-sessions';
+import UserLesson from '@/database/models/user-lessons';
 import UserItem from '@/database/models/user-items';
 import Topic from '@/database/models/topics';
+import SoundGroup from '@/database/models/sound-groups';
 import {
   loadReviewDeckData,
-  resolvePracticeEntries,
-  resolvePracticeGrammarContext,
   type ReviewDeckData,
 } from '@/database/utils/practice-content.utils';
-import type { PracticeSessionType } from '@/types/practice-session.types';
 import type { ReviewKind } from '@/types/practice.types';
 import {
   loadOverviewAvailability,
@@ -28,65 +25,24 @@ export type RouteDataDescriptor<T> = Readonly<{
   load: () => Promise<T>;
 }>;
 
-export type InitialTrainingData = PreparedInitialBlock;
+export type InitialTrainingData = PreparedInitialLesson;
 
 function emptyInitialTrainingData(): InitialTrainingData {
-  return { block: null, items: [], entries: [], grammar: null, grammarGroup: null };
-}
-
-function getSavedSessionItemIds(activeSession: PracticeSessionType | null): number[] {
-  if (!activeSession) return [];
-  return [
-    ...activeSession.current_queue_item_ids,
-    ...activeSession.retry_queue_item_ids,
-    ...activeSession.completed_item_ids,
-  ];
-}
-
-async function getActiveInitialTrainingSelection(
-  userId: string,
-  activeSession: PracticeSessionType,
-) {
-  const savedItemIds = getSavedSessionItemIds(activeSession);
-  return {
-    blockId: activeSession.block_id,
-    items: await UserItem.getByItemIds(userId, savedItemIds),
-  };
+  return { lesson: null, items: [], entries: [], grammar: null, grammarGroup: null };
 }
 
 async function loadInitialTrainingData(userId: string): Promise<InitialTrainingData> {
-  const activeSession = await PracticeSession.reconcileActive(userId);
-  if (!(await canLoadInitialTraining(userId, activeSession))) {
+  const prepared = await getPrefetchedNextInitialLesson(userId);
+  if (!prepared?.lesson) return emptyInitialTrainingData();
+
+  const continuingLesson = await UserLesson.hasStartedToday(userId, prepared.lesson.id);
+  if (!continuingLesson && await shouldBlockInitialTraining(userId)) {
     return emptyInitialTrainingData();
   }
-
-  if (!activeSession) {
-    return (
-      (await getPrefetchedNextInitialBlock(userId, null)) ??
-      emptyInitialTrainingData()
-    );
+  if (!(await UserLesson.canStartToday(userId, prepared.lesson.id))) {
+    return emptyInitialTrainingData();
   }
-
-  const selection = await getActiveInitialTrainingSelection(userId, activeSession);
-  const block = selection.blockId == null ? null : await Block.getById(selection.blockId);
-  const items = selection.items;
-  const hasInvalidSelection = items.length === 0 || (selection.blockId != null && !block);
-  if (hasInvalidSelection) return emptyInitialTrainingData();
-
-  const [entries, grammarContext] = await Promise.all([
-    resolvePracticeEntries(userId, items),
-    resolvePracticeGrammarContext(userId, block?.grammar_chunk_id ?? null),
-  ]);
-  return { block, items, entries, ...grammarContext };
-}
-
-async function canLoadInitialTraining(
-  userId: string,
-  activeSession: PracticeSessionType | null,
-): Promise<boolean> {
-  if (activeSession?.mode === 'review') return false;
-  if (activeSession?.mode === 'new') return true;
-  return !(await shouldBlockInitialTraining(userId));
+  return prepared;
 }
 
 async function shouldBlockInitialTraining(userId: string): Promise<boolean> {
@@ -134,7 +90,7 @@ export function topicDetailDescriptor(userId: string, topicId: number) {
   return {
     load: async () => {
       const [topic, items] = await Promise.all([
-        loadSharedQuery(userId, `topic:${topicId}`, () => Topic.getById(topicId)),
+        loadSharedQuery(userId, `topic:${topicId}`, () => Topic.getById(userId, topicId)),
         loadSharedQuery(userId, `topic-items:${topicId}`, () => UserItem.getInitiatedByTopicId(userId, topicId)),
       ]);
       return { topic, items };
@@ -144,6 +100,16 @@ export function topicDetailDescriptor(userId: string, topicId: number) {
 
 export function vocabularyDescriptor(userId: string) {
   return { load: () => loadOverviewQuery(userId, 'vocabulary') };
+}
+
+export function soundsDescriptor(userId: string) {
+  return { load: () => loadOverviewQuery(userId, 'sounds') };
+}
+
+export function soundGroupDetailDescriptor(userId: string, groupId: number) {
+  return {
+    load: () => loadSharedQuery(userId, `sound:${groupId}`, () => SoundGroup.getDetail(userId, groupId)),
+  };
 }
 
 export function pronunciationGroupDetailDescriptor(userId: string, groupId: number) {
@@ -160,3 +126,4 @@ export function initialTrainingDescriptor(userId: string) {
 
 export type { OverviewAvailabilityData } from '@/hooks/overview-query-store';
 export type TopicDetailData = Awaited<ReturnType<ReturnType<typeof topicDetailDescriptor>['load']>>;
+export type SoundGroupDetailData = Awaited<ReturnType<ReturnType<typeof soundGroupDetailDescriptor>['load']>>;

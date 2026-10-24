@@ -1,101 +1,44 @@
 import { db } from '@/database/models/db';
-import { DatabaseError } from '@/types/error.types';
-import type { GrammarChunkType } from '@/types/generic.types';
-import { TableName } from '@/types/table.types';
-import Dexie from 'dexie';
-import SyncEntityModel from './sync-entity-model';
-import UserItem from './user-items';
+import type { GroupType } from '@/types/table.types';
 import type { UserItemLocal } from '@/types/user-item.types';
+import Groups from './groups';
 
-export type GrammarChunkWithExamples = GrammarChunkType & { items: UserItemLocal[] };
+export type GrammarChunkWithExamples = GroupType & { items: UserItemLocal[] };
 
-export default class GrammarChunk extends SyncEntityModel implements GrammarChunkType {
-  id!: number;
-  name!: string;
-  note!: string | null;
-  grammar_group_id!: number;
-  sort_order!: number;
-  deleted_at!: string | null;
-
-  static override readonly syncTable = db.grammar_chunks as Dexie.Table<GrammarChunkType, number>;
-  static override readonly syncTableName = TableName.GrammarChunks;
-  static override readonly syncEntityName = 'grammar chunks';
-  static override readonly syncSelect = 'id, name, note, grammar_group_id, sort_order, deleted_at';
-
-  static async getById(grammarChunkId: number): Promise<GrammarChunkType> {
-    const chunk = await db.grammar_chunks.get(grammarChunkId);
-    if (!chunk) {
-      throw new DatabaseError(`Grammar chunk with ID ${grammarChunkId} not found.`, undefined, {
-        grammarChunkId,
-      });
-    }
-    return chunk;
+/** Grammar leaf queries backed by the shared groups and group_items stores. */
+export default class GrammarChunk {
+  static async getById(groupId: number): Promise<GroupType> {
+    const group = await Groups.getById(groupId);
+    if (group?.type !== 'grammar') throw new Error(`Grammar group ${groupId} not found.`);
+    return group;
   }
 
-  static async getDetail(
-    userId: string,
-    grammarChunkId: number,
-  ): Promise<GrammarChunkWithExamples> {
-    const chunk = await this.getById(grammarChunkId);
-    return this.addExamples(userId, chunk);
+  static async getDetail(userId: string, groupId: number): Promise<GrammarChunkWithExamples> {
+    const group = await this.getById(groupId);
+    return this.addExamples(userId, group);
   }
 
-  static async addExamples(
-    userId: string,
-    chunk: GrammarChunkType,
-  ): Promise<GrammarChunkWithExamples> {
-    const [chunkWithExamples] = await this.addExamplesToMany(userId, [chunk]);
-    return chunkWithExamples ?? { ...chunk, items: [] };
+  static async addExamples(userId: string, group: GroupType): Promise<GrammarChunkWithExamples> {
+    return { ...group, items: await Groups.getExamples(group.id, userId) };
   }
 
-  static async addExamplesToMany(
-    userId: string,
-    chunks: readonly GrammarChunkType[],
-  ): Promise<GrammarChunkWithExamples[]> {
-    if (chunks.length === 0) return [];
-
-    const chunkIds = new Set(chunks.map((chunk) => chunk.id));
-    const memberships = await db.grammar_chunk_examples
-      .filter((membership) => chunkIds.has(membership.grammar_chunk_id))
+  static async getByGroupId(grammarGroupId: number): Promise<GroupType[]> {
+    const relations = await db.group_relations
+      .where('parent_group_id')
+      .equals(grammarGroupId)
+      .filter((relation) => relation.relation_type === 'detail' && !relation.deleted_at)
       .toArray();
-    if (memberships.length === 0) {
-      return chunks.map((chunk) => ({ ...chunk, items: [] }));
-    }
-
-    const itemIds = [...new Set(memberships.map((membership) => membership.item_id))];
-    const items = await db.user_items
-      .where('[user_id+item_id]')
-      .anyOf(itemIds.map((itemId) => [userId, itemId]))
-      .toArray();
-    const itemById = new Map(items.map((item) => [item.item_id, item]));
-    const membershipsByChunkId = new Map<number, typeof memberships>();
-
-    for (const membership of memberships) {
-      const chunkMemberships = membershipsByChunkId.get(membership.grammar_chunk_id) ?? [];
-      chunkMemberships.push(membership);
-      membershipsByChunkId.set(membership.grammar_chunk_id, chunkMemberships);
-    }
-
-    return chunks.map((chunk) => {
-      const orderedMemberships = [...(membershipsByChunkId.get(chunk.id) ?? [])];
-      orderedMemberships.sort((left, right) => left.sort_order - right.sort_order);
-
-      return {
-        ...chunk,
-        items: orderedMemberships
-          .map((membership) => itemById.get(membership.item_id))
-          .filter((item): item is UserItem => Boolean(item)),
-      };
-    });
+    relations.sort((left, right) => left.sort_order - right.sort_order);
+    const ids = relations.map((relation) => relation.child_group_id);
+    return db.groups.where('id').anyOf(ids).toArray();
   }
 
-  static getByGroupId(grammarGroupId: number): Promise<GrammarChunkType[]> {
-    return db.grammar_chunks.where('grammar_group_id').equals(grammarGroupId).sortBy('sort_order');
-  }
-
-  static async getInitiated(userId: string): Promise<GrammarChunkType[]> {
-    const chunkIds = await UserItem.getInitiatedGrammarChunkIds(userId);
-    if (chunkIds.length === 0) return [];
-    return db.grammar_chunks.where('id').anyOf(chunkIds).sortBy('sort_order');
+  static async getInitiated(userId: string): Promise<GroupType[]> {
+    const [startedGroups, relations] = await Promise.all([
+      Groups.getStartedByUser(userId, 'grammar'),
+      db.group_relations.filter((relation) => relation.relation_type === 'detail' && !relation.deleted_at).toArray(),
+    ]);
+    const parentIds = new Set(relations.map((relation) => relation.parent_group_id));
+    return startedGroups.filter((group) => !parentIds.has(group.id));
   }
 }

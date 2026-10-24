@@ -1,17 +1,14 @@
-import { refreshPracticeAvailability } from '@/features/practice/practice-availability-controller';
 import UserItem from '@/database/models/user-items';
 import { useAuthStore } from '@/features/auth/use-auth-store';
-import { reportError, reportInfo } from '@/features/logging/monitoring-handler';
-import { TEXTS } from '@/locales/cs';
-import { useToastStore } from '@/features/toast/use-toast-store';
+import { runProgressReset } from '@/features/practice/run-progress-reset';
 import { useVocabulary } from './use-vocabulary';
-import { useCallback, useEffect } from 'react';
+import { useCallback } from 'react';
 import VocabularyDetailCard from './VocabularyDetailCard';
 import VocabularyList from './VocabularyList';
 import { ROUTES } from '@/config/routes.config';
 import type { UserItemLocal } from '@/types/user-item.types';
 import { useRouteClose } from '@/routing/use-route-close';
-import { invalidateReviewArrays } from '@/features/practice/review-prefetch';
+import { useQueryErrorToast } from '@/features/logging/use-query-error-toast';
 
 /**
  * VocabularyOverview component
@@ -22,7 +19,6 @@ export default function VocabularyOverview({
   initialWords,
 }: Readonly<{ initialWords?: UserItemLocal[] }>) {
   const userId = useAuthStore((state) => state.userId);
-  const showToast = useToastStore((state) => state.showToast);
   const closeRoute = useRouteClose(ROUTES.overviews);
 
   const {
@@ -39,31 +35,23 @@ export default function VocabularyOverview({
     filteredWords,
   } = useVocabulary(userId, initialWords);
 
-  useEffect(() => {
-    if (!error) return;
-    showToast(TEXTS.loadingError, 'error');
-    reportError('Failed to fetch vocabulary overview', error);
-  }, [error, showToast]);
+  useQueryErrorToast(error, 'Failed to fetch vocabulary overview');
 
   // -- HANDLERS  --
-  const handleResetUserItem = useCallback(async () => {
+  const handleResetUserItem = useCallback(async (direction: 'cz_to_en' | 'en_to_cz' = 'cz_to_en') => {
     const itemId = selectedWord?.item_id;
     if (typeof itemId !== 'number' || !userId) {
       return;
     }
-
-    try {
-      const resetItemId = await UserItem.resetItemById(userId, itemId);
-      invalidateReviewArrays(userId);
-      void refreshPracticeAvailability(userId);
-      reportInfo(`Vocabulary item reset completed: item ${resetItemId}.`);
-      showToast(TEXTS.resetProgressSuccessToast, 'success');
-      setSelectedWord(null);
-    } catch (error) {
-      showToast(TEXTS.resetProgressErrorToast, 'error');
-      reportError('Reset User Item Error', error);
-    }
-  }, [selectedWord, userId, showToast, setSelectedWord]);
+    await runProgressReset(
+      userId,
+      () => UserItem.resetItemById(userId, itemId, new Date().toISOString(), direction),
+      {
+        successLog: (resetItemId) => `Vocabulary item reset completed: item ${resetItemId}.`,
+        errorContext: 'Reset User Item Error',
+      },
+    );
+  }, [selectedWord, userId]);
 
   const handleSelectWord = useCallback(
     (index: number) => {
@@ -96,9 +84,6 @@ export default function VocabularyOverview({
   return (
     <VocabularyDetailCard
       selectedWord={selectedWord}
-      selectedTitle={
-        displayField === 'czech' ? (selectedWord.czech ?? '') : (selectedWord.english ?? '')
-      }
       onClose={() => setSelectedWord(null)}
       onReset={handleResetUserItem}
     />

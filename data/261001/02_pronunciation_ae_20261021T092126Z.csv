@@ -1,0 +1,9 @@
+czech,english,pronunciation,audio,sort_order,block_id,note_id,topic_id,grammar_chunk_id,is_vocabulary,lesson_id
+špatný,bad,bˈæd,bad.opus,2000,,,,,True,2
+pálka,bat,bˈæt,bat.opus,2001,,,,,True,2
+čepice,cap,kˈæp,cap.opus,2002,,,,,True,2
+muž,man,mˈæn,man.opus,2003,,,,,True,2
+pánev,pan,pˈæn,pan.opus,2004,,,,,True,2
+seděl,sat,sˈæt,sat.opus,2005,,,,,True,2
+země,land,lˈænd,land.opus,2006,,,,,True,2
+zápas,match,mˈætʃ,match.opus,2007,,,,,True,2

@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 const mocks = vi.hoisted(() => ({
   hasGrammar: vi.fn(), hasTopics: vi.fn(), hasVocabulary: vi.fn(),
   topics: vi.fn(), vocabulary: vi.fn(),
+  sounds: vi.fn(),
   loadReviewDeckData: vi.fn(),
 }));
 vi.mock('@/hooks/shared-query-store', () => ({
@@ -17,10 +18,12 @@ vi.mock('@/database/models/topics', () => ({ default: {
   hasInitiatedByUserId: mocks.hasTopics,
   getInitiatedByUserId: mocks.topics,
 } }));
+vi.mock('@/database/models/sound-groups', () => ({ default: {
+  getOverview: (...args: unknown[]) => mocks.sounds(...args),
+  getDetail: vi.fn(),
+} }));
 vi.mock('@/database/models/grammar-groups', () => ({ default: {} }));
 vi.mock('@/database/models/pronunciation-groups', () => ({ default: {} }));
-vi.mock('@/database/models/blocks', () => ({ default: {} }));
-vi.mock('@/database/models/practice-sessions', () => ({ default: {} }));
 vi.mock('@/database/utils/practice-content.utils', () => ({
   loadReviewDeckData: (...args: unknown[]) => mocks.loadReviewDeckData(...args),
 }));
@@ -29,6 +32,7 @@ import {
   overviewAvailabilityDescriptor,
   reviewPracticeDescriptor,
   topicsDescriptor,
+  soundsDescriptor,
   vocabularyDescriptor,
 } from '../route-data';
 
@@ -39,8 +43,9 @@ describe('route data queries', () => {
     mocks.hasGrammar.mockResolvedValue(true);
     mocks.hasTopics.mockResolvedValue(false);
     mocks.hasVocabulary.mockResolvedValue(true);
+    mocks.sounds.mockResolvedValue([{ id: 4 }]);
     await expect(overviewAvailabilityDescriptor('u1').load()).resolves.toEqual({
-      grammar: true, topics: false, vocabulary: true,
+      grammar: true, topics: false, vocabulary: true, sounds: true,
     });
     expect(mocks.topics).not.toHaveBeenCalled();
     expect(mocks.vocabulary).not.toHaveBeenCalled();
@@ -53,6 +58,7 @@ describe('route data queries', () => {
     mocks.vocabulary.mockResolvedValue(vocabulary);
     await expect(topicsDescriptor('u1').load()).resolves.toBe(topics);
     await expect(vocabularyDescriptor('u1').load()).resolves.toBe(vocabulary);
+    await expect(soundsDescriptor('u1').load()).resolves.toEqual([{ id: 4 }]);
     expect(mocks.hasTopics).not.toHaveBeenCalled();
     expect(mocks.hasVocabulary).not.toHaveBeenCalled();
   });

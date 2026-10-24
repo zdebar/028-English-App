@@ -1,129 +1,64 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const mocks = vi.hoisted(() => ({
-  getInitiatedGrammarChunkIds: vi.fn(),
-  chunksAnyOf: vi.fn(),
-  groupsAnyOf: vi.fn(),
-  topicsAnyOf: vi.fn(),
-  addExamplesToMany: vi.fn(),
+  groups: [] as any[],
+  relations: [] as any[],
+  startedGroups: [] as any[],
 }));
 
 vi.mock('@/database/models/db', () => ({
   db: {
-    grammar_chunks: {
-      where: (field: string) => {
-        if (field === 'id') {
-          return { anyOf: (...args: unknown[]) => mocks.chunksAnyOf(...args) };
-        }
-        throw new Error(`Unexpected grammar_chunks.where field: ${field}`);
-      },
-    },
-    grammar_groups: {
-      where: (field: string) => {
-        if (field === 'id') {
-          return { anyOf: (...args: unknown[]) => mocks.groupsAnyOf(...args) };
-        }
-        throw new Error(`Unexpected grammar_groups.where field: ${field}`);
-      },
-    },
-    grammar_topics: {
-      where: (field: string) => {
-        if (field === 'id') {
-          return { anyOf: (...args: unknown[]) => mocks.topicsAnyOf(...args) };
-        }
-        throw new Error(`Unexpected grammar_topics.where field: ${field}`);
-      },
-    },
+    grammar_topics: {},
+    groups: { filter: () => ({ toArray: async () => mocks.groups }) },
+    group_relations: { filter: () => ({ toArray: async () => mocks.relations }) },
   },
 }));
 
-vi.mock('@/database/models/user-items', () => ({
-  default: {
-    getInitiatedGrammarChunkIds: (...args: unknown[]) => mocks.getInitiatedGrammarChunkIds(...args),
-  },
-}));
-
-vi.mock('@/database/models/grammar-chunks', () => ({
-  default: {
-    addExamplesToMany: (...args: unknown[]) => mocks.addExamplesToMany(...args),
-  },
+vi.mock('@/database/models/groups', () => ({
+  default: { getStartedByUser: async () => mocks.startedGroups },
 }));
 
 import GrammarTopic from '@/database/models/grammar-topics';
 
 describe('GrammarTopic.getInitiated', () => {
   beforeEach(() => {
-    vi.clearAllMocks();
-    mocks.getInitiatedGrammarChunkIds.mockResolvedValue([11, 12, 13]);
-    mocks.chunksAnyOf.mockReturnValue({
-      toArray: vi.fn().mockResolvedValue([
-        { id: 12, name: 'Second', grammar_group_id: 2, sort_order: 2 },
-        { id: 11, name: 'First', grammar_group_id: 1, sort_order: 1 },
-        { id: 13, name: 'First group second', grammar_group_id: 1, sort_order: 3 },
-      ]),
-    });
-    mocks.groupsAnyOf.mockReturnValue({
-      sortBy: vi.fn().mockResolvedValue([
-        { id: 1, name: 'First group', grammar_topic_id: 1, sort_order: 2 },
-        { id: 2, name: 'Second group', grammar_topic_id: 1, sort_order: 3 },
-      ]),
-    });
-    mocks.topicsAnyOf.mockReturnValue({
-      sortBy: vi.fn().mockResolvedValue([
-        { id: 1, name: 'Present Simple', sort_order: 1 },
-      ]),
-    });
-    mocks.addExamplesToMany.mockImplementation(
-      async (_userId: string, chunks: Array<Record<string, unknown>>) =>
-        chunks.map((chunk) => ({ ...chunk, items: [] })),
-    );
+    mocks.groups = [
+      { id: 100, type: 'grammar', name: 'Tense', sort_order: 1, deleted_at: null },
+      { id: 101, type: 'grammar', name: 'Present', sort_order: 2, deleted_at: null },
+      { id: 102, type: 'grammar', name: 'Third person', note: 'Add s', sort_order: 3, deleted_at: null },
+      { id: 103, type: 'grammar', name: 'Question', sort_order: 4, deleted_at: null },
+    ];
+    mocks.relations = [
+      { id: 1, parent_group_id: 100, child_group_id: 101, relation_type: 'hierarchy', sort_order: 1, deleted_at: null },
+      { id: 2, parent_group_id: 101, child_group_id: 102, relation_type: 'detail', sort_order: 1, deleted_at: null },
+      { id: 3, parent_group_id: 101, child_group_id: 103, relation_type: 'detail', sort_order: 2, deleted_at: null },
+    ];
+    mocks.startedGroups = [
+      { ...mocks.groups[2], examples: [{ item_id: 1, english: 'works' }] },
+      { ...mocks.groups[3], examples: [{ item_id: 2, english: 'Does it work?' }] },
+    ];
   });
 
-  it('returns initiated groups nested under their ordered topic', async () => {
+  it('builds the initiated three-level grammar hierarchy from group relations', async () => {
     await expect(GrammarTopic.getInitiated('u1')).resolves.toEqual([
       {
-        id: 1,
-        name: 'Present Simple',
-        sort_order: 1,
+        ...mocks.groups[0],
         groups: [
           {
-            id: 1,
+            ...mocks.groups[1],
             kind: 'group',
-            name: 'First group',
-            grammar_topic_id: 1,
-            sort_order: 2,
             chunks: [
-              { id: 11, name: 'First', grammar_group_id: 1, sort_order: 1, items: [] },
-              { id: 13, name: 'First group second', grammar_group_id: 1, sort_order: 3, items: [] },
+              { ...mocks.groups[2], items: [{ item_id: 1, english: 'works' }] },
+              { ...mocks.groups[3], items: [{ item_id: 2, english: 'Does it work?' }] },
             ],
-          },
-          {
-            id: 2,
-            kind: 'group',
-            name: 'Second group',
-            grammar_topic_id: 1,
-            sort_order: 3,
-            chunks: [{ id: 12, name: 'Second', grammar_group_id: 2, sort_order: 2, items: [] }],
           },
         ],
       },
     ]);
-
-    expect(mocks.getInitiatedGrammarChunkIds).toHaveBeenCalledWith('u1');
-    expect(mocks.chunksAnyOf).toHaveBeenCalledWith([11, 12, 13]);
-    expect(mocks.addExamplesToMany).toHaveBeenCalledWith(
-      'u1',
-      expect.arrayContaining([expect.objectContaining({ id: 11 }), expect.objectContaining({ id: 12 })]),
-    );
-    expect(mocks.groupsAnyOf).toHaveBeenCalledWith([2, 1]);
-    expect(mocks.topicsAnyOf).toHaveBeenCalledWith([1]);
   });
 
-  it('returns no topics when there are no started chunks', async () => {
-    mocks.getInitiatedGrammarChunkIds.mockResolvedValue([]);
-
+  it('hides hierarchy nodes without started example items', async () => {
+    mocks.startedGroups = [];
     await expect(GrammarTopic.getInitiated('u1')).resolves.toEqual([]);
-    expect(mocks.chunksAnyOf).not.toHaveBeenCalled();
-    expect(mocks.topicsAnyOf).not.toHaveBeenCalled();
   });
 });

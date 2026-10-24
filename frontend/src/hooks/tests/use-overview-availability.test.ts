@@ -5,6 +5,7 @@ const mocks = vi.hoisted(() => ({
   grammar: false,
   topics: [] as unknown[],
   vocabulary: [] as unknown[],
+  sounds: [] as unknown[],
   grammarError: null as Error | null,
   observers: [] as Array<{
     next: (value: boolean) => void;
@@ -41,6 +42,9 @@ vi.mock('@/database/models/user-items', () => ({
     hasInitiatedVocabulary: vi.fn(async () => mocks.vocabulary.length > 0),
   },
 }));
+vi.mock('@/database/models/sound-groups', () => ({
+  default: { getOverview: vi.fn(async () => mocks.sounds) },
+}));
 vi.mock('@/features/toast/use-toast-store', () => ({
   useToastStore: (selector: (state: { showToast: typeof mocks.showToast }) => unknown) =>
     selector({ showToast: mocks.showToast }),
@@ -62,11 +66,12 @@ describe('useOverviewAvailability', () => {
     mocks.grammar = false;
     mocks.topics = [];
     mocks.vocabulary = [];
+    mocks.sounds = [];
     mocks.grammarError = null;
     mocks.observers = [];
   });
 
-  it('resolves all three overview states independently', async () => {
+  it('resolves all overview states independently', async () => {
     mocks.grammar = true;
     mocks.topics = [{}];
 
@@ -76,11 +81,12 @@ describe('useOverviewAvailability', () => {
     expect(result.current.grammar.hasData).toBe(true);
     expect(result.current.topics.hasData).toBe(true);
     expect(result.current.vocabulary.hasData).toBe(false);
+    expect(result.current.sounds.hasData).toBe(false);
   });
 
   it('retains live queries after the page unmounts and disposes them on sign-out', async () => {
     const { result, unmount } = renderHook(() => useOverviewAvailability('u1'));
-    await waitFor(() => expect(mocks.observers).toHaveLength(3));
+    await waitFor(() => expect(mocks.observers).toHaveLength(4));
 
     act(() => mocks.observers[0].next(true));
     expect(result.current.grammar.hasData).toBe(true);

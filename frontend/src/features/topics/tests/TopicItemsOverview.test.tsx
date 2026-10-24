@@ -31,8 +31,11 @@ vi.mock('@/features/auth/use-auth-store', () => ({
 }));
 
 vi.mock('@/features/toast/use-toast-store', () => ({
-  useToastStore: (selector: (state: { showToast: typeof mocks.showToast }) => unknown) =>
-    selector({ showToast: mocks.showToast }),
+  useToastStore: Object.assign(
+    (selector: (state: { showToast: typeof mocks.showToast }) => unknown) =>
+      selector({ showToast: mocks.showToast }),
+    { getState: () => ({ showToast: mocks.showToast }) },
+  ),
 }));
 
 vi.mock('@/hooks/use-live-query-data', () => ({
@@ -279,7 +282,7 @@ describe('TopicItemsOverview', () => {
     });
   });
 
-  it('allows reset independently of practice blocks', () => {
+  it('allows reset independently of practice lessons', () => {
     mocks.state.topic = { id: 2, name: 'Letters' };
 
     render(<TopicItemsOverview />);

@@ -1,0 +1,41 @@
+czech,english,pronunciation,audio,sort_order,block_id,note_id,topic_id,grammar_chunk_id,is_vocabulary,lesson_id
+špatný,bad,bˈæd,bad.opus,1000,,,,,True,1
+pálka,bat,bˈæt,bat.opus,1001,,,,,True,1
+čepice,cap,kˈæp,cap.opus,1002,,,,,True,1
+muž,man,mˈæn,man.opus,1003,,,,,True,1
+pánev,pan,pˈæn,pan.opus,1004,,,,,True,1
+seděl,sat,sˈæt,sat.opus,1005,,,,,True,1
+země,land,lˈænd,land.opus,1006,,,,,True,1
+zápas,match,mˈætʃ,match.opus,1007,,,,,True,1
+špatný,bad,bˈæd,bad.opus,2000,,,,,True,2
+pálka,bat,bˈæt,bat.opus,2001,,,,,True,2
+čepice,cap,kˈæp,cap.opus,2002,,,,,True,2
+muž,man,mˈæn,man.opus,2003,,,,,True,2
+pánev,pan,pˈæn,pan.opus,2004,,,,,True,2
+seděl,sat,sˈæt,sat.opus,2005,,,,,True,2
+země,land,lˈænd,land.opus,2006,,,,,True,2
+zápas,match,mˈætʃ,match.opus,2007,,,,,True,2
+já,I,ˈaɪ,i.opus,3000,,1,,,True,3
+ty,you,jˈuː,you.opus,3001,,1,,,True,3
+on,he,hˈiː,he.opus,3002,,1,,,True,3
+ona,she,ʃˈiː,she.opus,3003,,1,,,True,3
+ono,it,ˈɪt,it.opus,3004,,1,,,True,3
+my,we,wˈiː,we.opus,3005,,,,,True,3
+vy,you,jˈuː,you.opus,3006,,,,,True,3
+oni,they,ðˈeɪ,they.opus,3007,,,,,True,3
+já jsem,I am,aɪˈæm,i_am.opus,4000,,1,,,True,4
+ty jsi,you are,juː ˈɑːɹ,you_are.opus,4001,,1,,,True,4
+on je,he is,hiː ˈɪz,he_is.opus,4002,,1,,,True,4
+ona je,she is,ʃiː ˈɪz,she_is.opus,4003,,1,,,True,4
+to je,it is,ɪɾ ˈɪz,it_is.opus,4004,,1,,,True,4
+my jsme,we are,wiː ˈɑːɹ,we_are.opus,4005,,,,,True,4
+vy jste,you are,juː ˈɑːɹ,you_are.opus,4006,,,,,True,4
+oni jsou,they are,ðeɪ ˈɑːɹ,they_are.opus,4007,,,,,True,4
+já jsem (zk.),I'm,ˈaɪm,im.opus,5000,,,,,True,5
+ty jsi (zk.),you're,jˈʊɹ,youre.opus,5001,,,,,True,5
+on je (zk.),he's,hˈiːz,hes.opus,5002,,,,,True,5
+ona je (zk.),she's,ʃˈiːz,shes.opus,5003,,,,,True,5
+to je (zk.),it's,ˈɪts,its.opus,5004,,,,,True,5
+my jsme (zk.),we're,wˈɪɹ,were.opus,5005,,,,,True,5
+vy jste (zk.),you're,jˈʊɹ,youre.opus,5006,,,,,True,5
+oni jsou (zk.),they're,ðeɪˈɚ,theyre.opus,5007,,,,,True,5

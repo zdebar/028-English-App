@@ -10,6 +10,7 @@ const mocks = vi.hoisted(() => ({
   getInitiatedGrammar: vi.fn(),
   hasInitiatedByUserId: vi.fn(),
   getInitiatedByUserId: vi.fn(),
+  getInitiatedSounds: vi.fn(),
   loadNames: [] as string[],
 }));
 
@@ -38,6 +39,9 @@ vi.mock('@/database/models/user-items', () => ({
     getInitiatedVocabulary: (...args: unknown[]) => mocks.getInitiatedVocabulary(...args),
   },
 }));
+vi.mock('@/database/models/sound-groups', () => ({
+  default: { getOverview: (...args: unknown[]) => mocks.getInitiatedSounds(...args) },
+}));
 
 import {
   loadOverviewAvailability,
@@ -62,6 +66,7 @@ describe('overview query store', () => {
     mocks.getInitiatedByUserId.mockResolvedValue([{ id: 2 }]);
     mocks.getInitiatedVocabulary.mockResolvedValue([{ item_id: 3 }]);
     mocks.getByUserId.mockResolvedValue([{ item_id: 4 }]);
+    mocks.getInitiatedSounds.mockResolvedValue([{ id: 5 }]);
   });
 
   it('warms all availability and destination overview queries', async () => {
@@ -71,9 +76,11 @@ describe('overview query store', () => {
       'has-grammar',
       'has-topics',
       'has-vocabulary',
+      'has-sounds',
       'grammar',
       'topics',
       'vocabulary',
+      'sounds',
       'practice-overview',
     ]);
     expect(mocks.getInitiatedGrammar).toHaveBeenCalledWith('u1');
@@ -87,8 +94,9 @@ describe('overview query store', () => {
       grammar: true,
       topics: true,
       vocabulary: true,
+      sounds: true,
     });
-    expect(mocks.loadNames).toEqual(['has-grammar', 'has-topics', 'has-vocabulary']);
+    expect(mocks.loadNames).toEqual(['has-grammar', 'has-topics', 'has-vocabulary', 'has-sounds']);
   });
 
   it('uses the same user-scoped keys as the existing shared-query store', () => {

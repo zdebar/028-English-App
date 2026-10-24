@@ -11,7 +11,7 @@ import SyncEntityModel from './sync-entity-model';
  * Shared level lookup model.
  *
  * Public API:
- * - `getOverview` combines local levels, lessons, and user items into dashboard progress summaries.
+ * - `getOverview` combines local levels, lessons, user items, and started lesson records.
  * - `syncFromRemote` is inherited from `SyncEntityModel`.
  */
 export default class Levels extends SyncEntityModel implements LevelType {
@@ -31,16 +31,18 @@ export default class Levels extends SyncEntityModel implements LevelType {
    *
    * @param userId User id whose practice items should be aggregated.
    * @param localDate Local date used for started-today counts.
-   * @returns Level summaries with nested lessons; levels without lesson items are omitted.
+   * @returns Level summaries with nested lessons and their started state.
    */
   static getOverview(userId: string, localDate: string): Promise<LevelOverviewType[]> {
-    return db.transaction('r', db.user_items, db.lessons, db.levels, async () => {
-      const [items, lessons, levels] = await Promise.all([
+    return db.transaction('r', db.user_items, db.user_lessons, db.lessons, db.levels, async () => {
+      const [items, userLessons, lessons, levels] = await Promise.all([
         UserItem.getByUserId(userId),
+        db.user_lessons.where('user_id').equals(userId).toArray(),
         Lessons.getAll(),
         db.levels.orderBy('sort_order').toArray(),
       ]);
-      return aggregateLevels(items, lessons, levels, localDate);
+      const startedLessonIds = new Set(userLessons.map((userLesson) => userLesson.lesson_id));
+      return aggregateLevels(items, lessons, levels, localDate, startedLessonIds);
     });
   }
 }

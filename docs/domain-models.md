@@ -23,8 +23,9 @@ Dexie models under `frontend/src/database/models`.
 | `lessons` | Own ordered items and explicit blocks. |
 | `blocks` | Optional explicit initial-training groups; progress remains item-based. |
 | `topics` | Shared overview groups linked independently through nullable `items.topic_id`; one topic may span multiple practice blocks. |
+| `groups` / `group_items` / `group_relations` | Unified topic, grammar, sound, and pronunciation catalog. Group items are ordered examples; relations encode grammar hierarchy and sound contrasts. Visible examples must be initiated and belong to a lesson recorded in `user_lessons`. |
 | `items` / `user_items` | Individual vocabulary or grammar practice units. User items track progress and scheduling. |
-| `grammar_groups` / `grammar_chunks` | Overview pages group ordered chunks; blocks and practice items link to one relevant hint through `grammar_chunk_id`. |
+| `grammar_groups` / `grammar_chunks` | Legacy grammar references retained for existing practice-item and lesson compatibility while the shared group catalog powers overviews. |
 | `grammar_chunk_examples` | Curated, ordered item examples displayed with a grammar chunk independently of block membership and item hint linkage. |
 | `notes` | Shared note/detail content, linked by `note_id`. |
 | `user_scores` | Per-user daily practice count. |

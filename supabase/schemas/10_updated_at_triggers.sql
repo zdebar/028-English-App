@@ -9,33 +9,54 @@ BEGIN
 END;
 $$;
 
+CREATE OR REPLACE FUNCTION private.validate_group_relation_types()
+RETURNS trigger
+LANGUAGE plpgsql
+SET search_path = public, private
+AS $$
+DECLARE parent_type TEXT;
+DECLARE child_type TEXT;
+BEGIN
+  SELECT type INTO parent_type FROM public.groups WHERE id = NEW.parent_group_id;
+  SELECT type INTO child_type FROM public.groups WHERE id = NEW.child_group_id;
+  IF NOT (
+    (parent_type = 'grammar' AND child_type = 'grammar' AND NEW.relation_type IN ('hierarchy', 'detail'))
+    OR (parent_type = 'topic' AND child_type = 'topic' AND NEW.relation_type = 'hierarchy')
+    OR (parent_type = 'pronunciation' AND child_type = 'sound' AND NEW.relation_type = 'contrast')
+  ) THEN
+    RAISE EXCEPTION 'Invalid group relation: % -> % (%)', parent_type, child_type, NEW.relation_type;
+  END IF;
+  RETURN NEW;
+END;
+$$;
+
+DROP TRIGGER IF EXISTS trg_validate_group_relation_types ON public.group_relations;
+CREATE TRIGGER trg_validate_group_relation_types
+BEFORE INSERT OR UPDATE OF parent_group_id, child_group_id, relation_type
+ON public.group_relations
+FOR EACH ROW EXECUTE FUNCTION private.validate_group_relation_types();
+
 DROP TRIGGER IF EXISTS trg_set_updated_at__settings ON private.settings;
 CREATE TRIGGER trg_set_updated_at__settings
 BEFORE UPDATE ON private.settings
 FOR EACH ROW
 EXECUTE FUNCTION public.set_updated_at();
 
+DROP TRIGGER IF EXISTS trg_set_updated_at__groups ON public.groups;
+CREATE TRIGGER trg_set_updated_at__groups BEFORE UPDATE ON public.groups
+FOR EACH ROW EXECUTE FUNCTION public.set_updated_at();
+
+DROP TRIGGER IF EXISTS trg_set_updated_at__group_items ON public.group_items;
+CREATE TRIGGER trg_set_updated_at__group_items BEFORE UPDATE ON public.group_items
+FOR EACH ROW EXECUTE FUNCTION public.set_updated_at();
+
+DROP TRIGGER IF EXISTS trg_set_updated_at__group_relations ON public.group_relations;
+CREATE TRIGGER trg_set_updated_at__group_relations BEFORE UPDATE ON public.group_relations
+FOR EACH ROW EXECUTE FUNCTION public.set_updated_at();
+
 DROP TRIGGER IF EXISTS trg_set_updated_at__users ON public.users;
 CREATE TRIGGER trg_set_updated_at__users
 BEFORE UPDATE ON public.users
-FOR EACH ROW
-EXECUTE FUNCTION public.set_updated_at();
-
-DROP TRIGGER IF EXISTS trg_set_updated_at__grammar_topics ON public.grammar_topics;
-CREATE TRIGGER trg_set_updated_at__grammar_topics
-BEFORE UPDATE ON public.grammar_topics
-FOR EACH ROW
-EXECUTE FUNCTION public.set_updated_at();
-
-DROP TRIGGER IF EXISTS trg_set_updated_at__grammar_groups ON public.grammar_groups;
-CREATE TRIGGER trg_set_updated_at__grammar_groups
-BEFORE UPDATE ON public.grammar_groups
-FOR EACH ROW
-EXECUTE FUNCTION public.set_updated_at();
-
-DROP TRIGGER IF EXISTS trg_set_updated_at__grammar_chunks ON public.grammar_chunks;
-CREATE TRIGGER trg_set_updated_at__grammar_chunks
-BEFORE UPDATE ON public.grammar_chunks
 FOR EACH ROW
 EXECUTE FUNCTION public.set_updated_at();
 
@@ -51,18 +72,6 @@ BEFORE UPDATE ON public.lessons
 FOR EACH ROW
 EXECUTE FUNCTION public.set_updated_at();
 
-DROP TRIGGER IF EXISTS trg_set_updated_at__blocks ON public.blocks;
-CREATE TRIGGER trg_set_updated_at__blocks
-BEFORE UPDATE ON public.blocks
-FOR EACH ROW
-EXECUTE FUNCTION public.set_updated_at();
-
-DROP TRIGGER IF EXISTS trg_set_updated_at__topics ON public.topics;
-CREATE TRIGGER trg_set_updated_at__topics
-BEFORE UPDATE ON public.topics
-FOR EACH ROW
-EXECUTE FUNCTION public.set_updated_at();
-
 DROP TRIGGER IF EXISTS trg_set_updated_at__notes ON public.notes;
 CREATE TRIGGER trg_set_updated_at__notes
 BEFORE UPDATE ON public.notes
@@ -72,27 +81,6 @@ EXECUTE FUNCTION public.set_updated_at();
 DROP TRIGGER IF EXISTS trg_set_updated_at__items ON public.items;
 CREATE TRIGGER trg_set_updated_at__items
 BEFORE UPDATE ON public.items
-FOR EACH ROW
-EXECUTE FUNCTION public.set_updated_at();
-
-DROP TRIGGER IF EXISTS trg_set_updated_at__pronunciation_groups
-  ON public.pronunciation_groups;
-CREATE TRIGGER trg_set_updated_at__pronunciation_groups
-BEFORE UPDATE ON public.pronunciation_groups
-FOR EACH ROW
-EXECUTE FUNCTION public.set_updated_at();
-
-DROP TRIGGER IF EXISTS trg_set_updated_at__pronunciation_group_items
-  ON public.pronunciation_group_items;
-CREATE TRIGGER trg_set_updated_at__pronunciation_group_items
-BEFORE UPDATE ON public.pronunciation_group_items
-FOR EACH ROW
-EXECUTE FUNCTION public.set_updated_at();
-
-DROP TRIGGER IF EXISTS trg_set_updated_at__grammar_chunk_examples
-  ON public.grammar_chunk_examples;
-CREATE TRIGGER trg_set_updated_at__grammar_chunk_examples
-BEFORE UPDATE ON public.grammar_chunk_examples
 FOR EACH ROW
 EXECUTE FUNCTION public.set_updated_at();
 

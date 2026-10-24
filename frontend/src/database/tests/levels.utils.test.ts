@@ -34,7 +34,7 @@ describe('aggregateLevels', () => {
       },
     ] as UserItemLocal[];
 
-    const result = aggregateLevels(items, lessons, levels, '2026-07-27');
+    const result = aggregateLevels(items, lessons, levels, '2026-07-27', new Set([10]));
 
     expect(result).toHaveLength(1);
     expect(result[0]).toMatchObject({
@@ -48,6 +48,7 @@ describe('aggregateLevels', () => {
       startedCount: 1,
       startedTodayCount: 1,
       totalCount: 3,
+      isStarted: true,
     });
     expect(result[0]).not.toHaveProperty('masteredCount');
     expect(result[0].lessons[0]).not.toHaveProperty('masteredTodayCount');

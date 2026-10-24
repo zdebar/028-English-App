@@ -1,14 +1,12 @@
-import Block from '@/database/models/blocks';
-import PracticeSession from '@/database/models/practice-sessions';
+import Lessons from '@/database/models/lessons';
 import UserItem from '@/database/models/user-items';
-import config from '@/config/config';
 import {
   resolvePracticeEntries,
   resolvePracticeGrammarContext,
 } from '@/database/utils/practice-content.utils';
 import type { GrammarChunkWithExamples } from '@/database/models/grammar-chunks';
-import type { BlockType, GrammarGroupType } from '@/types/generic.types';
-import type { PracticeSessionType } from '@/types/practice-session.types';
+import type { LessonType } from '@/types/generic.types';
+import type { GroupType } from '@/types/table.types';
 import type {
   ResolvedPracticeEntry,
   UserItemLocal,
@@ -19,16 +17,16 @@ import {
   warmReviewArrays,
 } from './review-prefetch';
 
-export type PreparedInitialBlock = Readonly<{
-  block: BlockType | null;
+export type PreparedInitialLesson = Readonly<{
+  lesson: LessonType | null;
   items: UserItemLocal[];
   entries: Array<ResolvedPracticeEntry<UserItemLocal>>;
   grammar: GrammarChunkWithExamples | null;
-  grammarGroup: GrammarGroupType | null;
+  grammarGroup: GroupType | null;
 }>;
 
 type PracticePrefetchState = {
-  nextInitialBlock: PreparedInitialBlock | null;
+  nextInitialLesson: PreparedInitialLesson | null;
   dirty: boolean;
   version: number;
   pending: Promise<void> | null;
@@ -38,7 +36,7 @@ const states = new Map<string, PracticePrefetchState>();
 
 function createState(): PracticePrefetchState {
   return {
-    nextInitialBlock: null,
+    nextInitialLesson: null,
     dirty: true,
     version: 0,
     pending: null,
@@ -54,44 +52,21 @@ function getState(userId: string): PracticePrefetchState {
   return state;
 }
 
-function getSavedSessionItemIds(session: PracticeSessionType | null): number[] {
-  if (!session) return [];
-  return [
-    ...session.current_queue_item_ids,
-    ...session.retry_queue_item_ids,
-    ...session.completed_item_ids,
-  ];
-}
-
-function getSelectionOptions(session: PracticeSessionType | null) {
-  if (!session) return {};
-  const options = {
-    excludeItemIds: getSavedSessionItemIds(session),
-  };
-  if (session.block_id === null) return options;
-  return { ...options, excludeBlockId: session.block_id };
-}
-
-async function loadPreparedInitialBlock(
+async function loadPreparedInitialLesson(
   userId: string,
-  activeSession: PracticeSessionType | null,
-): Promise<PreparedInitialBlock | null> {
-  const selection = await UserItem.getNextInitialTrainingSelection(
-    userId,
-    config.practice.initialTrainingBatchSize,
-    getSelectionOptions(activeSession),
-  );
+): Promise<PreparedInitialLesson | null> {
+  const selection = await UserItem.getNextInitialTrainingSelection(userId);
   if (!selection || selection.items.length === 0) return null;
 
-  const block = selection.blockId == null ? null : await Block.getById(selection.blockId);
-  if (selection.blockId != null && !block) return null;
+  const lesson = await Lessons.getById(selection.lessonId);
+  if (!lesson) return null;
 
   const [entries, grammarContext] = await Promise.all([
     resolvePracticeEntries(userId, selection.items),
-    resolvePracticeGrammarContext(userId, block?.grammar_chunk_id ?? null),
+    resolvePracticeGrammarContext(userId, lesson.group_id),
   ]);
   return {
-    block,
+    lesson,
     items: selection.items,
     entries,
     grammar: grammarContext.grammar,
@@ -99,36 +74,24 @@ async function loadPreparedInitialBlock(
   };
 }
 
-async function resolveActiveSession(
-  userId: string,
-  activeSession: PracticeSessionType | null | undefined,
-): Promise<PracticeSessionType | null> {
-  if (activeSession !== undefined) return activeSession;
-  return (await PracticeSession.inspectActive(userId)).activeSession;
-}
-
-/** Loads review arrays and prepares the next initial block until explicit invalidation. */
-export async function warmPracticeCache(
-  userId: string,
-  activeSession?: PracticeSessionType | null,
-): Promise<void> {
+/** Loads review arrays and prepares the next initial lesson until explicit invalidation. */
+export async function warmPracticeCache(userId: string): Promise<void> {
   const state = getState(userId);
   if (state.pending) {
     await state.pending;
-    return warmPracticeCache(userId, activeSession);
+    return warmPracticeCache(userId);
   }
   if (!state.dirty) return;
 
   const version = state.version;
   let pending: Promise<void>;
   pending = (async () => {
-    const resolvedSession = await resolveActiveSession(userId, activeSession);
-    const [, nextInitialBlock] = await Promise.all([
+    const [, nextInitialLesson] = await Promise.all([
       warmReviewArrays(userId),
-      loadPreparedInitialBlock(userId, resolvedSession),
+      loadPreparedInitialLesson(userId),
     ]);
     if (states.get(userId) !== state || state.version !== version) return;
-    state.nextInitialBlock = nextInitialBlock;
+    state.nextInitialLesson = nextInitialLesson;
     state.dirty = false;
   })().finally(() => {
     if (state.pending === pending) state.pending = null;
@@ -137,19 +100,16 @@ export async function warmPracticeCache(
   state.pending = pending;
   await pending;
   if (states.get(userId) === state && state.version !== version) {
-    return warmPracticeCache(userId, activeSession);
+    return warmPracticeCache(userId);
   }
 }
 
-export async function getPrefetchedNextInitialBlock(
-  userId: string,
-  activeSession?: PracticeSessionType | null,
-): Promise<PreparedInitialBlock | null> {
-  await warmPracticeCache(userId, activeSession);
-  return getState(userId).nextInitialBlock;
+export async function getPrefetchedNextInitialLesson(userId: string): Promise<PreparedInitialLesson | null> {
+  await warmPracticeCache(userId);
+  return getState(userId).nextInitialLesson;
 }
 
-export function invalidateNextInitialBlock(userId: string): void {
+export function invalidateNextInitialLesson(userId: string): void {
   const state = states.get(userId);
   if (!state) return;
   state.version += 1;
@@ -158,7 +118,7 @@ export function invalidateNextInitialBlock(userId: string): void {
 
 export function invalidatePracticeCache(userId: string): void {
   invalidateReviewArrays(userId);
-  invalidateNextInitialBlock(userId);
+  invalidateNextInitialLesson(userId);
 }
 
 export function clearPracticeCache(userId: string | null): void {

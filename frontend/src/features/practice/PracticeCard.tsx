@@ -5,7 +5,7 @@ import PracticeEmptyState from './PracticeEmptyState';
 import { TEXTS } from '@/locales/cs';
 import DelayedMessage from '@/components/UI/DelayedMessage';
 import { useToastStore } from '../toast/use-toast-store';
-import { reportError } from '../logging/monitoring-handler';
+import { useQueryErrorToast } from '@/features/logging/use-query-error-toast';
 import { useCallback, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import type { ReviewDeckData } from '@/database/utils/practice-content.utils';
@@ -23,7 +23,7 @@ export default function PracticeCard({ initialData }: PracticeCardProps) {
   const navigate = useNavigate();
   const notifiedDetailFailuresRef = useRef(new Set<string>());
   const handlePracticeComplete = useCallback(() => {
-    navigate(ROUTES.home, { replace: true });
+    void navigate(ROUTES.home, { replace: true });
   }, [navigate]);
   const {
     currentItem,
@@ -71,11 +71,7 @@ export default function PracticeCard({ initialData }: PracticeCardProps) {
     if (grammarLoadFailed) notifyDetailLoadFailure('grammar');
   }, [grammarLoadFailed, noteLoadFailed, notifyDetailLoadFailure]);
 
-  useEffect(() => {
-    if (!error) return;
-    showToast(TEXTS.loadingError, 'error');
-    reportError('Failed to fetch practice deck', error);
-  }, [error, showToast]);
+  useQueryErrorToast(error, 'Failed to fetch practice deck');
 
   if (loading && !currentItem) {
     return <DelayedMessage />;
@@ -98,21 +94,30 @@ export default function PracticeCard({ initialData }: PracticeCardProps) {
       itemKey={currentItem ? String(currentItem.item_id) : undefined}
       ensureDetailLoaded={ensureDetailLoaded}
       onDetailLoadError={notifyDetailLoadFailure}
-      itemProgressLabel={formatProgress(currentItem.progress_cz_to_en) ?? ''}
+      itemProgressLabel={formatProgress(
+        currentItem.review_direction === 'en_to_cz'
+          ? currentItem.progress_en_to_cz
+          : currentItem.progress_cz_to_en,
+      ) ?? ''}
       progressLabel={progressLabel}
       progressHelpText={TEXTS.reviewProgress}
       showProgressLabel
-      isBlockTrainingPractice={false}
+      isReviewPractice
+      isInitialTrainingPractice={false}
       revealed={revealed}
-      czech={czech}
+      czech={currentItem.review_direction === 'en_to_cz' ? currentItem.czech : czech}
+      czechDescription={currentItem.czech_description}
+      czechHidden={currentItem.review_direction === 'en_to_cz' && !revealed}
       english={english}
       pronunciation={pronunciation}
+      audio={currentItem.audio}
       audioDisabled={audioDisabled}
       handleReveal={handleReveal}
       plusHint={plusHint}
-      nextRepeat={() => nextItem('incorrect')}
-      nextKnown={() => nextItem('correct')}
-      completeCurrent={() => nextItem('skip')}
+      nextRepeat={() => nextItem('repeat')}
+      nextHard={() => nextItem('hard')}
+      nextGood={() => nextItem('good')}
+      nextEasy={() => nextItem('easy')}
       retryAction={retryPractice}
       audioError={audioError}
       playAudio={playAudio}

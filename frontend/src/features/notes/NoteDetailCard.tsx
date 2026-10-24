@@ -1,6 +1,6 @@
 import OverviewCard from '@/components/UI/OverviewCard';
 import { TEXTS } from '@/locales/cs';
-import DOMPurify from 'dompurify';
+import SanitizedNote from '@/components/UI/SanitizedNote';
 
 export type NoteDetail = Readonly<{
   id: number;
@@ -17,10 +17,7 @@ export default function NoteDetailCard({ note, onClose }: NoteDetailCardProps) {
   return (
     <OverviewCard buttonTitle={note?.name} onClose={onClose}>
       {note?.note ? (
-        <div
-          className="grammar p-4"
-          dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(note.note) }}
-        />
+        <SanitizedNote className="grammar p-4" html={note.note} />
       ) : (
         TEXTS.noNotesToDisplay
       )}

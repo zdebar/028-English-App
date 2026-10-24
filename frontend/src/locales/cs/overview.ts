@@ -1,15 +1,25 @@
 export const OVERVIEW_TEXTS = {
-  // Levels Overview Page
-  levelsStartedHelp: 'iniciováno / celkem položek',
+  // Home lesson progress grid
+  lessonOverview: 'přehled započatých lekcí',
+  lessonsOverview: 'Přehled lekcí',
+  noLessons: 'Nejsou dostupné žádné lekce.',
+  lessonStarted: 'zahájena',
+  lessonNotStarted: 'nezahájena',
 
   // Grammar Overview Page
   noGrammar: 'Žádná započatá gramatika.',
   restartGrammarTitle: 'Restartovat gramatiku',
   restartGrammarDescription:
     'Opravdu chcete restartovat pokrok všech položek této gramatiky? Tuto akci nelze vrátit zpět.',
+  restartGrammarDirectionTitle: 'Restartovat pokrok gramatiky',
 
   // Topics Overview Page
   noTopics: 'Žádná započatá témata.',
+  soundsOverview: 'Přehled hlásek',
+  noSounds: 'Žádné odemčené hlásky.',
+  noSoundItems: 'Pro tuto hlásku nejsou dostupné příklady.',
+  resetSoundTitle: 'Restartovat hlásku',
+  resetSoundDescription: 'Opravdu chcete restartovat pokrok příkladů této hlásky?',
   noTopicItems: 'V tomto tématu nejsou žádné položky.',
   resetTopicTitle: 'Restartovat téma',
   resetTopicDescription:
@@ -26,13 +36,12 @@ export const OVERVIEW_TEXTS = {
   vocabularyCzechOption: 'Čeština',
   vocabularyEnglishOption: 'Angličtina',
   czech: 'Česky',
+  czechDescription: 'Český popis',
+  noCzechDescription: 'bez popisu',
   english: 'Anglicky',
   pronunciation: 'Výslovnost',
   pronunciationTitle: (pronunciation: string) => `Výslovnost: ${pronunciation}`,
-  levelName: 'CEFR úroveň',
   lessonOrder: 'Číslo lekce',
-  lessonName: 'Název lekce',
-  startedAt: 'Započato',
   updatedAt: 'Změněno',
   completedAt: 'dokončeno',
   nextAt: 'další',
@@ -40,13 +49,13 @@ export const OVERVIEW_TEXTS = {
   practiceSchedule: 'Procvičování',
   notScheduled: 'Nenaplánováno',
   restartItemProgress: 'Restartovat pokrok této položky',
+  restartDirectionProgressDescription:
+    'Opravdu chcete restartovat pokrok pouze v tomto směru procvičování?',
 
   // Overviews Page
   overviews: 'Přehledy',
   progressOverviews: 'Pokrok',
   pronunciationSettings: 'Přehled výslovnosti',
-  levelsOverview: 'Přehled CEFR úrovní',
-  levelsOverviewTooltip: 'Přehled CEFR úrovní s pokrokem',
   topicsOverview: 'Přehled témat',
   topicsOverviewTooltip: 'Přehled tematických skupin',
   grammarOverview: 'Přehled gramatiky',

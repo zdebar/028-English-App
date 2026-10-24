@@ -1,30 +1,30 @@
-import { refreshPracticeAvailability } from '@/features/practice/practice-availability-controller';
+import { runProgressReset } from '@/features/practice/run-progress-reset';
 import { sharedQueryKey } from '@/hooks/shared-query-store';
 import { ROUTES } from '@/config/routes.config';
 import UserItem from '@/database/models/user-items';
 import { useAuthStore } from '@/features/auth/use-auth-store';
-import { reportError, reportInfo } from '@/features/logging/monitoring-handler';
 import { useToastStore } from '@/features/toast/use-toast-store';
 import { useAudioManager } from '@/features/audio/use-audio-manager';
+import { getItemAudioSources } from '@/features/audio/audio.utils';
 import { TEXTS } from '@/locales/cs';
 import type { UserItemLocal } from '@/types/user-item.types';
 import { useCallback, useEffect, useMemo } from 'react';
 import Topic from '@/database/models/topics';
 import { useNavigate, useParams } from 'react-router-dom';
-import type { TopicType } from '@/types/generic.types';
+import type { GroupType } from '@/types/table.types';
 import { DataState } from '@/components/UI/DataState';
-import BilingualItemButton from '@/components/UI/buttons/BilingualItemButton';
+import AudioItemList from '@/components/UI/AudioItemList';
 import HelpButton from '../help/HelpButton';
 import OverviewCard from '@/components/UI/OverviewCard';
 import VolumeSlider from '../audio/VolumeSlider';
 import { useLiveQueryData } from '@/hooks/use-live-query-data';
 import { useRouteClose } from '@/routing/use-route-close';
-import { invalidateReviewArrays } from '@/features/practice/review-prefetch';
+import { useQueryErrorToast } from '@/features/logging/use-query-error-toast';
 
 export default function TopicItemsOverview({
   initialTopic,
   initialItems = [],
-}: Readonly<{ initialTopic?: TopicType | null; initialItems?: UserItemLocal[] }>) {
+}: Readonly<{ initialTopic?: GroupType | null; initialItems?: UserItemLocal[] }>) {
   const navigate = useNavigate();
   const closeRoute = useRouteClose(ROUTES.topics);
   const userId = useAuthStore((state) => state.userId);
@@ -38,19 +38,19 @@ export default function TopicItemsOverview({
 
   useEffect(() => {
     if (topicId) return;
-    navigate(ROUTES.topics);
+    void navigate(ROUTES.topics);
   }, [navigate, topicId]);
 
-  const fetchTopic = useCallback(async (): Promise<TopicType | null> => {
+  const fetchTopic = useCallback(async (): Promise<GroupType | null> => {
     if (!userId || !topicId) return null;
-    return Topic.getById(topicId);
+    return Topic.getById(userId, topicId);
   }, [topicId, userId]);
 
   const {
     data: topic,
     loading: topicLoading,
     error: topicError,
-  } = useLiveQueryData<TopicType | null>(fetchTopic, {
+  } = useLiveQueryData<GroupType | null>(fetchTopic, {
     emptyData: null,
     initialData: initialTopic,
     sharedKey: sharedQueryKey(userId, `topic:${topicId}`),
@@ -75,42 +75,24 @@ export default function TopicItemsOverview({
 
   useEffect(() => {
     if (topicLoading || !userId || !topicId || topic !== null) return;
-    navigate(ROUTES.topics, { replace: true });
+    void navigate(ROUTES.topics, { replace: true });
   }, [navigate, topic, topicId, topicLoading, userId]);
 
-  useEffect(() => {
-    if (!topicError) return;
-    showToast(TEXTS.loadingError, 'error');
-    reportError('Failed to fetch topic details', topicError);
-  }, [showToast, topicError]);
+  useQueryErrorToast(topicError, 'Failed to fetch topic details');
+  useQueryErrorToast(itemsError, 'Failed to fetch topic items');
 
-  useEffect(() => {
-    if (!itemsError) return;
-    showToast(TEXTS.loadingError, 'error');
-    reportError('Failed to fetch topic items', itemsError);
-  }, [itemsError, showToast]);
-
-  const itemAudios = useMemo(
-    () => items.map((item) => item.audio).filter((audio): audio is string => Boolean(audio)),
-    [items],
-  );
+  const itemAudios = useMemo(() => getItemAudioSources(items), [items]);
 
   const { playAudio, isAudioReady, loading: audioLoading } = useAudioManager(itemAudios);
 
   // -- Handlers --
   const handleReset = useCallback(async () => {
     if (!userId || !topicId) return;
-    try {
-      const resetCount = await UserItem.resetItemsByTopicId(userId, topicId);
-      invalidateReviewArrays(userId);
-      void refreshPracticeAvailability(userId);
-      reportInfo(`Reset ${resetCount} items in topic ${topicId}`);
-      showToast(TEXTS.resetProgressSuccessToast, 'success');
-    } catch (error) {
-      showToast(TEXTS.resetProgressErrorToast, 'error');
-      reportError(TEXTS.resetProgressErrorToast, error);
-    }
-  }, [showToast, topicId, userId]);
+    await runProgressReset(userId, () => UserItem.resetItemsByTopicId(userId, topicId), {
+      successLog: (resetCount) => `Reset ${resetCount} items in topic ${topicId}`,
+      errorContext: TEXTS.resetProgressErrorToast,
+    });
+  }, [topicId, userId]);
 
   const resetHandler = topic ? handleReset : undefined;
 
@@ -125,22 +107,13 @@ export default function TopicItemsOverview({
       className="bottom-controls-clearance"
     >
       <DataState loading={itemsLoading} hasData={hasItems} noDataMessage={TEXTS.noTopicItems}>
-        <div className="mt-1 flex flex-col gap-1">
-          {items.map((item) => (
-            <BilingualItemButton
-              key={item.item_id}
-              item={item}
-              onClick={async () => {
-                if (!item.audio) return;
-                const didPlay = await playAudio(item.audio);
-                if (!didPlay) {
-                  showToast(TEXTS.noAudio, 'error');
-                }
-              }}
-              disabled={!item.audio || (!audioLoading && !isAudioReady(item.audio))}
-            />
-          ))}
-        </div>
+        <AudioItemList
+          items={items}
+          audioLoading={audioLoading}
+          isAudioReady={isAudioReady}
+          playAudio={playAudio}
+          showToast={showToast}
+        />
       </DataState>
       <div className="pos-bottom-left-control">
         <VolumeSlider />

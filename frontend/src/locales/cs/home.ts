@@ -3,20 +3,18 @@ export const HOME_TEXTS = {
   appTitle: 'Angličtina',
   appDescription: 'Bez stresu. Bez přemýšlení. Jen dril.',
   guide: 'Návod',
-  startedTodayHint: 'dnes započato',
   noDashboardData: 'Žádná dostupná data.',
   signupHint:
     'Aplikace po přihlášení ukládá cvičební data do úložiště Vašeho prohlížeče (7.8MB). Účet je možno kdykoliv smazat, včetně všech dat.',
   installButton: 'Nainstalovat aplikaci',
   installButtonTooltip: 'Nainstalovat PWA aplikaci.',
-  dailyStartedGoal: 'dnes započato / cíl',
   grammarReviewButton: 'Opakování gramatiky',
   vocabularyReviewButton: 'Opakování slovíček',
-  newButton: 'Nové',
+  newButton: 'Další lekce',
+  dailyNewLessonLimitReached: 'Denní limit nových lekcí byl dosažen. Změňte jej v Profilu.',
 
   // User
   practiceOverviewTitle: 'Přehled procvičování',
-  practiceOverviewOpen: 'Otevřít přehled procvičování',
   practiceOverviewMoreDays: '... dalších 7 dní',
   practiceOverviewNone: 'Žádné započaté dny',
   authInitErrorToast: 'Nastala chyba při přihlašování.',
@@ -49,10 +47,11 @@ export const HOME_TEXTS = {
   simulateDataLoading: 'Simuluji data ...',
   simulateDataTooltip: 'Destruktivně přepíše část pokroku. Použijte pouze pro testování.',
   simulateDataModalTitle: 'Opravdu simulovat data?',
-  simulateDataModalText: 'Tato operace nevratně přepíše část vašich dat.',
+  simulateDataModalText:
+    'Nastaví simulovaný pokrok slovíček v prvních 10 lekcích a označí tyto lekce jako započaté. Existující pokrok u těchto slovíček bude přepsán.',
   simulateDataConfirm: 'Přepsat data',
   simulateDataSuccessToast: 'Data byla úspěšně simulována.',
   simulateDataErrorToast: 'Chyba při simulaci dat.',
   simulateDataExplanation:
-    'Pro testování přepíše pokrok až 400 položek a zahájí až 8 procvičovaných bloků. Změna je nevratná.',
+    'Pro testování nastaví pokrok slovíček v prvních 10 lekcích a označí lekce jako započaté. Změna je nevratná.',
 } as const;

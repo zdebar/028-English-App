@@ -1,22 +1,19 @@
 import config from '@/config/config';
 import { initDbMappings } from '@/database/models/db-init';
-import Block from '@/database/models/blocks';
 import UserItem from '@/database/models/user-items';
 import { getFullSyncTime, setFullSyncTime } from '@/database/utils/sync-time.utils';
 import { withSettledSummary } from '@/features/logging/logging.utils';
 import Lessons from '@/database/models/lessons';
 import Levels from '@/database/models/levels';
 import { assertNonEmptyString } from '@/utils/assertions.utils';
-import GrammarChunk from '@/database/models/grammar-chunks';
-import GrammarGroup from '@/database/models/grammar-groups';
-import GrammarTopic from '@/database/models/grammar-topics';
 import { reportInfo } from '@/features/logging/monitoring-handler';
 import { supabaseInstance } from '@/config/supabase.config';
 import Notes from '../models/notes';
-import PronunciationGroup from '../models/pronunciation-groups';
-import PronunciationGroupItem from '../models/pronunciation-group-items';
-import GrammarChunkExample from '../models/grammar-chunk-examples';
-import Topic from '../models/topics';
+import UserLesson from '../models/user-lessons';
+import UserSettings from '../models/user-settings';
+import Groups from '../models/groups';
+import GroupItem from '../models/group-items';
+import GroupRelation from '../models/group-relations';
 import { settleSyncWithAuthRecovery } from './sync-auth-recovery.utils';
 
 /**
@@ -41,34 +38,28 @@ export async function dataSync(userId: string, fullSync: boolean = false): Promi
 
   // Step 2: Perform shared stores data synchronization (grammar and audio metadata)
   const tasks = [
-    () => GrammarTopic.syncFromRemote(doFullSync),
-    () => GrammarGroup.syncFromRemote(doFullSync),
-    () => GrammarChunk.syncFromRemote(doFullSync),
-    () => GrammarChunkExample.syncFromRemote(doFullSync),
+    () => Groups.syncFromRemote(doFullSync),
+    () => GroupItem.syncFromRemote(doFullSync),
+    () => GroupRelation.syncFromRemote(doFullSync),
     () => Levels.syncFromRemote(doFullSync),
     () => Lessons.syncFromRemote(doFullSync),
-    () => Block.syncFromRemote(doFullSync),
     () => Notes.syncFromRemote(doFullSync),
-    () => Topic.syncFromRemote(doFullSync),
-    () => PronunciationGroup.syncFromRemote(doFullSync),
-    () => PronunciationGroupItem.syncFromRemote(doFullSync),
     () => UserItem.syncFromRemote(userId, doFullSync),
+    () => UserLesson.syncFromRemote(userId, doFullSync),
+    () => UserSettings.syncFromRemote(userId),
   ];
 
   // Keep a parallel list of human-readable table names to report per-table completions.
   const tableNames = [
-    'GrammarTopics',
-    'GrammarGroups',
-    'GrammarChunks',
-    'GrammarChunkExamples',
+    'Groups',
+    'GroupItems',
+    'GroupRelations',
     'Levels',
     'Lessons',
-    'Blocks',
     'Notes',
-    'Topics',
-    'PronunciationGroups',
-    'PronunciationGroupItems',
     'UserItems',
+    'UserLessons',
+    'UserSettings',
   ];
 
   const results = await settleSyncWithAuthRecovery(userId, tasks);
@@ -104,7 +95,7 @@ export async function dataSync(userId: string, fullSync: boolean = false): Promi
 /**
  * Performs a best-effort incremental sync for user-owned tables during unmount.
  *
- * @param userId User id whose user_items rows should sync.
+ * @param userId User id whose personal data should sync.
  * @returns Resolves without syncing when there is no active Supabase session.
  * @throws Error when at least one unmount sync task rejects.
  */
@@ -116,6 +107,8 @@ export async function dataSyncOnUnmount(userId: string): Promise<void> {
 
   const results = await settleSyncWithAuthRecovery(userId, [
     () => UserItem.syncFromRemote(userId, false),
+    () => UserLesson.syncFromRemote(userId, false),
+    () => UserSettings.syncFromRemote(userId),
   ]);
 
   if (results.some((r) => r.status === 'rejected')) {

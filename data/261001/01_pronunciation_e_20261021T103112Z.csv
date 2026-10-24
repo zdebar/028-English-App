@@ -1,0 +1,9 @@
+czech,english,pronunciation,audio,sort_order,block_id,note_id,topic_id,grammar_chunk_id,is_vocabulary,lesson_id
+postel,bed,bˈɛd,bed.opus,1000,,,,,True,1
+sázka,bet,bˈɛt,bet.opus,1001,,,,,True,1
+udržel,kept,kˈɛpt,kept.opus,1002,,,,,True,1
+muži,men,mˈɛn,men.opus,1003,,,,,True,1
+pero,pen,pˈɛn,pen.opus,1004,,,,,True,1
+soubor,set,sˈɛt,set.opus,1005,,,,,True,1
+půjčil,lend,lˈɛnd,lend.opus,1006,,,,,True,1
+aportovat,fetch,fˈɛtʃ,fetch.opus,1007,,,,,True,1

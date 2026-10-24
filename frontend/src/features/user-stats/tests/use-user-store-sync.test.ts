@@ -51,7 +51,7 @@ describe('useUserStoreSync', () => {
     mocks.unsubscribes.length = 0;
     mocks.currentDate = '2026-04-15';
     vi.spyOn(Date.prototype, 'toLocaleDateString').mockImplementation(() => mocks.currentDate);
-    useUserStore.setState({ levels: [], startedTodayCount: 0 });
+    useUserStore.setState({ levels: [] });
   });
 
   afterEach(() => {
@@ -73,7 +73,6 @@ describe('useUserStoreSync', () => {
     expect(useUserStore.getState()).toMatchObject({
       levels: [{ id: 1 }],
       levelsLoading: false,
-      startedTodayCount: 7,
     });
   });
 
@@ -98,7 +97,7 @@ describe('useUserStoreSync', () => {
     rerender({ userId: null });
 
     expect(mocks.unsubscribes[0]).toHaveBeenCalledOnce();
-    expect(useUserStore.getState()).toMatchObject({ levels: [], startedTodayCount: 0 });
+    expect(useUserStore.getState()).toMatchObject({ levels: [] });
   });
 
   it('clears stale snapshots and ignores the previous user after an account switch', () => {
@@ -113,7 +112,6 @@ describe('useUserStoreSync', () => {
     expect(useUserStore.getState()).toMatchObject({
       levels: [],
       levelsLoading: true,
-      startedTodayCount: 0,
     });
 
     act(() => {
@@ -123,7 +121,6 @@ describe('useUserStoreSync', () => {
 
     expect(useUserStore.getState()).toMatchObject({
       levels: [{ id: 2, startedTodayCount: 8 }],
-      startedTodayCount: 8,
     });
   });
 
@@ -137,6 +134,6 @@ describe('useUserStoreSync', () => {
 
     unmount();
     act(() => mocks.observers[0].next([{ id: 99, startedTodayCount: 99 }]));
-    expect(useUserStore.getState().startedTodayCount).toBe(0);
+    expect(useUserStore.getState().levels).toEqual([]);
   });
 });

@@ -5,6 +5,7 @@ import type { UserItemLocal } from '@/types/user-item.types';
 
 const mocks = vi.hoisted<{ userId: string | null } & Record<string, any>>(() => ({
   userId: 'u1',
+  soundGroups: [] as any[],
   navigate: vi.fn(),
   grammarVisible: false,
   grammarData: null as any,
@@ -19,23 +20,26 @@ const mocks = vi.hoisted<{ userId: string | null } & Record<string, any>>(() => 
     user_id: 'u1',
     item_id: 1,
     czech: 'ahoj',
+    czech_description: null,
     english: 'hello',
     pronunciation: 'həˈloʊ',
     audio: 'hello.opus',
     sort_order: 1,
     curriculum_sort_path: [1, 1, 1],
     progress_cz_to_en: 2,
+    progress_en_to_cz: 0,
+    is_cz_to_en_enabled: true,
+    is_en_to_cz_enabled: true,
     note_id: null,
     lesson_id: 1,
     updated_at: '2024-01-01T00:00:00.000Z',
     is_vocabulary: 1,
-    block_id: 1,
-    topic_id: -1,
-    grammar_chunk_id: 10,
     started_at: '2024-01-01T00:00:00.000Z',
     deleted_at: '9999-12-31T00:00:00.000Z',
     next_at_cz_to_en: '2024-01-01T00:00:00.000Z',
     mastered_at_cz_to_en: '9999-12-31T00:00:00.000Z',
+    next_at_en_to_cz: '2024-01-01T00:00:00.000Z',
+    mastered_at_en_to_cz: '9999-12-31T00:00:00.000Z',
     ...overrides,
   }),
   practiceDeck: {
@@ -80,6 +84,7 @@ mocks.practiceDeck.currentItem = mocks.makePracticeItem();
 vi.mock('@/config/config', () => ({
   default: {
     database: { nullReplacementDate: '9999-12-31T23:59:59+00:00' },
+    progress: { simulationLessonCount: 10, simulationItemProgress: 1 },
     practice: {
       dailyGoal: 20,
       grammarReviewLimitSize: 20,
@@ -90,6 +95,11 @@ vi.mock('@/config/config', () => ({
     buttons: { loadingMessageDelay: 300 },
     loading: { dataStateDelayMs: 1000 },
   },
+}));
+
+vi.mock('dexie-react-hooks', () => ({
+  useLiveQuery: (_query: unknown, _dependencies: unknown, fallback: unknown) =>
+    mocks.soundGroups ?? fallback,
 }));
 
 vi.mock('@/locales/cs', () => ({
@@ -104,12 +114,15 @@ vi.mock('@/locales/cs', () => ({
     loadingAudio: 'Loading audio',
     audio: 'Audio',
     grammar: 'Grammar',
+    pronunciationGuide: 'Pronunciation',
+    previousSound: 'Previous sound',
+    nextSound: 'Next sound',
+    close: 'Close',
     tooltipNotes: 'Notes',
     itemProgress: 'Item progress',
     progress: 'Progress',
     reviewProgress: 'Item count',
     progressToday: 'Today progress',
-    blockCompleted: 'Block completed',
     reviewCompleted: 'Review completed',
     today: 'Today',
     loadingMessage: 'Loading',
@@ -148,7 +161,7 @@ vi.mock('@/features/grammar/use-grammar-viewer', () => ({
 }));
 
 vi.mock('@/features/grammar/GrammarDetailCard', () => ({
-  default: ({ grammar, onClose, showHelpButton }: any) => (
+  default: ({ grammar, onClose, showHelpButton = false }: any) => (
     <div data-testid="grammar-detail" data-help-enabled={String(showHelpButton)}>
       {grammar?.name}
       <button type="button" onClick={onClose}>
@@ -302,6 +315,14 @@ vi.mock('@/features/practice/buttons/RepeatButton', () => ({
   ),
 }));
 
+vi.mock('@/features/practice/buttons/ReviewRatingButton', () => ({
+  default: ({ rating, onClick, disabled }: any) => (
+    <button data-testid={`${rating}-btn`} disabled={disabled} onClick={onClick}>
+      {rating}
+    </button>
+  ),
+}));
+
 vi.mock('@/features/practice/buttons/UnknownButton', () => ({
   default: ({ onClick }: any) => (
     <button data-testid="unknown-btn" onClick={onClick}>
@@ -327,19 +348,18 @@ describe('PracticeCard', () => {
     vi.useFakeTimers();
 
     mocks.userId = 'u1';
+    mocks.soundGroups = [];
     mocks.grammarVisible = false;
     mocks.grammarData = null;
     mocks.noteVisible = false;
     mocks.noteData = null;
     mocks.practiceDeck.index = 0;
-    mocks.practiceDeck.trainingBlockId = null;
     mocks.practiceDeck.currentItem = mocks.makePracticeItem({
       item_id: 1,
       czech: 'ahoj',
       english: 'hello',
       pronunciation: 'həˈloʊ',
       audio: 'hello.opus',
-      grammar_chunk_id: 10,
       progress: 2,
     });
     mocks.practiceDeck.note = null;
@@ -387,6 +407,45 @@ describe('PracticeCard', () => {
     expect(screen.getByTestId('grammar-detail').dataset.helpEnabled).toBe('false');
   });
 
+  it('shows an optional Czech description below Czech before revealing the answer', () => {
+    mocks.practiceDeck.currentItem = mocks.makePracticeItem({ czech_description: 'Pozdrav' });
+
+    const { container, rerender } = render(<PracticeCard />);
+    const czech = screen.getByText('ahoj');
+    const description = screen.getByText('Pozdrav');
+
+    expect(czech.parentElement?.children[1]).toBe(description);
+    expect(description.className).toContain('font-light');
+    expect(screen.getByText('hello-hint')).toBeTruthy();
+
+    mocks.practiceDeck.currentItem = mocks.makePracticeItem({ czech_description: null });
+    rerender(<PracticeCard />);
+
+    expect(screen.queryByText('Pozdrav')).toBeNull();
+    expect(container.querySelector('#item')?.children).toHaveLength(3);
+  });
+
+  it('keeps the English answer in place while revealing the Czech answer in EN-to-CZ practice', () => {
+    mocks.practiceDeck.currentItem = mocks.makePracticeItem({
+      review_direction: 'en_to_cz',
+      czech_description: 'Pozdrav',
+    });
+    mocks.practiceDeck.english = 'hello';
+    mocks.practiceDeck.revealed = false;
+
+    const { container, rerender } = render(<PracticeCard />);
+    const englishBeforeReveal = screen.getByText('hello');
+    const itemRows = container.querySelector('#item')?.children;
+    expect(screen.getByText('ahoj').className).toContain('invisible');
+    expect(itemRows?.[2]).toBe(englishBeforeReveal);
+
+    mocks.practiceDeck.revealed = true;
+    rerender(<PracticeCard />);
+
+    expect(screen.getByText('ahoj').className).not.toContain('invisible');
+    expect(container.querySelector('#item')?.children[2]).toBe(englishBeforeReveal);
+  });
+
   it('shows item progress on the left and review progress on the right', () => {
     const { container } = render(<PracticeCard />);
     const progressLabels = container.querySelectorAll('#bottom-bar > div > p');
@@ -415,7 +474,7 @@ describe('PracticeCard', () => {
 
     act(() => vi.advanceTimersByTime(1));
     expect(screen.getByText('Loading')).toBeTruthy();
-    expect((screen.getByTestId('known-btn') as HTMLButtonElement).disabled).toBe(false);
+    expect((screen.getByTestId('good-btn') as HTMLButtonElement).disabled).toBe(false);
   });
 
   it('returns home from the empty practice state', () => {
@@ -444,12 +503,14 @@ describe('PracticeCard', () => {
     render(<PracticeCard />);
 
     fireEvent.click(screen.getByTestId('repeat-btn'));
-    fireEvent.click(screen.getByTestId('known-btn'));
-    fireEvent.click(screen.getByTestId('master-btn'));
+    fireEvent.click(screen.getByTestId('hard-btn'));
+    fireEvent.click(screen.getByTestId('good-btn'));
+    fireEvent.click(screen.getByTestId('easy-btn'));
 
-    expect(mocks.practiceDeck.nextItem).toHaveBeenNthCalledWith(1, 'incorrect');
-    expect(mocks.practiceDeck.nextItem).toHaveBeenNthCalledWith(2, 'correct');
-    expect(mocks.practiceDeck.nextItem).toHaveBeenNthCalledWith(3, 'skip');
+    expect(mocks.practiceDeck.nextItem).toHaveBeenNthCalledWith(1, 'repeat');
+    expect(mocks.practiceDeck.nextItem).toHaveBeenNthCalledWith(2, 'hard');
+    expect(mocks.practiceDeck.nextItem).toHaveBeenNthCalledWith(3, 'good');
+    expect(mocks.practiceDeck.nextItem).toHaveBeenNthCalledWith(4, 'easy');
   });
 
   it('keeps playback disabled but volume available when audio is not available', () => {
@@ -486,6 +547,93 @@ describe('PracticeCard', () => {
     expect(audioButton).toBeTruthy();
     expect(audioButton.disabled).toBe(true);
     expect(volumeSlider.dataset.disabled).toBe('false');
+  });
+
+  it('opens pronunciation sounds in IPA order and navigates between them', () => {
+    mocks.practiceDeck.revealed = true;
+    mocks.practiceDeck.pronunciation = 'həlˈoʊ';
+    mocks.soundGroups = [
+      { id: 1, type: 'sound', name: 'h', note: 'výdech', sort_order: 1, deleted_at: null },
+      { id: 2, type: 'sound', name: 'ə', note: 'schwa', sort_order: 2, deleted_at: null },
+      { id: 3, type: 'sound', name: 'l', note: 'laterála', sort_order: 3, deleted_at: null },
+      { id: 4, type: 'sound', name: 'oʊ', note: 'dvojhláska', sort_order: 4, deleted_at: null },
+    ];
+
+    const { container } = render(<PracticeCard />);
+    const pronunciationButton = container.querySelector(
+      '.pos-bottom-left-control button[aria-label="Pronunciation"]',
+    ) as HTMLButtonElement;
+
+    expect(pronunciationButton).toBeTruthy();
+    expect(pronunciationButton.disabled).toBe(false);
+    fireEvent.click(pronunciationButton);
+    expect((container.querySelector('[aria-label^="IPA "]') as HTMLButtonElement).disabled).toBe(
+      true,
+    );
+    expect(container.querySelector('[aria-label^="IPA "]')?.textContent).toBe('h');
+    expect(screen.getByText('výdech')).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Previous sound' }).hasAttribute('disabled')).toBe(true);
+    expect(container.querySelector('.card-width.card-height')).toBeTruthy();
+    expect(container.querySelector('.card-width.card-height')?.className).not.toContain(
+      'min-h-card',
+    );
+    expect(container.querySelector('.text-left')).toBeTruthy();
+    expect(container.querySelector('.text-left')?.className).not.toContain('border');
+    expect(screen.getByTestId('pronunciation-sound-navigation').className).toContain(
+      'justify-center gap-1',
+    );
+    expect(screen.getByRole('button', { name: 'Next sound' }).className).toContain('color-button');
+    expect(screen.getByRole('button', { name: 'Next sound' }).className).toContain('h-button');
+    const pronunciationTextButton = screen.getByTestId('pronunciation-sound-navigation')
+      .querySelectorAll('button')[1] as HTMLButtonElement;
+    expect(pronunciationTextButton.textContent).toBe('həloʊ');
+    expect(pronunciationTextButton.disabled).toBe(true);
+    expect(pronunciationTextButton.className).toContain('h-button');
+    expect(pronunciationTextButton.querySelector('.text-blue-600')?.textContent).toBe('h');
+
+    fireEvent.click(screen.getByRole('button', { name: 'Next sound' }));
+    expect(pronunciationTextButton.querySelector('.text-blue-600')?.textContent).toBe('ə');
+    expect(container.querySelector('[aria-label^="IPA "]')?.textContent).toBe('ə');
+    expect(screen.getByRole('button', { name: 'Previous sound' }).hasAttribute('disabled')).toBe(false);
+    fireEvent.click(screen.getByRole('button', { name: 'Next sound' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Next sound' }));
+    expect(pronunciationTextButton.querySelector('.text-blue-600')?.textContent).toBe('oʊ');
+    expect(container.querySelector('[aria-label^="IPA "]')?.textContent).toBe('oʊ');
+    expect(screen.getByRole('button', { name: 'Next sound' }).hasAttribute('disabled')).toBe(true);
+    fireEvent.click(screen.getByTitle('Close (Escape)'));
+    expect(container.querySelector('#practice-main-content')).toBeTruthy();
+  });
+
+  it('keeps pronunciation visible but disabled before revealing the answer', () => {
+    mocks.practiceDeck.revealed = false;
+    mocks.practiceDeck.pronunciation = 'həlˈoʊ';
+    mocks.soundGroups = [
+      { id: 1, type: 'sound', name: 'h', note: 'výdech', sort_order: 1, deleted_at: null },
+    ];
+
+    const { container } = render(<PracticeCard />);
+
+    const pronunciationButton = container.querySelector(
+      '.pos-bottom-left-control button[aria-label="Pronunciation"]',
+    ) as HTMLButtonElement;
+
+    expect(pronunciationButton).toBeTruthy();
+    expect(pronunciationButton.disabled).toBe(true);
+    expect(pronunciationButton.querySelector('svg path')?.getAttribute('d')).toContain('M12 20.25');
+  });
+
+  it('disables pronunciation when no IPA sounds match even after revealing', () => {
+    mocks.practiceDeck.revealed = true;
+    mocks.practiceDeck.pronunciation = 'unknown';
+    mocks.soundGroups = [];
+
+    const { container } = render(<PracticeCard />);
+    const pronunciationButton = container.querySelector(
+      '.pos-bottom-left-control button[aria-label="Pronunciation"]',
+    ) as HTMLButtonElement;
+
+    expect(pronunciationButton).toBeTruthy();
+    expect(pronunciationButton.disabled).toBe(true);
   });
 
   it('opens grammar from the right secondary control group after reveal', () => {
@@ -690,7 +838,7 @@ describe('PracticeCard', () => {
         nextRepeat={vi.fn()}
         nextKnown={vi.fn()}
         completeDisabled
-        isBlockTrainingPractice
+        isInitialTrainingPractice
         audioError={false}
         playAudio={vi.fn()}
         audioLoading={false}

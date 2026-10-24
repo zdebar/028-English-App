@@ -1,22 +1,7 @@
 import type { UserItemLocal } from './user-item.types';
+import type { GroupType } from './table.types';
 
-export interface PronunciationGroupType {
-  id: number;
-  name: string;
-  note: string | null;
-  sort_order: number;
-  updated_at: string;
-  deleted_at: string | null;
-}
-
-export interface PronunciationGroupItemType {
-  pronunciation_group_id: number;
-  item_id: number;
-  contrast_set: number | null;
-  sort_order: number;
-  updated_at: string;
-  deleted_at: string | null;
-}
+export type PronunciationGroupType = Omit<GroupType, 'type'>;
 
 export interface PronunciationGroupOverviewType extends PronunciationGroupType {
   examples: string[];
@@ -26,5 +11,6 @@ export interface PronunciationGroupOverviewType extends PronunciationGroupType {
 
 export interface PronunciationGroupDetailType {
   group: PronunciationGroupType;
+  sounds: Array<Pick<PronunciationGroupType, 'id' | 'name' | 'note'>>;
   items: UserItemLocal[];
 }

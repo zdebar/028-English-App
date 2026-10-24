@@ -3,21 +3,33 @@ import type { PracticeDeckItem, UserItemLocal } from '@/types/user-item.types';
 
 const mocks = vi.hoisted(() => ({
   notesBulkGet: vi.fn(),
-  grammarBulkGet: vi.fn(),
-  grammarGroupGet: vi.fn(),
+  groupsBulkGet: vi.fn(),
+  groupGet: vi.fn(),
+  grammarRelation: {} as any,
+  lessons: [] as any[],
   addExamples: vi.fn(),
   getReviewDeck: vi.fn(),
   getAllReviewItems: vi.fn(),
   getByItemIds: vi.fn(),
-  reconcileActive: vi.fn(),
   reportError: vi.fn(),
 }));
 
 vi.mock('@/database/models/db', () => ({
   db: {
     notes: { bulkGet: (...args: unknown[]) => mocks.notesBulkGet(...args) },
-    grammar_chunks: { bulkGet: (...args: unknown[]) => mocks.grammarBulkGet(...args) },
-    grammar_groups: { get: (...args: unknown[]) => mocks.grammarGroupGet(...args) },
+    groups: {
+      bulkGet: (...args: unknown[]) => mocks.groupsBulkGet(...args),
+      get: (...args: unknown[]) => mocks.groupGet(...args),
+    },
+    group_relations: {
+      where: () => ({
+        equals: () => ({ filter: () => ({ first: async () => mocks.grammarRelation }) }),
+      }),
+    },
+    lessons: {
+      where: () => ({ anyOf: () => ({ toArray: async () => mocks.lessons }) }),
+      get: async (id: number) => mocks.lessons.find((lesson) => lesson.id === id),
+    },
     user_items: {},
     transaction: (_mode: string, _table: unknown, callback: () => Promise<unknown>) => callback(),
   },
@@ -35,11 +47,6 @@ vi.mock('@/database/models/user-items', () => ({
   },
 }));
 
-vi.mock('@/database/models/practice-sessions', () => ({
-  default: {
-    reconcileActive: (...args: unknown[]) => mocks.reconcileActive(...args),
-  },
-}));
 
 vi.mock('@/features/logging/monitoring-handler', () => ({
   reportError: (...args: unknown[]) => mocks.reportError(...args),
@@ -71,19 +78,22 @@ function makeItem(overrides: Partial<UserItemLocal> = {}): UserItemLocal {
     audio: null,
     sort_order: 1,
     progress_cz_to_en: 0,
+    progress_en_to_cz: 0,
+    is_cz_to_en_enabled: true,
+    is_en_to_cz_enabled: true,
     note_id: 1,
     lesson_id: 1,
     updated_at: '2026-01-01',
     is_vocabulary: 1,
-    block_id: 1,
-    topic_id: -1,
-    grammar_chunk_id: 10,
     started_at: '2026-01-01',
     deleted_at: '9999-12-31',
     next_at_cz_to_en: '2026-01-01',
     mastered_at_cz_to_en: '9999-12-31',
+    next_at_en_to_cz: '9999-12-31',
+    mastered_at_en_to_cz: '9999-12-31',
     curriculum_sort_path: [1, 1, 1],
     ...overrides,
+    czech_description: overrides.czech_description ?? null,
   };
 }
 
@@ -92,7 +102,8 @@ function makeGrammar(id: number) {
     id,
     name: `Grammar ${id}`,
     note: `Explanation ${id}`,
-    grammar_group_id: 1,
+    type: 'grammar',
+    updated_at: '2026-01-01',
     sort_order: id,
     deleted_at: null,
   };
@@ -104,16 +115,18 @@ describe('practice content resolution', () => {
     clearReviewArrays(null);
     mocks.getAllReviewItems.mockRejectedValue(new Error('prefetch unavailable'));
     mocks.notesBulkGet.mockResolvedValue([{ id: 1, name: 'Note', note: 'Body' }]);
-    mocks.grammarBulkGet.mockResolvedValue([makeGrammar(10)]);
-    mocks.grammarGroupGet.mockResolvedValue({
+    mocks.lessons = [{ id: 1, group_id: 10 }];
+    mocks.groupsBulkGet.mockResolvedValue([makeGrammar(10)]);
+    mocks.grammarRelation = { id: 1, parent_group_id: 1, child_group_id: 10, relation_type: 'detail' };
+    mocks.groupGet.mockResolvedValue({
       id: 1,
+      type: 'grammar',
       name: 'Basics',
       note: 'Group explanation',
       sort_order: 1,
       deleted_at: null,
     });
     mocks.addExamples.mockImplementation(async (_userId, grammar) => ({ ...grammar, items: [] }));
-    mocks.reconcileActive.mockResolvedValue(null);
   });
 
   it('deduplicates relation ids and attaches resolved content without dropping items', async () => {
@@ -121,7 +134,7 @@ describe('practice content resolution', () => {
     const entries = await resolvePracticeEntries('u1', items);
 
     expect(mocks.notesBulkGet).toHaveBeenCalledWith([1]);
-    expect(mocks.grammarBulkGet).toHaveBeenCalledWith([10]);
+    expect(mocks.groupsBulkGet).toHaveBeenCalledWith([10]);
     expect(mocks.addExamples).toHaveBeenCalledTimes(1);
     expect(entries).toHaveLength(2);
     expect(entries[0].note?.name).toBe('Note');
@@ -142,15 +155,15 @@ describe('practice content resolution', () => {
 
   it('keeps notes when the grammar batch fails', async () => {
     const error = new Error('grammar unavailable');
-    mocks.grammarBulkGet.mockRejectedValue(error);
+    mocks.groupsBulkGet.mockRejectedValue(error);
     const [entry] = await resolvePracticeEntries('u1', [makeItem()]);
 
     expect(entry.note?.id).toBe(1);
     expect(entry.grammar).toBeNull();
     expect(mocks.reportError).toHaveBeenCalledWith(
-      'Failed to resolve practice grammar chunks',
+      'Failed to resolve practice grammar groups',
       error,
-      { grammarChunkIds: '10' },
+      { grammarGroupIds: '10' },
     );
   });
 
@@ -167,7 +180,7 @@ describe('practice content resolution', () => {
 
     vi.clearAllMocks();
     mocks.notesBulkGet.mockResolvedValue([{ id: 1, name: 'Note', note: 'Body' }]);
-    mocks.grammarBulkGet.mockRejectedValue(new Error('grammar unavailable'));
+    mocks.groupsBulkGet.mockRejectedValue(new Error('grammar unavailable'));
 
     await expect(loadReviewEntryDetails('u1', makeItem())).resolves.toMatchObject({
       note: { id: 1 },
@@ -179,11 +192,11 @@ describe('practice content resolution', () => {
 
   it('keeps missing relations null and propagates a core deck failure', async () => {
     mocks.notesBulkGet.mockResolvedValue([undefined]);
-    mocks.grammarBulkGet.mockResolvedValue([undefined]);
+    mocks.groupsBulkGet.mockResolvedValue([undefined]);
     const item = makeItem() as PracticeDeckItem;
     mocks.getReviewDeck.mockResolvedValue([item]);
 
-    await expect(loadReviewDeck('u1', 'grammar')).resolves.toEqual([{ item, note: null, grammar: null }]);
+    await expect(loadReviewDeck('u1', 'grammar')).resolves.toEqual([{ item: { ...item, review_direction: 'cz_to_en' }, note: null, grammar: null }]);
     const error = new Error('items unavailable');
     mocks.getReviewDeck.mockRejectedValue(error);
     await expect(loadReviewDeck('u1', 'grammar')).rejects.toBe(error);
@@ -197,18 +210,17 @@ describe('practice content resolution', () => {
     const [userId, reviewKind, now] = mocks.getReviewDeck.mock.calls[0];
 
     expect(result.entries).toHaveLength(2);
-    expect(result.entries.map((entry) => entry.item)).toEqual(items);
+    expect(result.entries.map((entry) => entry.item)).toEqual(items.map((item) => ({ ...item, review_direction: 'cz_to_en' })));
     expect(result.availabilityCheckedAt).toBe(now);
     expect(result.abandoned).toBe(false);
     expect(result.reviewKind).toBe('grammar');
     expect(result.entries[0]?.note).toBeNull();
     expect(result.entries[0]?.grammar).toBeNull();
-    expect(mocks.reconcileActive).toHaveBeenCalledWith('u1');
     expect(userId).toBe('u1');
     expect(reviewKind).toBe('grammar');
     expect(now).toEqual(expect.any(String));
     expect(mocks.notesBulkGet).not.toHaveBeenCalled();
-    expect(mocks.grammarBulkGet).not.toHaveBeenCalled();
+    expect(mocks.groupsBulkGet).not.toHaveBeenCalled();
   });
 
   it('uses all prefetched rows while exposing only currently due entries', async () => {
@@ -227,6 +239,22 @@ describe('practice content resolution', () => {
     expect(mocks.getReviewDeck).not.toHaveBeenCalled();
   });
 
+  it('does not replace an explicitly requested CZ direction with EN items', async () => {
+    const enItem = makeReviewItem(2, {
+      next_at_en_to_cz: '2026-01-01T00:00:00.000Z',
+      review_direction: 'en_to_cz',
+    });
+    mocks.getAllReviewItems.mockImplementation(async (_userId: string, _kind: string, direction: string) =>
+      direction === 'en_to_cz' ? [enItem] : [],
+    );
+
+    const result = await loadReviewDeckData('u1', 'grammar', 'cz_to_en');
+
+    expect(result.entries).toEqual([]);
+    expect(result.reviewDirection).toBe('cz_to_en');
+    expect(result.availableCount).toBe(1);
+  });
+
   it('falls back to the direct review query when prefetch fails', async () => {
     const dueItem = makeReviewItem(1);
     mocks.getReviewDeck.mockResolvedValue([dueItem]);
@@ -234,18 +262,16 @@ describe('practice content resolution', () => {
     const result = await loadReviewDeckData('u1', 'grammar');
 
     expect(result.entries.map((entry) => entry.item.item_id)).toEqual([1]);
-    expect(mocks.getReviewDeck).toHaveBeenCalledWith('u1', 'grammar', expect.any(String));
+    expect(mocks.getReviewDeck).toHaveBeenCalledWith('u1', 'grammar', expect.any(String), 'cz_to_en');
   });
 
-  it('loads review while preserving an active initial-training session', async () => {
-    mocks.reconcileActive.mockResolvedValue({ mode: 'new' });
+  it('loads review without a persisted initial-training session', async () => {
     mocks.getReviewDeck.mockResolvedValue([makeReviewItem(1)]);
 
     const result = await loadReviewDeckData('u1', 'vocabulary');
 
     expect(result.entries).toHaveLength(1);
-    expect(mocks.reconcileActive).toHaveBeenCalledWith('u1');
-    expect(mocks.getReviewDeck).toHaveBeenCalledWith('u1', 'vocabulary', expect.any(String));
+    expect(mocks.getReviewDeck).toHaveBeenCalledWith('u1', 'vocabulary', expect.any(String), 'cz_to_en');
   });
 
   it('marks review abandoned when no due item is available', async () => {
@@ -268,7 +294,8 @@ describe('practice content resolution', () => {
 
   it('resolves the grammar group belonging to the requested chunk', async () => {
     const context = await resolvePracticeGrammarContext('u1', 10);
-    expect(mocks.grammarGroupGet).toHaveBeenCalledWith(1);
+    expect(mocks.grammarRelation).toMatchObject({ child_group_id: 10, parent_group_id: 1 });
+    expect(mocks.groupGet).toHaveBeenCalledWith(1);
     expect(context.grammar?.id).toBe(10);
     expect(context.grammarGroup?.note).toBe('Group explanation');
   });

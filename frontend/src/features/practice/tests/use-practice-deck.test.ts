@@ -11,6 +11,7 @@ const mocks = vi.hoisted(() => ({
   resetHint: vi.fn(),
   rebuildReviewArrays: vi.fn(),
   syncReviewItemToCache: vi.fn(),
+  loadReviewDeckData: vi.fn(),
   fetchData: null as ReviewDeckData | null,
 }));
 
@@ -20,6 +21,8 @@ type ReviewDeckData = {
   availabilityCheckedAt: string;
   abandoned: boolean;
   reviewKind: 'grammar' | 'vocabulary';
+  reviewDirection: 'cz_to_en' | 'en_to_cz';
+  availableCount?: number;
 };
 
 vi.mock('../practice-availability-controller', () => ({
@@ -52,7 +55,7 @@ vi.mock('@/database/models/user-items', () => ({
 }));
 
 vi.mock('@/database/utils/practice-content.utils', () => ({
-  loadReviewDeckData: vi.fn(),
+  loadReviewDeckData: (...args: unknown[]) => mocks.loadReviewDeckData(...args),
   loadReviewEntryDetails: (...args: unknown[]) => mocks.loadReviewEntryDetails(...args),
 }));
 
@@ -96,6 +99,7 @@ describe('usePracticeDeck', () => {
     mocks.savePracticeDeck.mockResolvedValue(undefined);
     mocks.rebuildReviewArrays.mockResolvedValue(undefined);
     mocks.syncReviewItemToCache.mockResolvedValue(undefined);
+    mocks.loadReviewDeckData.mockResolvedValue(reviewDeckResult([]));
   });
 
   it('saves each answered card while advancing to the next card', async () => {
@@ -254,6 +258,7 @@ describe('usePracticeDeck', () => {
         availabilityCheckedAt: '2026-06-24T11:00:00.000Z',
         abandoned: true,
         reviewKind: 'vocabulary',
+        reviewDirection: 'cz_to_en',
       };
     });
     const { result } = renderHook(() => usePracticeDeck('u1'));
@@ -263,6 +268,31 @@ describe('usePracticeDeck', () => {
 
     expect(result.current.finishedReview).toBe(false);
     expect(result.current.currentItem?.item_id).toBe(1);
+  });
+
+  it('switches from CZ-to-EN to EN-to-CZ without reloading the CZ queue', async () => {
+    mocks.fetchData = reviewDeckResult([entry(1)], 'cz_to_en', 2);
+    mocks.applyPracticeProgress.mockImplementationOnce((item: PracticeDeckEntry['item']) => ({
+      ...item,
+      next_at_cz_to_en: '9999-01-01T00:00:00.000Z',
+      updated_at: 'now',
+    }));
+    mocks.loadReviewDeckData.mockImplementation(async (_userId: string, _kind: string, direction: string) => {
+      if (direction === 'en_to_cz') return reviewDeckResult([entry(2, 0, 'en_to_cz')], 'en_to_cz', 2);
+      return reviewDeckResult([], 'cz_to_en', 2);
+    });
+
+    const { result } = renderHook(() => usePracticeDeck('u1'));
+    await waitFor(() => expect(result.current.currentItem?.item_id).toBe(1));
+    expect(result.current.progressLabel).toBe('0 / 2');
+
+    await act(async () => result.current.nextItem('correct'));
+
+    expect(result.current.currentItem?.item_id).toBe(2);
+    expect(result.current.currentItem?.review_direction).toBe('en_to_cz');
+    expect(result.current.progressLabel).toBe('1 / 2');
+    expect(mocks.loadReviewDeckData).toHaveBeenCalledWith('u1', 'grammar', 'en_to_cz');
+    expect(mocks.loadReviewDeckData).not.toHaveBeenCalledWith('u1', 'grammar', 'cz_to_en');
   });
 
   it('keeps the last card visible while the final batch is being saved', async () => {
@@ -290,6 +320,7 @@ describe('usePracticeDeck', () => {
       availabilityCheckedAt: '2026-06-24T11:00:00.000Z',
       abandoned: true,
       reviewKind: 'vocabulary',
+      reviewDirection: 'cz_to_en',
     };
     await act(async () => {
       resolveSave();
@@ -339,21 +370,36 @@ describe('usePracticeDeck', () => {
   });
 });
 
-function reviewDeckResult(entries: PracticeDeckEntry[]): ReviewDeckData {
+function reviewDeckResult(
+  entries: PracticeDeckEntry[],
+  reviewDirection: 'cz_to_en' | 'en_to_cz' = 'cz_to_en',
+  availableCount?: number,
+): ReviewDeckData {
   return {
     entries,
     availabilityCheckedAt: '2026-06-24T10:00:00.000Z',
     abandoned: false,
     reviewKind: 'vocabulary',
+    reviewDirection,
+    availableCount,
   };
 }
 
-function entry(itemId: number, grammarChunkId = 0): PracticeDeckEntry {
+function entry(
+  itemId: number,
+  grammarChunkId = 0,
+  direction: 'cz_to_en' | 'en_to_cz' = 'cz_to_en',
+): PracticeDeckEntry {
   return {
     item: {
       user_id: 'u1',
       item_id: itemId,
+      review_direction: direction,
+      progress_en_to_cz: 0,
+      is_cz_to_en_enabled: true,
+      is_en_to_cz_enabled: true,
       czech: 'ahoj',
+      czech_description: null,
       english: 'hello',
       pronunciation: '',
       audio: null,
@@ -362,7 +408,6 @@ function entry(itemId: number, grammarChunkId = 0): PracticeDeckEntry {
       curriculum_sort_path: [1, 1, itemId],
       topic_id: 1,
       note_id: null,
-      block_id: 1,
       grammar_chunk_id: grammarChunkId,
       progress_cz_to_en: 0,
       started_at: '2026-01-01',
@@ -370,6 +415,8 @@ function entry(itemId: number, grammarChunkId = 0): PracticeDeckEntry {
       deleted_at: '9999-01-01',
       next_at_cz_to_en: '2026-01-01',
       mastered_at_cz_to_en: '9999-01-01',
+      next_at_en_to_cz: '2026-01-01',
+      mastered_at_en_to_cz: '9999-01-01',
       lesson_id: 1,
     },
     note: null,

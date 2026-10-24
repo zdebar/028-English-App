@@ -1,6 +1,7 @@
-import { refreshPracticeAvailability } from '@/features/practice/practice-availability-controller';
+import { runProgressReset } from '@/features/practice/run-progress-reset';
 import { getOverviewQuery, overviewQueryKey } from '@/hooks/overview-query-store';
 import OverviewCard from '@/components/UI/OverviewCard';
+import StackedList from '@/components/UI/StackedList';
 import { useAuthStore } from '@/features/auth/use-auth-store';
 import { TEXTS } from '@/locales/cs';
 import type { JSX } from 'react';
@@ -9,14 +10,13 @@ import { ListButton } from '@/components/UI/buttons/ListButton';
 import type { GrammarGroupWithChunks } from '@/database/models/grammar-groups';
 import type { GrammarTopicWithGroups } from '@/database/models/grammar-topics';
 import UserItem from '@/database/models/user-items';
-import { reportError, reportInfo } from '@/features/logging/monitoring-handler';
-import { useToastStore } from '@/features/toast/use-toast-store';
+import { useQueryErrorToast } from '@/features/logging/use-query-error-toast';
 import { DataState } from '@/components/UI/DataState';
 import GrammarDetailCard from './GrammarDetailCard';
 import { ROUTES } from '@/config/routes.config';
 import { useLiveQueryData } from '@/hooks/use-live-query-data';
 import { useRouteClose } from '@/routing/use-route-close';
-import { invalidateReviewArrays } from '@/features/practice/review-prefetch';
+import type { ReviewDirection } from '@/types/practice.types';
 
 type GrammarSelection = Readonly<Pick<GrammarGroupWithChunks, 'id'>>;
 
@@ -25,7 +25,6 @@ export default function GrammarOverview({
 }: Readonly<{ initialGrammar?: GrammarTopicWithGroups[] }>): JSX.Element {
   const userId = useAuthStore((state) => state.userId);
   const closeRoute = useRouteClose(ROUTES.overviews);
-  const showToast = useToastStore((state) => state.showToast);
   const [selection, setSelection] = useState<GrammarSelection | null>(null);
   const [unpackedTopicId, setUnpackedTopicId] = useState<number | null>(null);
 
@@ -58,11 +57,7 @@ export default function GrammarOverview({
     if (selection && !currentItem) setSelection(null);
   }, [currentItem, selection]);
 
-  useEffect(() => {
-    if (!error) return;
-    showToast(TEXTS.loadingError, 'error');
-    reportError('Failed to fetch grammar overview', error);
-  }, [error, showToast]);
+  useQueryErrorToast(error, 'Failed to fetch grammar overview');
 
   const handleTopicClick = useCallback((topicId: number) => {
     setUnpackedTopicId((currentId) => (currentId === topicId ? null : topicId));
@@ -73,33 +68,28 @@ export default function GrammarOverview({
     setSelection({ id: groupId });
   }, []);
 
-  const handleReset = useCallback(async () => {
-    if (!currentItem || !userId) {
-      return;
-    }
-
-    try {
-      const resetCount = await UserItem.resetItemsByGrammarGroupId(userId, currentItem.id);
-      invalidateReviewArrays(userId);
-      void refreshPracticeAvailability(userId);
-      reportInfo(`Grammar ${currentItem.id} reset completed: ${resetCount} items reset.`);
-      showToast(TEXTS.resetProgressSuccessToast, 'success');
-    } catch (err) {
-      showToast(TEXTS.resetProgressErrorToast, 'error');
-      reportError('Failed to reset grammar progress', err);
-    }
-  }, [currentItem, showToast, userId]);
+  const handleReset = useCallback(
+    async (grammarGroupId: number, direction: ReviewDirection) => {
+      if (!userId) return;
+      await runProgressReset(
+        userId,
+        () => UserItem.resetItemsByGrammarGroupId(userId, grammarGroupId, direction),
+        {
+          successLog: (resetCount) =>
+            `Grammar ${grammarGroupId} ${direction} reset completed: ${resetCount} items reset.`,
+          errorContext: 'Failed to reset grammar progress',
+        },
+      );
+    },
+    [userId],
+  );
 
   // -- List view --
   if (currentItem === null) {
     return (
-      <OverviewCard
-        buttonTitle={TEXTS.grammarOverview}
-        loading={loading}
-        onClose={closeRoute}
-      >
+      <OverviewCard buttonTitle={TEXTS.grammarOverview} loading={loading} onClose={closeRoute}>
         <DataState loading={loading} hasData={hasData} noDataMessage={TEXTS.noGrammar}>
-          <div className="flex flex-col gap-1 pt-1">
+          <StackedList>
             {grammarList.map((topic) => {
               const isUnpacked = unpackedTopicId === topic.id;
 
@@ -132,7 +122,7 @@ export default function GrammarOverview({
                 </div>
               );
             })}
-          </div>
+          </StackedList>
         </DataState>
       </OverviewCard>
     );
@@ -143,7 +133,6 @@ export default function GrammarOverview({
       grammar={currentItem}
       onClose={() => setSelection(null)}
       onReset={handleReset}
-      showHelpButton
     />
   );
 }

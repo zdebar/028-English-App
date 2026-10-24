@@ -1,205 +1,64 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const mocks = vi.hoisted(() => ({
-  grammarGet: vi.fn(),
-  grammarAnyOf: vi.fn(),
-  getInitiatedGrammarChunkIds: vi.fn(),
-  transaction: vi.fn(),
-  getSyncTimestamps: vi.fn(),
-  markAsSynced: vi.fn(),
-  from: vi.fn(),
-  select: vi.fn(),
-  gt: vi.fn(),
-  grammarBulkPut: vi.fn(),
-  exampleMemberships: [] as any[],
-  userItems: [] as any[],
-  userItemsAnyOf: vi.fn(),
+  getById: vi.fn(),
+  getExamples: vi.fn(),
+  getStartedByUser: vi.fn(),
+}));
+
+vi.mock('@/database/models/groups', () => ({
+  default: {
+    getById: (...args: unknown[]) => mocks.getById(...args),
+    getExamples: (...args: unknown[]) => mocks.getExamples(...args),
+    getStartedByUser: (...args: unknown[]) => mocks.getStartedByUser(...args),
+  },
 }));
 
 vi.mock('@/database/models/db', () => ({
   db: {
-    metadata: {},
-    transaction: (...args: unknown[]) => mocks.transaction(...args),
-    grammar_chunks: {
-      get: (...args: unknown[]) => mocks.grammarGet(...args),
-      where: (field: string) => {
-        if (field === 'id') {
-          return {
-            anyOf: (...args: unknown[]) => mocks.grammarAnyOf(...args),
-          };
-        }
-        throw new Error(`Unexpected grammar.where field: ${field}`);
-      },
-      clear: vi.fn(),
-      bulkDelete: vi.fn(),
-      bulkPut: (...args: unknown[]) => mocks.grammarBulkPut(...args),
-    },
-    grammar_chunk_examples: {
-      filter: (predicate: (membership: any) => boolean) => ({
-        toArray: async () => mocks.exampleMemberships.filter(predicate),
-      }),
-    },
-    user_items: {
-      where: () => ({
-        anyOf: (...args: unknown[]) => {
-          mocks.userItemsAnyOf(...args);
-          return { toArray: async () => mocks.userItems };
-        },
-      }),
+    group_relations: {
+      filter: () => ({ toArray: async () => [] }),
     },
   },
 }));
 
-vi.mock('@/database/models/user-items', () => ({
-  default: {
-    getInitiatedGrammarChunkIds: (...args: unknown[]) => mocks.getInitiatedGrammarChunkIds(...args),
-  },
-}));
+import GrammarGroup from '@/database/models/grammar-chunks';
 
-vi.mock('@/database/models/metadata', () => ({
-  default: {
-    markAsSynced: (...args: unknown[]) => mocks.markAsSynced(...args),
-  },
-}));
-
-vi.mock('@/database/utils/sync-generic.utils', async () => {
-  const actual = await vi.importActual<any>('@/database/utils/sync-generic.utils');
-  return {
-    ...actual,
-    getSyncTimestamps: (...args: unknown[]) => mocks.getSyncTimestamps(...args),
-  };
-});
-
-vi.mock('@/config/supabase.config', () => ({
-  supabaseInstance: {
-    from: (...args: unknown[]) => mocks.from(...args),
-  },
-}));
-
-import Grammar from '@/database/models/grammar-chunks';
-
-describe('Grammar', () => {
+describe('grammar group adapter', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-
-    mocks.getInitiatedGrammarChunkIds.mockResolvedValue([]);
-    mocks.grammarAnyOf.mockReturnValue({
-      sortBy: vi.fn().mockResolvedValue([]),
+    mocks.getById.mockResolvedValue({
+      id: 10,
+      type: 'grammar',
+      name: 'Articles',
+      note: 'Explanation',
+      sort_order: 1,
+      updated_at: '2026-01-01',
+      deleted_at: null,
     });
-    mocks.transaction.mockImplementation(async (...args: unknown[]) => {
-      const callback = args.at(-1) as () => Promise<unknown>;
-      return callback();
-    });
-    mocks.getSyncTimestamps.mockResolvedValue({
-      lastSyncedAt: '2026-03-03T00:00:00.000Z',
-      newSyncedAt: '2026-03-04T00:00:00.000Z',
-    });
-    mocks.markAsSynced.mockResolvedValue(undefined);
-    mocks.exampleMemberships = [];
-    mocks.userItems = [];
-    mocks.gt.mockResolvedValue({ data: [], error: null });
-    mocks.select.mockReturnValue({
-      gt: (...args: unknown[]) => mocks.gt(...args),
-    });
-    mocks.from.mockReturnValue({
-      select: (...args: unknown[]) => mocks.select(...args),
-    });
+    mocks.getExamples.mockResolvedValue([{ item_id: 2 }, { item_id: 1 }]);
+    mocks.getStartedByUser.mockResolvedValue([{ id: 10, type: 'grammar', examples: [] }]);
   });
 
-  it('getGrammarById returns grammar when found', async () => {
-    mocks.grammarGet.mockResolvedValue({ id: 1, name: 'Articles', note: '', sort_order: 1 });
-
-    await expect(Grammar.getById(1)).resolves.toEqual(
-      expect.objectContaining({ id: 1, name: 'Articles' }),
-    );
+  it('loads a grammar leaf from the generic groups store', async () => {
+    await expect(GrammarGroup.getById(10)).resolves.toMatchObject({ id: 10, type: 'grammar' });
+    expect(mocks.getById).toHaveBeenCalledWith(10);
   });
 
-  it('getGrammarById throws when missing', async () => {
-    mocks.grammarGet.mockResolvedValue(undefined);
-
-    await expect(Grammar.getById(2)).rejects.toThrow('Grammar chunk with ID 2 not found.');
+  it('rejects a missing or non-grammar group', async () => {
+    mocks.getById.mockResolvedValueOnce(null).mockResolvedValueOnce({ id: 11, type: 'topic' });
+    await expect(GrammarGroup.getById(11)).rejects.toThrow('Grammar group 11 not found.');
+    await expect(GrammarGroup.getById(11)).rejects.toThrow('Grammar group 11 not found.');
   });
 
-  it('getDetail returns explicitly mapped examples in membership order', async () => {
-    mocks.grammarGet.mockResolvedValue({ id: 1, name: 'Articles', note: '', sort_order: 1 });
-    mocks.exampleMemberships = [
-      { grammar_chunk_id: 1, item_id: 2, sort_order: 2 },
-      { grammar_chunk_id: 1, item_id: 1, sort_order: 1 },
-    ];
-    mocks.userItems = [
-      { user_id: 'u1', item_id: 2, czech: 'druzí', english: 'second' },
-      { user_id: 'u1', item_id: 1, czech: 'první', english: 'first' },
-    ];
-
-    const detail = await Grammar.getDetail('u1', 1);
-
-    expect(detail.items.map((item) => item.item_id)).toEqual([1, 2]);
+  it('loads examples from generic group_items in their stored order', async () => {
+    const detail = await GrammarGroup.getDetail('u1', 10);
+    expect(mocks.getExamples).toHaveBeenCalledWith(10, 'u1');
+    expect(detail.items.map((item) => item.item_id)).toEqual([2, 1]);
   });
 
-  it('adds examples to multiple chunks in one batch', async () => {
-    mocks.exampleMemberships = [
-      { grammar_chunk_id: 1, item_id: 2, sort_order: 2 },
-      { grammar_chunk_id: 1, item_id: 1, sort_order: 1 },
-      { grammar_chunk_id: 2, item_id: 3, sort_order: 1 },
-      { grammar_chunk_id: 2, item_id: 4, sort_order: 2 },
-      { grammar_chunk_id: 99, item_id: 99, sort_order: 1 },
-    ];
-    mocks.userItems = [
-      { user_id: 'u1', item_id: 1 },
-      { user_id: 'u1', item_id: 2 },
-      { user_id: 'u1', item_id: 3 },
-    ];
-
-    const result = await Grammar.addExamplesToMany('u1', [
-      { id: 1, name: 'First' } as any,
-      { id: 2, name: 'Second' } as any,
-    ]);
-
-    expect(result.map((chunk) => chunk.items.map((item) => item.item_id))).toEqual([
-      [1, 2],
-      [3],
-    ]);
-    expect(mocks.userItemsAnyOf).toHaveBeenCalledOnce();
-    expect(mocks.userItemsAnyOf).toHaveBeenCalledWith([
-      ['u1', 2],
-      ['u1', 1],
-      ['u1', 3],
-      ['u1', 4],
-    ]);
-  });
-
-  it('getInitiatedList returns grammar list for initiated ids', async () => {
-    mocks.getInitiatedGrammarChunkIds.mockResolvedValue([1, 2]);
-    mocks.grammarAnyOf.mockReturnValue({
-      sortBy: vi.fn().mockResolvedValue([
-        { id: 1, name: 'A', note: '', sort_order: 1, deleted_at: null },
-        { id: 2, name: 'B', note: '', sort_order: 2, deleted_at: null },
-      ]),
-    });
-
-    await expect(Grammar.getInitiated('u1')).resolves.toHaveLength(2);
-    expect(mocks.grammarAnyOf).toHaveBeenCalledWith([1, 2]);
-  });
-
-  it('syncFromRemote fetches remote data and marks sync metadata', async () => {
-    await Grammar.syncFromRemote(true);
-
-    expect(mocks.from).toHaveBeenCalledWith('grammar_chunks');
-    expect(mocks.select).toHaveBeenCalledWith('id, name, note, grammar_group_id, sort_order, deleted_at');
-    expect(mocks.gt).toHaveBeenCalledWith('updated_at', '2026-03-03T00:00:00.000Z');
-    expect(mocks.markAsSynced).toHaveBeenCalledWith('grammar_chunks', '2026-03-04T00:00:00.000Z');
-  });
-
-  it('syncFromRemote stores grammar with a null note', async () => {
-    mocks.gt.mockResolvedValueOnce({
-      data: [{ id: 1, name: 'Articles', note: null, sort_order: 1, deleted_at: null }],
-      error: null,
-    });
-
-    await Grammar.syncFromRemote();
-
-    expect(mocks.grammarBulkPut).toHaveBeenCalledWith([
-      expect.objectContaining({ id: 1, note: null }),
-    ]);
+  it('uses the shared started lesson and item visibility query', async () => {
+    await expect(GrammarGroup.getInitiated('u1')).resolves.toHaveLength(1);
+    expect(mocks.getStartedByUser).toHaveBeenCalledWith('u1', 'grammar');
   });
 });

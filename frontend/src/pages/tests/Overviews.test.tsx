@@ -49,6 +49,7 @@ vi.mock('@/locales/cs', () => ({
   TEXTS: {
     overviews: 'Přehledy',
     progressOverviews: 'Pokrok',
+    soundsOverview: 'Sound overview',
     practiceOverviewTitle: 'Přehled procvičování',
     grammarOverview: 'Přehled gramatiky',
     grammarOverviewTooltip: 'Grammar tooltip',
@@ -60,6 +61,7 @@ vi.mock('@/locales/cs', () => ({
     pronunciationGroupsTooltip: 'Pronunciation tooltip',
     practiceOverviewNone: 'No practice',
     noGrammar: 'No grammar',
+    noSounds: 'No sounds',
     noTopics: 'No topics',
     noStartedVocabulary: 'No vocabulary',
     noPronunciationGroups: 'No pronunciation groups',
@@ -70,7 +72,7 @@ vi.mock('@/locales/cs', () => ({
 
 import Overviews from '@/pages/Overviews';
 
-const overviewKeys = ['grammar', 'topics', 'vocabulary'];
+const overviewKeys = ['grammar', 'topics', 'vocabulary', 'sounds'];
 
 describe('Overviews', () => {
   beforeEach(() => {
@@ -92,25 +94,26 @@ describe('Overviews', () => {
     render(<Overviews />);
 
     const buttons = screen.getAllByRole('button');
-    expect(buttons).toHaveLength(4);
-    buttons.forEach((button) => {
-      expect((button as HTMLButtonElement).disabled).toBe(true);
-      fireEvent.click(button);
-    });
+    expect(buttons).toHaveLength(6);
+    expect(buttons.slice(0, 2).every((button) => !(button as HTMLButtonElement).disabled)).toBe(true);
+    expect(buttons.slice(2, 5).every((button) => (button as HTMLButtonElement).disabled)).toBe(true);
+    expect((buttons[5] as HTMLButtonElement).disabled).toBe(false);
+    buttons.slice(2, 5).forEach((button) => fireEvent.click(button));
     expect(mocks.navigate).not.toHaveBeenCalled();
   });
 
-  it('disables the pronunciation overview while group availability is loading', () => {
+  it('keeps the pronunciation overview available while group availability is loading', () => {
     mocks.pronunciationGroups = [];
     mocks.pronunciationLoading = true;
 
     render(<Overviews />);
 
     const button = screen.getByRole('button', { name: 'Výslovnost' }) as HTMLButtonElement;
-    expect(button.disabled).toBe(true);
+    expect(button.disabled).toBe(false);
   });
 
   it.each([
+    ['Sound overview', '/sounds'],
     ['Přehled gramatiky', '/grammar'],
     ['Přehled témat', '/topics'],
     ['Přehled slovíček', '/vocabulary'],

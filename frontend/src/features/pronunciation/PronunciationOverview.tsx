@@ -1,36 +1,32 @@
 import { DataState } from '@/components/UI/DataState';
+import StackedList from '@/components/UI/StackedList';
 import OverviewCard from '@/components/UI/OverviewCard';
 import { ROUTES } from '@/config/routes.config';
-import { useToastStore } from '@/features/toast/use-toast-store';
 import HelpButton from '@/features/help/HelpButton';
 import HelpText from '@/features/help/HelpText';
 import { TEXTS } from '@/locales/cs';
-import { useEffect } from 'react';
 import { NavigationButton } from '@/routing/data-navigation';
 import { usePronunciationGroupsStore } from './use-pronunciation-groups-store';
 import { useRouteClose } from '@/routing/use-route-close';
+import { useQueryErrorToast } from '@/features/logging/use-query-error-toast';
 
 export default function PronunciationOverview() {
-  const showToast = useToastStore((state) => state.showToast);
-  const closeRoute = useRouteClose(ROUTES.home);
+  const closeRoute = useRouteClose(ROUTES.overviews);
   const data = usePronunciationGroupsStore((state) => state.groups);
   const loading = usePronunciationGroupsStore((state) => state.loading);
   const error = usePronunciationGroupsStore((state) => state.error);
   const hasData = data.length > 0;
 
-  useEffect(() => {
-    if (!error) return;
-    showToast(TEXTS.loadingError, 'error');
-  }, [error, showToast]);
+  useQueryErrorToast(error, 'Failed to fetch pronunciation overview');
 
   return (
     <OverviewCard
-      buttonTitle={TEXTS.pronunciationGroups}
+      buttonTitle={TEXTS.pronunciationSettings}
       onClose={closeRoute}
       className={hasData ? 'bottom-controls-clearance' : ''}
     >
       <DataState loading={loading} hasData={hasData} noDataMessage={TEXTS.noPronunciationGroups}>
-        <div className="flex flex-col gap-1 pt-1">
+        <StackedList>
           {data.map((group) => (
             <NavigationButton
               key={group.id}
@@ -38,22 +34,12 @@ export default function PronunciationOverview() {
               title={group.name}
               to={ROUTES.pronunciationGroup.replace(':groupId', String(group.id))}
             >
-              <div className="flex w-full min-w-0 items-center justify-between gap-3">
-                <div className="min-w-0 text-left">
-                  <p className="overflow-hidden font-bold text-ellipsis whitespace-nowrap">
-                    {group.name}
-                  </p>
-                  <p className="overflow-hidden text-sm text-ellipsis whitespace-nowrap">
-                    {group.examples.join(', ')}
-                  </p>
-                </div>
-                <span className="shrink-0 text-sm">
-                  {group.unlocked_count}/{group.total_count}
-                </span>
-              </div>
+              <p className="w-full overflow-hidden text-left font-bold text-ellipsis whitespace-nowrap">
+                {group.name}
+              </p>
             </NavigationButton>
           ))}
-        </div>
+        </StackedList>
         <HelpText className="top-20 right-2">{TEXTS.pronunciationStartedHelp}</HelpText>
         <div className="pos-bottom-right-control">
           <HelpButton />

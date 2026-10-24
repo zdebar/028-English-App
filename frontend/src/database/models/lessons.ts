@@ -17,12 +17,13 @@ export default class Lessons extends SyncEntityModel implements LessonType {
   note!: string | null;
   sort_order!: number;
   level_id!: number;
+  group_id!: number | null;
   deleted_at!: string | null;
 
   static override readonly syncTable = db.lessons as Dexie.Table<LessonType, number>;
   static override readonly syncTableName = TableName.Lessons;
   static override readonly syncEntityName = 'lessons';
-  static override readonly syncSelect = 'id, name, note, level_id, sort_order, deleted_at';
+  static override readonly syncSelect = 'id, name, note, level_id, sort_order, deleted_at, group_id';
 
   /**
    * Reads all local lessons in display order.
@@ -31,5 +32,9 @@ export default class Lessons extends SyncEntityModel implements LessonType {
    */
   static async getAll(): Promise<LessonType[]> {
     return await db.lessons.orderBy('sort_order').toArray();
+  }
+
+  static async getById(lessonId: number): Promise<LessonType | null> {
+    return (await db.lessons.get(lessonId)) ?? null;
   }
 }
