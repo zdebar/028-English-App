@@ -154,7 +154,7 @@ describe('usePracticeDeck', () => {
   });
 
   it('reuses the background detail request when detail is requested early', async () => {
-    mocks.fetchData = reviewDeckResult([entry(1, 10)]);
+    mocks.fetchData = reviewDeckResult([entry(1)]);
     let resolveDetails!: (details: unknown) => void;
     mocks.loadReviewEntryDetails.mockReturnValue(
       new Promise((resolve) => {
@@ -278,7 +278,7 @@ describe('usePracticeDeck', () => {
       updated_at: 'now',
     }));
     mocks.loadReviewDeckData.mockImplementation(async (_userId: string, _kind: string, direction: string) => {
-      if (direction === 'en_to_cz') return reviewDeckResult([entry(2, 0, 'en_to_cz')], 'en_to_cz', 2);
+      if (direction === 'en_to_cz') return reviewDeckResult([entry(2, 'en_to_cz')], 'en_to_cz', 2);
       return reviewDeckResult([], 'cz_to_en', 2);
     });
 
@@ -387,7 +387,6 @@ function reviewDeckResult(
 
 function entry(
   itemId: number,
-  grammarChunkId = 0,
   direction: 'cz_to_en' | 'en_to_cz' = 'cz_to_en',
 ): PracticeDeckEntry {
   return {
@@ -406,9 +405,7 @@ function entry(
       is_vocabulary: 1,
       sort_order: itemId,
       curriculum_sort_path: [1, 1, itemId],
-      topic_id: 1,
       note_id: null,
-      grammar_chunk_id: grammarChunkId,
       progress_cz_to_en: 0,
       started_at: '2026-01-01',
       updated_at: '2026-01-01',

@@ -172,8 +172,6 @@ function item(
     note_id: null,
     lesson_id: 1,
     is_vocabulary: _reviewKind === 'vocabulary' ? 1 : 0,
-    topic_id: 1,
-    grammar_chunk_id: 0,
     started_at: '2026-01-01T00:00:00.000Z',
     deleted_at: NULL_DATE,
     updated_at: NOW,
