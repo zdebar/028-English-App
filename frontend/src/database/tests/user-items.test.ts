@@ -95,8 +95,6 @@ function makeItem(overrides: Partial<UserItemLocal> = {}): UserItemLocal {
     lesson_id: 1,
     updated_at: '2026-01-01T00:00:00.000Z',
     is_vocabulary: 1,
-    topic_id: 0,
-    grammar_chunk_id: 0,
     started_at: '2026-01-01T00:00:00.000Z',
     deleted_at: NULL_DATE,
     next_at_cz_to_en: '2026-01-01T00:00:00.000Z',
@@ -225,8 +223,8 @@ describe('UserItem', () => {
 
   it('filters review decks by explicit vocabulary state', async () => {
     mocks.dueItems = [
-      makeItem({ item_id: 1, is_vocabulary: 1, grammar_chunk_id: 10 }),
-      makeItem({ item_id: 2, is_vocabulary: 0, grammar_chunk_id: 10 }),
+      makeItem({ item_id: 1, is_vocabulary: 1 }),
+      makeItem({ item_id: 2, is_vocabulary: 0 }),
     ];
 
     const vocabularyDeck = await UserItem.getReviewDeck('u1', 'vocabulary');
@@ -244,7 +242,6 @@ describe('UserItem', () => {
         makeItem({
           item_id: index + 1,
           is_vocabulary: 0,
-          grammar_chunk_id: 10,
           progress_cz_to_en: 1,
           next_at_cz_to_en: dueAt,
         }),
@@ -252,7 +249,6 @@ describe('UserItem', () => {
       makeItem({
         item_id: 48,
         is_vocabulary: 0,
-        grammar_chunk_id: 10,
         progress_cz_to_en: 1,
         next_at_cz_to_en: grammarFuture,
       }),
@@ -413,8 +409,6 @@ function toApiItem(item: UserItemLocal, overrides: Partial<UserItemLocal> = {}) 
   return {
     ...merged,
     is_vocabulary: merged.is_vocabulary === 1,
-    topic_id: merged.topic_id,
-    grammar_chunk_id: merged.grammar_chunk_id,
     started_at: merged.started_at === NULL_DATE ? null : merged.started_at,
     deleted_at: merged.deleted_at === NULL_DATE ? null : merged.deleted_at,
     next_at_cz_to_en: merged.next_at_cz_to_en === NULL_DATE ? null : merged.next_at_cz_to_en,
