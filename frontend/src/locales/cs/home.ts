@@ -14,7 +14,7 @@ export const HOME_TEXTS = {
   dailyNewLessonLimitReached: 'Denní limit nových lekcí byl dosažen. Změňte jej v Profilu.',
 
   // User
-  practiceOverviewTitle: 'Přehled procvičování',
+  practiceOverviewTitle: 'Přehled nových lekcí',
   practiceOverviewMoreDays: '... dalších 7 dní',
   practiceOverviewNone: 'Žádné započaté dny',
   authInitErrorToast: 'Nastala chyba při přihlašování.',

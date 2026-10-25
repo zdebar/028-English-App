@@ -50,6 +50,9 @@ export default function Overviews(): JSX.Element {
       <h1 className="sr-only">{TEXTS.overviews}</h1>
       <section aria-label={TEXTS.progressOverviews}>
         <div className="flex flex-col gap-1">
+          <NavigationButton className="h-button w-full" to={ROUTES.practiceOverview}>
+            <MenuButtonText>{TEXTS.practiceOverviewTitle}</MenuButtonText>
+          </NavigationButton>
           <NavigationButton className="h-button w-full" to={ROUTES.sounds} {...soundsButton}>
             <MenuButtonText>{TEXTS.soundsOverview}</MenuButtonText>
           </NavigationButton>
@@ -75,9 +78,6 @@ export default function Overviews(): JSX.Element {
           </NavigationButton>
           <NavigationButton className="h-button w-full" to={ROUTES.lessonsOverview}>
             <MenuButtonText>{TEXTS.lessonsOverview}</MenuButtonText>
-          </NavigationButton>
-          <NavigationButton className="h-button w-full" to={ROUTES.practiceOverview}>
-            <MenuButtonText>{TEXTS.practiceOverviewTitle}</MenuButtonText>
           </NavigationButton>
         </div>
       </section>
