@@ -6,7 +6,6 @@ import type { JSX } from 'react';
 import { Link } from 'react-router-dom';
 import { InstallPWAButton } from '@/features/pwa/InstallPwaButton';
 import { useSyncStore } from '@/features/synchronization/use-sync-store';
-import { ROUTES } from '@/config/routes.config';
 import GoogleAuthButton from '@/features/auth/GoogleAuthButton';
 import AnonymousSigninButton from '@/features/auth/AnonymousSigninButton';
 import ConvertAnonymousUserButton from '@/features/auth/ConvertAnonymousUserButton';
@@ -64,9 +63,6 @@ export default function Home(): JSX.Element {
                 <SimulateDataButton />
               </div>
             )}
-            <Link to={ROUTES.practiceOverview} className={HOME_TEXT_ACTION_CLASS_NAME}>
-              {TEXTS.practiceOverviewTitle}
-            </Link>
           </div>
           <div className="my-4 flex w-full flex-col">
             <PracticeButton />

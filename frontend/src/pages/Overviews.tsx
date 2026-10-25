@@ -76,6 +76,9 @@ export default function Overviews(): JSX.Element {
           <NavigationButton className="h-button w-full" to={ROUTES.lessonsOverview}>
             <MenuButtonText>{TEXTS.lessonsOverview}</MenuButtonText>
           </NavigationButton>
+          <NavigationButton className="h-button w-full" to={ROUTES.practiceOverview}>
+            <MenuButtonText>{TEXTS.practiceOverviewTitle}</MenuButtonText>
+          </NavigationButton>
         </div>
       </section>
     </div>

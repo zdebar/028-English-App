@@ -3,6 +3,8 @@ import Topic from '@/database/models/topics';
 import UserItem from '@/database/models/user-items';
 import SoundGroup from '@/database/models/sound-groups';
 import type { UserItemLocal } from '@/types/user-item.types';
+import type { UserLessonType } from '@/types/generic.types';
+import UserLesson from '@/database/models/user-lessons';
 import { getSharedQuery, loadSharedQuery, sharedQueryKey } from './shared-query-store';
 
 export type OverviewQueryName =
@@ -25,7 +27,7 @@ export type OverviewQueryData = {
   topics: Awaited<ReturnType<typeof Topic.getInitiatedByUserId>>;
   vocabulary: UserItemLocal[];
   sounds: Awaited<ReturnType<typeof SoundGroup.getOverview>>;
-  'practice-overview': UserItemLocal[];
+  'practice-overview': UserLessonType[];
 };
 
 export type OverviewAvailabilityData = Readonly<{
@@ -70,7 +72,7 @@ export function getOverviewQuery<T extends OverviewQueryName>(
       case 'sounds':
         return SoundGroup.getOverview(userId) as Promise<OverviewQueryData[T]>;
       case 'practice-overview':
-        return UserItem.getByUserId(userId) as Promise<OverviewQueryData[T]>;
+        return UserLesson.getByUserId(userId) as Promise<OverviewQueryData[T]>;
     }
   };
 }

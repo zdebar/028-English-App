@@ -1,13 +1,11 @@
 import { getOverviewQuery, overviewQueryKey } from '@/hooks/overview-query-store';
 import OverviewCard from '@/components/UI/OverviewCard';
-import config from '@/config/config';
 import { ROUTES } from '@/config/routes.config';
 import { getLocalDateFromUTC } from '@/database/utils/database.utils';
 import { useAuthStore } from '@/features/auth/use-auth-store';
 import { useQueryErrorToast } from '@/features/logging/use-query-error-toast';
 import { TEXTS } from '@/locales/cs';
-import type { UserItemLocal } from '@/types/user-item.types';
-import { formatProgressChange } from '@/utils/format.utils';
+import type { UserLessonType } from '@/types/generic.types';
 import { useCallback, useEffect, useMemo, useState, type JSX } from 'react';
 import { DataState } from '@/components/UI/DataState';
 import { useLiveQueryData } from '@/hooks/use-live-query-data';
@@ -43,18 +41,18 @@ function formatShortDate(date: Date): string {
   return `${year}-${month}-${day}`;
 }
 
-function getPracticeDays(items: UserItemLocal[]): PracticeDay[] {
+function getPracticeDays(userLessons: UserLessonType[]): PracticeDay[] {
   const startedCountByDate = new Map<string, number>();
-  items
-    .filter(
-      (item) =>
-        item.deleted_at === config.database.nullReplacementDate &&
-        item.started_at !== config.database.nullReplacementDate,
-    )
-    .forEach((item) => {
-      const date = getLocalDateFromUTC(item.started_at);
-      startedCountByDate.set(date, (startedCountByDate.get(date) ?? 0) + 1);
-    });
+  const lessonsByDate = new Map<string, Set<number>>();
+  userLessons.forEach((userLesson) => {
+    const date = getLocalDateFromUTC(userLesson.started_at);
+    const lessons = lessonsByDate.get(date) ?? new Set<number>();
+    lessons.add(userLesson.lesson_id);
+    lessonsByDate.set(date, lessons);
+  });
+  lessonsByDate.forEach((lessons, date) => {
+    startedCountByDate.set(date, lessons.size);
+  });
 
   const sortedDates = [...startedCountByDate.keys()].sort((left, right) =>
     right.localeCompare(left),
@@ -74,16 +72,7 @@ function getPracticeDays(items: UserItemLocal[]): PracticeDay[] {
   return days;
 }
 
-function getDailyStartedColorClass(startedCount: number): string {
-  if (startedCount >= config.practice.dailyStartedGoal) {
-    return 'text-success-light dark:text-success-dark';
-  }
-  return 'text-error-light dark:text-error-dark';
-}
-
 function PracticeOverviewRow({ day }: Readonly<{ day: PracticeDay }>): JSX.Element {
-  const countColorClass = getDailyStartedColorClass(day.startedCount);
-
   return (
     <div className={isSunday(day.date) ? 'border-t-2 border-b' : 'border-b'}>
       <div className="h-button flex items-center justify-between gap-4 px-4">
@@ -92,30 +81,28 @@ function PracticeOverviewRow({ day }: Readonly<{ day: PracticeDay }>): JSX.Eleme
         >
           {formatPracticeDate(day.date)}
         </span>
-        <span className={`mr-4 font-bold ${countColorClass}`}>
-          {formatProgressChange(day.startedCount)}
-        </span>
+        <span className="mr-4 font-bold">{day.startedCount}</span>
       </div>
     </div>
   );
 }
 
 export default function PracticeOverviewFeature({
-  initialItems,
-}: Readonly<{ initialItems?: UserItemLocal[] }>): JSX.Element {
+  initialUserLessons,
+}: Readonly<{ initialUserLessons?: UserLessonType[] }>): JSX.Element {
   const closeRoute = useRouteClose(ROUTES.home);
   const userId = useAuthStore((state) => state.userId);
   const [visibleCount, setVisibleCount] = useState(INITIAL_VISIBLE_DAYS);
-  const fetchItems = useCallback(
+  const fetchUserLessons = useCallback(
     () => (userId ? getOverviewQuery(userId, 'practice-overview')() : Promise.resolve([])),
     [userId],
   );
-  const { data: rawItems, loading, error } = useLiveQueryData(fetchItems, {
+  const { data: userLessons, loading, error } = useLiveQueryData(fetchUserLessons, {
     emptyData: [],
-    initialData: initialItems,
+    initialData: initialUserLessons,
     sharedKey: userId ? overviewQueryKey(userId, 'practice-overview') : undefined,
   });
-  const days = useMemo(() => getPracticeDays(rawItems), [rawItems]);
+  const days = useMemo(() => getPracticeDays(userLessons), [userLessons]);
 
   useEffect(() => {
     setVisibleCount(INITIAL_VISIBLE_DAYS);
