@@ -33,7 +33,7 @@ const config = {
       repeat: -1,
       hard: 0,
       good: 1,
-      easy: 3,
+      easy: 4,
     },
     randomness: 0.2, // Randomness of SRS algorithm
   },
