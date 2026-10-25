@@ -1,5 +1,6 @@
 import { getOverviewQuery, overviewQueryKey } from '@/hooks/overview-query-store';
 import OverviewCard from '@/components/UI/OverviewCard';
+import config from '@/config/config';
 import { ROUTES } from '@/config/routes.config';
 import { getLocalDateFromUTC } from '@/database/utils/database.utils';
 import { useAuthStore } from '@/features/auth/use-auth-store';
@@ -73,6 +74,11 @@ function getPracticeDays(userLessons: UserLessonType[]): PracticeDay[] {
 }
 
 function PracticeOverviewRow({ day }: Readonly<{ day: PracticeDay }>): JSX.Element {
+  const countColorClass =
+    day.startedCount >= config.practice.dailyStartedLessonLimit
+      ? 'text-success-light dark:text-success-dark'
+      : 'text-error-light dark:text-error-dark';
+
   return (
     <div className={isSunday(day.date) ? 'border-t-2 border-b' : 'border-b'}>
       <div className="h-button flex items-center justify-between gap-4 px-4">
@@ -81,7 +87,7 @@ function PracticeOverviewRow({ day }: Readonly<{ day: PracticeDay }>): JSX.Eleme
         >
           {formatPracticeDate(day.date)}
         </span>
-        <span className="mr-4 font-bold">{day.startedCount}</span>
+        <span className={`mr-4 font-bold ${countColorClass}`}>{day.startedCount}</span>
       </div>
     </div>
   );
