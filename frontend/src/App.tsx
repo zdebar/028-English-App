@@ -33,7 +33,7 @@ export default function App() {
     <>
       {/* <GoogleAnalytics /> */}
       <div
-        className="app-shell max-w-container relative mx-auto flex flex-col justify-start"
+        className="app-shell max-w-container relative mx-auto flex flex-col justify-start pb-1"
         data-header-layout={headerLayout}
         data-secondary-layout={secondaryLayout}
         data-side-header-orientation={sideHeaderOrientation}
