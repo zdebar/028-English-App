@@ -61,7 +61,7 @@ export const OVERVIEW_TEXTS = {
   // Overviews Page
   overviews: 'Přehledy',
   progressOverviews: 'Pokrok',
-  pronunciationSettings: 'Přehled výslovnosti',
+  pronunciationSettings: 'Porovnání hlásek',
   topicsOverview: 'Přehled témat',
   topicsOverviewTooltip: 'Přehled tematických skupin',
   grammarOverview: 'Přehled gramatiky',
