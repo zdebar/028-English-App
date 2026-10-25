@@ -65,14 +65,14 @@ It does not create `id` when the source file has no `id` column. It assigns:
 - `sort_order` starting at `lesson_id * 1000` (`5000`, `5001`, ...);
 - IPA pronunciation through locally installed eSpeak NG (`en-us`);
 - an `.opus` audio filename and, when missing, the matching Google Cloud TTS
-  audio file.
+  audio file using US English by default (`en-US-Neural2-F`).
 
 The generated output is saved beside the input using one UTC timestamp for the
 whole run, such as `05_plurals_20260715T132045Z.csv`.
 
 ## Requirements for preparation
 
-- Python dependencies used by the scripts, including `pandas`,
+- Python dependencies used by the scripts, including `pandas`, `eng-to-ipa`,
   `google-cloud-texttospeech`, `python-dotenv`, FFmpeg, and eSpeak NG.
 - eSpeak NG installed at `C:/Program Files/eSpeak NG/espeak-ng.exe`.
 - `GOOGLE_APPLICATION_CREDENTIALS` configured in `.env` for Google Cloud TTS.
