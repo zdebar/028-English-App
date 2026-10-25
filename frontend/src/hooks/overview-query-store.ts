@@ -26,7 +26,7 @@ export type OverviewQueryData = {
   grammar: GrammarTopicWithGroups[];
   topics: Awaited<ReturnType<typeof Topic.getInitiatedByUserId>>;
   vocabulary: UserItemLocal[];
-  sounds: Awaited<ReturnType<typeof SoundGroup.getOverview>>;
+  sounds: Awaited<ReturnType<typeof SoundGroup.getAllForOverview>>;
   'practice-overview': UserLessonType[];
 };
 
@@ -70,7 +70,7 @@ export function getOverviewQuery<T extends OverviewQueryName>(
       case 'vocabulary':
         return UserItem.getInitiatedVocabulary(userId) as Promise<OverviewQueryData[T]>;
       case 'sounds':
-        return SoundGroup.getOverview(userId) as Promise<OverviewQueryData[T]>;
+        return SoundGroup.getAllForOverview(userId) as Promise<OverviewQueryData[T]>;
       case 'practice-overview':
         return UserLesson.getByUserId(userId) as Promise<OverviewQueryData[T]>;
     }

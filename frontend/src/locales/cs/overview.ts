@@ -16,6 +16,12 @@ export const OVERVIEW_TEXTS = {
   // Topics Overview Page
   noTopics: 'Žádná započatá témata.',
   soundsOverview: 'Přehled hlásek',
+  shortVowels: 'short vowels',
+  longVowels: 'long vowels',
+  doubleVowelSounds: 'double vowel sounds',
+  voicelessConsonants: 'voiceless consonants',
+  voicedConsonants: 'voiced consonants',
+  otherConsonants: 'other consonants',
   noSounds: 'Žádné odemčené hlásky.',
   noSoundItems: 'Pro tuto hlásku nejsou dostupné příklady.',
   resetSoundTitle: 'Restartovat hlásku',
