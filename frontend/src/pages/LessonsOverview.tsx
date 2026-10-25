@@ -11,7 +11,7 @@ import { useState } from 'react';
 export default function LessonsOverview() {
   const levels = useUserStore((state) => state.levels);
   const loading = useUserStore((state) => state.levelsLoading);
-  const closeRoute = useRouteClose(ROUTES.overviews);
+  const closeRoute = useRouteClose(ROUTES.home);
   const [expandedLevelId, setExpandedLevelId] = useState<number | null>(null);
   const levelsWithLessons = levels.filter((level) => level.lessons.length > 0);
 
