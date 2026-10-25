@@ -9,8 +9,11 @@ import { NavigationButton } from '@/routing/data-navigation';
 import { usePronunciationGroupsStore } from './use-pronunciation-groups-store';
 import { useRouteClose } from '@/routing/use-route-close';
 import { useQueryErrorToast } from '@/features/logging/use-query-error-toast';
+import { useAuthStore } from '@/features/auth/use-auth-store';
+import { usePronunciationGroupsStoreSync } from './use-pronunciation-groups-store-sync';
 
 export default function PronunciationOverview() {
+  usePronunciationGroupsStoreSync(useAuthStore((state) => state.userId));
   const closeRoute = useRouteClose(ROUTES.overviews);
   const data = usePronunciationGroupsStore((state) => state.groups);
   const loading = usePronunciationGroupsStore((state) => state.loading);

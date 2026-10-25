@@ -4,12 +4,15 @@ import { ROUTES } from '@/config/routes.config';
 import { useUserStore } from '@/features/user-stats/use-user-store';
 import { ARIA_TEXTS, TEXTS } from '@/locales/cs';
 import { Link } from 'react-router-dom';
+import { useAuthStore } from '@/features/auth/use-auth-store';
+import { useUserStoreSync } from '@/features/user-stats/use-user-store-sync';
 
 type DashboardProps = Readonly<{
   className?: string;
 }>;
 
 export default function Dashboard({ className = '' }: DashboardProps) {
+  useUserStoreSync(useAuthStore((state) => state.userId));
   const levels = useUserStore((state) => state.levels);
   const levelsLoading = useUserStore((state) => state.levelsLoading);
 

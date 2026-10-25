@@ -15,7 +15,7 @@ import Groups from '@/database/models/groups';
 import PronunciationSoundDetailCard from './PronunciationSoundDetailCard';
 import { getUniquePronunciationSounds, splitPronunciationIntoSounds } from '@/utils/pronunciation.utils';
 import type { GroupType } from '@/types/table.types';
-import { useLiveQuery } from 'dexie-react-hooks';
+import { useLiveQueryData } from '@/hooks/use-live-query-data';
 import { TEXTS } from '@/locales/cs';
 import HintButton from './buttons/HintButton';
 import KnownButton from './buttons/KnownButton';
@@ -752,7 +752,7 @@ function PracticeSessionCardView({
 
 export default function PracticeSessionCard(props: PracticeSessionCardProps) {
   const normalizedProps = normalizePracticeSessionCardProps(props);
-  const sounds = useLiveQuery(() => Groups.getSounds(), [], []) ?? [];
+  const { data: sounds } = useLiveQueryData(() => Groups.getSounds(), { emptyData: [], sharedKey: JSON.stringify(['global', 'sounds-catalog']) });
   const [visibleDetail, setVisibleDetail] = useState<PracticeDetail | null>(null);
   const [pronunciationSounds, setPronunciationSounds] = useState<readonly GroupType[]>([]);
   const [selectedSoundIndex, setSelectedSoundIndex] = useState(0);

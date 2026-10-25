@@ -1,93 +1,88 @@
 import { liveQuery } from 'dexie';
-import { createStore } from 'zustand/vanilla';
+import { createStore, type StoreApi } from 'zustand/vanilla';
+import config from '@/config/config';
 
-type QueryState<T> = {
-  data: T | undefined;
-  loading: boolean;
-  error: Error | null;
-};
+export type QueryState<T> = { data: T | undefined; loading: boolean; error: Error | null };
+type Entry<T> = { store: StoreApi<QueryState<T>>; query: () => Promise<T>; subscription?: { unsubscribe: () => void }; consumers: Map<string, number>; pins: Set<string>; disposed: boolean };
+const queries = new Map<string, Entry<unknown>>();
 
-function createQueryStore<T>(query: () => Promise<T>) {
-  const store = createStore<QueryState<T>>(() => ({
-    data: undefined,
-    loading: true,
-    error: null,
-  }));
-  let subscription: { unsubscribe: () => void } | undefined;
-  let active = true;
-  const restart = () => {
-    subscription?.unsubscribe();
-    store.setState({ loading: true, error: null });
-    subscription = liveQuery(query).subscribe({
-      next: (data) => {
-        if (active) store.setState({ data, loading: false, error: null });
-      },
-      error: (error: unknown) => {
-        if (!active) return;
-        store.setState({
-          loading: false,
-          error: error instanceof Error ? error : new Error(String(error)),
-        });
-      },
-    });
-  };
-  restart();
-  return {
-    store,
-    restart,
-    dispose: () => {
-      active = false;
-      subscription?.unsubscribe();
-      store.setState({ loading: false, error: new Error('Query account changed') });
-    },
-  };
+function featureForKey(key: string): string {
+  try { return JSON.parse(key)[1] as string; } catch { return 'unknown'; }
 }
 
-const queries = new Map<string, ReturnType<typeof createQueryStore<unknown>>>();
+function shouldRelease(feature: string): boolean {
+  return config.liveState?.releaseByFeature?.[feature] ?? config.liveState?.defaultRelease ?? true;
+}
 
-/** User-scoped identity shared by a route loader and its page subscription. */
+function start<T>(entry: Entry<T>): void {
+  if (entry.subscription || entry.disposed) return;
+  entry.store.setState({ loading: true, error: null });
+  entry.subscription = liveQuery(entry.query).subscribe({
+    next: (data) => { if (!entry.disposed) entry.store.setState({ data, loading: false, error: null }); },
+    error: (error: unknown) => {
+      entry.subscription = undefined;
+      if (!entry.disposed) entry.store.setState({ loading: false, error: error instanceof Error ? error : new Error(String(error)) });
+    },
+  });
+}
+
+function stop<T>(entry: Entry<T>): void {
+  entry.subscription?.unsubscribe();
+  entry.subscription = undefined;
+  entry.store.setState({ loading: false, error: null });
+}
+
+function createEntry<T>(query: () => Promise<T>): Entry<T> {
+  return { store: createStore<QueryState<T>>(() => ({ data: undefined, loading: false, error: null })), query, consumers: new Map(), pins: new Set(), disposed: false };
+}
+
 export function sharedQueryKey(userId: string | null, name: string): string | undefined {
   if (!userId) return undefined;
   return JSON.stringify([userId, name]);
 }
 
-/** Keeps one live subscription across page mounts, until the account changes. */
+function getEntry<T>(key: string, query: () => Promise<T>): Entry<T> {
+  let entry = queries.get(key) as Entry<T> | undefined;
+  if (!entry) { entry = createEntry(query); queries.set(key, entry as Entry<unknown>); }
+  return entry;
+}
+
+/** Registers a consumer. A shared Dexie observer runs once while any consumer needs it. */
+export function observeSharedQuery<T>(key: string, feature: string, query: () => Promise<T>, listener: (state: QueryState<T>) => void): () => void {
+  const entry = getEntry(key, query);
+  const featureName = feature || featureForKey(key);
+  if (!shouldRelease(featureName)) entry.pins.add(featureName);
+  if (entry.store.getState().error) stop(entry);
+  entry.consumers.set(featureName, (entry.consumers.get(featureName) ?? 0) + 1);
+  start(entry);
+  const unsubscribeStore = entry.store.subscribe(listener);
+  listener(entry.store.getState());
+  return () => {
+    unsubscribeStore();
+    const count = entry.consumers.get(featureName) ?? 0;
+    if (count <= 1) entry.consumers.delete(featureName); else entry.consumers.set(featureName, count - 1);
+    if (shouldRelease(featureName) && entry.consumers.size === 0 && entry.pins.size === 0) stop(entry);
+  };
+}
+
+/** Compatibility access for callers that need the state API; observation starts on subscribe via observeSharedQuery. */
 export function getSharedQuery<T>(key: string, query: () => Promise<T>) {
-  let entry = queries.get(key);
-  if (!entry) {
-    entry = createQueryStore(query);
-    queries.set(key, entry);
-  } else if (entry.store.getState().error) {
-    entry.restart();
-  }
-  return entry as ReturnType<typeof createQueryStore<T>>;
+  return getEntry(key, query);
 }
 
 export function clearSharedQueriesExcept(userId: string | null): void {
-  for (const [key, entry] of queries) {
+  for (const [key, rawEntry] of queries) {
+    const entry = rawEntry as Entry<unknown>;
     const [owner] = JSON.parse(key) as [string, string];
     if (owner === userId) continue;
-    entry.dispose();
+    entry.disposed = true;
+    stop(entry);
+    entry.store.setState({ data: undefined, loading: false, error: new Error('Query account changed') });
     queries.delete(key);
   }
 }
 
-/** Waits for the same snapshot the page observes; it does not run a second query. */
-export async function loadSharedQuery<T>(userId: string, name: string, query: () => Promise<T>): Promise<T> {
-  const key = sharedQueryKey(userId, name)!;
-  const { store } = getSharedQuery(key, query);
-  if (store.getState().loading) {
-    await new Promise<void>((resolve) => {
-      const unsubscribe = store.subscribe((state) => {
-        if (state.loading) return;
-        unsubscribe();
-        resolve();
-      });
-    });
-  }
-  const state = store.getState();
-  if (state.error) {
-    throw state.error;
-  }
-  return state.data as T;
+/** One-shot read for route loaders and prefetching; it never creates a live observer. */
+export async function loadSharedQuery<T>(_userId: string, _name: string, query: () => Promise<T>): Promise<T> {
+  return query();
 }

@@ -7,8 +7,11 @@ import { useUserStore } from '@/features/user-stats/use-user-store';
 import { useRouteClose } from '@/routing/use-route-close';
 import { TEXTS } from '@/locales/cs';
 import { useState } from 'react';
+import { useAuthStore } from '@/features/auth/use-auth-store';
+import { useUserStoreSync } from '@/features/user-stats/use-user-store-sync';
 
 export default function LessonsOverview() {
+  useUserStoreSync(useAuthStore((state) => state.userId));
   const levels = useUserStore((state) => state.levels);
   const loading = useUserStore((state) => state.levelsLoading);
   const closeRoute = useRouteClose(ROUTES.home);

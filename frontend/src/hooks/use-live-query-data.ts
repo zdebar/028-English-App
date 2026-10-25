@@ -1,11 +1,12 @@
 import { liveQuery } from 'dexie';
 import { useEffect, useRef, useState } from 'react';
-import { getSharedQuery } from './shared-query-store';
+import { observeSharedQuery } from './shared-query-store';
 
 type UseLiveQueryDataOptions<T> = Readonly<{
   emptyData: T;
   initialData?: T;
   sharedKey?: string;
+  feature?: string;
 }>;
 
 type UseLiveQueryDataResult<T> = Readonly<{
@@ -58,14 +59,11 @@ export function useLiveQueryData<T>(
     };
 
     if (options.sharedKey) {
-      const { store } = getSharedQuery(options.sharedKey, query);
-      const update = () => {
-        const state = store.getState();
+      const unsubscribe = observeSharedQuery(options.sharedKey, options.feature ?? '', query, (state) => {
         if (state.error) observer.error(state.error);
         else if (!state.loading) observer.next(state.data as T);
-      };
-      const unsubscribe = store.subscribe(update);
-      update();
+        else if (!hasDataRef.current) setLoading(true);
+      });
       return () => {
         isActive = false;
         unsubscribe();

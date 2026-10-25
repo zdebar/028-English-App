@@ -1,7 +1,7 @@
 import PronunciationGroup from '@/database/models/pronunciation-groups';
 import { reportError } from '@/features/logging/monitoring-handler';
-import { liveQuery } from 'dexie';
 import { useEffect } from 'react';
+import { observeSharedQuery, sharedQueryKey } from '@/hooks/shared-query-store';
 import { usePronunciationGroupsStore } from './use-pronunciation-groups-store';
 
 function toError(error: unknown): Error {
@@ -21,30 +21,26 @@ export function usePronunciationGroupsStoreSync(userId: string | null) {
     let isActive = true;
     usePronunciationGroupsStore.setState({ groups: [], loading: true, error: null });
 
-    const subscription = liveQuery(() => PronunciationGroup.getOverview(userId)).subscribe({
-      next: (groups) => {
+    const unsubscribe = observeSharedQuery(sharedQueryKey(userId, 'pronunciation-overview')!, 'pronunciation', () => PronunciationGroup.getOverview(userId), ({ data: groups, error }) => {
+      if (error) {
+        const normalizedError = toError(error);
+        usePronunciationGroupsStore.setState({ groups: [], loading: false, error: normalizedError });
+        reportError('Error observing pronunciation groups', normalizedError);
+        return;
+      }
+      if (groups) {
         if (!isActive) return;
         usePronunciationGroupsStore.setState({
           groups: groups ?? [],
           loading: false,
           error: null,
         });
-      },
-      error: (error) => {
-        if (!isActive) return;
-        const normalizedError = toError(error);
-        usePronunciationGroupsStore.setState({
-          groups: [],
-          loading: false,
-          error: normalizedError,
-        });
-        reportError('Error observing pronunciation groups', normalizedError);
-      },
+      }
     });
 
     return () => {
       isActive = false;
-      subscription.unsubscribe();
+      unsubscribe();
     };
   }, [clear, userId]);
 }
