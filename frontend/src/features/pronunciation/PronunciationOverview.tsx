@@ -20,10 +20,17 @@ const VOWEL_PHONEMES = new Set([
 const CATEGORY_HEADING_CLASS_NAME =
   'h-input border-disabled-light text-light dark:border-disabled-dark dark:text-dark flex w-full items-center justify-start border border-dashed px-4 text-left';
 
+function normalizePhoneme(phoneme: string): string {
+  let normalized = phoneme.trim();
+  if (normalized.startsWith('/')) normalized = normalized.slice(1);
+  if (normalized.endsWith('/')) normalized = normalized.slice(0, -1);
+  return normalized;
+}
+
 function isVowelContrast(groupName: string): boolean {
   const phonemes = groupName
     .split(/[|×–—]/)
-    .map((phoneme) => phoneme.trim().replace(/^\/+|\/+$/g, ''))
+    .map(normalizePhoneme)
     .filter(Boolean);
   return phonemes.length > 0 && phonemes.every((phoneme) => VOWEL_PHONEMES.has(phoneme));
 }
