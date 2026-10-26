@@ -13,7 +13,7 @@
   .color-button {
     @apply bg-button-light border-button-light border;
     @apply dark:bg-button-dark dark:border-button-dark;
-    @apply disabled:text-disabled-light dark:disabled:text-disabled-dark disabled:bg-inherit;
+    @apply disabled:text-light dark:disabled:text-dark disabled:bg-inherit;
     @apply disabled:border-disabled-light dark:disabled:border-disabled-dark disabled:border disabled:border-dashed;
   }
 

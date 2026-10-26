@@ -47,7 +47,7 @@ export default function LessonsOverview() {
                       <div
                         key={lesson.id}
                         className={`flex h-input w-full items-center border border-disabled-light border-dashed px-8 dark:border-disabled-dark ${
-                          lesson.isStarted ? '' : 'text-disabled-light dark:text-disabled-dark'
+                          lesson.isStarted ? '' : 'text-light dark:text-dark'
                         }`}
                       >
                         <span className="overflow-hidden text-ellipsis whitespace-nowrap">

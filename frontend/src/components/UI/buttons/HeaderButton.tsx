@@ -24,7 +24,7 @@ export default function HeaderButton({ to, ...rest }: HeaderButtonProps): JSX.El
         disabled
         aria-disabled="true"
         tabIndex={-1}
-        className={`${sharedClasses} text-disabled-light dark:text-disabled-dark cursor-default hover:bg-inherit`}
+        className={`${sharedClasses} text-light dark:text-dark cursor-default hover:bg-inherit`}
       >
         {rest.children}
       </button>
