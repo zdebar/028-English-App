@@ -163,6 +163,7 @@ describe('Home practice buttons', () => {
     const newButton = button('New');
     expect(newButton.disabled).toBe(true);
     expect(newButton.className).toContain('color-button');
+    expect(newButton.className).toContain('preserve-disabled-text-color');
   });
 
   it('disables new when the daily lesson limit is reached', () => {

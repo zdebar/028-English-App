@@ -78,11 +78,12 @@ describe('OverviewCard', () => {
     });
   });
 
-  it('keeps the card title visible while disabling its reset action', () => {
-    render(<OverviewCard buttonTitle="English title" showResetAction={false} onClose={vi.fn()} />);
+  it('keeps a permanently disabled card title in the main text color', () => {
+    render(<OverviewCard buttonTitle="English title" onClose={vi.fn()} />);
 
     const titleButton = screen.getByRole('button', { name: 'English title' }) as HTMLButtonElement;
     expect(titleButton.disabled).toBe(true);
+    expect(titleButton.className).toContain('preserve-disabled-text-color');
     expect(screen.getByTestId('close-button')).toBeTruthy();
   });
 });

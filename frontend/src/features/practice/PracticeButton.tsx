@@ -76,7 +76,11 @@ const NewPracticeButton = memo(function NewPracticeButton(): JSX.Element {
 
   if (!available && !loading) {
     return (
-      <StyledButton className="h-button max-h-button w-full px-4" disabled title={title}>
+      <StyledButton
+        className="preserve-disabled-text-color h-button max-h-button w-full px-4"
+        disabled
+        title={title}
+      >
         {TEXTS.newButton}
       </StyledButton>
     );
