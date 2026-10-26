@@ -5,7 +5,7 @@ export const HOME_TEXTS = {
   guide: 'Návod',
   noDashboardData: 'Žádná dostupná data.',
   signupHint:
-    'Aplikace po přihlášení ukládá cvičební data do úložiště Vašeho prohlížeče (7.8MB). Účet je možno kdykoliv smazat, včetně všech dat.',
+    'Aplikace po přihlášení ukládá cvičební data do úložiště Vašeho prohlížeče. Účet je možno kdykoliv smazat, včetně všech dat.',
   installButton: 'Nainstalovat aplikaci',
   installButtonTooltip: 'Nainstalovat PWA aplikaci.',
   grammarReviewButton: 'Opakování gramatiky',

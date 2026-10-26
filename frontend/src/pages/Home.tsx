@@ -82,11 +82,11 @@ export default function Home(): JSX.Element {
           </div>
         </div>
       ) : (
-        <div className="card-width flex w-full flex-col gap-8">
-          <h1 className="mx-auto mt-4">{TEXTS.appTitle}</h1>
-          <p className="mx-auto my-4 landscape:hidden">{TEXTS.appDescription}</p>
+        <div className="card-width w-full">
+          <h1 className="mx-auto">{TEXTS.appTitle}</h1>
+          <p className="mx-auto landscape:hidden">{TEXTS.appDescription}</p>
           <HomeActionLinks />
-          <div className="flex flex-col gap-1 pt-4">
+          <div className="flex flex-col gap-1 pt-8">
             <AnonymousSigninButton />
             <GoogleAuthButton />
           </div>
