@@ -8,7 +8,7 @@ BEGIN
   INTO tables_to_truncate
   FROM pg_tables
   WHERE schemaname = 'public'
-    AND tablename NOT IN ('users', 'levels');
+    AND tablename NOT IN ('users', 'levels', 'notes');
 
   IF tables_to_truncate IS NOT NULL THEN
     EXECUTE format(

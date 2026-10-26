@@ -1,42 +1,61 @@
 id,type,name,note,sort_order
-1,sound,p,,1
-2,sound,t,,2
-3,sound,k,,3
-4,sound,b,,4
-5,sound,d,,5
-6,sound,ɡ,,6
-7,sound,f,,7
-8,sound,v,,8
-9,sound,w,,9
-10,sound,θ,,10
-11,sound,ð,,11
-12,sound,h,,12
-13,sound,m,,13
-14,sound,n,,14
-15,sound,ŋ,,15
-16,sound,l,,16
-17,sound,ɹ,,17
-18,sound,j,,18
-19,sound,s,,19
-20,sound,z,,20
-21,sound,ʃ,,21
-22,sound,ʒ,,22
-23,sound,tʃ,,23
-24,sound,dʒ,,24
-25,sound,i,,25
-26,sound,ɪ,,26
-27,sound,u,,27
-28,sound,ʊ,,28
-29,sound,ɛ,,29
-30,sound,æ,,30
-31,sound,ɑ,,31
-32,sound,ʌ,,32
-33,sound,ɔ,,33
-34,sound,ə,,34
-35,sound,ɝ,,35
-36,sound,ɚ,,36
-37,sound,eɪ,,37
-38,sound,aɪ,,38
-39,sound,aʊ,,39
-40,sound,oʊ,,40
-41,sound,ɔɪ,,41
+1,sound,p,"Sevřete rty, zadržte vzduch a uvolněte jej bez hlasu; na začátku přízvučné slabiky bývá silný přídech.",1
+2,sound,t,Špička jazyka uzavře průchod za horními zuby; uvolnění je bez hlasu a na začátku přízvučné slabiky s přídechem.,2
+3,sound,k,Zadní část jazyka uzavře průchod u měkkého patra; uvolnění je bez hlasu a obvykle s přídechem.,3
+4,sound,b,Sevřete rty a uvolněte uzávěr za současného kmitání hlasivek.,4
+5,sound,d,Špička jazyka vytvoří uzávěr za horními zuby; při uvolnění kmitají hlasivky.,5
+6,sound,ɡ,Zadní část jazyka se dotkne měkkého patra a vytvoří uzávěr; hlasivky kmitají.,6
+7,sound,f,Horní zuby se lehce opřou o dolní ret; vzduch prochází úzkou štěrbinou bez hlasu.,7
+8,sound,v,Horní zuby se lehce opřou o dolní ret; vzduch prochází úzkou štěrbinou za kmitání hlasivek.,8
+9,sound,w,Zaokrouhlete obě rty a plynule přejděte k samohlásce; zuby se nedotýkají dolního rtu.,9
+10,sound,θ,Špičku jazyka dejte lehce mezi zuby nebo k jejich hraně; vzduch proudí bez hlasu.,10
+11,sound,ð,Špičku jazyka dejte lehce mezi zuby nebo k jejich hraně; vzduch proudí za kmitání hlasivek.,11
+12,sound,h,Jde o neznělý výdech v hrtanu před samohláskou; nevzniká uzávěr jako u českého ch.,12
+13,sound,m,"Sevřete rty, nechte hlasivky kmitat a veďte vzduch nosem.",13
+14,sound,n,Špička jazyka se dotkne dásní za horními zuby; hlasivky kmitají a vzduch proudí nosem.,14
+15,sound,ŋ,"Zadní část jazyka se dotkne měkkého patra; hlasivky kmitají a vzduch proudí nosem, bez dodatečného /g/.",15
+16,sound,l,Špička jazyka se dotkne dásní za horními zuby a vzduch proudí po stranách jazyka.,16
+17,sound,ɹ,"Jazyk zvedněte nebo stáhněte dozadu, ale nedotýkejte se patra; hlasivky kmitají a jazyk nevibruje.",17
+18,sound,j,Jazyk se rychle přiblíží k tvrdému patru a plynule sklouzne k následující samohlásce.,18
+19,sound,s,Jazyk vytvoří u dásní úzkou drážku; proudící vzduch tvoří tření bez hlasu.,19
+20,sound,z,Jazyk vytvoří u dásní úzkou drážku; proudící vzduch tvoří tření za kmitání hlasivek.,20
+21,sound,ʃ,Jazyk je oproti /s/ posunutý dozadu a vzduch tvoří tření; rty mohou být mírně zaokrouhlené.,21
+22,sound,ʒ,Jazyk je oproti /z/ posunutý dozadu; vzniká tření za kmitání hlasivek.,22
+23,sound,tʃ,Uzávěr jazyka se plynule uvolní do tření jako u /ʃ/; jde o jednu neznělou hlásku.,23
+24,sound,dʒ,Uzávěr jazyka se plynule uvolní do tření jako u /ʒ/; hlasivky po celou dobu kmitají.,24
+25,sound,i,"Jazyk je vysoko a vpředu, rty jsou lehce roztažené; v přízvučné slabice bývá samohláska delší.",25
+26,sound,ɪ,"Jazyk je vpředu, ale o něco níž než u /i/; samohláska je kratší a uvolněnější.",26
+27,sound,u,Jazyk je vysoko vzadu a rty jsou zaokrouhlené; v americké angličtině se jazyk často posouvá dopředu.,27
+28,sound,ʊ,Jazyk je vysoko vzadu a rty zaokrouhlené; oproti /u/ je samohláska kratší a uvolněnější.,28
+29,sound,ɛ,Jazyk je vpředu v nižší střední poloze a rty nejsou zaokrouhlené.,29
+30,sound,æ,Jazyk je vpředu a nízko; otevřete čelist víc než u /ɛ/.,30
+31,sound,ɑ,Otevřená samohláska tvořená nízko a vzadu v ústní dutině; rty nejsou zaokrouhlené.,31
+32,sound,ʌ,"Krátká samohláska ve střední, mírně zadní poloze; rty nejsou zaokrouhlené.",32
+33,sound,ɔ,"Jazyk je v zadní, nižší poloze a rty jsou zaokrouhlené; někteří američtí mluvčí ji slévají s /ɑ/.",33
+34,sound,ə,"Krátká, uvolněná samohláska ve střední poloze; objevuje se hlavně v nepřízvučných slabikách.",34
+35,sound,ɝ,Přízvučná středová samohláska se zabarvením amerického /ɹ/.,35
+36,sound,ɚ,Nepřízvučná středová samohláska se zabarvením amerického /ɹ/.,36
+37,sound,eɪ,Začíná ve střední přední poloze a plynule klouže vysoko směrem k /ɪ/.,37
+38,sound,aɪ,Začíná otevřeně a plynule klouže vysoko dopředu k /ɪ/.,38
+39,sound,aʊ,Začíná otevřeně a plynule klouže vysoko dozadu k /ʊ/.,39
+40,sound,oʊ,Začíná ve střední zadní poloze s mírně zaokrouhlenými rty a klouže k /ʊ/.,40
+41,sound,ɔɪ,Začíná v zadní zaokrouhlené poloze a plynule klouže dopředu k /ɪ/.,41
+42,pronunciation,θ | t,U /θ/ vzduch souvisle proudí kolem jazyka u zubů; /t/ začíná úplným uzávěrem za horními zuby.,42
+43,pronunciation,ð | d,"Obě hlásky jsou znělé; /ð/ tvoří souvislé tření u zubů, /d/ krátký uzávěr a jeho uvolnění.",43
+44,pronunciation,θ | ð,"Poloha jazyka je podobná; rozdíl je ve znělosti: u /ð/ kmitají hlasivky, u /θ/ ne.",44
+45,pronunciation,v | w,U /v/ se zuby dotýkají dolního rtu a vzniká tření; u /w/ se zaokrouhlí oba rty a hláska plynule přechází do samohlásky.,45
+46,pronunciation,ɪ | i,"/ɪ/ je kratší, uvolněnější a otevřenější; /i/ je napjatější a v přízvučné slabice obvykle delší.",46
+47,pronunciation,ɛ | æ,U /æ/ klesne čelist níž a ústa se otevřou více než u /ɛ/.,47
+48,pronunciation,ʊ | u,/ʊ/ je kratší a uvolněnější; /u/ je napjatější a vyslovuje se s vyšší polohou jazyka.,48
+49,pronunciation,ʌ | ɑ,"/ʌ/ je středovější a méně otevřená; /ɑ/ je otevřená, s jazykem nízko a vzadu.",49
+50,pronunciation,n | ŋ,U /n/ se uzávěr tvoří špičkou jazyka za horními zuby; u /ŋ/ zadní částí jazyka u měkkého patra.,50
+51,pronunciation,ŋ | ŋk,Ve *sing* slovo končí hláskou /ŋ/; ve *sink* po ní následuje ještě samostatné /k/.,51
+52,pronunciation,ɹ | l,U /ɹ/ se jazyk nedotýká patra a vzduch proudí středem; u /l/ se špička jazyka dotkne dásní a vzduch proudí po stranách.,52
+53,pronunciation,f | v,"Poloha rtů a zubů je stejná; u /v/ navíc kmitají hlasivky, u /f/ ne.",53
+54,pronunciation,s | z,Poloha jazyka je stejná; /z/ je znělé a /s/ neznělé.,54
+55,pronunciation,ʃ | tʃ,"/ʃ/ tvoří souvislé tření; /tʃ/ začíná úplným uzávěrem, který se uvolní do tření.",55
+56,pronunciation,j | dʒ,/j/ je plynulý skluz jazyka bez uzávěru; /dʒ/ začíná uzávěrem a přechází do znělého tření.,56
+57,topic,Osobní zájmena,,1
+58,grammar,Být,,1
+59,grammar,Být - základní tvary,<p>Sloveso <b>být</b> je v angličtině nepravidelné a má různé tvary podle osoby a času.</p>,2
+60,grammar,Být - zkrácené tvary,<p>V mluveném jazyce se častěji používají zkrácené tvary slovesa být.</p>,3
