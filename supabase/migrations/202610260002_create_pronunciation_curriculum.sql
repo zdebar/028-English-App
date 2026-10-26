@@ -10,6 +10,10 @@ BEGIN
     RAISE EXCEPTION 'Clear public.lessons before applying the pronunciation curriculum migration';
   END IF;
 
+  IF EXISTS (SELECT 1 FROM public.groups) THEN
+    RAISE EXCEPTION 'Clear public.groups before applying the pronunciation curriculum migration';
+  END IF;
+
   IF NOT EXISTS (
     SELECT 1 FROM public.levels WHERE name = 'A1' AND deleted_at IS NULL
   ) THEN
@@ -137,31 +141,19 @@ INSERT INTO curriculum_sounds(name, sort_order) VALUES
   ('oʊ', 40),
   ('ɔɪ', 41);
 
-UPDATE public.groups existing
-SET note = NULL,
-    sort_order = sound.sort_order,
-    deleted_at = NULL,
-    updated_at = NOW()
-FROM curriculum_sounds sound
-WHERE existing.type = 'sound'
-  AND existing.name = sound.name;
+INSERT INTO public.groups(id, type, name, note, sort_order)
+SELECT sound.sort_order, 'sound', sound.name, NULL, sound.sort_order
+FROM curriculum_sounds sound;
 
-INSERT INTO public.groups(type, name, note, sort_order)
-SELECT 'sound', sound.name, NULL, sound.sort_order
+UPDATE public.lessons lesson
+SET group_id = sound.sort_order
 FROM curriculum_sounds sound
-WHERE NOT EXISTS (
-  SELECT 1
-  FROM public.groups existing
-  WHERE existing.type = 'sound'
-    AND existing.name = sound.name
-    AND existing.deleted_at IS NULL
+WHERE lesson.id = sound.sort_order;
+
+SELECT setval(
+  pg_get_serial_sequence('public.groups', 'id'),
+  (SELECT MAX(id) FROM public.groups),
+  TRUE
 );
-
-UPDATE public.groups
-SET deleted_at = NOW(),
-    updated_at = NOW()
-WHERE type = 'sound'
-  AND deleted_at IS NULL
-  AND name NOT IN (SELECT name FROM curriculum_sounds);
 
 COMMIT;
