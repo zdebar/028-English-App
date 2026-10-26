@@ -6,6 +6,7 @@ import {
   type OverviewAvailabilityData,
   type OverviewQueryName,
 } from './overview-query-store';
+import { observeSharedQuery } from './shared-query-store';
 import { useEffect, useState } from 'react';
 
 export type OverviewAvailability = Readonly<{
@@ -84,10 +85,11 @@ export function useOverviewAvailability(
     ];
 
     const subscriptions = queries.map(([key, queryName]) => {
-      const { store } = getOverviewSharedQuery(userId, queryName);
-      const update = () => {
+      const unsubscribe = observeSharedQuery(
+        JSON.stringify([userId, queryName]), queryName,
+        getOverviewSharedQuery(userId, queryName).query,
+        ({ data, loading, error }) => {
         if (!isActive) return;
-        const { data, loading, error } = store.getState();
         if (loading) return;
         setDatabaseState((current) => ({
           ...current,
@@ -97,9 +99,7 @@ export function useOverviewAvailability(
           reportError(`Failed to observe ${key} overview availability`, error);
           showToast(TEXTS.loadingError, 'error');
         }
-      };
-      const unsubscribe = store.subscribe(update);
-      update();
+      });
       return unsubscribe;
     });
 

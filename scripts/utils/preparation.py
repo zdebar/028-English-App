@@ -4,7 +4,7 @@ import os
 import pandas as pd
 from typing import Any, List
 
-INT_COLUMNS = {"id", "sort_order", "block_id", "note_id", "topic_id", "grammar_chunks_id", "lesson_id"}
+INT_COLUMNS = {"id", "sort_order", "note_id", "lesson_id"}
 
 
 def clean_data_frame(df: pd.DataFrame) -> pd.DataFrame:
@@ -57,7 +57,7 @@ def _clean_and_convert_col(col: str, value: Any) -> Any:
 def read_vocab_csv(
     file_path: str,
     columns: List[str] = [
-        "id", "czech", "english", "pronunciation", "audio", "sort_order", "block_id", "note_id", "topic_id", "grammar_id"
+        "id", "czech", "english", "pronunciation", "audio", "sort_order", "note_id", "grammar_id"
     ],
 ) -> pd.DataFrame:
     """Read a vocabulary CSV, add missing requested columns, and normalize configured int columns."""
@@ -76,7 +76,7 @@ def read_vocab_csv(
 
 
 def fill_is_vocabulary(df: pd.DataFrame) -> pd.DataFrame:
-    """Preserve explicit values and derive missing ones from grammar_chunk_id."""
+    """Preserve explicit values and default missing values to vocabulary items."""
     df = df.copy()
     if "is_vocabulary" not in df.columns:
         df["is_vocabulary"] = ""
@@ -86,10 +86,7 @@ def fill_is_vocabulary(df: pd.DataFrame) -> pd.DataFrame:
 
     explicit_values = df["is_vocabulary"].astype("string").str.strip()
     missing_values = explicit_values.isna() | explicit_values.eq("")
-    grammar_chunk_values = df["grammar_chunk_id"].astype("string").str.strip()
-    derived_values = grammar_chunk_values.isna() | grammar_chunk_values.eq("")
-
-    df.loc[missing_values, "is_vocabulary"] = derived_values.loc[missing_values]
+    df.loc[missing_values, "is_vocabulary"] = True
     return df
 
 def redo_id(df, start_id=1):

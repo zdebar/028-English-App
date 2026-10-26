@@ -6,7 +6,7 @@ import { SupabaseError } from '@/types/error.types';
 import { Entity } from 'dexie';
 import type AppDB from './app-db';
 
-const DEFAULT_DAILY_NEW_LESSON_LIMIT = 1;
+const DEFAULT_DAILY_NEW_LESSON_LIMIT = config.practice.dailyStartedLessonLimit;
 
 export default class UserSettings extends Entity<AppDB> implements UserSettingsType {
   id!: string;

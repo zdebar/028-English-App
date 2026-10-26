@@ -17,13 +17,17 @@
     @apply disabled:border-disabled-light dark:disabled:border-disabled-dark disabled:border disabled:border-dashed;
   }
 
+  .preserve-disabled-text-color:disabled {
+    color: var(--color-light);
+  }
+
+  .dark .preserve-disabled-text-color:disabled {
+    color: var(--color-dark);
+  }
+
   .color-button:not(:disabled):hover,
   .secondary-control-button:not(:disabled):hover {
     @apply brightness-103 saturate-98 dark:brightness-112;
-  }
-
-  .color-button.preserve-disabled-text-color:disabled {
-    @apply text-light dark:text-dark opacity-100;
   }
 
   .color-info {

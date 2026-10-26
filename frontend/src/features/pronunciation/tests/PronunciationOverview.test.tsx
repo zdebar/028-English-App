@@ -91,6 +91,10 @@ vi.mock('@/components/UI/OverviewCard', () => ({
   ),
 }));
 
+vi.mock('../use-pronunciation-groups-store-sync', () => ({
+  usePronunciationGroupsStoreSync: vi.fn(),
+}));
+
 vi.mock('@/components/UI/DataState', () => ({
   DataState: ({ hasData, noDataMessage, children }: any) =>
     hasData ? children : <p>{noDataMessage}</p>,
@@ -101,6 +105,9 @@ vi.mock('@/locales/cs', () => ({
     pronunciationGroups: 'Skupiny výslovnosti',
     noPronunciationGroups: 'No groups',
     noPronunciationGroupItems: 'No items',
+    pronunciationSettings: 'Porovnání hlásek',
+    pronunciationConsonants: 'Souhlásky',
+    pronunciationVowels: 'Samohlásky',
     noAudio: 'No audio',
     loadingError: 'Loading error',
     pronunciationStartedHelp: 'odemčeno/celkem položek',
@@ -125,6 +132,7 @@ describe('Pronunciation overview screens', () => {
       {
         id: 1,
         name: '/æ/ × /e/',
+        isActive: true,
         examples: ['man', 'men'],
         unlocked_count: 2,
         total_count: 3,

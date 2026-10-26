@@ -22,7 +22,7 @@ describe('LessonTrainingOverviewCard', () => {
       <MemoryRouter initialEntries={['/practice/new-lesson']}>
         <LessonTrainingOverviewCard
           lesson={{ name: 'Lesson A' }}
-          groupNotes={[]}
+          groupNote={null}
           onContinue={onContinue}
         />
         <LocationProbe />

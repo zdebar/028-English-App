@@ -1,8 +1,8 @@
 import config from '@/config/config';
 import Levels from '@/database/models/levels';
 import { reportError } from '@/features/logging/monitoring-handler';
-import { liveQuery } from 'dexie';
 import { useEffect, useState } from 'react';
+import { observeSharedQuery, sharedQueryKey } from '@/hooks/shared-query-store';
 import { useUserStore } from './use-user-store';
 
 function getLocalDate(): string {
@@ -46,8 +46,14 @@ export function useUserStoreSync(userId: string | null) {
       levelsError: null,
     });
 
-    const levelsSubscription = liveQuery(() => Levels.getOverview(userId, localDate)).subscribe({
-      next: (levels) => {
+    const key = sharedQueryKey(userId, `user-stats:${localDate}`)!;
+    const unsubscribe = observeSharedQuery(key, 'user-stats', () => Levels.getOverview(userId, localDate), ({ data: levels, error }) => {
+      if (error) {
+        useUserStore.setState({ levels: [], levelsLoading: false, levelsError: toError(error) });
+        reportError('Error observing levels', error);
+        return;
+      }
+      if (levels) {
         if (isActive) {
           const nextLevels = levels ?? [];
           useUserStore.setState({
@@ -56,22 +62,12 @@ export function useUserStoreSync(userId: string | null) {
             levelsError: null,
           });
         }
-      },
-      error: (error) => {
-        if (isActive) {
-          useUserStore.setState({
-            levels: [],
-            levelsLoading: false,
-            levelsError: toError(error),
-          });
-          reportError('Error observing levels', error);
-        }
-      },
+      }
     });
 
     return () => {
       isActive = false;
-      levelsSubscription.unsubscribe();
+      unsubscribe();
     };
   }, [userId, localDate, clearItemsStats]);
 }

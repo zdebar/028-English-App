@@ -1,4 +1,8 @@
 const config = {
+  liveState: {
+    defaultRelease: true,
+    releaseByFeature: {} as Record<string, boolean>,
+  },
   sync: {
     fullSyncInterval: 7 * 24 * 60 * 60 * 1000, // Interval for performing a full sync in milliseconds (7 days)
     periodicSyncInterval: 24 * 60 * 60 * 1000, // Interval for periodic sync in milliseconds (1 day)
@@ -14,7 +18,7 @@ const config = {
   },
 
   progress: {
-    simulationLessonCount: 10,
+    simulationLessonCount: 100,
     simulationItemProgress: 1,
   },
 
@@ -33,7 +37,7 @@ const config = {
       repeat: -1,
       hard: 0,
       good: 1,
-      easy: 3,
+      easy: 4,
     },
     randomness: 0.2, // Randomness of SRS algorithm
   },
@@ -46,7 +50,7 @@ const config = {
   practice: {
     grammarReviewLimitSize: 50, // New training locks only above this grammar review count
     vocabularyReviewLimitSize: 50, // New training locks only above this vocabulary review count
-    dailyStartedGoal: 50, // Daily started-item goal used in the practice overview
+    dailyStartedLessonLimit: 5, // Default daily lesson limit
     audioDelay: 100, // Delay in milliseconds for automatically playing audio
     holdDuration: 300, // Duration in milliseconds for which the practice card is held before moving to the next item
     maxReviewReadyTimerDelayMs: 2_147_483_647, // Maximum setTimeout delay supported by browsers

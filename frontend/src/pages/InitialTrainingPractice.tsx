@@ -45,7 +45,7 @@ function InitialTrainingContent({
     return (
       <LessonTrainingOverviewCard
         lesson={deck.lesson}
-        groupNotes={deck.groupNotes}
+        groupNote={deck.groupNote}
         items={deck.items}
         onContinue={dismissIntro}
       />

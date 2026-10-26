@@ -2,12 +2,15 @@ import Notification from '@/components/UI/Notification';
 import HelpText from '@/features/help/HelpText';
 import { useUserStore } from '@/features/user-stats/use-user-store';
 import { ARIA_TEXTS, TEXTS } from '@/locales/cs';
+import { useAuthStore } from '@/features/auth/use-auth-store';
+import { useUserStoreSync } from '@/features/user-stats/use-user-store-sync';
 
 type DashboardProps = Readonly<{
   className?: string;
 }>;
 
 export default function Dashboard({ className = '' }: DashboardProps) {
+  useUserStoreSync(useAuthStore((state) => state.userId));
   const levels = useUserStore((state) => state.levels);
   const levelsLoading = useUserStore((state) => state.levelsLoading);
 
@@ -34,7 +37,7 @@ export default function Dashboard({ className = '' }: DashboardProps) {
   return (
     <section
       className={`min-w-card relative mx-auto flex w-full flex-row gap-0.5 ${className}`}
-      aria-label={TEXTS.lessonOverview}
+      aria-label={ARIA_TEXTS.dashboardRegion}
     >
       <HelpText className="-top-7 right-0">{TEXTS.lessonOverview}</HelpText>
       {levels

@@ -8,11 +8,9 @@ import IdentityLinkConflictModal from '@/features/auth/IdentityLinkConflictModal
 import OverlayMask from '@/features/overlay/OverlayMask';
 import { useThemeLoader } from '@/features/theme/use-theme-loader';
 import ToastContainer from '@/features/toast/ToastContainer';
-import { useUserStoreSync } from '@/features/user-stats/use-user-store-sync';
 import { Outlet } from 'react-router-dom';
 import './styles/index.css';
 import { useAudioLoader } from './features/audio/use-audio-loader';
-import { usePronunciationGroupsStoreSync } from './features/pronunciation/use-pronunciation-groups-store-sync';
 import { useResponsiveLayout } from './components/Layout/use-responsive-layout';
 import { useSideHeaderOrientation } from './components/Layout/use-side-header-orientation';
 
@@ -22,8 +20,6 @@ export default function App() {
 
   usePracticeAvailabilityStoreSync(userId);
   useAudioLoader(userId);
-  useUserStoreSync(userId);
-  usePronunciationGroupsStoreSync(userId);
   useThemeLoader(userId, authLoading);
   usePeriodicSync(userId);
   const { headerLayout, secondaryLayout } = useResponsiveLayout();
@@ -33,7 +29,7 @@ export default function App() {
     <>
       {/* <GoogleAnalytics /> */}
       <div
-        className="app-shell max-w-container relative mx-auto flex flex-col justify-start"
+        className="app-shell max-w-container relative mx-auto flex flex-col justify-start pb-1"
         data-header-layout={headerLayout}
         data-secondary-layout={secondaryLayout}
         data-side-header-orientation={sideHeaderOrientation}

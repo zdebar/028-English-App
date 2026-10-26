@@ -10,6 +10,7 @@ type BilingualItemButtonProps = Readonly<{
   className?: string;
   leadingLanguage?: 'czech' | 'english';
   showPronunciation?: boolean;
+  title?: string;
 }>;
 
 function pronunciationTitle(pronunciation: string): string {
@@ -92,7 +93,7 @@ function useBilingualItemLayout(
 
 /** A shared, content-aware Czech/English item row used by all item lists. */
 export default function BilingualItemButton({ ...props }: BilingualItemButtonProps) {
-  const { item, onClick, disabled, className, leadingLanguage, showPronunciation } = {
+  const { item, onClick, disabled, className, leadingLanguage, showPronunciation, title: customTitle } = {
     disabled: false,
     className: '',
     leadingLanguage: 'czech' as const,
@@ -111,7 +112,7 @@ export default function BilingualItemButton({ ...props }: BilingualItemButtonPro
   );
 
   const audioTitle = pronunciationTitle(item.pronunciation);
-  const title = truncated
+  const title = customTitle ?? (truncated
     ? [
         `${TEXTS.czech ?? 'Čeština'}: ${item.czech}`,
         `${TEXTS.english ?? 'Angličtina'}: ${item.english}`,
@@ -119,7 +120,7 @@ export default function BilingualItemButton({ ...props }: BilingualItemButtonPro
       ]
         .filter(Boolean)
         .join('\n')
-    : audioTitle || undefined;
+    : audioTitle || undefined);
 
   const czechText = (
     <span
@@ -142,7 +143,7 @@ export default function BilingualItemButton({ ...props }: BilingualItemButtonPro
   const languageTexts =
     leadingLanguage === 'english' ? [englishText, czechText] : [czechText, englishText];
   const itemHeightClass = getItemHeightClass(stacked, showPronunciation);
-  const shouldStack = showPronunciation ? false : stacked;
+  const shouldStack = shouldStackLanguageTexts(stacked, showPronunciation);
 
   return (
     <ListButton
@@ -171,4 +172,9 @@ function getItemHeightClass(stacked: boolean, showPronunciation: boolean): strin
   if (showPronunciation) return '';
   if (stacked) return 'min-h-[calc(var(--height-input)*2)]';
   return '';
+}
+
+function shouldStackLanguageTexts(stacked: boolean, showPronunciation: boolean): boolean {
+  if (showPronunciation) return false;
+  return stacked;
 }

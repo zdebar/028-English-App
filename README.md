@@ -135,8 +135,8 @@ and keeps user progress local-first through IndexedDB. The main feature areas ar
   conversion, sign-out, and soft-delete/reactivation support.
 - Unified vocabulary/grammar review and inline new-grammar learning with local
   progress saves, audio playback, daily score updates, and sync-backed recovery.
-- Home readiness buttons, dashboard stats, practice overview, and overview pages
-  for levels, blocks, grammar, and vocabulary.
+- Home readiness buttons and a non-clickable progress dashboard, plus overview
+  pages for sounds, pronunciation, grammar, topics, and vocabulary.
 - Periodic, logout, and unmount synchronization for user progress and shared
   content, plus audio archive synchronization.
 - Global UI infrastructure for theme, toast, help, overlay, PWA install prompt,

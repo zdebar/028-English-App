@@ -84,7 +84,7 @@ describe('useOverviewAvailability', () => {
     expect(result.current.sounds.hasData).toBe(false);
   });
 
-  it('retains live queries after the page unmounts and disposes them on sign-out', async () => {
+  it('releases its live queries after the page unmounts', async () => {
     const { result, unmount } = renderHook(() => useOverviewAvailability('u1'));
     await waitFor(() => expect(mocks.observers).toHaveLength(4));
 
@@ -93,7 +93,7 @@ describe('useOverviewAvailability', () => {
 
     const unsubscribeFunctions = mocks.observers.map((observer) => observer.unsubscribe);
     unmount();
-    unsubscribeFunctions.forEach((unsubscribe) => expect(unsubscribe).not.toHaveBeenCalled());
+    unsubscribeFunctions.forEach((unsubscribe) => expect(unsubscribe).toHaveBeenCalledOnce());
     clearSharedQueriesExcept(null);
     unsubscribeFunctions.forEach((unsubscribe) => expect(unsubscribe).toHaveBeenCalledOnce());
   });

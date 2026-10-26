@@ -6,7 +6,6 @@ import type { JSX } from 'react';
 import { Link } from 'react-router-dom';
 import { InstallPWAButton } from '@/features/pwa/InstallPwaButton';
 import { useSyncStore } from '@/features/synchronization/use-sync-store';
-import { ROUTES } from '@/config/routes.config';
 import GoogleAuthButton from '@/features/auth/GoogleAuthButton';
 import AnonymousSigninButton from '@/features/auth/AnonymousSigninButton';
 import ConvertAnonymousUserButton from '@/features/auth/ConvertAnonymousUserButton';
@@ -19,11 +18,11 @@ const HOME_TEXT_ACTION_CLASS_NAME =
 
 function HomeActionLinks(): JSX.Element {
   return (
-    <div className="flex items-center justify-center gap-2 px-4">
-      <InstallPWAButton className={`pr-4 ${HOME_TEXT_ACTION_CLASS_NAME}`} />
+    <div className="flex items-center justify-center gap-6 px-4">
       <Link to="/guide" className={HOME_TEXT_ACTION_CLASS_NAME}>
         {TEXTS.guide}
       </Link>
+      <InstallPWAButton className={`${HOME_TEXT_ACTION_CLASS_NAME}`} />
     </div>
   );
 }
@@ -50,7 +49,7 @@ export default function Home(): JSX.Element {
   return (
     <>
       {userId ? (
-        <div className="card-width relative flex h-full w-full grow flex-col justify-start gap-1">
+        <div className="card-width relative flex h-full w-full grow flex-col justify-start gap-8">
           <div className="flex flex-col gap-0">
             <div className="mt-2 landscape:mt-6">
               <HomeActionLinks />
@@ -58,17 +57,14 @@ export default function Home(): JSX.Element {
             <p className={`text-error-light dark:text-error-dark px-4 text-center text-sm`}>
               Aplikace v testovacím režimu! V tuto chvíli Vaše tréninková data nebudou zachována.
             </p>
-            {isAnonymousUser && (
-              <div className="flex flex-col gap-1">
-                <ConvertAnonymousUserButton />
-                <SimulateDataButton />
-              </div>
-            )}
-            <Link to={ROUTES.practiceOverview} className={HOME_TEXT_ACTION_CLASS_NAME}>
-              {TEXTS.practiceOverviewTitle}
-            </Link>
           </div>
-          <div className="my-4 flex w-full flex-col">
+          {isAnonymousUser && (
+            <div className="flex flex-col gap-1">
+              <ConvertAnonymousUserButton />
+              <SimulateDataButton />
+            </div>
+          )}
+          <div className="flex w-full flex-col">
             <PracticeButton />
           </div>
           <div className="relative">
@@ -77,7 +73,7 @@ export default function Home(): JSX.Element {
             >
               {TEXTS.syncWarning}
             </p>
-            <div className="home-bottom-controls-clearance relative mt-2">
+            <div className="home-bottom-controls-clearance relative">
               <Dashboard />
               <div className="pos-home-dashboard-help">
                 <HelpButton />
@@ -87,14 +83,14 @@ export default function Home(): JSX.Element {
         </div>
       ) : (
         <div className="card-width w-full">
-          <h1 className="mx-auto mt-4">{TEXTS.appTitle}</h1>
-          <p className="mx-auto my-4 landscape:hidden">{TEXTS.appDescription}</p>
+          <h1 className="mx-auto">{TEXTS.appTitle}</h1>
+          <p className="mx-auto landscape:hidden">{TEXTS.appDescription}</p>
           <HomeActionLinks />
-          <div className="flex flex-col gap-1 pt-4">
+          <div className="flex flex-col gap-1 pt-8">
             <AnonymousSigninButton />
             <GoogleAuthButton />
           </div>
-          <p className="p-4 text-sm">{TEXTS.signupHint}</p>
+          <p className="p-4 text-center text-sm">{TEXTS.signupHint}</p>
         </div>
       )}
     </>

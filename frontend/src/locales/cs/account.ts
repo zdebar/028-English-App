@@ -2,7 +2,7 @@ export const ACCOUNT_TEXTS = {
   // Profile
   profileNameLabel: 'Uživatel',
   profileEmailLabel: 'E-mail',
-  profileDailyNewLessonLimit: 'Nové lekce za den',
+  profileDailyNewLessonLimit: 'Max. nové lekce za den',
   profileDailyNewLessonLimitHint: 'Kolik nových lekcí lze zahájit během jednoho dne.',
   profileFullSyncButton: 'Plná synchronizace',
   profileFullSyncInProgress: 'Synchronizuji…',

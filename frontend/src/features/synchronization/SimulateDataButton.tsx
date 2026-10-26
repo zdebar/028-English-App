@@ -1,4 +1,5 @@
 import { useCallback, useState, type JSX } from 'react';
+import config from '@/config/config';
 import SigninButton from '@/features/auth/SigninButton';
 import { simulateUserProgress } from '@/features/synchronization/simulate-data-service';
 import { useToastStore } from '@/features/toast/use-toast-store';
@@ -49,7 +50,9 @@ export default function SimulateDataButton(): JSX.Element | null {
         label={TEXTS.simulateDataButton}
         signinLabel={TEXTS.simulateDataLoading}
       />
-      <p className="p-2 text-sm">{TEXTS.simulateDataExplanation}</p>
+      <p className="p-2 text-sm">
+        {TEXTS.simulateDataExplanation(config.progress.simulationLessonCount)}
+      </p>
       {showConfirmation && (
         <Modal
           onConfirm={simulateData}
@@ -57,7 +60,7 @@ export default function SimulateDataButton(): JSX.Element | null {
           confirmLabel={TEXTS.simulateDataConfirm}
         >
           <p className="font-bold">{TEXTS.simulateDataModalTitle}</p>
-          <p>{TEXTS.simulateDataModalText}</p>
+          <p>{TEXTS.simulateDataModalText(config.progress.simulationLessonCount)}</p>
         </Modal>
       )}
     </>

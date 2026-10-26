@@ -102,6 +102,10 @@ vi.mock('dexie-react-hooks', () => ({
     mocks.soundGroups ?? fallback,
 }));
 
+vi.mock('@/hooks/use-live-query-data', () => ({
+  useLiveQueryData: () => ({ data: mocks.soundGroups, loading: false, error: null }),
+}));
+
 vi.mock('@/locales/cs', () => ({
   TEXTS: {
     syncLoadingText: 'Sync loading',

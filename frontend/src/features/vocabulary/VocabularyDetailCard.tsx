@@ -26,8 +26,8 @@ import Groups from '@/database/models/groups';
 import PronunciationSoundDetailCard from '@/features/practice/PronunciationSoundDetailCard';
 import { getUniquePronunciationSounds, splitPronunciationIntoSounds } from '@/utils/pronunciation.utils';
 import type { GroupType } from '@/types/table.types';
-import { useLiveQuery } from 'dexie-react-hooks';
 import { useState } from 'react';
+import { useLiveQueryData } from '@/hooks/use-live-query-data';
 
 const NOT_AVAILABLE = TEXTS.notAvailable;
 
@@ -324,7 +324,7 @@ export default function VocabularyDetailCard({
   const cardValues = getVocabularyCardValues(selectedWord);
   const baseProperties = getBaseProperties(selectedWord);
   const directionSections = getDirectionSections(selectedWord);
-  const sounds = useLiveQuery(() => Groups.getSounds(), [], []) ?? [];
+  const { data: sounds } = useLiveQueryData(() => Groups.getSounds(), { emptyData: [], sharedKey: JSON.stringify(['global', 'sounds-catalog']) });
   const [pronunciationIndex, setPronunciationIndex] = useState<number | null>(null);
   const fullPronunciationSounds = splitPronunciationIntoSounds(cardValues.pronunciation, sounds);
   const pronunciationSounds = getUniquePronunciationSounds(fullPronunciationSounds);

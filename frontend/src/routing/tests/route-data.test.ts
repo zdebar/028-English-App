@@ -4,6 +4,7 @@ const mocks = vi.hoisted(() => ({
   hasGrammar: vi.fn(), hasTopics: vi.fn(), hasVocabulary: vi.fn(),
   topics: vi.fn(), vocabulary: vi.fn(),
   sounds: vi.fn(),
+  allSoundsForOverview: vi.fn(),
   loadReviewDeckData: vi.fn(),
 }));
 vi.mock('@/hooks/shared-query-store', () => ({
@@ -20,6 +21,7 @@ vi.mock('@/database/models/topics', () => ({ default: {
 } }));
 vi.mock('@/database/models/sound-groups', () => ({ default: {
   getOverview: (...args: unknown[]) => mocks.sounds(...args),
+  getAllForOverview: (...args: unknown[]) => mocks.allSoundsForOverview(...args),
   getDetail: vi.fn(),
 } }));
 vi.mock('@/database/models/grammar-groups', () => ({ default: {} }));
@@ -44,6 +46,7 @@ describe('route data queries', () => {
     mocks.hasTopics.mockResolvedValue(false);
     mocks.hasVocabulary.mockResolvedValue(true);
     mocks.sounds.mockResolvedValue([{ id: 4 }]);
+    mocks.allSoundsForOverview.mockResolvedValue([{ id: 4, isActive: true }]);
     await expect(overviewAvailabilityDescriptor('u1').load()).resolves.toEqual({
       grammar: true, topics: false, vocabulary: true, sounds: true,
     });
@@ -56,9 +59,10 @@ describe('route data queries', () => {
     const vocabulary = [{ item_id: 1, english: 'word' }];
     mocks.topics.mockResolvedValue(topics);
     mocks.vocabulary.mockResolvedValue(vocabulary);
+    mocks.allSoundsForOverview.mockResolvedValue([{ id: 4, isActive: true }]);
     await expect(topicsDescriptor('u1').load()).resolves.toBe(topics);
     await expect(vocabularyDescriptor('u1').load()).resolves.toBe(vocabulary);
-    await expect(soundsDescriptor('u1').load()).resolves.toEqual([{ id: 4 }]);
+    await expect(soundsDescriptor('u1').load()).resolves.toEqual([{ id: 4, isActive: true }]);
     expect(mocks.hasTopics).not.toHaveBeenCalled();
     expect(mocks.hasVocabulary).not.toHaveBeenCalled();
   });

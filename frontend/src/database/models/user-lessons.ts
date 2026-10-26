@@ -16,6 +16,10 @@ export default class UserLesson extends Entity<AppDB> implements UserLessonType 
     await db.user_lessons.put({ user_id: userId, lesson_id: lessonId, started_at: startedAt });
   }
 
+  static getByUserId(userId: string): Promise<UserLessonType[]> {
+    return db.user_lessons.where('user_id').equals(userId).toArray();
+  }
+
   /** Records a lesson's first daily start while enforcing the current daily limit. */
   static startIfAllowed(
     userId: string,

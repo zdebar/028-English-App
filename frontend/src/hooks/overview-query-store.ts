@@ -13,8 +13,7 @@ export type OverviewQueryName =
   | 'grammar'
   | 'topics'
   | 'vocabulary'
-  | 'sounds'
-  | 'practice-overview';
+  | 'sounds';
 
 export type OverviewQueryData = {
   'has-grammar': boolean;
@@ -24,8 +23,7 @@ export type OverviewQueryData = {
   grammar: GrammarTopicWithGroups[];
   topics: Awaited<ReturnType<typeof Topic.getInitiatedByUserId>>;
   vocabulary: UserItemLocal[];
-  sounds: Awaited<ReturnType<typeof SoundGroup.getOverview>>;
-  'practice-overview': UserItemLocal[];
+  sounds: Awaited<ReturnType<typeof SoundGroup.getAllForOverview>>;
 };
 
 export type OverviewAvailabilityData = Readonly<{
@@ -44,7 +42,6 @@ const OVERVIEW_QUERY_NAMES: readonly OverviewQueryName[] = [
   'topics',
   'vocabulary',
   'sounds',
-  'practice-overview',
 ];
 
 export function getOverviewQuery<T extends OverviewQueryName>(
@@ -68,9 +65,7 @@ export function getOverviewQuery<T extends OverviewQueryName>(
       case 'vocabulary':
         return UserItem.getInitiatedVocabulary(userId) as Promise<OverviewQueryData[T]>;
       case 'sounds':
-        return SoundGroup.getOverview(userId) as Promise<OverviewQueryData[T]>;
-      case 'practice-overview':
-        return UserItem.getByUserId(userId) as Promise<OverviewQueryData[T]>;
+        return SoundGroup.getAllForOverview(userId) as Promise<OverviewQueryData[T]>;
     }
   };
 }

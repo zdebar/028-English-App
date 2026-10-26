@@ -74,9 +74,11 @@ vi.mock('@/locales/cs', () => ({
     simulateDataLoading: 'Simuluji data ...',
     simulateDataTooltip: 'Simulate tooltip',
     simulateDataModalTitle: 'Destructive simulation',
-    simulateDataModalText: 'Progress will be overwritten.',
+    simulateDataModalText: (lessonCount: number) =>
+      `Progress will be overwritten after ${lessonCount} lessons.`,
     simulateDataConfirm: 'Overwrite data',
-    simulateDataExplanation: 'Simulation explanation',
+    simulateDataExplanation: (lessonCount: number) =>
+      `Simulation explanation for ${lessonCount} lessons.`,
     simulateDataSuccessToast: 'Data byla úspěšně simulována.',
     simulateDataErrorToast: 'Chyba při simulaci dat.',
   },

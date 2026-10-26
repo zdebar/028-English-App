@@ -16,7 +16,7 @@ export default function PracticeEndState({
     <div className="card-width max-h-card h-full w-full grow">
       <div className="flex h-full grow flex-col justify-center">
         <Notification>{message}</Notification>
-        {secondaryMessage && <div className={`mt-4 text-center text-lg`}>{secondaryMessage}</div>}
+        {secondaryMessage && <Notification>{secondaryMessage}</Notification>}
       </div>
       <ReturnHomeButton />
     </div>

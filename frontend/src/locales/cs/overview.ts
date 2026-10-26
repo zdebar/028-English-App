@@ -1,7 +1,6 @@
 export const OVERVIEW_TEXTS = {
   // Home lesson progress grid
   lessonOverview: 'přehled započatých lekcí',
-  lessonsOverview: 'Přehled lekcí',
   noLessons: 'Nejsou dostupné žádné lekce.',
   lessonStarted: 'zahájena',
   lessonNotStarted: 'nezahájena',
@@ -16,6 +15,12 @@ export const OVERVIEW_TEXTS = {
   // Topics Overview Page
   noTopics: 'Žádná započatá témata.',
   soundsOverview: 'Přehled hlásek',
+  shortVowels: 'krátké samohlásky',
+  longVowels: 'dlouhé samohlásky',
+  doubleVowelSounds: 'dvojhlásky',
+  voicelessConsonants: 'neznělé souhlásky',
+  voicedConsonants: 'znělé souhlásky',
+  otherConsonants: 'ostatní souhlásky',
   noSounds: 'Žádné odemčené hlásky.',
   noSoundItems: 'Pro tuto hlásku nejsou dostupné příklady.',
   resetSoundTitle: 'Restartovat hlásku',
@@ -55,7 +60,9 @@ export const OVERVIEW_TEXTS = {
   // Overviews Page
   overviews: 'Přehledy',
   progressOverviews: 'Pokrok',
-  pronunciationSettings: 'Přehled výslovnosti',
+  pronunciationSettings: 'Porovnání hlásek',
+  pronunciationConsonants: 'souhlásky',
+  pronunciationVowels: 'samohlásky',
   topicsOverview: 'Přehled témat',
   topicsOverviewTooltip: 'Přehled tematických skupin',
   grammarOverview: 'Přehled gramatiky',
@@ -64,6 +71,9 @@ export const OVERVIEW_TEXTS = {
   vocabularyOverviewTooltip: 'Přehled započatých slovíček',
   pronunciationGroups: 'Skupiny výslovnosti',
   pronunciationGroupsTooltip: 'Skupiny podobně znějících položek',
+  playRandomWord: 'Přehrát náhodné slovo',
+  clickToRevealRandomWord: 'Kliknutím zobrazte',
+  playNextRandomWordTooltip: 'Kliknutím přehrajete další náhodné slovo',
   pronunciationStartedHelp: 'odemčeno/celkem položek',
   noPronunciationGroups: 'Žádné dostupné skupiny výslovnosti.',
   noPronunciationGroupItems: 'V této skupině nejsou dostupná slovíčka.',
