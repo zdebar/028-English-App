@@ -101,6 +101,9 @@ vi.mock('@/locales/cs', () => ({
     pronunciationGroups: 'Skupiny výslovnosti',
     noPronunciationGroups: 'No groups',
     noPronunciationGroupItems: 'No items',
+    pronunciationSettings: 'Porovnání hlásek',
+    pronunciationConsonants: 'Souhlásky',
+    pronunciationVowels: 'Samohlásky',
     noAudio: 'No audio',
     loadingError: 'Loading error',
     pronunciationStartedHelp: 'odemčeno/celkem položek',
@@ -125,6 +128,7 @@ describe('Pronunciation overview screens', () => {
       {
         id: 1,
         name: '/æ/ × /e/',
+        isActive: true,
         examples: ['man', 'men'],
         unlocked_count: 2,
         total_count: 3,

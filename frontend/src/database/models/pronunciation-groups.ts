@@ -18,13 +18,30 @@ function isAvailable(item: UserItemLocal): boolean {
 export default class PronunciationGroup {
   static async getOverview(userId: string): Promise<PronunciationGroupOverviewType[]> {
     const groups = await this.getVisibleGroups(userId);
+    const [activeSoundGroups, relations] = await Promise.all([
+      Groups.getByTypeWithStartedLessons(userId, 'sound'),
+      db.group_relations.toArray(),
+    ]);
+    const activeSoundGroupIds = new Set(activeSoundGroups.map((group) => group.id));
+    const relationsByPronunciationGroup = new Map<number, number[]>();
+    for (const relation of relations) {
+      if (relation.relation_type !== 'contrast' || relation.deleted_at) continue;
+      const relatedGroupIds = relationsByPronunciationGroup.get(relation.parent_group_id) ?? [];
+      relatedGroupIds.push(relation.child_group_id);
+      relationsByPronunciationGroup.set(relation.parent_group_id, relatedGroupIds);
+    }
+
     return groups.flatMap((group) => {
       const eligible = group.examples.filter(isEligible);
       const unlocked = eligible.filter(isAvailable);
+      const relatedSoundGroupIds = relationsByPronunciationGroup.get(group.id) ?? [];
       const { type: _type, ...groupData } = group;
       return [
         {
           ...groupData,
+          isActive:
+            relatedSoundGroupIds.length > 0 &&
+            relatedSoundGroupIds.every((groupId) => activeSoundGroupIds.has(groupId)),
           examples: unlocked.slice(0, 4).map((item) => item.english),
           unlocked_count: unlocked.length,
           total_count: eligible.length,
@@ -47,7 +64,7 @@ export default class PronunciationGroup {
       .filter((relation) => relation.relation_type === 'contrast' && !relation.deleted_at)
       .toArray();
     relations.sort((left, right) => left.sort_order - right.sort_order);
-    const startedGroups = await Groups.getStartedByUser(userId);
+    const startedGroups = await Groups.getStartedByUser(userId, 'sound');
     const startedGroupsById = new Map(startedGroups.map((startedGroup) => [startedGroup.id, startedGroup]));
     const contrastGroupIds = relations.map((relation) => relation.child_group_id);
     const memberships = await db.group_items

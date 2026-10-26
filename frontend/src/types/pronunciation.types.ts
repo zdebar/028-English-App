@@ -4,6 +4,7 @@ import type { GroupType } from './table.types';
 export type PronunciationGroupType = Omit<GroupType, 'type'>;
 
 export interface PronunciationGroupOverviewType extends PronunciationGroupType {
+  isActive: boolean;
   examples: string[];
   unlocked_count: number;
   total_count: number;
