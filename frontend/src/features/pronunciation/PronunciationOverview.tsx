@@ -35,6 +35,15 @@ function isVowelContrast(groupName: string): boolean {
   return phonemes.length > 0 && phonemes.every((phoneme) => VOWEL_PHONEMES.has(phoneme));
 }
 
+function splitContrastName(groupName: string): readonly [string, string] | null {
+  const separatorIndex = groupName.indexOf('|');
+  if (separatorIndex < 0) return null;
+  return [
+    groupName.slice(0, separatorIndex).trim(),
+    groupName.slice(separatorIndex + 1).trim(),
+  ];
+}
+
 export default function PronunciationOverview() {
   usePronunciationGroupsStoreSync(useAuthStore((state) => state.userId));
   const closeRoute = useRouteClose(ROUTES.overviews);
@@ -56,24 +65,39 @@ export default function PronunciationOverview() {
       <DataState loading={loading} hasData={hasData} noDataMessage={TEXTS.noPronunciationGroups}>
         <StackedList>
           {[
-            { title: TEXTS.pronunciationConsonants, groups: consonantGroups },
             { title: TEXTS.pronunciationVowels, groups: vowelGroups },
+            { title: TEXTS.pronunciationConsonants, groups: consonantGroups },
           ].map((category) => (
             <section key={category.title} className="flex flex-col gap-1">
               <div className={CATEGORY_HEADING_CLASS_NAME}>{category.title}</div>
               <div className="grid grid-cols-2 gap-1 min-[480px]:grid-cols-4">
-                {category.groups.map((group) => (
-                  <NavigationButton
-                    key={group.id}
-                    className="h-input w-full min-w-0 grow-0 px-1 text-center"
-                    title={group.name}
-                    aria-label={group.name}
-                    disabled={!group.isActive}
-                    to={ROUTES.pronunciationGroup.replace(':groupId', String(group.id))}
-                  >
-                    {group.name}
-                  </NavigationButton>
-                ))}
+                {category.groups.map((group) => {
+                  const contrastName = splitContrastName(group.name);
+                  return (
+                    <NavigationButton
+                      key={group.id}
+                      className="h-input w-full min-w-0 grow-0 px-1 text-center"
+                      title={group.name}
+                      aria-label={group.name}
+                      disabled={!group.isActive}
+                      to={ROUTES.pronunciationGroup.replace(':groupId', String(group.id))}
+                    >
+                      {contrastName ? (
+                        <span className="grid w-full grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center">
+                          <span className="overflow-hidden text-right text-ellipsis whitespace-nowrap">
+                            {contrastName[0]}
+                          </span>
+                          <span className="px-1">|</span>
+                          <span className="overflow-hidden text-left text-ellipsis whitespace-nowrap">
+                            {contrastName[1]}
+                          </span>
+                        </span>
+                      ) : (
+                        group.name
+                      )}
+                    </NavigationButton>
+                  );
+                })}
               </div>
             </section>
           ))}
