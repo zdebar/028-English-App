@@ -13,10 +13,11 @@ type UsePracticeCardStateOptions = {
 
 function isPracticeAudioDisabled(
   revealed: boolean,
+  isEnToCz: boolean,
   currentItem: UserItemLocal | null,
   audioError: boolean,
 ): boolean {
-  return !revealed || !currentItem?.audio || audioError;
+  return (!revealed && !isEnToCz) || !currentItem?.audio || audioError;
 }
 
 function getCzechText(currentItem: UserItemLocal | null): string | undefined {
@@ -123,7 +124,7 @@ export function usePracticeCardState({
     isPlaying,
   } = useAudioManager(currentItem?.audio ?? null);
 
-  const audioDisabled = isPracticeAudioDisabled(revealed, currentItem, audioError);
+  const audioDisabled = isPracticeAudioDisabled(revealed, isEnToCz, currentItem, audioError);
   usePracticeAudioPhases({
     currentItem,
     isEnToCz,

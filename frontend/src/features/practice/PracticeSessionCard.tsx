@@ -406,7 +406,7 @@ function getPracticeCardDisplayState(
       hasPronunciationSounds,
     ),
     showProgressLabel: props.isInitialTrainingPractice || props.showProgressLabel,
-    audioButtonDisabled: audioControlsDisabled || !revealed,
+    audioButtonDisabled: audioControlsDisabled || (!revealed && !props.czechHidden),
     grammarButtonDisabled: controlsLocked || grammarLoadFailed || !showGrammarButton,
     noteButtonDisabled: controlsLocked || noteLoadFailed || !showNoteButton,
     controlsLocked,
