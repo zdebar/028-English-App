@@ -133,9 +133,21 @@ export default function Profile(): JSX.Element {
           {userEmail || TEXTS.notAvailable}
         </PropertyView>
       </div>
-      <div className="mx-auto mb-4 w-64 text-left">
+      <StyledButton
+        className="card-width h-button px-4"
+        disabled={!userId || isSynchronizing}
+        onClick={handleFullSync}
+        title={TEXTS.profileFullSyncHint}
+      >
+        <MenuButtonText>
+          {isSynchronizing ? TEXTS.profileFullSyncInProgress : TEXTS.profileFullSyncButton}
+        </MenuButtonText>
+      </StyledButton>
+      <SignoutButton />
+      <DeleteUserButton />
+      <div className="mx-auto mt-4 w-64 text-left">
         <div className="flex items-center gap-1">
-          <label htmlFor="daily-new-lesson-limit" className="w-40 shrink-0 font-bold">
+          <label htmlFor="daily-new-lesson-limit" className="w-46 shrink-0 font-bold">
             {TEXTS.profileDailyNewLessonLimit}
           </label>
           <input
@@ -152,18 +164,6 @@ export default function Profile(): JSX.Element {
           />
         </div>
       </div>
-      <StyledButton
-        className="card-width h-button px-4"
-        disabled={!userId || isSynchronizing}
-        onClick={handleFullSync}
-        title={TEXTS.profileFullSyncHint}
-      >
-        <MenuButtonText>
-          {isSynchronizing ? TEXTS.profileFullSyncInProgress : TEXTS.profileFullSyncButton}
-        </MenuButtonText>
-      </StyledButton>
-      <SignoutButton />
-      <DeleteUserButton />
     </div>
   );
 }
