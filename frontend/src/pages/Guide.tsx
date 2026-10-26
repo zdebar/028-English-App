@@ -8,14 +8,17 @@ import { Screenshot } from '@/components/UI/Screenshot';
  */
 export default function Guide(): JSX.Element {
   return (
-    <div className="guide card-width overflow-x-hidden">
+    <div className="guide card-width mt-8 overflow-x-hidden">
       <h1 className="text-center">Návod</h1>
       <section>
         <h2>Úvod</h2>
-        <p>Jednoduchá ale kompletní aplikace pro učení angličtiny.</p>
         <p>
-          Zde v návodu se nachází pouze klíčové aspekty aplikace. Vše ostatní lze pochopit prostým
-          projetím aplikace.
+          Jednoduchá ale kompletní aplikace pro učení angličtiny. Zde v návodu se nachází pouze
+          klíčové aspekty aplikace. Vše ostatní lze pochopit prostým projetím aplikace.
+        </p>
+        <p>
+          Prvotní lekce jsou zaměřené na správnou výslovnost. Po úvodním procvičení hlásek v lekcích
+          lze, a je doporučeno, procvičovat výslovnost v přehledech.
         </p>
       </section>
       <section>
