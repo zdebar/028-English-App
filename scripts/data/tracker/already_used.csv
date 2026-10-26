@@ -31,18 +31,18 @@ nehet,nail
 známý,known
 kopec,knoll
 úhledný,neat
-poplácat,pat
+póry,pore
 špendlík,pin
 sbalit,pack
-čepice,cap
+koláč,pie
 hruška,pear
 pilulka,pill
 tempo,pace
 vědro,pail
-pálka,bat
+vrtal,bore
 koš,bin
 záda,back
-taxi,cab
+koupit,buy
 medvěd,bear
 účet,bill
 základ,base
@@ -51,6 +51,7 @@ deset,ten
 cín,tin
 nádrž,tank
 podnos,tray
+stan,tent
 modrozelený,teal
 hora,mount
 loď,boat
@@ -58,15 +59,16 @@ doupě,den
 večeře,dinner
 dank,dank
 podnos,dray
-špatný,bad
+zub,dent
 obchod,deal
 pahorek,mound
 bode,bode
 kabát,coat
+kopnout,kick
 přišel,came
-mohl,could
+jádro,core
 jeskyně,cave
-kudrna,curl
+tvaroh,curd
 karta,card
 rákoska,cane
 koza,goat
@@ -74,7 +76,7 @@ mezera,gap
 hra,game
 dobrý,good
 dal,gave
-dívka,girl
+opásat,gird
 stráž,guard
 zisk,gain
 postel,bed
@@ -90,8 +92,8 @@ jemný,fine
 trajekt,ferry
 trápit se,fret
 selhat,fail
-cítit,feel
-pilník,file
+flís,fleece
+liška,fox
 vlákno,fiber
 srkat,sip
 Sue,Sue
@@ -109,11 +111,11 @@ zápal,zeal
 nula,zero
 zóna,zone
 zipový uzávěr,zipper
-loď,ship
+obchod,shop
 sdílet,share
 bota,shoe
 hotovost,cash
-překupník,shill
+chatrč,shack
 ukázat,show
 břeh,shore
 stud,shame
@@ -125,11 +127,11 @@ poklad,treasure
 volný čas,leisure
 obvyklý,usual
 televize,television
-čip,chip
+sekat,chop
 židle,chair
 žvýkat,chew
 chytit,catch
-levný,cheap
+kontrola,check
 dusit,choke
 brada,chin
 řetěz,chain
@@ -148,7 +150,7 @@ dům,home
 ruka,hand
 slyšet,hear
 pomoci,help
-horký,hot
+naděje,hope
 ještě,yet
 jam,yam
 křičet,yell
@@ -160,11 +162,14 @@ Vánoce,yule
 vedl,led
 světlo,light
 plíce,lung
-naložit,load
+trávník,lawn
 jízdní pruh,lane
 vést,lead
 vši,lice
 stav,loom
+špatný,bad
+pálka,bat
+čepice,cap
 muž,man
 pánev,pan
 seděl,sat
@@ -181,6 +186,7 @@ kdo by,who'd
 plný,full
 táhnout,pull
 dívat se,look
+měl by,should
 noha,foot
 kniha,book
 chtěl by,would
@@ -190,6 +196,7 @@ kočka,cot
 přístaviště,dock
 ne,not
 posmívat se,mock
+horký,hot
 výstřel,shot
 policista,cop
 chycený,caught
@@ -213,13 +220,15 @@ slovo,word
 hořet,burn
 pán,sir
 první,first
+stádo,herd
 práce,work
 otočit,turn
+herec,actor
 rys,feature
 lepší,better
 dopis,letter
-matka,mother
-bratr,brother
+sestra,sister
+voda,water
 doktor,doctor
 barva,color
 báje,bade
@@ -234,6 +243,7 @@ plachý,shy
 kousnout,bite
 místo,site
 život,life
+pilník,file
 jako,like
 zvonkohra,chime
 brousit,grind
@@ -260,20 +270,23 @@ ven,out
 jak,how
 našel,found
 zvuk,sound
-kolem,round
+země,ground
 vědět,know
+naložit,load
 tón,tone
 oves,oat
 motyka,hoe
 telefonoval,phoned
 ušitý,sewn
-silnice,road
+sténat,groan
 tento,this
 tamten,that
 tito,these
 tamti,those
 pak,then
+matka,mother
 otec,father
+bratr,brother
 západ,west
 víno,wine
 ostražitý,wary
@@ -293,19 +306,24 @@ zmije,viper
 červený,red
 správný,right
 běžet,run
+silnice,road
 déšť,rain
 číst,read
 říže,rice
 pokoj,room
+loď,ship
 kousek,bit
 sedět,sit
 žít,live
 naplnit,fill
 lízat,lick
+čip,chip
 šklebit se,grin
 ovce,sheep
 porazit,beat
 sedadlo,seat
 odejít,leave
+cítit,feel
 uniknout,leak
+levný,cheap
 zelený,green
