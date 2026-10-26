@@ -19,7 +19,7 @@ const SOUND_CATEGORIES: readonly SoundCategory[] = [
   { title: TEXTS.doubleVowelSounds, phonemes: ['eɪ', 'aɪ', 'ɔɪ', 'aʊ', 'oʊ'] },
   { title: TEXTS.voicelessConsonants, phonemes: ['p', 't', 'k', 'f', 'θ', 's', 'ʃ', 'tʃ', 'h'] },
   { title: TEXTS.voicedConsonants, phonemes: ['b', 'd', 'ɡ', 'v', 'ð', 'z', 'ʒ', 'dʒ'] },
-  { title: TEXTS.otherConsonants, phonemes: ['m', 'n', 'ŋ', 'w', 'j', 'ɹ', 'l', 'ɾ'] },
+  { title: TEXTS.otherConsonants, phonemes: ['m', 'n', 'ŋ', 'w', 'j', 'ɹ', 'l'] },
 ];
 
 const SOUND_CATEGORY_HEADING_CLASS_NAME =

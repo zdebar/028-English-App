@@ -44,11 +44,11 @@ export const HOME_TEXTS = {
   simulateDataLoading: 'Simuluji data ...',
   simulateDataTooltip: 'Destruktivně přepíše část pokroku. Použijte pouze pro testování.',
   simulateDataModalTitle: 'Opravdu simulovat data?',
-  simulateDataModalText:
-    'Nastaví simulovaný pokrok slovíček v prvních 10 lekcích a označí tyto lekce jako započaté. Existující pokrok u těchto slovíček bude přepsán.',
+  simulateDataModalText: (lessonCount: number) =>
+    `Nastaví simulovaný pokrok slovíček v prvních ${lessonCount} lekcích a označí tyto lekce jako započaté. Existující pokrok u těchto slovíček bude přepsán.`,
   simulateDataConfirm: 'Přepsat data',
   simulateDataSuccessToast: 'Data byla úspěšně simulována.',
   simulateDataErrorToast: 'Chyba při simulaci dat.',
-  simulateDataExplanation:
-    'Pro testování nastaví pokrok slovíček v prvních 10 lekcích a označí lekce jako započaté. Změna je nevratná.',
+  simulateDataExplanation: (lessonCount: number) =>
+    `Pro testování nastaví pokrok slovíček v prvních ${lessonCount} lekcích a označí lekce jako započaté. Změna je nevratná.`,
 } as const;

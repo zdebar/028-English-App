@@ -57,13 +57,13 @@ export default function Home(): JSX.Element {
             <p className={`text-error-light dark:text-error-dark px-4 text-center text-sm`}>
               Aplikace v testovacím režimu! V tuto chvíli Vaše tréninková data nebudou zachována.
             </p>
-            {isAnonymousUser && (
-              <div className="flex flex-col gap-1">
-                <ConvertAnonymousUserButton />
-                <SimulateDataButton />
-              </div>
-            )}
           </div>
+          {isAnonymousUser && (
+            <div className="flex flex-col gap-1">
+              <ConvertAnonymousUserButton />
+              <SimulateDataButton />
+            </div>
+          )}
           <div className="flex w-full flex-col">
             <PracticeButton />
           </div>
@@ -82,7 +82,7 @@ export default function Home(): JSX.Element {
           </div>
         </div>
       ) : (
-        <div className="card-width w-full">
+        <div className="card-width flex w-full flex-col gap-8">
           <h1 className="mx-auto mt-4">{TEXTS.appTitle}</h1>
           <p className="mx-auto my-4 landscape:hidden">{TEXTS.appDescription}</p>
           <HomeActionLinks />
