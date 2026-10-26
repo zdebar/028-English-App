@@ -14,7 +14,7 @@ import { useAuthStore } from '@/features/auth/use-auth-store';
 import { useToastStore } from '@/features/toast/use-toast-store';
 import { useLiveQueryData } from '@/hooks/use-live-query-data';
 import { TEXTS } from '@/locales/cs';
-import { useCallback, useEffect, useMemo, useRef, useState, type JSX } from 'react';
+import { useCallback, useEffect, useMemo, useState, type JSX } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import type { PronunciationGroupDetailType } from '@/types/pronunciation.types';
 import { useRouteClose } from '@/routing/use-route-close';
@@ -74,26 +74,9 @@ type RandomWordPhase = 'initial' | 'reveal' | 'revealed';
 
 function chooseRandomItem(
   items: readonly UserItemLocal[],
-  remainingIds: number[],
-  previousItemId: number | null,
-): { item: UserItemLocal; remainingIds: number[] } | null {
-  const availableIds = new Set(items.map((item) => item.item_id));
-  let cycleIds = remainingIds.filter((itemId) => availableIds.has(itemId));
-  if (cycleIds.length === 0) cycleIds = [...availableIds];
-  let pool = cycleIds;
-  if (pool.length > 1 && previousItemId !== null) {
-    const withoutPrevious = pool.filter((itemId) => itemId !== previousItemId);
-    if (withoutPrevious.length > 0) pool = withoutPrevious;
-  }
-
-  const selectedId = pool[Math.floor(Math.random() * pool.length)];
-  const item = items.find((candidate) => candidate.item_id === selectedId);
-  if (!item) return null;
-
-  return {
-    item,
-    remainingIds: cycleIds.filter((itemId) => itemId !== selectedId),
-  };
+): UserItemLocal | null {
+  if (items.length === 0) return null;
+  return items[Math.floor(Math.random() * items.length)] ?? null;
 }
 
 function RandomPronunciationPractice({
@@ -111,8 +94,6 @@ function RandomPronunciationPractice({
 }>) {
   const [phase, setPhase] = useState<RandomWordPhase>('initial');
   const [selectedItem, setSelectedItem] = useState<UserItemLocal | null>(null);
-  const remainingItemIds = useRef<number[]>([]);
-  const previousItemId = useRef<number | null>(null);
   const itemSetKey = items.map((item) => item.item_id).join(',');
   const playableItems = items.filter(
     (item) => item.audio?.trim() && (audioLoading || isAudioReady(item.audio)),
@@ -121,23 +102,15 @@ function RandomPronunciationPractice({
   useEffect(() => {
     setPhase('initial');
     setSelectedItem(null);
-    remainingItemIds.current = [];
-    previousItemId.current = null;
   }, [itemSetKey]);
 
   const playRandomWord = async () => {
-    const nextSelection = chooseRandomItem(
-      playableItems,
-      remainingItemIds.current,
-      previousItemId.current,
-    );
-    if (!nextSelection) return;
+    const selectedItem = chooseRandomItem(playableItems);
+    if (!selectedItem) return;
 
-    remainingItemIds.current = nextSelection.remainingIds;
-    previousItemId.current = nextSelection.item.item_id;
-    setSelectedItem(nextSelection.item);
+    setSelectedItem(selectedItem);
     setPhase('reveal');
-    await playAudioWithToast(nextSelection.item.audio, playAudio, showToast);
+    await playAudioWithToast(selectedItem.audio, playAudio, showToast);
   };
 
   if (items.length === 0) return null;
