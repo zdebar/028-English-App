@@ -77,7 +77,7 @@ const NewPracticeButton = memo(function NewPracticeButton(): JSX.Element {
   if (!available && !loading) {
     return (
       <StyledButton
-        className="preserve-disabled-text-color h-button max-h-button w-full px-4"
+        className="h-button max-h-button w-full px-4"
         disabled
         title={title}
       >
@@ -85,6 +85,7 @@ const NewPracticeButton = memo(function NewPracticeButton(): JSX.Element {
       </StyledButton>
     );
   }
+
   return (
     <NavigationButton
       to={ROUTES.initialTraining}

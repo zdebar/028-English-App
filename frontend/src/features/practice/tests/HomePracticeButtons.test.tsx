@@ -157,13 +157,13 @@ describe('Home practice buttons', () => {
     ]);
   });
 
-  it('uses the shared primary disabled style when no new lesson exists', () => {
+  it('keeps new visible but disabled when no unstarted lesson exists', () => {
     usePracticeAvailabilityStore.setState({ initialTrainingAvailable: false });
     render(<PracticeButtons />);
     const newButton = button('New');
     expect(newButton.disabled).toBe(true);
     expect(newButton.className).toContain('color-button');
-    expect(newButton.className).toContain('preserve-disabled-text-color');
+    expect(newButton.className).not.toContain('preserve-disabled-text-color');
   });
 
   it('disables new when the daily lesson limit is reached', () => {
