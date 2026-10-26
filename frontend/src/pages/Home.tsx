@@ -90,7 +90,7 @@ export default function Home(): JSX.Element {
             <AnonymousSigninButton />
             <GoogleAuthButton />
           </div>
-          <p className="p-4 text-sm">{TEXTS.signupHint}</p>
+          <p className="p-4 text-center text-sm">{TEXTS.signupHint}</p>
         </div>
       )}
     </>
