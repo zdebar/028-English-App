@@ -300,7 +300,7 @@ describe('UserItem', () => {
     ['repeat', 1],
     ['hard', 2],
     ['good', 3],
-    ['easy', 5],
+    ['easy', 6],
   ] as const)('applies the %s review rating progress delta', (rating, expectedProgress) => {
     const item = makeItem({ progress_cz_to_en: 2 });
     const updated = UserItem.applyPracticeProgress(item, rating, '2026-02-01T00:00:00.000Z');

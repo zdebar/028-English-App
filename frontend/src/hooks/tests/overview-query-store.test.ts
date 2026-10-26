@@ -10,6 +10,7 @@ const mocks = vi.hoisted(() => ({
   hasInitiatedByUserId: vi.fn(),
   getInitiatedByUserId: vi.fn(),
   getInitiatedSounds: vi.fn(),
+  getAllSoundsForOverview: vi.fn(),
   loadNames: [] as string[],
 }));
 
@@ -38,7 +39,10 @@ vi.mock('@/database/models/user-items', () => ({
   },
 }));
 vi.mock('@/database/models/sound-groups', () => ({
-  default: { getOverview: (...args: unknown[]) => mocks.getInitiatedSounds(...args) },
+  default: {
+    getOverview: (...args: unknown[]) => mocks.getInitiatedSounds(...args),
+    getAllForOverview: (...args: unknown[]) => mocks.getAllSoundsForOverview(...args),
+  },
 }));
 
 import {
@@ -64,6 +68,7 @@ describe('overview query store', () => {
     mocks.getInitiatedByUserId.mockResolvedValue([{ id: 2 }]);
     mocks.getInitiatedVocabulary.mockResolvedValue([{ item_id: 3 }]);
     mocks.getInitiatedSounds.mockResolvedValue([{ id: 5 }]);
+    mocks.getAllSoundsForOverview.mockResolvedValue([{ id: 5, isActive: true }]);
   });
 
   it('warms all availability and destination overview queries', async () => {

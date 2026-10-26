@@ -26,58 +26,70 @@ describe('shared route query store', () => {
     observers.length = 0;
   });
 
-  it('shares one 5,000-item query between concurrent loaders, mount and remount', async () => {
+  it('shares one live query between mounted consumers and releases it after the last unmount', async () => {
     const items = Array.from({ length: 5000 }, (_, id) => ({ id }));
     const query = vi.fn(async () => items);
-    const [initialData] = await Promise.all([
-      loadSharedQuery('u1', 'items', query),
-      loadSharedQuery('u1', 'items', query),
-    ]);
-    const options = { emptyData: [], initialData, sharedKey: sharedQueryKey('u1', 'items') };
-    const page = renderHook(() => useLiveQueryData(query, options));
-    expect(page.result.current.data).toBe(items);
-    page.unmount();
-    renderHook(() => useLiveQueryData(query, options));
-    await loadSharedQuery('u1', 'items', query);
+    const options = { emptyData: [], sharedKey: sharedQueryKey('u1', 'items') };
+    const firstPage = renderHook(() => useLiveQueryData(query, options));
+    const secondPage = renderHook(() => useLiveQueryData(query, options));
+
+    await waitFor(() => expect(firstPage.result.current.data).toBe(items));
     expect(query).toHaveBeenCalledOnce();
     expect(observers).toHaveLength(1);
+    firstPage.unmount();
     expect(observers[0].unsubscribe).not.toHaveBeenCalled();
+    secondPage.unmount();
+    expect(observers[0].unsubscribe).toHaveBeenCalledOnce();
   });
 
-  it('publishes changed data to mounted pages and later loaders', async () => {
-    const query = vi.fn(async () => ['initial']);
-    await loadSharedQuery('u1', 'items', query);
+  it('publishes observed changes while keeping route loads one-shot', async () => {
+    let currentData = ['initial'];
+    const query = vi.fn(async () => currentData);
     const { result } = renderHook(() => useLiveQueryData(query, {
       emptyData: [], sharedKey: sharedQueryKey('u1', 'items'),
     }));
+    await waitFor(() => expect(result.current.data).toEqual(['initial']));
     act(() => observers[0].next(['updated']));
     expect(result.current.data).toEqual(['updated']);
-    await expect(loadSharedQuery('u1', 'items', query)).resolves.toEqual(['updated']);
-    expect(query).toHaveBeenCalledOnce();
+    currentData = ['fresh route data'];
+    await expect(loadSharedQuery('u1', 'items', query)).resolves.toEqual(currentData);
+    expect(query).toHaveBeenCalledTimes(2);
   });
 
-  it('disposes the old account and prevents reuse across accounts', async () => {
+  it('disposes live queries when their account is cleared', async () => {
     const query = vi.fn(async () => ['private']);
-    await loadSharedQuery('u1', 'items', query);
-    clearSharedQueriesExcept('u2');
+    const page = renderHook(() => useLiveQueryData(query, {
+      emptyData: [], sharedKey: sharedQueryKey('u1', 'items'),
+    }));
+    await waitFor(() => expect(observers).toHaveLength(1));
+
+    act(() => clearSharedQueriesExcept('u2'));
     expect(observers[0].unsubscribe).toHaveBeenCalledOnce();
-    await expect(loadSharedQuery('u2', 'items', async () => ['other'])).resolves.toEqual(['other']);
-    await loadSharedQuery('u1', 'items', query);
-    expect(query).toHaveBeenCalledTimes(2);
+    await waitFor(() =>
+      expect(page.result.current.error?.message).toBe('Query account changed'),
+    );
+    page.unmount();
   });
 
-  it('retries a failed query on the next load', async () => {
+  it('retries a failed live query when it is observed again', async () => {
     const query = vi.fn().mockRejectedValueOnce(new Error('failed')).mockResolvedValue(['recovered']);
-    await expect(loadSharedQuery('u1', 'items', query)).rejects.toThrow('failed');
-    await expect(loadSharedQuery('u1', 'items', query)).resolves.toEqual(['recovered']);
+    const options = { emptyData: [], sharedKey: sharedQueryKey('u1', 'items') };
+    const firstPage = renderHook(() => useLiveQueryData(query, options));
+    await waitFor(() => expect(firstPage.result.current.error?.message).toBe('failed'));
+    firstPage.unmount();
+
+    const secondPage = renderHook(() => useLiveQueryData(query, options));
+    await waitFor(() => expect(secondPage.result.current.data).toEqual(['recovered']));
     expect(query).toHaveBeenCalledTimes(2);
+    secondPage.unmount();
   });
 
-  it('settles pending loaders when their account is cleared', async () => {
-    const loading = loadSharedQuery('u1', 'items', () => new Promise<string[]>(() => {}));
-    const result = expect(loading).rejects.toThrow('Query account changed');
-    clearSharedQueriesExcept(null);
-    await result;
-    await waitFor(() => expect(observers[0].unsubscribe).toHaveBeenCalledOnce());
+  it('does not create a live observer for one-shot route loads', async () => {
+    const query = vi.fn(async () => ['route data']);
+
+    await expect(loadSharedQuery('u1', 'items', query)).resolves.toEqual(['route data']);
+
+    expect(query).toHaveBeenCalledOnce();
+    expect(observers).toHaveLength(0);
   });
 });

@@ -91,6 +91,10 @@ vi.mock('@/components/UI/OverviewCard', () => ({
   ),
 }));
 
+vi.mock('../use-pronunciation-groups-store-sync', () => ({
+  usePronunciationGroupsStoreSync: vi.fn(),
+}));
+
 vi.mock('@/components/UI/DataState', () => ({
   DataState: ({ hasData, noDataMessage, children }: any) =>
     hasData ? children : <p>{noDataMessage}</p>,

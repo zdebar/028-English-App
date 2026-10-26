@@ -94,9 +94,8 @@ describe('Overviews', () => {
     const buttons = screen.getAllByRole('button');
     expect(buttons).toHaveLength(5);
     expect(buttons.slice(0, 2).every((button) => !(button as HTMLButtonElement).disabled)).toBe(true);
-    expect(buttons.slice(2, 4).every((button) => (button as HTMLButtonElement).disabled)).toBe(true);
-    expect((buttons[4] as HTMLButtonElement).disabled).toBe(false);
-    buttons.slice(2, 4).forEach((button) => fireEvent.click(button));
+    expect(buttons.slice(2).every((button) => (button as HTMLButtonElement).disabled)).toBe(true);
+    buttons.slice(2).forEach((button) => fireEvent.click(button));
     expect(mocks.navigate).not.toHaveBeenCalled();
   });
 
