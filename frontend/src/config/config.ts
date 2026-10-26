@@ -50,7 +50,7 @@ const config = {
   practice: {
     grammarReviewLimitSize: 50, // New training locks only above this grammar review count
     vocabularyReviewLimitSize: 50, // New training locks only above this vocabulary review count
-    dailyStartedLessonLimit: 5, // Default daily lesson limit and practice overview goal
+    dailyStartedLessonLimit: 5, // Default daily lesson limit
     audioDelay: 100, // Delay in milliseconds for automatically playing audio
     holdDuration: 300, // Duration in milliseconds for which the practice card is held before moving to the next item
     maxReviewReadyTimerDelayMs: 2_147_483_647, // Maximum setTimeout delay supported by browsers

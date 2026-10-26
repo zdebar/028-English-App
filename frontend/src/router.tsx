@@ -14,9 +14,7 @@ import Grammar from '@/pages/Grammar';
 import Guide from '@/pages/Guide';
 import Home from '@/pages/Home';
 import Overviews from '@/pages/Overviews';
-import LessonsOverview from '@/pages/LessonsOverview';
 import Practice from '@/pages/Practice';
-import PracticeOverview from '@/pages/PracticeOverview';
 import PrivacyPolicy from '@/pages/PrivacyPolicy';
 import Profile from '@/pages/Profile';
 import PronunciationGroupPage from '@/pages/PronunciationGroupPage';
@@ -32,7 +30,6 @@ import {
   initialTrainingDescriptor,
   grammarDescriptor,
   overviewAvailabilityDescriptor,
-  practiceOverviewDescriptor,
   reviewPracticeDescriptor,
   soundsDescriptor,
   soundGroupDetailDescriptor,
@@ -185,16 +182,10 @@ export const router = createHashRouter([
             Component: InitialTrainingPractice,
           },
           {
-            path: ROUTES.practiceOverview,
-            loader: () => loadProtectedData('practice overview', practiceOverviewDescriptor),
-            Component: PracticeOverview,
-          },
-          {
             path: ROUTES.overviews,
             loader: () => loadProtectedData('overviews', overviewAvailabilityDescriptor),
             Component: Overviews,
           },
-          { path: ROUTES.lessonsOverview, Component: LessonsOverview },
           { path: ROUTES.profile, Component: Profile },
           {
             path: ROUTES.topics,

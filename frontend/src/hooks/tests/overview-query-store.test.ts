@@ -5,7 +5,6 @@ const mocks = vi.hoisted(() => ({
   loadSharedQuery: vi.fn(),
   hasInitiatedGrammar: vi.fn(),
   hasInitiatedVocabulary: vi.fn(),
-  getByUserId: vi.fn(),
   getInitiatedVocabulary: vi.fn(),
   getInitiatedGrammar: vi.fn(),
   hasInitiatedByUserId: vi.fn(),
@@ -35,7 +34,6 @@ vi.mock('@/database/models/user-items', () => ({
   default: {
     hasInitiatedGrammar: (...args: unknown[]) => mocks.hasInitiatedGrammar(...args),
     hasInitiatedVocabulary: (...args: unknown[]) => mocks.hasInitiatedVocabulary(...args),
-    getByUserId: (...args: unknown[]) => mocks.getByUserId(...args),
     getInitiatedVocabulary: (...args: unknown[]) => mocks.getInitiatedVocabulary(...args),
   },
 }));
@@ -65,7 +63,6 @@ describe('overview query store', () => {
     mocks.getInitiatedGrammar.mockResolvedValue([{ id: 1 }]);
     mocks.getInitiatedByUserId.mockResolvedValue([{ id: 2 }]);
     mocks.getInitiatedVocabulary.mockResolvedValue([{ item_id: 3 }]);
-    mocks.getByUserId.mockResolvedValue([{ item_id: 4 }]);
     mocks.getInitiatedSounds.mockResolvedValue([{ id: 5 }]);
   });
 
@@ -81,12 +78,10 @@ describe('overview query store', () => {
       'topics',
       'vocabulary',
       'sounds',
-      'practice-overview',
     ]);
     expect(mocks.getInitiatedGrammar).toHaveBeenCalledWith('u1');
     expect(mocks.getInitiatedByUserId).toHaveBeenCalledWith('u1');
     expect(mocks.getInitiatedVocabulary).toHaveBeenCalledWith('u1');
-    expect(mocks.getByUserId).toHaveBeenCalledWith('u1');
   });
 
   it('loads availability from the same shared query names', async () => {

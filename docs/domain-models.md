@@ -49,7 +49,7 @@ The curriculum path contains level, lesson, and item order.
 | Model | Main readers | Main writers |
 | --- | --- | --- |
 | `UserItem` | Home readiness, practice decks, vocabulary overview, explicit block items, grammar overview | Practice progress, initial-training completion, item/block/grammar/vocabulary resets, sync. |
-| `UserScore` | Home daily count, practice overview, dashboard stars | Practice progress actions, sync. |
+| `UserScore` | Home daily count, dashboard stars | Practice progress actions, sync. |
 | `Levels` / `Lessons` | Dashboard, levels overview, block/lesson grouping | Shared content sync. |
 | `GrammarGroup` / `GrammarChunk` / `Notes` | Grouped grammar overview and chunk-level practice details | Shared content sync. |
 | `AudioRecord` / `AudioMetadata` | Practice audio controls and audio manager | Audio archive sync and orphan cleanup. |

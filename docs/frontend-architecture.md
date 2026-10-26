@@ -31,7 +31,6 @@ root layout and renders route content through `Outlet`.
 | `/guide` | `Guide` | Public |
 | `/practice` | `Practice` | Protected |
 | `/practice/initial-training` | `InitialTrainingPractice` | Protected |
-| `/practice-overview` | `PracticeOverview` | Protected |
 | `/profile` | `Profile` | Protected |
 | `/levels` | `Levels` | Protected |
 | `/topics` | `Topics` | Protected |

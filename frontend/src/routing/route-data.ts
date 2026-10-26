@@ -68,10 +68,6 @@ export function overviewAvailabilityDescriptor(userId: string) {
   } satisfies RouteDataDescriptor<unknown>;
 }
 
-export function practiceOverviewDescriptor(userId: string) {
-  return { load: () => loadOverviewQuery(userId, 'practice-overview') };
-}
-
 export function reviewPracticeDescriptor(userId: string, reviewKind: ReviewKind) {
   return {
     load: () => loadReviewDeckData(userId, reviewKind),

@@ -50,7 +50,6 @@ vi.mock('@/locales/cs', () => ({
     overviews: 'Přehledy',
     progressOverviews: 'Pokrok',
     soundsOverview: 'Sound overview',
-    practiceOverviewTitle: 'Přehled procvičování',
     grammarOverview: 'Přehled gramatiky',
     grammarOverviewTooltip: 'Grammar tooltip',
     topicsOverview: 'Přehled témat',
@@ -59,7 +58,6 @@ vi.mock('@/locales/cs', () => ({
     vocabularyOverviewTooltip: 'Vocabulary tooltip',
     pronunciationSettings: 'Výslovnost',
     pronunciationGroupsTooltip: 'Pronunciation tooltip',
-    practiceOverviewNone: 'No practice',
     noGrammar: 'No grammar',
     noSounds: 'No sounds',
     noTopics: 'No topics',
@@ -94,11 +92,11 @@ describe('Overviews', () => {
     render(<Overviews />);
 
     const buttons = screen.getAllByRole('button');
-    expect(buttons).toHaveLength(6);
+    expect(buttons).toHaveLength(5);
     expect(buttons.slice(0, 2).every((button) => !(button as HTMLButtonElement).disabled)).toBe(true);
-    expect(buttons.slice(2, 5).every((button) => (button as HTMLButtonElement).disabled)).toBe(true);
-    expect((buttons[5] as HTMLButtonElement).disabled).toBe(false);
-    buttons.slice(2, 5).forEach((button) => fireEvent.click(button));
+    expect(buttons.slice(2, 4).every((button) => (button as HTMLButtonElement).disabled)).toBe(true);
+    expect((buttons[4] as HTMLButtonElement).disabled).toBe(false);
+    buttons.slice(2, 4).forEach((button) => fireEvent.click(button));
     expect(mocks.navigate).not.toHaveBeenCalled();
   });
 

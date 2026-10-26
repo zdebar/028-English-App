@@ -1,7 +1,6 @@
 export const OVERVIEW_TEXTS = {
   // Home lesson progress grid
   lessonOverview: 'přehled započatých lekcí',
-  lessonsOverview: 'Přehled lekcí',
   noLessons: 'Nejsou dostupné žádné lekce.',
   lessonStarted: 'zahájena',
   lessonNotStarted: 'nezahájena',

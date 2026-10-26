@@ -29,7 +29,7 @@ starting point when a change crosses route, store, model, or sync boundaries.
 | Feature | User purpose | Main entrypoints | Data and state | Connection points |
 | --- | --- | --- | --- | --- |
 | Signed-out Home | Presents app title, guide link, install button, and sign-in actions. | `/`, `Home`, auth buttons | `useAuthStore.userId` | Public state renders no local progress queries. |
-| Signed-in hub | Shows user name, daily count, practice buttons, dashboard, and sync warning. | `Home`, `Dashboard`, `PracticeOverviewButton`, `HomePracticeButtons` | `useAuthStore`, `useUserStore`, `useSyncStore`, IndexedDB models | Home combines global stores with local model reads; it does not read Supabase directly. |
+| Signed-in hub | Shows user name, daily count, practice buttons, progress dashboard, and sync warning. | `Home`, `Dashboard`, `HomePracticeButtons` | `useAuthStore`, `useUserStore`, `useSyncStore`, IndexedDB models | The progress dashboard is informational and does not navigate. Home combines global stores with local model reads; it does not read Supabase directly. |
 | Practice readiness button | Enables unified practice when local data is ready. | `HomePracticeButtons` | `UserItem`, Dexie live query | Recalculates after relevant committed writes; timers update future ready counts while Home stays mounted. |
 | Sync warning | Warns when the last periodic sync failed. | `Home` | `useSyncStore.isSyncError` | Successful sync clears the warning; failed sync does not prevent local-first practice. |
 | Simulated data | Atomically seed anonymous/test progress once local sync is ready and destructive confirmation is accepted. | `SimulateDataButton`, `simulate-data-service` | `UserItem`, `UserLesson`, localStorage `simulate-data-v2-${userId}` | Replaces vocabulary progress from the first ten lessons in curriculum order and marks those lessons started; reactive consumers refresh after commit. |
@@ -49,8 +49,7 @@ starting point when a change crosses route, store, model, or sync boundaries.
 
 | Feature | User purpose | Main entrypoints | Data and state | Connection points |
 | --- | --- | --- | --- | --- |
-| Practice overview | Review recent daily practice counts. | `/practice-overview`, `PracticeOverviewFeature` | `UserScore` | The overview queries score history directly; the current-day snapshot is reactive. |
-| Dashboard and levels | Show progress grouped by course structure. | `Dashboard`, `/levels`, levels feature | `Levels`, `Lessons`, `UserItem`, `useUserStore` | Active-user live queries refresh cached progress after relevant commits. |
+| Dashboard progress | Show progress grouped by course structure. | `Dashboard` on Home | `Levels`, `Lessons`, `UserItem`, `useUserStore` | Active-user live queries refresh cached progress after relevant commits. The dashboard is not a link. |
 | Topics overview | List ordered topics with initiated corresponding items. | `/topics`, `TopicsOverview` | `Topic`, `UserItem`, audio playback for items | Topics are independent of practice blocks and require at least one initiated item. |
 | Topic items | Show and reset initiated items inside one topic. | `/topics/:topicId`, `TopicItemsOverview` | `Topic`, `UserItem`, audio and detail links | Items link directly through nullable `items.topic_id`; initial-training skips are included. |
 | Grammar overview | List initiated groups with ordered chunk sections, playable curated examples, and reset group progress. | `/grammar`, `GrammarOverview` | `GrammarGroup`, `GrammarChunk`, `grammar_chunk_examples`, `UserItem` | Reset preserves unlock history and includes initial-training skips. |

@@ -3,8 +3,6 @@ import Topic from '@/database/models/topics';
 import UserItem from '@/database/models/user-items';
 import SoundGroup from '@/database/models/sound-groups';
 import type { UserItemLocal } from '@/types/user-item.types';
-import type { UserLessonType } from '@/types/generic.types';
-import UserLesson from '@/database/models/user-lessons';
 import { getSharedQuery, loadSharedQuery, sharedQueryKey } from './shared-query-store';
 
 export type OverviewQueryName =
@@ -15,8 +13,7 @@ export type OverviewQueryName =
   | 'grammar'
   | 'topics'
   | 'vocabulary'
-  | 'sounds'
-  | 'practice-overview';
+  | 'sounds';
 
 export type OverviewQueryData = {
   'has-grammar': boolean;
@@ -27,7 +24,6 @@ export type OverviewQueryData = {
   topics: Awaited<ReturnType<typeof Topic.getInitiatedByUserId>>;
   vocabulary: UserItemLocal[];
   sounds: Awaited<ReturnType<typeof SoundGroup.getAllForOverview>>;
-  'practice-overview': UserLessonType[];
 };
 
 export type OverviewAvailabilityData = Readonly<{
@@ -46,7 +42,6 @@ const OVERVIEW_QUERY_NAMES: readonly OverviewQueryName[] = [
   'topics',
   'vocabulary',
   'sounds',
-  'practice-overview',
 ];
 
 export function getOverviewQuery<T extends OverviewQueryName>(
@@ -71,8 +66,6 @@ export function getOverviewQuery<T extends OverviewQueryName>(
         return UserItem.getInitiatedVocabulary(userId) as Promise<OverviewQueryData[T]>;
       case 'sounds':
         return SoundGroup.getAllForOverview(userId) as Promise<OverviewQueryData[T]>;
-      case 'practice-overview':
-        return UserLesson.getByUserId(userId) as Promise<OverviewQueryData[T]>;
     }
   };
 }
