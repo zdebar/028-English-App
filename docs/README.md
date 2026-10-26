@@ -19,6 +19,7 @@ owns this side effect?".
 | Vocabulary, grammar, and new grammar practice flows | [practice-flows.md](practice-flows.md) |
 | Home practice button readiness and badges | [home-readiness.md](home-readiness.md) |
 | Domain fields, relationships, and key Dexie indexes | [domain-models.md](domain-models.md) |
+| eSpeak NG IPA output for US English | [espeak-ipa-en-us.md](espeak-ipa-en-us.md) |
 
 ## Where To Look First
 
