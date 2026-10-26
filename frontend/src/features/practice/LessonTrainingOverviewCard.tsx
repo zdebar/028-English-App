@@ -4,7 +4,6 @@ import AudioItemList from '@/components/UI/AudioItemList';
 import { ROUTES } from '@/config/routes.config';
 import type { LessonType } from '@/types/generic.types';
 import { TEXTS } from '@/locales/cs';
-import type { GroupType } from '@/types/table.types';
 import SanitizedNote from '@/components/UI/SanitizedNote';
 import type { JSX } from 'react';
 import type { UserItemLocal } from '@/types/user-item.types';
@@ -17,7 +16,7 @@ import { useRouteClose } from '@/routing/use-route-close';
 
 type LessonTrainingOverviewCardProps = Readonly<{
   lesson: Pick<LessonType, 'name'>;
-  groupNotes: readonly Pick<GroupType, 'note'>[];
+  groupNote: string | null;
   items?: readonly UserItemLocal[];
   onContinue: () => void;
 }>;
@@ -26,25 +25,10 @@ function Note({ note }: Readonly<{ note: string }>): JSX.Element {
   return <SanitizedNote className="m-4" html={note} />;
 }
 
-function OverviewNotes({
-  groupNotes,
-}: Readonly<{ groupNotes: readonly Pick<GroupType, 'note'>[] }>): JSX.Element {
-  const notes = groupNotes.flatMap((group) => (group.note ? [group.note] : []));
-  return (
-    <>
-      {notes.length > 0 ? (
-        notes.map((note, index) => <Note key={`${index}-${note}`} note={note} />)
-      ) : (
-        <div className="h-4" aria-hidden="true" />
-      )}
-    </>
-  );
-}
-
 /** Introduces the selected lesson and its optional grammar before initial training begins. */
 export default function LessonTrainingOverviewCard({
   lesson,
-  groupNotes,
+  groupNote,
   items = [],
   onContinue,
 }: LessonTrainingOverviewCardProps): JSX.Element {
@@ -60,7 +44,7 @@ export default function LessonTrainingOverviewCard({
       onClose={closeRoute}
       className="flex w-full flex-col gap-1"
     >
-      <OverviewNotes groupNotes={groupNotes} />
+      {groupNote ? <Note note={groupNote} /> : <div className="h-4" aria-hidden="true" />}
       <AudioItemList
         items={items}
         audioLoading={loading}
