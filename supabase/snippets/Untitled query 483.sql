@@ -8,7 +8,7 @@ INSERT INTO public.group_items (
   sort_order
 )
 SELECT
-  44,
+  1,
   item_id,
   ROW_NUMBER() OVER (ORDER BY item_id)
 FROM generate_series(81, 88) AS item_id;
