@@ -18,7 +18,7 @@ export function ListButton({
   return (
     <StyledButton
       {...props}
-      className={`${flexibleHeight ? 'min-h-input' : 'h-input'} preserve-disabled-text-color w-full grow-0 ${className}`}
+      className={`${flexibleHeight ? 'min-h-input' : 'h-input'} w-full grow-0 ${className}`}
     >
       {children}
     </StyledButton>

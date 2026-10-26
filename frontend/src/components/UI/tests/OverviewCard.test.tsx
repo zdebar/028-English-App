@@ -11,13 +11,12 @@ vi.mock('@/locales/cs', () => ({
 }));
 
 vi.mock('@/features/modal/ButtonWithModal', () => ({
-  default: ({ children, disabled, onConfirm, title, className, preserveEnabledTextColorWhenDisabled }: any) => (
+  default: ({ children, disabled, onConfirm, title, className }: any) => (
     <button
       data-testid="reset-button"
       disabled={disabled}
       title={title}
       className={className}
-      data-preserve-enabled-text-color={preserveEnabledTextColorWhenDisabled ? 'true' : 'false'}
       onClick={() => onConfirm?.()}
     >
       {children}

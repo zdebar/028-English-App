@@ -33,7 +33,7 @@ export default function PronunciationOverview() {
           {data.map((group) => (
             <NavigationButton
               key={group.id}
-              className="h-input preserve-disabled-text-color w-full grow-0 px-4"
+              className="h-input w-full grow-0 px-4"
               title={group.name}
               to={ROUTES.pronunciationGroup.replace(':groupId', String(group.id))}
             >

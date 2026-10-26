@@ -17,8 +17,6 @@ type ButtonWithModalProps = Readonly<{
   title?: string;
   /** Disables the trigger button; loading state also disables it. */
   disabled?: boolean;
-  /** Keeps normal text color while disabled for buttons that should look visually active. */
-  preserveEnabledTextColorWhenDisabled?: boolean;
   /** Extra classes appended to the trigger button. */
   className?: string;
   /** Trigger button content; keep it inline to preserve button layout. */
@@ -31,7 +29,6 @@ export default function ButtonWithModal({
   modalText = TEXTS.modalText,
   disabled = false,
   title = '',
-  preserveEnabledTextColorWhenDisabled = false,
   children,
   className = '',
 }: ButtonWithModalProps): JSX.Element {
@@ -56,13 +53,7 @@ export default function ButtonWithModal({
         onClick={() => setShowModal(true)}
         title={title}
         disabled={isDisabled}
-          className={[
-          'h-button',
-            className,
-          preserveEnabledTextColorWhenDisabled ? 'preserve-disabled-text-color' : '',
-        ]
-          .filter(Boolean)
-          .join(' ')}
+        className={['h-button', className].filter(Boolean).join(' ')}
       >
         {children}
       </StyledButton>

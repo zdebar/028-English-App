@@ -21,7 +21,7 @@ export default function SigninButton({
 }: SigninButtonProps): JSX.Element | null {
   const disabledClass =
     disabled || isSignin
-      ? 'cursor-not-allowed bg-signin-disabled'
+      ? 'cursor-not-allowed bg-signin-disabled disabled:text-disabled-light dark:disabled:text-disabled-dark'
       : 'hover:bg-signin-button-hover focus-visible:bg-signin-button-hover bg-signin-button';
 
   return (

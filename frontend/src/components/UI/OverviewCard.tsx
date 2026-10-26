@@ -88,7 +88,6 @@ export default function OverviewCard(props: OverviewCardProps): JSX.Element {
             title={showResetAction && !isDisabled ? TEXTS.restartProgressHelp : ''}
             onConfirm={() => confirmOverviewCardAction(handleReset, onClose)}
             disabled={isDisabled || !showResetAction}
-            preserveEnabledTextColorWhenDisabled
             className={`${titleAlignment === 'center' ? 'justify-center text-center' : 'justify-start'} px-4`}
           >
             {getOverviewCardButtonContent(buttonTitle, loading)}
