@@ -18,11 +18,11 @@ const HOME_TEXT_ACTION_CLASS_NAME =
 
 function HomeActionLinks(): JSX.Element {
   return (
-    <div className="flex items-center justify-center gap-2 px-4">
-      <InstallPWAButton className={`pr-4 ${HOME_TEXT_ACTION_CLASS_NAME}`} />
+    <div className="flex items-center justify-center gap-6 px-4">
       <Link to="/guide" className={HOME_TEXT_ACTION_CLASS_NAME}>
         {TEXTS.guide}
       </Link>
+      <InstallPWAButton className={`${HOME_TEXT_ACTION_CLASS_NAME}`} />
     </div>
   );
 }
@@ -49,7 +49,7 @@ export default function Home(): JSX.Element {
   return (
     <>
       {userId ? (
-        <div className="card-width relative flex h-full w-full grow flex-col justify-start gap-1">
+        <div className="card-width relative flex h-full w-full grow flex-col justify-start gap-8">
           <div className="flex flex-col gap-0">
             <div className="mt-2 landscape:mt-6">
               <HomeActionLinks />
@@ -64,7 +64,7 @@ export default function Home(): JSX.Element {
               </div>
             )}
           </div>
-          <div className="my-4 flex w-full flex-col">
+          <div className="flex w-full flex-col">
             <PracticeButton />
           </div>
           <div className="relative">
@@ -73,7 +73,7 @@ export default function Home(): JSX.Element {
             >
               {TEXTS.syncWarning}
             </p>
-            <div className="home-bottom-controls-clearance relative mt-2">
+            <div className="home-bottom-controls-clearance relative">
               <Dashboard />
               <div className="pos-home-dashboard-help">
                 <HelpButton />
