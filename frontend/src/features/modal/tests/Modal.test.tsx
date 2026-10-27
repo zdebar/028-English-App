@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const mocks = vi.hoisted(() => ({
@@ -85,7 +85,9 @@ describe('Modal', () => {
     expect((screen.getByRole('button', { name: 'Cancel' }) as HTMLButtonElement).disabled).toBe(true);
     expect((screen.getByRole('button', { name: 'Confirm' }) as HTMLButtonElement).disabled).toBe(true);
 
-    resolveConfirmation?.();
+    await act(async () => {
+      resolveConfirmation?.();
+    });
 
     await waitFor(() => {
       expect(mocks.closeOverlay).toHaveBeenCalledTimes(1);

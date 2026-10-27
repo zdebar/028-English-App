@@ -50,7 +50,7 @@ export default function Home(): JSX.Element {
     <>
       {userId ? (
         <div className="card-width relative flex h-full w-full grow flex-col justify-start gap-8">
-          <div className="flex flex-col gap-0">
+          <div className="flex flex-col gap-0 pt-2">
             <div className="mt-2 landscape:mt-6">
               <HomeActionLinks />
             </div>
@@ -82,7 +82,7 @@ export default function Home(): JSX.Element {
           </div>
         </div>
       ) : (
-        <div className="card-width w-full">
+        <div className="card-width w-full landscape:pt-8">
           <h1 className="mx-auto">{TEXTS.appTitle}</h1>
           <p className="mx-auto landscape:hidden">{TEXTS.appDescription}</p>
           <HomeActionLinks />

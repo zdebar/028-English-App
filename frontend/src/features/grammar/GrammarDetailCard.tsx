@@ -79,9 +79,9 @@ function GrammarContent({
       <div className="flex flex-col gap-4">
         {grammar.chunks.map((chunk) => (
           <section key={chunk.id} className="flex flex-col gap-1">
-            <h2 className="border-disabled-light text-light dark:border-disabled-dark dark:text-dark mt-1 mb-0 border border-dashed px-4 py-2 text-left">
+            <div className="border-disabled-light text-light dark:border-disabled-dark dark:text-dark mt-1 mb-0 border border-dashed px-4 py-2 text-left">
               {chunk.name}
-            </h2>
+            </div>
             <GrammarDirectionResetButtons
               items={chunk.items ?? []}
               onReset={onReset ? (direction) => onReset(chunk.id, direction) : undefined}

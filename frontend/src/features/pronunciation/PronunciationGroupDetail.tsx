@@ -196,6 +196,7 @@ function PronunciationGroupOverviewCard({
       onClose={closeRoute}
       className="card-height min-h-card"
       showResetAction={false}
+      titleAlignment="center"
     >
       <DataState
         loading={loading}
