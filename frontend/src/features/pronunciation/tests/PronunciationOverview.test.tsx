@@ -71,14 +71,6 @@ vi.mock('@/features/audio/VolumeSlider', () => ({
   default: () => <div data-testid="volume" />,
 }));
 
-vi.mock('@/features/help/HelpButton', () => ({
-  default: () => <button type="button">Help</button>,
-}));
-
-vi.mock('@/features/help/HelpText', () => ({
-  default: ({ children }: any) => <span>{children}</span>,
-}));
-
 vi.mock('@/components/UI/OverviewCard', () => ({
   default: ({ buttonTitle, onClose, children }: any) => (
     <div>
@@ -110,7 +102,6 @@ vi.mock('@/locales/cs', () => ({
     pronunciationVowels: 'Samohlásky',
     noAudio: 'No audio',
     loadingError: 'Loading error',
-    pronunciationStartedHelp: 'odemčeno/celkem položek',
   },
 }));
 
