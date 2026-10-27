@@ -82,7 +82,7 @@ export default function Home(): JSX.Element {
           </div>
         </div>
       ) : (
-        <div className="card-width w-full pt-8">
+        <div className="card-width w-full landscape:pt-8">
           <h1 className="mx-auto">{TEXTS.appTitle}</h1>
           <p className="mx-auto landscape:hidden">{TEXTS.appDescription}</p>
           <HomeActionLinks />
