@@ -1,4 +1,5 @@
 import { usePracticeAvailabilityBoundary } from './use-practice-availability-boundary';
+import { refreshPracticeReviewAvailability } from '../practice-availability-controller';
 import Lessons from '@/database/models/lessons';
 import UserItem from '@/database/models/user-items';
 import UserLesson from '@/database/models/user-lessons';
@@ -359,6 +360,7 @@ async function advanceInitialTraining(options: AdvanceInitialTrainingOptions): P
     );
     await UserItem.saveInitialTrainingProgress(updatedItem);
     await syncPersistedItemToReviewCache(updatedItem);
+    await refreshPracticeReviewAvailability(updatedItem.user_id);
     invalidateNextInitialLesson(updatedItem.user_id);
 
     if (!nextQueue) {

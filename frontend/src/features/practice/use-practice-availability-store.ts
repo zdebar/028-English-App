@@ -15,6 +15,15 @@ type PracticeAvailabilityValues = Pick<
   | 'maxNewLessonsPerDay'
 >;
 
+type ReviewAvailabilityValues = Pick<
+  PracticeAvailabilitySnapshot,
+  | 'grammarReviewReadyAt'
+  | 'vocabularyReviewReadyAt'
+  | 'grammarReviewDueCount'
+  | 'vocabularyReviewDueCount'
+  | 'nextReviewAt'
+>;
+
 export type PracticeAvailabilityState = {
   availabilityUserId: string | null;
   grammarReviewReadyAt: string | null;
@@ -31,6 +40,7 @@ export type PracticeAvailabilityState = {
   practiceError: Error | null;
   setLoading: (userId: string) => void;
   setSnapshot: (userId: string, values: PracticeAvailabilityValues) => void;
+  setReviewSnapshot: (userId: string, values: ReviewAvailabilityValues) => void;
   setMaxNewLessonsPerDay: (limit: number) => void;
   setError: (userId: string, error: Error) => void;
   reset: () => void;
@@ -86,6 +96,11 @@ export const usePracticeAvailabilityStore = create<PracticeAvailabilityState>((s
       maxNewLessonsPerDay: values.maxNewLessonsPerDay,
       practiceLoading: false,
       practiceError: null,
+    }),
+  setReviewSnapshot: (userId, values) =>
+    set((state) => {
+      if (state.availabilityUserId !== userId) return state;
+      return values;
     }),
   setMaxNewLessonsPerDay: (limit) =>
     set((state) => ({

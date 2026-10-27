@@ -1,4 +1,5 @@
 import { usePracticeAvailabilityBoundary } from './use-practice-availability-boundary';
+import { refreshPracticeReviewAvailability } from '../practice-availability-controller';
 import {
   useCallback,
   useEffect,
@@ -260,6 +261,8 @@ export function usePracticeDeck(
         });
         reportError('Failed to update review cache', caughtError);
       }
+
+      await refreshPracticeReviewAvailability(userId);
 
       setSaveError(null);
       return true;

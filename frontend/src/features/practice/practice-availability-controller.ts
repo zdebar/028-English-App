@@ -3,6 +3,7 @@ import { reportError } from '@/features/logging/monitoring-handler';
 import { useToastStore } from '@/features/toast/use-toast-store';
 import { TEXTS } from '@/locales/cs';
 import { loadPracticeAvailabilitySnapshot } from './practice-availability';
+import { loadReviewAvailabilityFromArrays } from './review-prefetch';
 import { usePracticeAvailabilityStore } from './use-practice-availability-store';
 
 type AvailabilityContext = {
@@ -43,6 +44,19 @@ export async function ensurePracticeAvailability(userId: string): Promise<void> 
   if (context.pending !== null) return context.pending;
   if (!state.practiceLoading) return;
   return refreshPracticeAvailability(userId);
+}
+
+/** Updates review counts from the current bidirectional cache after a saved answer. */
+export async function refreshPracticeReviewAvailability(userId: string): Promise<void> {
+  try {
+    const reviewAvailability = await loadReviewAvailabilityFromArrays(userId);
+    usePracticeAvailabilityStore.getState().setReviewSnapshot(userId, reviewAvailability);
+  } catch (error) {
+    reportError(
+      'Failed to refresh review availability after practice progress',
+      error instanceof Error ? error : new Error(String(error)),
+    );
+  }
 }
 
 /** Called after sync/reset; while practicing, coalesces changes until exit. */
