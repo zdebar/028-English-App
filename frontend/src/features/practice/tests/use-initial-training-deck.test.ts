@@ -6,6 +6,7 @@ const mocks = vi.hoisted(() => ({
   saveInitialTrainingProgress: vi.fn(),
   applyPracticeProgress: vi.fn(),
   syncReviewItemToCache: vi.fn(),
+  refreshPracticeReviewAvailability: vi.fn(),
   invalidateNextInitialLesson: vi.fn(),
   resetQuestionState: vi.fn(),
   renderStates: [] as Array<{ itemId: number | null; revealed: boolean }>,
@@ -14,6 +15,8 @@ const mocks = vi.hoisted(() => ({
 
 vi.mock('../practice-availability-controller', () => ({
   beginPracticeAvailabilityBoundary: () => async () => {},
+  refreshPracticeReviewAvailability: (...args: unknown[]) =>
+    mocks.refreshPracticeReviewAvailability(...args),
 }));
 
 vi.mock('@/config/config', () => ({
@@ -103,6 +106,7 @@ describe('useInitialTrainingDeck', () => {
     mocks.startLesson.mockResolvedValue(true);
     mocks.saveInitialTrainingProgress.mockResolvedValue(undefined);
     mocks.syncReviewItemToCache.mockResolvedValue(undefined);
+    mocks.refreshPracticeReviewAvailability.mockResolvedValue(null);
     mocks.applyPracticeProgress.mockImplementation((item) => ({
       ...item,
       started_at: '2026-08-23',
