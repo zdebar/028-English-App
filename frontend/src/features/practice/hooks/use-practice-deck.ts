@@ -25,6 +25,7 @@ import {
   invalidateReviewArrays,
   rebuildReviewArrays,
   syncReviewItemToCache,
+  type ReviewAvailability,
 } from '../review-prefetch';
 import {
   loadReviewDeckData,
@@ -44,6 +45,15 @@ type ReviewRetryAction = 'save';
 
 type PracticeCompletionHandler = () => void;
 
+function getAvailableDueCount(
+  availability: ReviewAvailability | null,
+  reviewKind: ReviewKind,
+): number | null {
+  if (!availability) return null;
+  if (reviewKind === 'grammar') return availability.grammarReviewDueCount;
+  return availability.vocabularyReviewDueCount;
+}
+
 type MutableRef<T> = { current: T };
 type StateSetter<T> = (value: T | ((current: T) => T)) => void;
 
@@ -56,6 +66,8 @@ type ContinueAnsweredQueueOptions = {
   queueDataRef: MutableRef<ReviewDeckData | null>;
   completedOffsetRef: MutableRef<number>;
   setCompletedCount: StateSetter<number>;
+  setTotalCount: StateSetter<number | null>;
+  availableDueCount: number | null;
   setFinishedReview: StateSetter<boolean>;
   setRetryAction: StateSetter<ReviewRetryAction | null>;
   setQueueVersion: StateSetter<number>;
@@ -72,14 +84,19 @@ async function continueAnsweredQueue({
   queueDataRef,
   completedOffsetRef,
   setCompletedCount,
+  setTotalCount,
+  availableDueCount,
   setFinishedReview,
   setRetryAction,
   setQueueVersion,
   resetQuestionState,
   completePractice,
 }: ContinueAnsweredQueueOptions): Promise<void> {
+  const completedCount = completedOffsetRef.current + queue.completedCount;
+  setCompletedCount(completedCount);
+  if (availableDueCount !== null) setTotalCount(completedCount + availableDueCount);
+
   if (answerResult.hasNextItem) {
-    setCompletedCount(completedOffsetRef.current + queue.completedCount);
     setQueueVersion((version) => version + 1);
     resetQuestionState();
     return;
@@ -261,8 +278,6 @@ export function usePracticeDeck(
         });
         reportError('Failed to update review cache', caughtError);
       }
-
-      await refreshPracticeReviewAvailability(userId);
 
       setSaveError(null);
       return true;
@@ -450,6 +465,11 @@ export function usePracticeDeck(
       const answerResult = answerCurrentReviewItem(queue, updatedItem);
       if (!answerResult) return;
 
+      const reviewAvailability = userId
+        ? await refreshPracticeReviewAvailability(userId)
+        : null;
+      const availableDueCount = getAvailableDueCount(reviewAvailability, reviewKind);
+
       pendingAnswerRef.current = null;
       setRetryAction(null);
 
@@ -462,6 +482,8 @@ export function usePracticeDeck(
         queueDataRef,
         completedOffsetRef,
         setCompletedCount,
+        setTotalCount,
+        availableDueCount,
         setFinishedReview,
         setRetryAction,
         setQueueVersion,
@@ -469,7 +491,7 @@ export function usePracticeDeck(
         completePractice,
       });
     },
-    [completePractice, resetQuestionState, saveReviewItem, userId],
+    [completePractice, resetQuestionState, reviewKind, saveReviewItem, userId],
   );
 
   const nextItem = useCallback(
