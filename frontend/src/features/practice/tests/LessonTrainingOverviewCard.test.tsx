@@ -2,6 +2,14 @@ import { fireEvent, render, screen } from '@testing-library/react';
 import { MemoryRouter, useLocation } from 'react-router-dom';
 import { describe, expect, it, vi } from 'vitest';
 
+vi.mock('@/features/audio/use-audio-manager', () => ({
+  useAudioManager: () => ({
+    playAudio: vi.fn(),
+    isAudioReady: () => false,
+    loading: false,
+  }),
+}));
+
 vi.mock('@/locales/cs', () => ({
   TEXTS: {
     close: 'Close',

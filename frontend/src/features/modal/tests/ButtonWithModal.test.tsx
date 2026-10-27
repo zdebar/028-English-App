@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const mocks = vi.hoisted(() => ({
@@ -32,7 +32,7 @@ vi.mock('@/features/modal/Modal', () => ({
   Modal: ({ onConfirm, onClose, children }: any) => (
     <div data-testid="modal">
       <div>{children}</div>
-      <button data-testid="modal-confirm" onClick={() => onConfirm?.()}>
+      <button data-testid="modal-confirm" onClick={() => void onConfirm?.()}>
         confirm
       </button>
       <button data-testid="modal-close" onClick={onClose}>
@@ -44,30 +44,36 @@ vi.mock('@/features/modal/Modal', () => ({
 
 import ButtonWithModal from '@/features/modal/ButtonWithModal';
 
+async function clickWithinAct(element: HTMLElement): Promise<void> {
+  await act(async () => {
+    fireEvent.click(element);
+  });
+}
+
 describe('ButtonWithModal', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mocks.isLoading = false;
   });
 
-  it('renders trigger button and opens modal on click with default text', () => {
+  it('renders trigger button and opens modal on click with default text', async () => {
     render(<ButtonWithModal>Open</ButtonWithModal>);
 
-    fireEvent.click(screen.getByRole('button', { name: 'Open' }));
+    await clickWithinAct(screen.getByRole('button', { name: 'Open' }));
 
     expect(screen.getByTestId('modal')).toBeTruthy();
     expect(screen.getByText('Default title')).toBeTruthy();
     expect(screen.getByText('Default text')).toBeTruthy();
   });
 
-  it('uses custom modal title and text', () => {
+  it('uses custom modal title and text', async () => {
     render(
       <ButtonWithModal modalTitle="Custom title" modalText="Custom text">
         Open
       </ButtonWithModal>,
     );
 
-    fireEvent.click(screen.getByRole('button', { name: 'Open' }));
+    await clickWithinAct(screen.getByRole('button', { name: 'Open' }));
 
     expect(screen.getByText('Custom title')).toBeTruthy();
     expect(screen.getByText('Custom text')).toBeTruthy();
@@ -77,8 +83,8 @@ describe('ButtonWithModal', () => {
     const onConfirm = vi.fn().mockResolvedValue(undefined);
 
     render(<ButtonWithModal onConfirm={onConfirm}>Open</ButtonWithModal>);
-    fireEvent.click(screen.getByRole('button', { name: 'Open' }));
-    fireEvent.click(screen.getByTestId('modal-confirm'));
+    await clickWithinAct(screen.getByRole('button', { name: 'Open' }));
+    await clickWithinAct(screen.getByTestId('modal-confirm'));
 
     await waitFor(() => {
       expect(onConfirm).toHaveBeenCalledTimes(1);
