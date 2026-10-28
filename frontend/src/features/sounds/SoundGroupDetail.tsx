@@ -90,6 +90,7 @@ export default function SoundGroupDetail({
           isAudioReady={isAudioReady}
           playAudio={playAudio}
           showToast={showToast}
+          showPronunciation
         />
         <SoundDetailControls items={items} />
       </DataState>
