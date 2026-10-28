@@ -2,8 +2,6 @@ import { DataState } from '@/components/UI/DataState';
 import StackedList from '@/components/UI/StackedList';
 import OverviewCard from '@/components/UI/OverviewCard';
 import { ROUTES } from '@/config/routes.config';
-import HelpButton from '@/features/help/HelpButton';
-import HelpText from '@/features/help/HelpText';
 import { TEXTS } from '@/locales/cs';
 import { NavigationButton } from '@/routing/data-navigation';
 import { usePronunciationGroupsStore } from './use-pronunciation-groups-store';
@@ -60,7 +58,7 @@ export default function PronunciationOverview() {
     <OverviewCard
       buttonTitle={TEXTS.pronunciationSettings}
       onClose={closeRoute}
-      className={hasData ? 'bottom-controls-clearance' : ''}
+      showResetAction={false}
     >
       <DataState loading={loading} hasData={hasData} noDataMessage={TEXTS.noPronunciationGroups}>
         <StackedList>
@@ -102,10 +100,6 @@ export default function PronunciationOverview() {
             </section>
           ))}
         </StackedList>
-        <HelpText className="top-20 right-2">{TEXTS.pronunciationStartedHelp}</HelpText>
-        <div className="pos-bottom-right-control">
-          <HelpButton />
-        </div>
       </DataState>
     </OverviewCard>
   );

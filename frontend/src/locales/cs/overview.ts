@@ -74,7 +74,6 @@ export const OVERVIEW_TEXTS = {
   playRandomWord: 'Přehrát náhodné slovo',
   clickToRevealRandomWord: 'Kliknutím zobrazte',
   playNextRandomWordTooltip: 'Kliknutím přehrajete další náhodné slovo',
-  pronunciationStartedHelp: 'odemčeno/celkem položek',
   noPronunciationGroups: 'Žádné dostupné skupiny výslovnosti.',
   noPronunciationGroupItems: 'V této skupině nejsou dostupná slovíčka.',
 } as const;
