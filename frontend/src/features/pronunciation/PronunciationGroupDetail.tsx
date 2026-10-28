@@ -12,6 +12,7 @@ import { useQueryErrorToast } from '@/features/logging/use-query-error-toast';
 import { useAuthStore } from '@/features/auth/use-auth-store';
 import { useToastStore } from '@/features/toast/use-toast-store';
 import { useLiveQueryData } from '@/hooks/use-live-query-data';
+import { useLocalStorageSync } from '@/hooks/use-local-storage-sync';
 import { TEXTS } from '@/locales/cs';
 import { useCallback, useEffect, useMemo, useRef, useState, type JSX } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -72,6 +73,7 @@ function PronunciationDetailControls({
 
 type RandomWordPhase = 'initial' | 'reveal' | 'revealed';
 const RANDOM_WORD_REVEAL_TIMEOUT_MS = 5000;
+const EMPTY_SELECTED_ITEM_IDS: number[] = [];
 
 function chooseRandomItem(
   items: readonly UserItemLocal[],
@@ -205,6 +207,7 @@ function hasItemAudio(item: UserItemLocal): boolean {
 
 function PronunciationGroupItems({
   items,
+  selectionStorageKey,
   audioLoading,
   isAudioReady,
   playAudio,
@@ -212,25 +215,32 @@ function PronunciationGroupItems({
   showToast,
 }: Readonly<{
   items: PronunciationGroupDetailType['items'];
+  selectionStorageKey: string;
   audioLoading: boolean;
   isAudioReady: (audio: string) => boolean;
   playAudio: (audio: string) => Promise<boolean>;
   stopAudio: () => void;
   showToast: (message: string, type: 'error') => void;
 }>) {
-  const [selectedItemIds, setSelectedItemIds] = useState<Set<number>>(() => new Set());
+  const [selectedItemIds, setSelectedItemIds] = useLocalStorageSync<number[]>(
+    selectionStorageKey,
+    EMPTY_SELECTED_ITEM_IDS,
+  );
+  const selectedItemIdSet = useMemo(() => new Set(selectedItemIds), [selectedItemIds]);
   const itemKey = JSON.stringify(items.map((item) => [item.item_id, item.audio]));
   const selectableItems = items.filter(hasItemAudio);
-  const selectedItems = selectableItems.filter((item) => selectedItemIds.has(item.item_id));
+  const selectedItems = selectableItems.filter((item) => selectedItemIdSet.has(item.item_id));
   const allItemsSelected = selectableItems.length > 0 &&
     selectedItems.length === selectableItems.length;
   const someItemsSelected = selectedItems.length > 0 && !allItemsSelected;
 
   useEffect(() => {
     const availableIds = new Set(items.map((item) => item.item_id));
-    setSelectedItemIds((previousIds) =>
-      new Set([...previousIds].filter((itemId) => availableIds.has(itemId))),
-    );
+    setSelectedItemIds((previousIds) => {
+      const validIds = [...previousIds].filter((itemId) => availableIds.has(itemId));
+      if (validIds.length === previousIds.length) return previousIds;
+      return validIds;
+    });
   }, [itemKey]);
 
   useEffect(
@@ -240,9 +250,7 @@ function PronunciationGroupItems({
 
   const toggleAllItems = (checked: boolean) => {
     stopAudio();
-    setSelectedItemIds(checked
-      ? new Set(selectableItems.map((item) => item.item_id))
-      : new Set());
+    setSelectedItemIds(checked ? selectableItems.map((item) => item.item_id) : []);
   };
 
   const toggleItem = (itemId: number, checked: boolean) => {
@@ -251,7 +259,7 @@ function PronunciationGroupItems({
       const nextIds = new Set(previousIds);
       if (checked) nextIds.add(itemId);
       else nextIds.delete(itemId);
-      return nextIds;
+      return [...nextIds];
     });
   };
 
@@ -313,7 +321,7 @@ function PronunciationGroupItems({
               />
               <input
                 type="checkbox"
-                checked={selectedItemIds.has(item.item_id)}
+                checked={selectedItemIdSet.has(item.item_id)}
                 disabled={!hasAudio}
                 aria-label={`${TEXTS.selectPronunciationWord}: ${item.czech}`}
                 title={`${TEXTS.selectPronunciationWord}: ${item.czech}`}
@@ -353,6 +361,7 @@ function usePronunciationGroupNavigation(
 
 function PronunciationGroupOverviewCard({
   data,
+  selectionStorageKey,
   loading,
   closeRoute,
   audioLoading,
@@ -362,6 +371,7 @@ function PronunciationGroupOverviewCard({
   showToast,
 }: Readonly<{
   data: PronunciationGroupDetailType | null;
+  selectionStorageKey: string;
   loading: boolean;
   closeRoute: () => void;
   audioLoading: boolean;
@@ -388,7 +398,9 @@ function PronunciationGroupOverviewCard({
         <PronunciationGroupNote note={data?.group.note} />
         <RelatedPronunciationSounds sounds={data?.sounds ?? []} />
         <PronunciationGroupItems
+          key={selectionStorageKey}
           items={items}
+          selectionStorageKey={selectionStorageKey}
           audioLoading={audioLoading}
           isAudioReady={isAudioReady}
           playAudio={playAudio}
@@ -410,6 +422,8 @@ export default function PronunciationGroupDetail({
   const closeRoute = useRouteClose(ROUTES.pronunciationGroups);
   const { groupId: groupIdText } = useParams<{ groupId: string }>();
   const validGroupId = parseGroupId(groupIdText);
+  const selectionStorageKey =
+    `pronunciation_group_selected_words_${userId ?? 'guest'}_${validGroupId ?? 'unknown'}`;
   const fetchDetail = useCallback(
     () => fetchGroupDetail(userId, validGroupId),
     [userId, validGroupId],
@@ -433,6 +447,7 @@ export default function PronunciationGroupDetail({
   return (
     <PronunciationGroupOverviewCard
       data={data}
+      selectionStorageKey={selectionStorageKey}
       loading={loading}
       closeRoute={closeRoute}
       audioLoading={audioLoading}
