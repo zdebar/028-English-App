@@ -88,6 +88,8 @@ function linkSoundExamples(itemIds: number[]): void {
     sort_order: 1,
     updated_at: '2026-07-01',
     deleted_at: null,
+    sound_class: 'vowel',
+    sound_category: 'short_vowel',
   });
   mocks.relations = [{
     id: 1,
@@ -150,6 +152,48 @@ describe('PronunciationGroup', () => {
     ]);
   });
 
+  it('classifies comparison groups using their linked sound records', async () => {
+    mocks.groups.push(
+      {
+        id: 50,
+        type: 'sound',
+        name: 'ɪ',
+        note: null,
+        sort_order: 1,
+        updated_at: '2026-07-01',
+        deleted_at: null,
+        sound_class: 'vowel',
+        sound_category: 'short_vowel',
+      },
+      {
+        id: 51,
+        type: 'sound',
+        name: 'ɛ',
+        note: null,
+        sort_order: 2,
+        updated_at: '2026-07-01',
+        deleted_at: null,
+        sound_class: 'vowel',
+        sound_category: 'short_vowel',
+      },
+    );
+    mocks.relations = [
+      { id: 1, parent_group_id: 1, child_group_id: 50, relation_type: 'contrast', deleted_at: null },
+      { id: 2, parent_group_id: 1, child_group_id: 51, relation_type: 'contrast', deleted_at: null },
+    ];
+
+    const vowelOverview = await PronunciationGroup.getOverview('u1');
+    expect(vowelOverview[0]?.contrast_class).toBe('vowel');
+
+    mocks.groups[2] = {
+      ...mocks.groups[2],
+      sound_class: 'consonant',
+      sound_category: 'voiced_consonant',
+    };
+    const mixedOverview = await PronunciationGroup.getOverview('u1');
+    expect(mixedOverview[0]?.contrast_class).toBe('consonant');
+  });
+
   it('includes an initial-training skip as an initiated example', async () => {
     mocks.items[1].started_at = '1970-01-01T00:00:00.000Z';
     mocks.items[1].mastered_at_cz_to_en = '2026-07-01T00:00:00.000Z';
@@ -202,6 +246,8 @@ describe('PronunciationGroup', () => {
       sort_order: 1,
       updated_at: '2026-07-01',
       deleted_at: null,
+      sound_class: 'vowel',
+      sound_category: 'short_vowel',
     });
     mocks.relations = [{
       id: 1,
@@ -266,6 +312,8 @@ describe('PronunciationGroup', () => {
       sort_order: 1,
       updated_at: '2026-07-01',
       deleted_at: null,
+      sound_class: 'vowel',
+      sound_category: 'short_vowel',
     });
     mocks.relations = [{
       id: 1,
