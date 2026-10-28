@@ -91,6 +91,7 @@ export default function SoundGroupDetail({
           playAudio={playAudio}
           showToast={showToast}
           showPronunciation
+          hideCzechOnNarrow
         />
         <SoundDetailControls items={items} />
       </DataState>

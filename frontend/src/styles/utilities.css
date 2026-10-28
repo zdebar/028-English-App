@@ -38,6 +38,16 @@
     @apply dark:text-new-progress-light text-light hover:underline;
   }
 
+  .pronunciation-item-list {
+    container-type: inline-size;
+  }
+
+  @container (max-width: 420px) {
+    .pronunciation-item-list .pronunciation-item-czech {
+      display: none;
+    }
+  }
+
   .secondary-control-button:not(:disabled):hover {
     @apply bg-button-light dark:bg-button-dark;
   }

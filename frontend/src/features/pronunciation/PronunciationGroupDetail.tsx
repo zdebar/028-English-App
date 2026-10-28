@@ -137,6 +137,7 @@ function RandomPronunciationPractice({
       <BilingualItemButton
         item={selectedItem}
         showPronunciation
+        hideCzechOnNarrow
         className={reserveTrailingSpace ? 'h-input pr-12' : 'h-input'}
         forceSingleLine={reserveTrailingSpace}
         title={TEXTS.playNextRandomWordTooltip}
@@ -163,7 +164,7 @@ function RandomPronunciationPractice({
   }
 
   return (
-    <div className="flex flex-col gap-1">
+    <div className="pronunciation-item-list flex flex-col gap-1">
       {buttonContent}
     </div>
   );
@@ -303,7 +304,7 @@ function PronunciationGroupItems({
           />
         </div>
       </div>
-      <div className="mt-3 flex flex-col gap-1">
+      <div className="pronunciation-item-list mt-3 flex flex-col gap-1">
         {items.map((item) => {
           const hasAudio = hasItemAudio(item);
           const audio = item.audio?.trim();
@@ -315,6 +316,7 @@ function PronunciationGroupItems({
                 item={item}
                 showPronunciation
                 forceSingleLine
+                hideCzechOnNarrow
                 className="min-w-0 pr-12"
                 disabled={disabled}
                 onClick={() => handleItemPlay(item)}
