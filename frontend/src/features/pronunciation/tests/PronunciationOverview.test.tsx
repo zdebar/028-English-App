@@ -4,6 +4,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 const mocks = vi.hoisted(() => ({
   navigate: vi.fn(),
   playAudio: vi.fn(),
+  stopAudio: vi.fn(),
   overviewData: [] as any[],
   overviewLoading: false,
   overviewError: null as Error | null,
@@ -62,6 +63,7 @@ vi.mock('@/hooks/use-live-query-data', () => ({
 vi.mock('@/features/audio/use-audio-manager', () => ({
   useAudioManager: () => ({
     playAudio: mocks.playAudio,
+    stopAudio: mocks.stopAudio,
     isAudioReady: () => true,
     loading: false,
   }),
@@ -102,6 +104,12 @@ vi.mock('@/locales/cs', () => ({
     pronunciationVowels: 'Samohlásky',
     noAudio: 'No audio',
     loadingError: 'Loading error',
+    playAllRandomly: 'Play all randomly',
+    playSelectedRandomly: 'Play selected randomly',
+    selectAllPronunciationWords: 'Select all words',
+    selectPronunciationWord: 'Select word',
+    clickToRevealRandomWord: 'Reveal word',
+    playNextRandomWordTooltip: 'Play next random word',
   },
 }));
 

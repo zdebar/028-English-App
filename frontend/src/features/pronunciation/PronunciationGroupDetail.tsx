@@ -1,7 +1,6 @@
 import { sharedQueryKey } from '@/hooks/shared-query-store';
 import { DataState } from '@/components/UI/DataState';
 import OverviewCard from '@/components/UI/OverviewCard';
-import AudioItemList from '@/components/UI/AudioItemList';
 import BilingualItemButton from '@/components/UI/buttons/BilingualItemButton';
 import { ListButton } from '@/components/UI/buttons/ListButton';
 import { ROUTES } from '@/config/routes.config';
@@ -14,11 +13,12 @@ import { useAuthStore } from '@/features/auth/use-auth-store';
 import { useToastStore } from '@/features/toast/use-toast-store';
 import { useLiveQueryData } from '@/hooks/use-live-query-data';
 import { TEXTS } from '@/locales/cs';
-import { useCallback, useEffect, useMemo, useState, type JSX } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, type JSX } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import type { PronunciationGroupDetailType } from '@/types/pronunciation.types';
 import { useRouteClose } from '@/routing/use-route-close';
 import type { UserItemLocal } from '@/types/user-item.types';
+import { reportError } from '@/features/logging/monitoring-handler';
 
 function parseGroupId(value: string | undefined): number | null {
   const groupId = Number(value);
@@ -71,6 +71,7 @@ function PronunciationDetailControls({
 }
 
 type RandomWordPhase = 'initial' | 'reveal' | 'revealed';
+const RANDOM_WORD_REVEAL_TIMEOUT_MS = 5000;
 
 function chooseRandomItem(
   items: readonly UserItemLocal[],
@@ -81,12 +82,18 @@ function chooseRandomItem(
 
 function RandomPronunciationPractice({
   items,
+  initialLabel,
+  minimumPlayableItems = 1,
+  reserveTrailingSpace = false,
   audioLoading,
   isAudioReady,
   playAudio,
   showToast,
 }: Readonly<{
   items: PronunciationGroupDetailType['items'];
+  initialLabel: string;
+  minimumPlayableItems?: number;
+  reserveTrailingSpace?: boolean;
   audioLoading: boolean;
   isAudioReady: (audio: string) => boolean;
   playAudio: (audio: string) => Promise<boolean>;
@@ -104,6 +111,15 @@ function RandomPronunciationPractice({
     setSelectedItem(null);
   }, [itemSetKey]);
 
+  useEffect(() => {
+    if (phase !== 'revealed') return;
+    const timeoutId = window.setTimeout(() => {
+      setPhase('initial');
+      setSelectedItem(null);
+    }, RANDOM_WORD_REVEAL_TIMEOUT_MS);
+    return () => window.clearTimeout(timeoutId);
+  }, [phase]);
+
   const playRandomWord = async () => {
     const selectedItem = chooseRandomItem(playableItems);
     if (!selectedItem) return;
@@ -113,17 +129,16 @@ function RandomPronunciationPractice({
     await playAudioWithToast(selectedItem.audio, playAudio, showToast);
   };
 
-  if (items.length === 0) return null;
-
   let buttonContent: JSX.Element;
   if (phase === 'revealed' && selectedItem) {
     buttonContent = (
       <BilingualItemButton
         item={selectedItem}
         showPronunciation
-        className="h-input"
+        className={reserveTrailingSpace ? 'h-input pr-12' : 'h-input'}
+        forceSingleLine={reserveTrailingSpace}
         title={TEXTS.playNextRandomWordTooltip}
-        disabled={playableItems.length === 0}
+        disabled={playableItems.length < minimumPlayableItems}
         onClick={playRandomWord}
       />
     );
@@ -131,20 +146,185 @@ function RandomPronunciationPractice({
     buttonContent = (
       <ListButton
         className="min-h-(--height-input) shrink-0 px-4"
-        disabled={playableItems.length === 0}
+        disabled={playableItems.length < minimumPlayableItems}
+        title={phase === 'initial' ? initialLabel : TEXTS.clickToRevealRandomWord}
         onClick={() => {
           if (phase === 'initial') void playRandomWord();
           else setPhase('revealed');
         }}
       >
-        {phase === 'initial' ? TEXTS.playRandomWord : TEXTS.clickToRevealRandomWord}
+        <span className="w-64 max-w-full shrink-0 overflow-hidden text-left text-ellipsis whitespace-nowrap">
+          {phase === 'initial' ? initialLabel : TEXTS.clickToRevealRandomWord}
+        </span>
       </ListButton>
     );
   }
 
   return (
-    <div className="flex flex-col gap-1 pt-1">
+    <div className="flex flex-col gap-1">
       {buttonContent}
+    </div>
+  );
+}
+
+function SelectAllWordsCheckbox({
+  checked,
+  indeterminate,
+  disabled,
+  onChange,
+}: Readonly<{
+  checked: boolean;
+  indeterminate: boolean;
+  disabled: boolean;
+  onChange: (checked: boolean) => void;
+}>) {
+  const checkboxRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (checkboxRef.current) checkboxRef.current.indeterminate = indeterminate;
+  }, [indeterminate]);
+
+  return (
+    <input
+      ref={checkboxRef}
+      type="checkbox"
+      checked={checked}
+      disabled={disabled}
+      aria-label={TEXTS.selectAllPronunciationWords}
+      title={TEXTS.selectAllPronunciationWords}
+      className="color-info absolute top-1/2 right-3 z-10 size-5 -translate-y-1/2 cursor-pointer disabled:cursor-default"
+      style={{ accentColor: 'currentColor' }}
+      onChange={(event) => onChange(event.target.checked)}
+    />
+  );
+}
+
+function hasItemAudio(item: UserItemLocal): boolean {
+  return Boolean(item.audio?.trim());
+}
+
+function PronunciationGroupItems({
+  items,
+  audioLoading,
+  isAudioReady,
+  playAudio,
+  stopAudio,
+  showToast,
+}: Readonly<{
+  items: PronunciationGroupDetailType['items'];
+  audioLoading: boolean;
+  isAudioReady: (audio: string) => boolean;
+  playAudio: (audio: string) => Promise<boolean>;
+  stopAudio: () => void;
+  showToast: (message: string, type: 'error') => void;
+}>) {
+  const [selectedItemIds, setSelectedItemIds] = useState<Set<number>>(() => new Set());
+  const itemKey = JSON.stringify(items.map((item) => [item.item_id, item.audio]));
+  const selectableItems = items.filter(hasItemAudio);
+  const selectedItems = selectableItems.filter((item) => selectedItemIds.has(item.item_id));
+  const allItemsSelected = selectableItems.length > 0 &&
+    selectedItems.length === selectableItems.length;
+  const someItemsSelected = selectedItems.length > 0 && !allItemsSelected;
+
+  useEffect(() => {
+    const availableIds = new Set(items.map((item) => item.item_id));
+    setSelectedItemIds((previousIds) =>
+      new Set([...previousIds].filter((itemId) => availableIds.has(itemId))),
+    );
+  }, [itemKey]);
+
+  useEffect(
+    () => () => stopAudio(),
+    [stopAudio],
+  );
+
+  const toggleAllItems = (checked: boolean) => {
+    stopAudio();
+    setSelectedItemIds(checked
+      ? new Set(selectableItems.map((item) => item.item_id))
+      : new Set());
+  };
+
+  const toggleItem = (itemId: number, checked: boolean) => {
+    stopAudio();
+    setSelectedItemIds((previousIds) => {
+      const nextIds = new Set(previousIds);
+      if (checked) nextIds.add(itemId);
+      else nextIds.delete(itemId);
+      return nextIds;
+    });
+  };
+
+  const handleItemPlay = (item: UserItemLocal) => {
+    stopAudio();
+    void playAudioWithToast(item.audio, playAudio, showToast).catch((error: unknown) => {
+      reportError('Failed to play pronunciation item', error);
+    });
+  };
+
+  if (items.length === 0) return null;
+
+  return (
+    <div className="flex flex-col pt-1">
+      <div className="flex flex-col gap-1">
+        <RandomPronunciationPractice
+          items={items}
+          initialLabel={TEXTS.playAllRandomly}
+          reserveTrailingSpace
+          audioLoading={audioLoading}
+          isAudioReady={isAudioReady}
+          playAudio={playAudio}
+          showToast={showToast}
+        />
+        <div className="relative">
+          <RandomPronunciationPractice
+            items={selectedItems}
+            initialLabel={`${TEXTS.playSelectedRandomly} (${selectedItems.length})`}
+            minimumPlayableItems={2}
+            reserveTrailingSpace
+            audioLoading={audioLoading}
+            isAudioReady={isAudioReady}
+            playAudio={playAudio}
+            showToast={showToast}
+          />
+          <SelectAllWordsCheckbox
+            checked={allItemsSelected}
+            indeterminate={someItemsSelected}
+            disabled={selectableItems.length === 0}
+            onChange={toggleAllItems}
+          />
+        </div>
+      </div>
+      <div className="mt-3 flex flex-col gap-1">
+        {items.map((item) => {
+          const hasAudio = hasItemAudio(item);
+          const audio = item.audio?.trim();
+          const disabled = !audio || (!audioLoading && !isAudioReady(audio));
+
+          return (
+            <div key={item.item_id} className="relative">
+              <BilingualItemButton
+                item={item}
+                showPronunciation
+                forceSingleLine
+                className="min-w-0 pr-12"
+                disabled={disabled}
+                onClick={() => handleItemPlay(item)}
+              />
+              <input
+                type="checkbox"
+                checked={selectedItemIds.has(item.item_id)}
+                disabled={!hasAudio}
+                aria-label={`${TEXTS.selectPronunciationWord}: ${item.czech}`}
+                title={`${TEXTS.selectPronunciationWord}: ${item.czech}`}
+                className="color-info absolute top-1/2 right-3 z-10 size-5 -translate-y-1/2 cursor-pointer disabled:cursor-default"
+                style={{ accentColor: 'currentColor' }}
+                onChange={(event) => toggleItem(item.item_id, event.target.checked)}
+              />
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 }
@@ -178,6 +358,7 @@ function PronunciationGroupOverviewCard({
   audioLoading,
   isAudioReady,
   playAudio,
+  stopAudio,
   showToast,
 }: Readonly<{
   data: PronunciationGroupDetailType | null;
@@ -186,6 +367,7 @@ function PronunciationGroupOverviewCard({
   audioLoading: boolean;
   isAudioReady: (audio: string) => boolean;
   playAudio: (audio: string) => Promise<boolean>;
+  stopAudio: () => void;
   showToast: (message: string, type: 'error') => void;
 }>) {
   const items = data?.items ?? [];
@@ -203,23 +385,15 @@ function PronunciationGroupOverviewCard({
         hasData={Boolean(data)}
         noDataMessage={TEXTS.noPronunciationGroupItems}
       >
-        <RandomPronunciationPractice
-          items={items}
-          audioLoading={audioLoading}
-          isAudioReady={isAudioReady}
-          playAudio={playAudio}
-          showToast={showToast}
-        />
         <PronunciationGroupNote note={data?.group.note} />
         <RelatedPronunciationSounds sounds={data?.sounds ?? []} />
-        <AudioItemList
+        <PronunciationGroupItems
           items={items}
           audioLoading={audioLoading}
           isAudioReady={isAudioReady}
           playAudio={playAudio}
+          stopAudio={stopAudio}
           showToast={showToast}
-          showPronunciation
-          itemClassName="min-w-0 grow"
         />
         <PronunciationDetailControls items={items} />
       </DataState>
@@ -246,7 +420,12 @@ export default function PronunciationGroupDetail({
     sharedKey: sharedQueryKey(userId, `pronunciation:${validGroupId}`),
   });
   const audios = useMemo(() => getItemAudioSources(data?.items ?? []), [data]);
-  const { playAudio, isAudioReady, loading: audioLoading } = useAudioManager(audios);
+  const {
+    playAudio,
+    stopAudio,
+    isAudioReady,
+    loading: audioLoading,
+  } = useAudioManager(audios);
   usePronunciationGroupNavigation(validGroupId, loading, userId, data, navigate);
 
   useQueryErrorToast(error, 'Failed to fetch pronunciation group detail');
@@ -259,6 +438,7 @@ export default function PronunciationGroupDetail({
       audioLoading={audioLoading}
       isAudioReady={isAudioReady}
       playAudio={playAudio}
+      stopAudio={stopAudio}
       showToast={showToast}
     />
   );
