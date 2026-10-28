@@ -1,9 +1,10 @@
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const mocks = vi.hoisted(() => ({
   navigate: vi.fn(),
   playAudio: vi.fn(),
+  stopAudio: vi.fn(),
   overviewData: [] as any[],
   overviewLoading: false,
   overviewError: null as Error | null,
@@ -62,6 +63,7 @@ vi.mock('@/hooks/use-live-query-data', () => ({
 vi.mock('@/features/audio/use-audio-manager', () => ({
   useAudioManager: () => ({
     playAudio: mocks.playAudio,
+    stopAudio: mocks.stopAudio,
     isAudioReady: () => true,
     loading: false,
   }),
@@ -102,6 +104,12 @@ vi.mock('@/locales/cs', () => ({
     pronunciationVowels: 'Samohlásky',
     noAudio: 'No audio',
     loadingError: 'Loading error',
+    playAllRandomly: 'Play all randomly',
+    playSelectedRandomly: 'Play selected randomly',
+    selectAllPronunciationWords: 'Select all words',
+    selectPronunciationWord: 'Select word',
+    clickToRevealRandomWord: 'Reveal word',
+    playNextRandomWordTooltip: 'Play next random word',
   },
 }));
 
@@ -123,6 +131,7 @@ describe('Pronunciation overview screens', () => {
       {
         id: 1,
         name: '/æ/ × /e/',
+        contrast_class: 'vowel',
         isActive: true,
         examples: ['man', 'men'],
         unlocked_count: 2,
@@ -137,6 +146,38 @@ describe('Pronunciation overview screens', () => {
 
     fireEvent.click(screen.getByRole('button', { name: /æ/ }));
     expect(mocks.navigate).toHaveBeenCalledWith('/pronunciation/1');
+  });
+
+  it('places comparison groups using their database-derived class', () => {
+    mocks.overviewData = [
+      {
+        id: 1,
+        name: '/p/ | /t/',
+        contrast_class: 'vowel',
+        isActive: true,
+        examples: [],
+        unlocked_count: 0,
+        total_count: 0,
+      },
+      {
+        id: 2,
+        name: '/ɪ/ | /ɛ/',
+        contrast_class: 'consonant',
+        isActive: true,
+        examples: [],
+        unlocked_count: 0,
+        total_count: 0,
+      },
+    ];
+
+    render(<PronunciationOverview />);
+
+    const vowelSection = screen.getByText('Samohlásky').closest('section');
+    const consonantSection = screen.getByText('Souhlásky').closest('section');
+    expect(vowelSection).not.toBeNull();
+    expect(consonantSection).not.toBeNull();
+    expect(within(vowelSection!).getByRole('button', { name: '/p/ | /t/' })).toBeTruthy();
+    expect(within(consonantSection!).getByRole('button', { name: '/ɪ/ | /ɛ/' })).toBeTruthy();
   });
 
   it('plays group items', async () => {

@@ -53,4 +53,7 @@ async def get_ipa_pronunciation(word: str, accent: str) -> str | None:
         print(f"Error occurred while processing word '{word}': {error_message}")
         return None
     
-    return stdout.decode('utf-8').strip() if stdout else None
+    pronunciation = stdout.decode('utf-8').strip() if stdout else None
+    if pronunciation and accent.lower().startswith("en"):
+        pronunciation = pronunciation.replace("ɐ", "ə")
+    return pronunciation

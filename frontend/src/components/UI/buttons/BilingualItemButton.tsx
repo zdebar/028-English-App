@@ -10,8 +10,15 @@ type BilingualItemButtonProps = Readonly<{
   className?: string;
   leadingLanguage?: 'czech' | 'english';
   showPronunciation?: boolean;
+  forceSingleLine?: boolean;
+  hideCzechOnNarrow?: boolean;
   title?: string;
 }>;
+
+function czechTextClassName(hideCzechOnNarrow: boolean | undefined): string {
+  const narrowRowClass = hideCzechOnNarrow ? 'pronunciation-item-czech' : '';
+  return `min-w-0 flex-1 overflow-hidden text-left text-ellipsis whitespace-nowrap ${narrowRowClass}`.trim();
+}
 
 function pronunciationTitle(pronunciation: string): string {
   if (!pronunciation) return '';
@@ -93,11 +100,23 @@ function useBilingualItemLayout(
 
 /** A shared, content-aware Czech/English item row used by all item lists. */
 export default function BilingualItemButton({ ...props }: BilingualItemButtonProps) {
-  const { item, onClick, disabled, className, leadingLanguage, showPronunciation, title: customTitle } = {
+  const {
+    item,
+    onClick,
+    disabled,
+    className,
+    leadingLanguage,
+    showPronunciation,
+    forceSingleLine,
+    hideCzechOnNarrow,
+    title: customTitle,
+  } = {
     disabled: false,
     className: '',
     leadingLanguage: 'czech' as const,
     showPronunciation: false,
+    forceSingleLine: false,
+    hideCzechOnNarrow: false,
     ...props,
   };
   const containerRef = useRef<HTMLDivElement>(null);
@@ -126,7 +145,7 @@ export default function BilingualItemButton({ ...props }: BilingualItemButtonPro
     <span
       key="czech"
       ref={czechRef}
-      className="min-w-0 flex-1 overflow-hidden text-left text-ellipsis whitespace-nowrap"
+      className={czechTextClassName(hideCzechOnNarrow)}
     >
       {item.czech}
     </span>
@@ -142,8 +161,11 @@ export default function BilingualItemButton({ ...props }: BilingualItemButtonPro
   );
   const languageTexts =
     leadingLanguage === 'english' ? [englishText, czechText] : [czechText, englishText];
-  const itemHeightClass = getItemHeightClass(stacked, showPronunciation);
-  const shouldStack = shouldStackLanguageTexts(stacked, showPronunciation);
+  const { itemHeightClass, shouldStack } = getBilingualItemDisplayState(
+    stacked,
+    showPronunciation,
+    forceSingleLine,
+  );
 
   return (
     <ListButton
@@ -177,4 +199,19 @@ function getItemHeightClass(stacked: boolean, showPronunciation: boolean): strin
 function shouldStackLanguageTexts(stacked: boolean, showPronunciation: boolean): boolean {
   if (showPronunciation) return false;
   return stacked;
+}
+
+function getBilingualItemDisplayState(
+  stacked: boolean,
+  showPronunciation: boolean,
+  forceSingleLine: boolean | undefined,
+): Readonly<{ itemHeightClass: string; shouldStack: boolean }> {
+  const shouldStack = forceSingleLine
+    ? false
+    : shouldStackLanguageTexts(stacked, showPronunciation);
+
+  return {
+    itemHeightClass: getItemHeightClass(shouldStack, showPronunciation),
+    shouldStack,
+  };
 }

@@ -34,8 +34,24 @@ CREATE TABLE IF NOT EXISTS groups (
   name TEXT NOT NULL,
   note TEXT,
   sort_order INTEGER NOT NULL CHECK (sort_order >= 1),
+  sound_class TEXT,
+  sound_category TEXT,
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-  deleted_at TIMESTAMPTZ
+  deleted_at TIMESTAMPTZ,
+  CONSTRAINT groups_sound_classification_presence_check CHECK (
+    (sound_class IS NULL) = (sound_category IS NULL)
+  ),
+  CONSTRAINT groups_sound_classification_type_check CHECK (
+    (type = 'sound' AND deleted_at IS NULL) = (sound_class IS NOT NULL)
+  ),
+  CONSTRAINT groups_sound_classification_pair_check CHECK (
+    (sound_class = 'vowel' AND sound_category IN ('short_vowel', 'long_vowel', 'diphthong'))
+    OR (
+      sound_class = 'consonant'
+      AND sound_category IN ('voiceless_consonant', 'voiced_consonant', 'other_consonant')
+    )
+    OR (sound_class IS NULL AND sound_category IS NULL)
+  )
 );
 
 CREATE TABLE IF NOT EXISTS lessons (

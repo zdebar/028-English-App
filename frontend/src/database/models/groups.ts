@@ -11,6 +11,8 @@ export type VisibleGroup = GroupRow & { examples: UserItemLocal[] };
 export default class Groups extends SyncEntityModel implements GroupRow {
   id!: number;
   type!: GroupTypeName;
+  sound_class!: GroupRow['sound_class'];
+  sound_category!: GroupRow['sound_category'];
   name!: string;
   note!: string | null;
   sort_order!: number;
@@ -20,7 +22,8 @@ export default class Groups extends SyncEntityModel implements GroupRow {
   static override readonly syncTable = db.groups as Dexie.Table<GroupRow, number>;
   static override readonly syncTableName = 'groups';
   static override readonly syncEntityName = 'groups';
-  static override readonly syncSelect = 'id, type, name, note, sort_order, updated_at, deleted_at';
+  static override readonly syncSelect =
+    'id, type, name, note, sort_order, sound_class, sound_category, updated_at, deleted_at';
 
   static async getById(groupId: number): Promise<GroupRow | null> {
     const group = await db.groups.get(groupId);

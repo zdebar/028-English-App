@@ -19,9 +19,21 @@ export interface SyncEntityType {
 
 export type GroupTypeName = 'topic' | 'grammar' | 'sound' | 'pronunciation';
 
+export type SoundClass = 'vowel' | 'consonant';
+
+export type SoundCategory =
+  | 'short_vowel'
+  | 'long_vowel'
+  | 'diphthong'
+  | 'voiceless_consonant'
+  | 'voiced_consonant'
+  | 'other_consonant';
+
 export interface GroupType extends SyncEntityType {
   type: GroupTypeName;
   updated_at: string;
+  sound_class: SoundClass | null;
+  sound_category: SoundCategory | null;
 }
 
 export interface GroupItemType {

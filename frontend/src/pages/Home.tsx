@@ -51,7 +51,7 @@ export default function Home(): JSX.Element {
       {userId ? (
         <div className="card-width relative flex h-full w-full grow flex-col justify-start gap-8">
           <div className="flex flex-col gap-0 pt-2">
-            <div className="mt-2 landscape:mt-6">
+            <div className="landscape:mt-6">
               <HomeActionLinks />
             </div>
             <p className={`text-error-light dark:text-error-dark px-4 text-center text-sm`}>

@@ -9,6 +9,7 @@ type AudioItemListProps = Readonly<{
   playAudio: (audio: string) => Promise<boolean>;
   showToast: (message: string, type: 'error') => void;
   showPronunciation?: boolean;
+  hideCzechOnNarrow?: boolean;
   itemClassName?: string;
 }>;
 
@@ -20,17 +21,21 @@ export default function AudioItemList({
   playAudio,
   showToast,
   showPronunciation = false,
+  hideCzechOnNarrow = false,
   itemClassName,
 }: AudioItemListProps) {
   if (items.length === 0) return null;
 
   return (
-    <div className="flex flex-col gap-1 pt-1">
+    <div
+      className={`flex flex-col gap-1 pt-1 ${hideCzechOnNarrow ? 'pronunciation-item-list' : ''}`}
+    >
       {items.map((item) => (
         <BilingualItemButton
           key={item.item_id}
           item={item}
           showPronunciation={showPronunciation}
+          hideCzechOnNarrow={hideCzechOnNarrow}
           className={itemClassName}
           disabled={isAudioDisabled(item.audio, audioLoading, isAudioReady)}
           onClick={() => playAudioWithToast(item.audio, playAudio, showToast)}

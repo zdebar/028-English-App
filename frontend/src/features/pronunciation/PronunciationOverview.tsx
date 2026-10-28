@@ -9,29 +9,17 @@ import { useRouteClose } from '@/routing/use-route-close';
 import { useQueryErrorToast } from '@/features/logging/use-query-error-toast';
 import { useAuthStore } from '@/features/auth/use-auth-store';
 import { usePronunciationGroupsStoreSync } from './use-pronunciation-groups-store-sync';
+import type { SoundClass } from '@/types/table.types';
 
-const VOWEL_PHONEMES = new Set([
-  'i', 'iː', 'ɪ', 'e', 'ɛ', 'æ', 'a', 'ɑ', 'ɒ', 'ɔ', 'o', 'oʊ', 'ʊ', 'u', 'uː', 'ʌ', 'ə',
-  'ɝ', 'ɚ', 'eɪ', 'aɪ', 'ɔɪ', 'aʊ',
-]);
+type ContrastClassPresentation = Readonly<{ key: SoundClass; title: string }>;
+
+const CONTRAST_CLASS_PRESENTATION: readonly ContrastClassPresentation[] = [
+  { key: 'vowel', title: TEXTS.pronunciationVowels },
+  { key: 'consonant', title: TEXTS.pronunciationConsonants },
+];
 
 const CATEGORY_HEADING_CLASS_NAME =
   'h-input border-disabled-light text-light dark:border-disabled-dark dark:text-dark flex w-full items-center justify-start border border-dashed px-4 text-left';
-
-function normalizePhoneme(phoneme: string): string {
-  let normalized = phoneme.trim();
-  if (normalized.startsWith('/')) normalized = normalized.slice(1);
-  if (normalized.endsWith('/')) normalized = normalized.slice(0, -1);
-  return normalized;
-}
-
-function isVowelContrast(groupName: string): boolean {
-  const phonemes = groupName
-    .split(/[|×–—]/)
-    .map(normalizePhoneme)
-    .filter(Boolean);
-  return phonemes.length > 0 && phonemes.every((phoneme) => VOWEL_PHONEMES.has(phoneme));
-}
 
 function splitContrastName(groupName: string): readonly [string, string] | null {
   const separatorIndex = groupName.indexOf('|');
@@ -49,8 +37,6 @@ export default function PronunciationOverview() {
   const loading = usePronunciationGroupsStore((state) => state.loading);
   const error = usePronunciationGroupsStore((state) => state.error);
   const hasData = data.length > 0;
-  const consonantGroups = data.filter((group) => !isVowelContrast(group.name));
-  const vowelGroups = data.filter((group) => isVowelContrast(group.name));
 
   useQueryErrorToast(error, 'Failed to fetch pronunciation overview');
 
@@ -62,14 +48,11 @@ export default function PronunciationOverview() {
     >
       <DataState loading={loading} hasData={hasData} noDataMessage={TEXTS.noPronunciationGroups}>
         <StackedList>
-          {[
-            { title: TEXTS.pronunciationVowels, groups: vowelGroups },
-            { title: TEXTS.pronunciationConsonants, groups: consonantGroups },
-          ].map((category) => (
+          {CONTRAST_CLASS_PRESENTATION.map((category) => (
             <section key={category.title} className="flex flex-col gap-1">
               <div className={CATEGORY_HEADING_CLASS_NAME}>{category.title}</div>
               <div className="grid grid-cols-2 gap-1 min-[480px]:grid-cols-4">
-                {category.groups.map((group) => {
+                {data.filter((group) => group.contrast_class === category.key).map((group) => {
                   const contrastName = splitContrastName(group.name);
                   return (
                     <NavigationButton

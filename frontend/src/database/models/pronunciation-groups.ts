@@ -4,6 +4,7 @@ import type {
   PronunciationGroupOverviewType,
 } from '@/types/pronunciation.types';
 import type { UserItemLocal } from '@/types/user-item.types';
+import type { GroupType, SoundClass } from '@/types/table.types';
 import { isInitiated } from '@/utils/progress.utils';
 import Groups from './groups';
 
@@ -13,6 +14,16 @@ function isEligible(item: UserItemLocal): boolean {
 
 function isAvailable(item: UserItemLocal): boolean {
   return isEligible(item) && isInitiated(item);
+}
+
+function getContrastClass(
+  relatedSoundGroupIds: readonly number[],
+  soundGroupsById: ReadonlyMap<number, GroupType>,
+): SoundClass {
+  const isVowelContrast =
+    relatedSoundGroupIds.length > 0 &&
+    relatedSoundGroupIds.every((groupId) => soundGroupsById.get(groupId)?.sound_class === 'vowel');
+  return isVowelContrast ? 'vowel' : 'consonant';
 }
 
 export default class PronunciationGroup {
@@ -30,15 +41,32 @@ export default class PronunciationGroup {
       relatedGroupIds.push(relation.child_group_id);
       relationsByPronunciationGroup.set(relation.parent_group_id, relatedGroupIds);
     }
+    const allRelatedSoundGroupIds = [
+      ...new Set(Array.from(relationsByPronunciationGroup.values()).flat()),
+    ];
+    const linkedSoundGroups = allRelatedSoundGroupIds.length > 0
+      ? await db.groups.where('id').anyOf(allRelatedSoundGroupIds).toArray()
+      : [];
+    const soundGroupsById = new Map(
+      linkedSoundGroups
+        .filter((sound) => sound.type === 'sound' && !sound.deleted_at)
+        .map((sound) => [sound.id, sound]),
+    );
 
     return groups.flatMap((group) => {
       const eligible = group.examples.filter(isEligible);
       const unlocked = eligible.filter(isAvailable);
       const relatedSoundGroupIds = relationsByPronunciationGroup.get(group.id) ?? [];
-      const { type: _type, ...groupData } = group;
+      const {
+        type: _type,
+        sound_class: _soundClass,
+        sound_category: _soundCategory,
+        ...groupData
+      } = group;
       return [
         {
           ...groupData,
+          contrast_class: getContrastClass(relatedSoundGroupIds, soundGroupsById),
           isActive:
             relatedSoundGroupIds.length > 0 &&
             relatedSoundGroupIds.every((groupId) => activeSoundGroupIds.has(groupId)),
