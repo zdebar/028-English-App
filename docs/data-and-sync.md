@@ -1,75 +1,85 @@
 # Data And Sync
 
-The app is local-first for user progress. User actions update IndexedDB first;
-sync later pushes local changes and pulls remote deltas.
+Practice and overview pages read local Dexie models. User changes are written to
+IndexedDB first; sync later pushes local changes to Supabase and applies remote
+updates.
 
-## Local-First Rule
+## Local Writes
 
-| Action type | Local write | Remote write |
+| Action | Local write | Remote sync path |
 | --- | --- | --- |
-| Practice progress | `UserItem.savePracticeDeck`, `UserScore.addItemCount`, block helpers | Later via `dataSync` / `dataSyncOnUnmount`. |
-| Initial training completion | `PracticeSession.completeInitialTraining`, `UserItem.saveInitialTrainingCompletion` | Later via sync. |
-| Reset progress | `UserItem.reset*` | Later via sync. |
-| Daily score | `UserScore` model | Later via sync. |
+| Review answer | Save one direction's `user_items` progress before advancing. | `UserItem.syncFromRemote` calls `upsert_fetch_user_items`. |
+| Initial-training answer | Save progress immediately; mirror the initial result to both directions. | Pushed with the next user-item sync. |
+| Lesson start | Add a `user_lessons` record after validating the daily limit. | `UserLesson.syncFromRemote` merges lesson-start records. |
+| Progress reset | Update the affected local `user_items` rows. | Pushed with the next user-item sync. |
+| Daily lesson limit | Update the local `users` settings row. | `UserSettings.syncFromRemote` compares `updated_at` and writes the selected setting. |
 
-UI should generally read from local models and stores, not directly from Supabase.
-Route loaders may read required IndexedDB data before rendering a page. A short-lived
-navigation handoff can pass click-time prepared data to a loader, but it is a transport
-mechanism rather than another source of truth. Features opting into intent-time loading
-must invalidate their route-data key whenever the underlying IndexedDB data changes.
+Route loaders, feature hooks, and models work from local data. Supabase calls are
+owned by auth, data sync, settings sync, and audio storage flows.
 
 ## Sync Lifecycle
 
-`frontend/src/database/utils/data-sync.utils.ts` is the central sync entrypoint.
+`frontend/src/database/utils/data-sync.utils.ts` synchronizes groups, group items,
+group relations, levels, lessons, notes, user items, user lessons, and user
+settings. The shared table models pull rows whose `updated_at` is newer than the
+local sync cursor. They apply soft-deleted content as local deletes.
+
+User-item sync exports local rows within the incremental sync window to the
+`upsert_fetch_user_items` RPC. The RPC upserts progress and returns current item
+content with user progress. The model merges those results into IndexedDB while
+preserving concurrent local edits. User-lesson sync merges start records; user
+settings use their own timestamp comparison.
 
 | Moment | Owner | Behavior |
 | --- | --- | --- |
-| App mount with user | `usePeriodicSync` | Schedules initial sync after a short delay. |
-| Periodic interval | `usePeriodicSync` | Runs `dataSync(userId)` at `config.sync.periodicSyncInterval`. |
-| App/unmount cleanup | `usePeriodicSync` | Calls `dataSyncOnUnmount(userId)` for user tables. |
-| Logout | `useAuthStore.handleLogout` | Runs `dataSyncOnUnmount` unless explicitly skipped. |
-| Full sync decision | `dataSync` | Uses localStorage full-sync timestamp and `config.sync.fullSyncInterval`. |
+| User becomes active | `usePeriodicSync` | Warms practice and overview caches and schedules the first sync after three seconds. |
+| Periodic interval | `usePeriodicSync` | Runs `dataSync`; the default interval is one day. |
+| Full sync due | `dataSync` | Uses the per-user localStorage timestamp; the default interval is seven days. |
+| App unmount or logout | `dataSyncOnUnmount` / `handleLogout` | Best-effort incremental sync of user items, lesson starts, and user settings when a session exists. |
+| Profile full-sync action | `Profile` | Forces a full data sync, refreshes audio archives, and removes orphaned local audio. |
 
-`usePeriodicSync` avoids overlapping syncs by reusing an in-flight promise.
-On success it sets sync status flags and then syncs/removes audio archive records.
-Committed model writes progressively refresh matching Dexie live queries. On
-failure it sets the sync error flag and leaves local-first reads available.
+Overlapping periodic syncs reuse the current promise. A completed data sync
+invalidates and rebuilds practice caches and refreshes Home availability. Audio
+archive sync then checks remote bucket metadata, downloads changed archives,
+updates local audio records, and removes records no longer referenced by items.
+Sync status lives in `useSyncStore`; failure leaves local reads available and
+sets the Home sync warning.
 
-## Full Sync vs Incremental Sync
+## Full And Incremental Sync
 
-| Mode | Trigger | Behavior |
+| Mode | Behavior |
+| --- | --- |
+| Full | Reads from the epoch cursor and replaces local shared rows where supported. User-item sync reconciles remote results while preserving changes made during the sync. |
+| Incremental | Pushes local changes newer than the stored cursor, then applies remote changes within the sync window. |
+
+Sync cursors are stored in the local Dexie `metadata` table. The full-sync
+throttle timestamp is stored under `last-full-sync-at_${userId}` in localStorage.
+
+## Local And Browser Storage
+
+| Storage | Key/data | Purpose |
 | --- | --- | --- |
-| Full sync | Explicit `fullSync` or stale full-sync timestamp | Replaces local user/shared data from remote where model supports it. |
-| Incremental sync | Normal periodic sync | Pushes local changes since last metadata timestamp and pulls remote deltas/deletes. |
+| IndexedDB `user_items` | Item content plus per-user progress locally | Practice, review scheduling, and incremental sync. |
+| IndexedDB `user_lessons` | User, lesson, and start timestamp | Lesson continuation and daily new-lesson limit. |
+| IndexedDB `users` | User ID and `max_new_lessons_per_day` | Per-user training limit. |
+| IndexedDB `metadata` | Table name, optional user ID, sync timestamp | Incremental sync cursors. |
+| IndexedDB `audio_records`, `audio_metadata` | Audio blobs and archive timestamps | Offline audio playback and archive refresh. |
+| localStorage | `theme_${userId}`, `theme_guest`, `theme_active` | Theme preference and pre-paint theme. |
+| localStorage | `volume-${userId}` | Per-user playback volume. |
+| localStorage | `vocabulary_search_term_${userId}` | Vocabulary search text. |
+| localStorage | `simulate-data-v2-${userId}` | Whether the anonymous-user fixture was applied. |
+| sessionStorage | `google-signin-anonymous-session-fallback` | Short-lived anonymous-session recovery during Google sign-in. |
 
-Shared content models include `Block`, `Grammar`, `Levels`, `Lessons`, `Topics`, and `Notes`.
-User models include `UserScore` and `UserItem`.
+The simulation fixture updates vocabulary progress in the first 100 curriculum
+lessons that contain vocabulary and records those lessons as started. It waits
+for the initial sync and requires confirmation. Practice answers and the active
+review/training queue are not stored in localStorage.
 
-## Model Map
+## Reactive Refresh
 
-| Model | Table/domain | Common readers/writers |
-| --- | --- | --- |
-| `UserItem` | Per-user item progress and scheduling | Practice decks, vocabulary/grammar readiness, resets, sync. |
-| `Block` | Shared explicit initial-training metadata | Initial training and shared sync. |
-| `Topic` | Shared topic catalog | Topic overview and detail metadata. |
-| `UserScore` | Per-user daily item count | Practice actions, daily stats, overview stars. |
-| `Levels` / `Lessons` | Shared course hierarchy | Dashboard and overview pages. |
-| `GrammarGroup` / `GrammarChunk` / `Notes` | Shared detail content | Practice detail buttons and overview pages. |
-| `AudioRecord` / `AudioMetadata` | Audio availability/cache metadata | Audio loader and periodic sync. |
-
-## LocalStorage Uses
-
-| Key pattern | Owner | Purpose |
-| --- | --- | --- |
-| `last-full-sync-at_${userId}` | `sync-time.utils` | Decide when the next full sync is needed. |
-| `theme_${userId}` / guest key | `theme-utils`, `useThemeStore` | Persist selected theme. |
-| `volume-${userId}` | `useAudioStore` | Persist audio volume. |
-| `vocabulary_search_term_${userId}` | vocabulary overview | Persist vocabulary search UI state. |
-| `simulate-data-v2-${userId}` | `SimulateDataButton` | Persist simulation toggle for the first-ten-lessons fixture. |
-
-## Reactive Refresh After Data Changes
-
-Dashboard statistics and Home readiness observe their IndexedDB inputs through
-Dexie live queries. Each relevant committed write transaction can publish a new
-coherent snapshot; multi-table synchronization may therefore update the UI
-progressively. Schedule timers still handle readiness changes caused only by time.
+Overview and dashboard queries use Dexie `liveQuery` observers, which rerun when
+their IndexedDB inputs change. Home practice availability uses an explicit
+controller and in-memory caches. It refreshes after sync, progress reset, and
+practice writes, and schedules a timer for review due times and local-day
+rollover. See [state-and-events.md](state-and-events.md) and
+[home-readiness.md](home-readiness.md) for those refresh paths.

@@ -13,7 +13,12 @@ import InfoButton from '@/features/notes/InfoButton';
 import NoteDetailCard from '@/features/notes/NoteDetailCard';
 import Groups from '@/database/models/groups';
 import PronunciationSoundDetailCard from './PronunciationSoundDetailCard';
-import { getUniquePronunciationSounds, splitPronunciationIntoSounds } from '@/utils/pronunciation.utils';
+import {
+  getSoundsFromPronunciationSegments,
+  getUniquePronunciationSounds,
+  splitPronunciationIntoSegments,
+  type PronunciationSegment,
+} from '@/utils/pronunciation.utils';
 import type { GroupType } from '@/types/table.types';
 import { useLiveQueryData } from '@/hooks/use-live-query-data';
 import { TEXTS } from '@/locales/cs';
@@ -95,7 +100,7 @@ type PracticeDetailProps = Readonly<{
   grammar: GrammarChunkWithExamples | null;
   note: NoteType | null;
   sounds: readonly GroupType[];
-  pronunciationSounds: readonly GroupType[];
+  pronunciationSegments: readonly PronunciationSegment[];
   audio: string | null | undefined;
   selectedSoundIndex: number;
   onClose: () => void;
@@ -107,7 +112,7 @@ function PracticeDetail({
   grammar,
   note,
   sounds,
-  pronunciationSounds,
+  pronunciationSegments,
   audio,
   selectedSoundIndex,
   onClose,
@@ -127,7 +132,7 @@ function PracticeDetail({
   return (
     <PronunciationSoundDetailCard
       sounds={sounds}
-      pronunciationSounds={pronunciationSounds}
+      pronunciationSegments={pronunciationSegments}
       audio={audio}
       index={selectedSoundIndex}
       onIndexChange={onSoundIndexChange}
@@ -606,15 +611,15 @@ function PracticeCardActionBar({
   display,
   setVisibleDetail,
   onDetailLoadError,
-  pronunciationSounds,
+  pronunciationSegments,
   onOpenPronunciation,
 }: Readonly<{
   props: NormalizedPracticeSessionCardProps;
   display: PracticeCardDisplayState;
   setVisibleDetail: (detail: PracticeDetail) => void;
   onDetailLoadError: (detail: PracticeDetail) => void;
-  pronunciationSounds: readonly GroupType[];
-  onOpenPronunciation: (sounds: readonly GroupType[]) => void;
+  pronunciationSegments: readonly PronunciationSegment[];
+  onOpenPronunciation: (segments: readonly PronunciationSegment[]) => void;
 }>) {
   const {
     grammar,
@@ -662,7 +667,7 @@ function PracticeCardActionBar({
           ariaLabel={TEXTS.pronunciationGuide}
           onClick={(event) => {
             event.stopPropagation();
-            onOpenPronunciation(pronunciationSounds);
+            onOpenPronunciation(pronunciationSegments);
           }}
           disabled={display.pronunciationButtonDisabled}
         >
@@ -728,9 +733,10 @@ function PracticeSessionCardView({
   setVisibleDetail: (detail: PracticeDetail) => void;
   onDetailLoadError: (detail: PracticeDetail) => void;
   sounds: readonly GroupType[];
-  onOpenPronunciation: (sounds: readonly GroupType[]) => void;
+  onOpenPronunciation: (segments: readonly PronunciationSegment[]) => void;
 }>) {
-  const pronunciationSounds = splitPronunciationIntoSounds(props.pronunciation ?? '', sounds);
+  const pronunciationSegments = splitPronunciationIntoSegments(props.pronunciation ?? '', sounds);
+  const pronunciationSounds = getSoundsFromPronunciationSegments(pronunciationSegments);
   const uniquePronunciationSounds = getUniquePronunciationSounds(pronunciationSounds);
   const display = getPracticeCardDisplayState(props, uniquePronunciationSounds.length > 0);
   return (
@@ -742,7 +748,7 @@ function PracticeSessionCardView({
           display={display}
           setVisibleDetail={setVisibleDetail}
           onDetailLoadError={onDetailLoadError}
-          pronunciationSounds={pronunciationSounds}
+          pronunciationSegments={pronunciationSegments}
           onOpenPronunciation={onOpenPronunciation}
         />
       </div>
@@ -754,7 +760,7 @@ export default function PracticeSessionCard(props: PracticeSessionCardProps) {
   const normalizedProps = normalizePracticeSessionCardProps(props);
   const { data: sounds } = useLiveQueryData(() => Groups.getSounds(), { emptyData: [], sharedKey: JSON.stringify(['global', 'sounds-catalog']) });
   const [visibleDetail, setVisibleDetail] = useState<PracticeDetail | null>(null);
-  const [pronunciationSounds, setPronunciationSounds] = useState<readonly GroupType[]>([]);
+  const [pronunciationSegments, setPronunciationSegments] = useState<readonly PronunciationSegment[]>([]);
   const [selectedSoundIndex, setSelectedSoundIndex] = useState(0);
   const reportedDetailFailuresRef = useRef(new Set<string>());
 
@@ -775,8 +781,8 @@ export default function PracticeSessionCard(props: PracticeSessionCardProps) {
         visibleDetail={visibleDetail}
         grammar={normalizedProps.grammar}
         note={normalizedProps.note}
-        sounds={getUniquePronunciationSounds(pronunciationSounds)}
-        pronunciationSounds={pronunciationSounds}
+        sounds={getUniquePronunciationSounds(getSoundsFromPronunciationSegments(pronunciationSegments))}
+        pronunciationSegments={pronunciationSegments}
         audio={normalizedProps.audio}
         selectedSoundIndex={selectedSoundIndex}
         onClose={() => setVisibleDetail(null)}
@@ -792,7 +798,7 @@ export default function PracticeSessionCard(props: PracticeSessionCardProps) {
       onDetailLoadError={handleDetailLoadError}
       sounds={sounds}
       onOpenPronunciation={(sequence) => {
-        setPronunciationSounds(sequence);
+        setPronunciationSegments(sequence);
         setSelectedSoundIndex(0);
         setVisibleDetail('pronunciation');
       }}

@@ -17,17 +17,6 @@ Repository docs:
 - [STYLEGUIDE.md](STYLEGUIDE.md): recommended repository coding style and review defaults
 - [docs/README.md](docs/README.md): frontend behavior docs for architecture, state, sync, practice flows, readiness counts, and domain models
 
-## What The Frontend Does
-
-The current frontend provides:
-
-- authentication and session initialization
-- guided practice flow for vocabulary and grammar
-- overview screens for levels, blocks, grammar, and vocabulary
-- local user progress storage through IndexedDB
-- periodic synchronization with remote data sources
-- theme, toast, overlay, and help-state management through feature stores
-
 ## Tech Stack
 
 - Frontend: React 19, TypeScript 5, Vite 7, React Router 7
@@ -117,12 +106,15 @@ Top-level folders in [frontend/src](frontend/src):
 
 ## Main Frontend Routes
 
-The current app wiring in [frontend/src/App.tsx](frontend/src/App.tsx) includes:
+The current app wiring in [frontend/src/router.tsx](frontend/src/router.tsx) includes:
 
-- `/`: home page
-- `/privacy-policy`: privacy policy page
-- `/guide`: guide page
-- protected routes for practice, profile, levels, blocks, block detail, grammar, and vocabulary
+- Public routes: `/`, `/privacy-policy`, and `/guide`
+- Protected practice routes: `/practice`, `/practice/grammar`, `/practice/vocabulary`,
+  and `/practice/initial-training`
+- Protected overview routes: `/overviews`, `/topics`, `/topics/:topicId`, `/grammar`,
+  `/vocabulary`, `/sounds`, `/sounds/:groupId`, `/pronunciation`, and
+  `/pronunciation/:groupId`
+- Protected account route: `/profile`
 
 Unknown routes render a page-not-found notification.
 
@@ -132,9 +124,9 @@ The frontend initializes app-wide flows in [frontend/src/App.tsx](frontend/src/A
 and keeps user progress local-first through IndexedDB. The main feature areas are:
 
 - Supabase authentication with anonymous sign-in, Google sign-in, account
-  conversion, sign-out, and soft-delete/reactivation support.
-- Unified vocabulary/grammar review and inline new-grammar learning with local
-  progress saves, audio playback, daily score updates, and sync-backed recovery.
+  conversion, sign-out, and hard-delete support.
+- Vocabulary and grammar review plus initial training, with local progress saves,
+  audio playback, and sync-backed recovery.
 - Home readiness buttons and a non-clickable progress dashboard, plus overview
   pages for sounds, pronunciation, grammar, topics, and vocabulary.
 - Periodic, logout, and unmount synchronization for user progress and shared
@@ -166,7 +158,10 @@ Key frontend areas:
 ## Database and Backend Assets
 
 Supabase SQL is managed through the CLI layout in [supabase](supabase).
-Declarative database objects live in [supabase/schemas](supabase/schemas), and reset-time seed/operational SQL lives in [supabase/seeds](supabase/seeds).
+Declarative database objects live in [supabase/schemas](supabase/schemas),
+incremental migrations live in [supabase/migrations](supabase/migrations), and
+database-reset seed SQL lives in [supabase/seeds](supabase/seeds). The active
+schema and seed file order is configured in [supabase/config.toml](supabase/config.toml).
 
 Important files include:
 
@@ -174,24 +169,37 @@ Important files include:
 - [supabase/schemas/10_updated_at_triggers.sql](supabase/schemas/10_updated_at_triggers.sql): trigger wiring such as `updated_at`
 - [supabase/schemas/20_auth_helpers.sql](supabase/schemas/20_auth_helpers.sql): shared RPC auth helpers
 - [supabase/schemas/30_rpc_fetch_user_items.sql](supabase/schemas/30_rpc_fetch_user_items.sql): user item fetch RPC
-- [supabase/schemas/40_user_lifecycle_functions.sql](supabase/schemas/40_user_lifecycle_functions.sql): user soft-delete/reactivation functions
-- [supabase/schemas/90_rls.sql](supabase/schemas/90_rls.sql): RLS policies and table grants
-- [supabase/seeds/00_private_settings.sql](supabase/seeds/00_private_settings.sql): private settings seed values
-- [supabase/seeds/01_cron_schedules.sql](supabase/seeds/01_cron_schedules.sql): local reset cron scheduling SQL
+- [supabase/schemas/31_rpc_upsert_user_items.sql](supabase/schemas/31_rpc_upsert_user_items.sql): user item upsert RPC
+- [supabase/schemas/32_rpc_upsert_fetch_user_items.sql](supabase/schemas/32_rpc_upsert_fetch_user_items.sql): combined user item sync RPC
+- [supabase/schemas/40_user_lifecycle_functions.sql](supabase/schemas/40_user_lifecycle_functions.sql): authenticated user hard-delete function
+- [supabase/schemas/41_anonymous_cleanup_function.sql](supabase/schemas/41_anonymous_cleanup_function.sql): cleanup function for old anonymous accounts
+- [supabase/schemas/42_cron_jobs.sql](supabase/schemas/42_cron_jobs.sql): scheduled database jobs
+- [supabase/schemas/50_storage_buckets.sql](supabase/schemas/50_storage_buckets.sql): audio storage buckets and access policy
+- [supabase/schemas/90_rls.sql](supabase/schemas/90_rls.sql): row-level security policies and table grants
+- [supabase/seeds/remote_data.sql](supabase/seeds/remote_data.sql): shared lesson and item data loaded on database reset
+- [supabase/seeds/01_legacy_group_import.sql](supabase/seeds/01_legacy_group_import.sql), [supabase/seeds/02_unified_groups.sql](supabase/seeds/02_unified_groups.sql), and [supabase/seeds/03_cleanup_legacy_group_import.sql](supabase/seeds/03_cleanup_legacy_group_import.sql): import legacy group data into the unified group model
 
-Main domain tables/entities across the project:
+Current application-owned database tables:
 
-- `levels`, `lessons`, `items`, `grammar_groups`, `grammar_chunks`, `grammar_chunk_examples`, `blocks`, `notes`
-- `user_items`, `user_scores`
-- sync metadata and user-linked records
+- Shared curriculum and content in `public`: `levels`, `lessons`, `items`, and `notes`
+- Unified content groups in `public`: `groups`, `group_items`, and `group_relations`.
+  Groups use the `topic`, `grammar`, `sound`, or `pronunciation` type; relations
+  represent hierarchy, detail, or contrast.
+- User records in `public`: `users`, `user_lessons`, and `user_items`
+- Operational settings in `private`: `private.settings`
 
-Important sync fields include:
+The main content model links ordered `items` to `lessons`. `groups` organize topics,
+grammar content, sounds, and pronunciation content independently of the lesson
+curriculum; `group_items` links groups to items.
+
+Important sync and progress fields include:
 
 - `updated_at`
-- `started_at`
-- `next_at`
-- `mastered_at`
-- `deleted_at`
+- `deleted_at` for soft-deleted shared content
+- `started_at` for user lesson and item progress
+- `progress_cz_to_en` and `progress_en_to_cz` for directional progress
+- `next_at_cz_to_en` and `next_at_en_to_cz` for directional review scheduling
+- `mastered_at_cz_to_en` and `mastered_at_en_to_cz` for directional mastery
 
 ## PWA and Static Assets
 
@@ -204,10 +212,13 @@ Included assets:
 - [frontend/public/robots.txt](frontend/public/robots.txt)
 - [frontend/public/sitemap.xml](frontend/public/sitemap.xml)
 
-Important current note:
-
-- service worker registration code in [frontend/src/main.tsx](frontend/src/main.tsx) is currently commented out
-- build-time service worker generation still runs through [frontend/scripts/generate-sw.mjs](frontend/scripts/generate-sw.mjs)
+The production build runs [frontend/scripts/generate-sw.mjs](frontend/scripts/generate-sw.mjs)
+through [frontend/scripts/build-with-version.mjs](frontend/scripts/build-with-version.mjs)
+to inject the built asset list into `dist/service-worker.js`. Run `npm run build:sw`
+from [frontend](frontend) to generate it separately. In production,
+[frontend/src/main.tsx](frontend/src/main.tsx) registers the service worker after
+the page loads. In development, the app unregisters a service worker in its scope
+and clears its associated caches.
 
 ## Styling and Build Configuration
 

@@ -1,81 +1,95 @@
 # Domain Models
 
-The frontend stores shared content and per-user progress in IndexedDB through
-Dexie models under `frontend/src/database/models`.
+Supabase stores shared content and user data. The frontend mirrors the records it
+needs in Dexie IndexedDB, where its model classes support local reads, writes, and
+synchronization.
 
-## Core Progress Fields
+## Current Supabase Tables
 
-| Field | Meaning |
-| --- | --- |
-| Directional progress | Numeric SRS level. Correct answers increment it, incorrect answers reset it, and skips preserve it while mastering the direction. |
-| `progress_history` | Array of progress snapshots with direction and explicit `correct`, `incorrect`, `skip`, or legacy outcome. |
-| `started_at` | First time the user started an item. Null is represented by config's null replacement date. |
-| `next_at` | When the item is next ready. Null replacement date means not scheduled/not started depending on context. |
-| `mastered_at` | Completion/mastery timestamp. Null replacement date means not mastered. |
-| `deleted_at` | Synchronization tombstone for content/progress rows. User accounts are deleted immediately and do not use this field. |
-| Null replacement date/number | IndexedDB index-friendly stand-ins from `config.database`. |
+| Schema | Tables | Role |
+| --- | --- | --- |
+| `public` shared content | `levels`, `lessons`, `items`, `notes` | Ordered course content, practice items, and supporting notes. |
+| `public` group catalog | `groups`, `group_items`, `group_relations` | Topics, grammar, sounds, pronunciation groups, their item examples, and relationships. |
+| `public` user data | `users`, `user_lessons`, `user_items` | User settings, lesson starts, and per-item progress. |
+| `private` | `private.settings` | Operational settings used by database functions. |
 
-## Main Relationships
+The active schema is defined in `supabase/schemas/00_tables.sql`. Older names such
+as `blocks`, `topics`, `grammar_chunks`, and `user_scores` belong to historical
+migrations or local Dexie upgrades; they are not current application tables.
+
+## Relationships
 
 | Entity | Relationship |
 | --- | --- |
-| `levels` | Contain lessons and support dashboard/overview grouping. |
-| `lessons` | Own ordered items and explicit blocks. |
-| `blocks` | Optional explicit initial-training groups; progress remains item-based. |
-| `topics` | Shared overview groups linked independently through nullable `items.topic_id`; one topic may span multiple practice blocks. |
-| `groups` / `group_items` / `group_relations` | Unified topic, grammar, sound, and pronunciation catalog. Group items are ordered examples; relations encode grammar hierarchy and sound contrasts. Visible examples must be initiated and belong to a lesson recorded in `user_lessons`. |
-| `items` / `user_items` | Individual vocabulary or grammar practice units. User items track progress and scheduling. |
-| `grammar_groups` / `grammar_chunks` | Legacy grammar references retained for existing practice-item and lesson compatibility while the shared group catalog powers overviews. |
-| `grammar_chunk_examples` | Curated, ordered item examples displayed with a grammar chunk independently of block membership and item hint linkage. |
-| `notes` | Shared note/detail content, linked by `note_id`. |
-| `user_scores` | Per-user daily practice count. |
+| `levels` → `lessons` → `items` | Lessons are ordered within levels; items are ordered within lessons. |
+| `items` → `notes` | An item can reference an optional note through `note_id`. |
+| `lessons` → `groups` | Optional `lessons.group_id` links a lesson to its grammar detail group. |
+| `groups` ↔ `items` | `group_items` links a group to ordered example items. |
+| `groups` ↔ `groups` | `group_relations` records `hierarchy`, `detail`, and `contrast` relationships. |
+| `user_items` | One progress row per user and item, keyed by `(user_id, item_id)`. |
+| `user_lessons` | Records a user's lesson starts with `started_at`; a user may have start records for different dates. |
 
-Vocabulary items have `is_vocabulary = 1`. Grammar items have `is_vocabulary = 0`. The flag
-and `grammar_chunk_id` are independent item fields. Items own `lesson_id`; `block_id` is optional.
-The curriculum path contains level, lesson, and item order.
+`groups.type` is `topic`, `grammar`, `sound`, or `pronunciation`. Sound groups also
+carry a sound class/category. The grammar, topic, sound, and pronunciation query
+helpers in `frontend/src/database/models` read this unified group model; their
+names do not imply separate current Supabase tables.
 
-## Important Model Responsibilities
+## Progress And Sync Fields
+
+The server's `user_items` table stores progress and scheduling. Sync RPCs combine
+those rows with item content for the local `UserItem` model.
+
+| Field | Meaning |
+| --- | --- |
+| `progress_cz_to_en`, `progress_en_to_cz` | Spaced-repetition progress for each review direction. |
+| `is_cz_to_en_enabled`, `is_en_to_cz_enabled` | Whether an item is enabled in each direction. |
+| `next_at_cz_to_en`, `next_at_en_to_cz` | Next scheduled review for each direction. |
+| `mastered_at_cz_to_en`, `mastered_at_en_to_cz` | Mastery timestamps for each direction. |
+| `started_at` | First practice start for an item, or the start time for a `user_lessons` record. |
+| `updated_at` | Change timestamp used by synchronization. |
+| `deleted_at` | Soft-delete marker for shared catalog content. User accounts are hard-deleted. |
+
+For IndexedDB compound indexes, null dates use
+`config.database.nullReplacementDate`. Sync converts the local sentinel back to
+null where the remote field is nullable. `items.is_vocabulary` separates
+vocabulary from grammar practice.
+
+An item is considered initiated when it has a `started_at` value or has been
+skipped during initial training (its Czech-to-English direction is marked
+mastered). Lesson-start state in the Home dashboard comes from `user_lessons`.
+
+## Frontend Models
 
 | Model | Responsibility |
 | --- | --- |
-| `UserItem` | Practice deck creation, item progress saves, vocabulary readiness, item resets, user item sync. |
-| `Block` | Shared metadata for explicit initial-training groups. |
-| `Topic` | Shared topic metadata sync and initiated-topic discovery. |
-| `UserScore` | Daily practice count creation, incrementing, and sync. |
-| `Levels` | Dashboard/overview progress aggregation. |
+| `Levels`, `Lessons`, `Notes`, `Groups`, `GroupItem`, `GroupRelation` | Read and synchronize shared catalog data. |
+| `UserItem` | Local user progress, review selection, initial-training selection, resets, and item sync. |
+| `UserLesson` | Record and synchronize lesson starts; enforce the daily new-lesson limit. |
+| `UserSettings` | Read and synchronize `users.max_new_lessons_per_day`. |
+| `AudioRecord`, `AudioMetadata` | Track local audio records and archive metadata. |
+| `Metadata` | Store local per-table, per-user sync metadata. |
+| `Topic`, `GrammarTopic`, `GrammarGroup`, `GrammarChunk`, `SoundGroup`, `PronunciationGroup` | Feature query helpers backed by the unified group tables. |
 
-## Feature Readers And Writers
+## Active IndexedDB Tables And Indexes
 
-| Model | Main readers | Main writers |
-| --- | --- | --- |
-| `UserItem` | Home readiness, practice decks, vocabulary overview, explicit block items, grammar overview | Practice progress, initial-training completion, item/block/grammar/vocabulary resets, sync. |
-| `UserScore` | Home daily count, dashboard stars | Practice progress actions, sync. |
-| `Levels` / `Lessons` | Dashboard, levels overview, block/lesson grouping | Shared content sync. |
-| `GrammarGroup` / `GrammarChunk` / `Notes` | Grouped grammar overview and chunk-level practice details | Shared content sync. |
-| `AudioRecord` / `AudioMetadata` | Practice audio controls and audio manager | Audio archive sync and orphan cleanup. |
+The current Dexie schema is version 13 in
+`frontend/src/database/models/app-db.ts`. Its active tables are `levels`,
+`lessons`, `notes`, `user_items`, `user_lessons`, `users`, `groups`,
+`group_items`, `group_relations`, `audio_records`, `audio_metadata`, and
+`metadata`. Upgrades remove legacy block, topic, grammar, pronunciation, score,
+history, and practice-session stores.
 
-## Key IndexedDB Indexes
-
-Declared in `frontend/src/database/models/app-db.ts`.
+Key indexes on `user_items`:
 
 | Index | Used for |
 | --- | --- |
-| `[user_id+item_id]` | Direct user item lookup/reset/update. |
-| `[user_id+block_id]` | Block item loading and block reset operations. |
-| `[user_id+topic_id]` | Initiated topic detail loading and topic reset operations. |
-| `[user_id+grammar_chunk_id+started_at]` | Grammar-chunk initiated-item queries and resets. |
-| `[user_id+is_vocabulary+started_at]` | Initiated vocabulary queries. |
-| `[user_id+started_at]` | Initiated-item and grammar discovery. |
-| `[user_id+updated_at]` | Incremental sync push windows. |
-| `[user_id+next_at+mastered_at+curriculum_sort_path]` | Unified practice deck and readiness queries. |
+| `[user_id+item_id]` | Direct user-item lookup, update, and reset. |
+| `[user_id+is_vocabulary+started_at]` | Started vocabulary lookup. |
+| `[user_id+started_at]` | User items ordered/filterable by start state. |
+| `[user_id+updated_at]` | Incremental sync windows. |
+| `[user_id+lesson_id+is_vocabulary+started_at]` | Lesson/type-specific selection. |
+| `[user_id+next_at_cz_to_en+mastered_at_cz_to_en+curriculum_sort_path]` | Czech-to-English review selection and order. |
+| `[user_id+next_at_en_to_cz+mastered_at_en_to_cz+curriculum_sort_path]` | English-to-Czech review selection and order. |
 
-## Readiness Meaning
-
-| Practice type | Ready item condition |
-| --- | --- |
-| Vocabulary | Not mastered and either `next_at < now` or `next_at` equals the null replacement date. |
-| Grammar review | Not mastered, already started/scheduled, and `next_at < now`. |
-| Initial training | First unstarted curriculum item starts an automatic lesson/type batch or its explicit block. |
-
-Readiness is a UI availability concept. Actual practice deck creation still
-queries the model again when the practice route mounts.
+`user_lessons` uses `[user_id+lesson_id+started_at]` and
+`[user_id+started_at]` to check lesson continuation and daily starts.

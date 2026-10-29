@@ -9,10 +9,11 @@ import PlayButton from '@/features/audio/PlayButton';
 import VolumeSlider from '@/features/audio/VolumeSlider';
 import { useToastStore } from '@/features/toast/use-toast-store';
 import { playAudioWithToast } from '@/features/audio/audio.utils';
+import type { PronunciationSegment } from '@/utils/pronunciation.utils';
 
 type PronunciationSoundDetailCardProps = Readonly<{
   sounds: readonly GroupType[];
-  pronunciationSounds: readonly GroupType[];
+  pronunciationSegments: readonly PronunciationSegment[];
   audio?: string | null;
   index: number;
   onIndexChange: (index: number) => void;
@@ -21,7 +22,7 @@ type PronunciationSoundDetailCardProps = Readonly<{
 
 export default function PronunciationSoundDetailCard({
   sounds,
-  pronunciationSounds,
+  pronunciationSegments,
   audio = null,
   index,
   onIndexChange,
@@ -35,8 +36,8 @@ export default function PronunciationSoundDetailCard({
 
   const isFirstSound = index === 0;
   const isLastSound = index === sounds.length - 1;
-  const highlightedPronunciation = highlightSoundOccurrences(pronunciationSounds, sound);
-  const pronunciationText = pronunciationSounds.map((item) => item.name).join('');
+  const highlightedPronunciation = highlightSoundOccurrences(pronunciationSegments, sound);
+  const pronunciationText = highlightedPronunciation.map((segment) => segment.text).join('');
   return (
     <Card className="card-height gap-1">
       <div className="h-button flex w-full shrink-0 items-center gap-1">
@@ -80,10 +81,11 @@ export default function PronunciationSoundDetailCard({
         >
           {highlightedPronunciation.map((segment, segmentIndex) => (
             <span
-              key={`${segment.name}-${segmentIndex}`}
-              className={segment.isHighlighted ? 'text-blue-600 dark:text-blue-400' : undefined}
+              key={`${segment.kind}-${segment.text}-${segmentIndex}`}
+              data-pronunciation-segment={segment.kind}
+              className={getPronunciationSegmentClassName(segment)}
             >
-              {segment.name}
+              {segment.text}
             </span>
           ))}
         </StyledButton>
@@ -101,14 +103,26 @@ export default function PronunciationSoundDetailCard({
   );
 }
 
-type PronunciationSegment = Readonly<{ name: string; isHighlighted: boolean }>;
+type HighlightedPronunciationSegment = Readonly<{
+  kind: PronunciationSegment['kind'];
+  text: string;
+  isHighlighted: boolean;
+}>;
 
 function highlightSoundOccurrences(
-  pronunciationSounds: readonly GroupType[],
+  pronunciationSegments: readonly PronunciationSegment[],
   highlightedSound: GroupType,
-): readonly PronunciationSegment[] {
-  return pronunciationSounds.map((sound) => ({
-    name: sound.name,
-    isHighlighted: sound.id === highlightedSound.id,
+): readonly HighlightedPronunciationSegment[] {
+  return pronunciationSegments.map((segment) => ({
+    kind: segment.kind,
+    text: segment.kind === 'sound' ? segment.sound.name : segment.text,
+    isHighlighted: segment.kind === 'sound' && segment.sound.id === highlightedSound.id,
   }));
+}
+
+function getPronunciationSegmentClassName(segment: HighlightedPronunciationSegment): string | undefined {
+  if (segment.isHighlighted) return 'text-blue-600 dark:text-blue-400';
+  if (segment.kind === 'marker') return 'opacity-60';
+  if (segment.kind === 'unknown') return 'underline decoration-dotted underline-offset-2';
+  return undefined;
 }

@@ -1,86 +1,88 @@
 # Feature Catalog
 
-This catalog maps user-visible features to the frontend modules, data sources,
-stores, persistence, and refresh signals that make them work. Use it as the
-starting point when a change crosses route, store, model, or sync boundaries.
+This catalog maps current user-visible behavior to the frontend owners and data
+sources. Start here when a change crosses a route, model, store, or sync boundary.
 
 ## App Shell And Routing
 
-| Feature | User purpose | Main entrypoints | Data and state | Connection points |
-| --- | --- | --- | --- | --- |
-| App shell | Initializes the app and renders global UI around routes. | `frontend/src/App.tsx`, `Header`, `Footer` | `useAuthStore`, `useToastStore`, `usePeriodicSync`, `useUserStoreSync`, `useAudioLoader`, `useThemeLoader` | Mounting `App` starts auth, sync, reactive stats, audio, theme, toasts, overlay, and analytics. |
-| Public routes | Let unsigned users read static pages or sign in from Home. | `/`, `/guide`, `/privacy-policy` | Auth store decides Home signed-in vs signed-out view. | Unknown routes render a page-not-found notification. |
-| Protected routes | Gate practice, profile, and overview pages behind a session. | `ProtectedLayout`, `ROUTES` | `useAuthStore.userId` | Protected route access depends on hydrated auth state, not direct Supabase reads in pages. |
-| Navigation | Provides Home/profile/theme navigation and footer content. | `Header`, `Footer`, route buttons | Router state, auth state, theme store | Footer renders only on the exact Home and Profile routes; route buttons use `ROUTES` constants. |
+| Feature | Main entrypoints | Data and state | Behavior |
+| --- | --- | --- | --- |
+| App shell | `main.tsx`, `App.tsx`, `Header`, `Footer` | Auth, sync, theme, audio, availability stores | Starts global hooks and renders route content, toast, overlay, identity-link modal, and navigation. |
+| Public routes | `/`, `/guide`, `/privacy-policy` | Auth store | Home offers sign-in to signed-out users; the guide and privacy page are static. |
+| Protected routes | `router.tsx`, `ProtectedLayout` | `useAuthStore.userId` | Protected route loaders wait for auth initialization and redirect signed-out users to Home. |
 
 ## Auth And Account
 
-| Feature | User purpose | Main entrypoints | Data and state | Connection points |
-| --- | --- | --- | --- | --- |
-| Session initialization | Restore current Supabase session and keep auth state current. | `useAuthStore.initializeAuth` | Supabase Auth, Sentry/monitoring user context | `App` calls it once; auth changes drive protected route access and user-scoped loaders. |
-| Anonymous sign-in | Create a quick trial account. | `AnonymousSigninButton`, `anonymous-auth-service` | Supabase Auth, optional captcha token | Signed-in anonymous users can simulate data from Home after initial sync. |
-| Google sign-in | Sign in or convert to a durable account. | `GoogleAuthButton`, `ConvertAnonymousUserButton`, `IdentityLinkConflictModal` | Supabase Auth provider flow, intent-scoped one-time `sessionStorage` guest fallback | Conversion backs up the verified guest before redirect. If the Google identity belongs to another account, callback handling restores the same guest before offering stay-guest or explicit existing-account sign-in; no progress is merged or transferred. |
-| Profile page | Show account email and account actions. | `/profile`, `Profile` | `useAuthStore.userEmail` | Links to overview pages and exposes sign-out/delete actions. |
-| Sign-out | End the session after best-effort user-data sync. | `SignoutButton`, `useAuthStore.handleLogout` | Supabase Auth, `dataSyncOnUnmount`, theme cleanup | Logout normally syncs user tables before clearing local auth state. |
-| Account deletion | Permanently delete the current user and their data immediately after confirmation. | `DeleteUserButton`, `useAuthStore` | Supabase Auth user lifecycle RPC, local auth/session state | Delete clears local state after remote hard delete; no reactivation window remains. |
+| Feature | Main entrypoints | Behavior |
+| --- | --- | --- |
+| Session initialization | `startAuthLifecycle`, `useAuthStore` | Restores and validates the Supabase session, handles OAuth callbacks, and keeps auth state current. |
+| Anonymous sign-in | `AnonymousSigninButton`, `anonymous-auth-service` | Creates a guest account for trying the app. |
+| Google sign-in and conversion | `GoogleAuthButton`, `ConvertAnonymousUserButton`, `anonymous-session-fallback` | Signs in or links a guest account. A short-lived sessionStorage fallback supports OAuth recovery and identity-link conflict handling. |
+| Profile | `/profile`, `Profile` | Shows the account name/email, offers full sync and sign-out/delete actions, and saves `max_new_lessons_per_day`. |
+| Account deletion | `DeleteUserButton`, `useAuthStore`, `hard_delete_user` RPC | Permanently deletes the authenticated Supabase user and their linked data after confirmation. |
 
 ## Home
 
-| Feature | User purpose | Main entrypoints | Data and state | Connection points |
-| --- | --- | --- | --- | --- |
-| Signed-out Home | Presents app title, guide link, install button, and sign-in actions. | `/`, `Home`, auth buttons | `useAuthStore.userId` | Public state renders no local progress queries. |
-| Signed-in hub | Shows user name, daily count, practice buttons, progress dashboard, and sync warning. | `Home`, `Dashboard`, `HomePracticeButtons` | `useAuthStore`, `useUserStore`, `useSyncStore`, IndexedDB models | The progress dashboard is informational and does not navigate. Home combines global stores with local model reads; it does not read Supabase directly. |
-| Practice readiness button | Enables unified practice when local data is ready. | `HomePracticeButtons` | `UserItem`, Dexie live query | Recalculates after relevant committed writes; timers update future ready counts while Home stays mounted. |
-| Sync warning | Warns when the last periodic sync failed. | `Home` | `useSyncStore.isSyncError` | Successful sync clears the warning; failed sync does not prevent local-first practice. |
-| Simulated data | Atomically seed anonymous/test progress once local sync is ready and destructive confirmation is accepted. | `SimulateDataButton`, `simulate-data-service` | `UserItem`, `UserLesson`, localStorage `simulate-data-v2-${userId}` | Replaces vocabulary progress from the first ten lessons in curriculum order and marks those lessons started; reactive consumers refresh after commit. |
+| Feature | Main entrypoints | Data and state | Behavior |
+| --- | --- | --- | --- |
+| Signed-out Home | `/`, `Home`, auth buttons | `useAuthStore` | Shows app information, guide/install links, anonymous sign-in, and Google sign-in. |
+| Signed-in Home | `Home`, `Dashboard`, `PracticeButton` | Local models, `useUserStore`, `useSyncStore` | Shows a test-mode notice, practice buttons, a lesson-start dashboard, and a sync warning when needed. |
+| Practice availability | `PracticeButton`, `practice-availability-controller` | `usePracticeAvailabilityStore` | Shows New, Grammar Review, and Vocabulary Review. Review buttons show due counts; availability rules are in [home-readiness.md](home-readiness.md). |
+| Lesson dashboard | `Dashboard`, `Levels.getOverview` | `levels`, `lessons`, `user_items`, `user_lessons` | Displays lesson progress by level. It is informational and does not navigate. |
+| Simulated progress | `SimulateDataButton`, `simulate-data-service` | `UserItem`, `UserLesson`, localStorage | For anonymous users, applies a local vocabulary fixture to the first 100 curriculum lessons with vocabulary and marks those lessons started. Requires sync completion and confirmation. |
 
 ## Practice And Learning
 
-| Feature | User purpose | Main entrypoints | Data and state | Connection points |
-| --- | --- | --- | --- | --- |
-| Shared practice card | Display a prompt, answer, controls, audio, and detail buttons. | `PracticeSessionCard`, practice buttons | Hook-provided current item, audio manager state, grammar/note IDs | Used by review practice and new grammar where behavior overlaps. |
-| Unified practice | Review vocabulary and started grammar. | `/practice`, `Practice`, `usePracticeDeck` | `UserItem.getPracticeDeck` | Uses due odd/even progress priority and curriculum ordering. |
-| Initial training | Learn an automatic lesson/type batch or an explicit grammar block in staged rounds. | `/practice/initial-training`, `InitialTrainingPractice`, `useInitialTrainingDeck` | `Block`, `UserItem`, `PracticeSession` | Only unstarted items enter the stable session queue; completion returns Home to recalculate availability. |
-| Progress actions | Mark an item as hint/repeat/known/skip/mastered. | `HintButton`, `RepeatButton`, `KnownButton`, `MasterItemButton` | `UserItem` progress fields, `UserScore` daily count | Progress writes refresh matching live queries and are pushed by later sync. |
-| Audio in practice | Play item audio and respect per-user volume. | `PlayAudioButton`, `useAudioManager`, `useAudioStore` | `AudioRecord`, object URLs, localStorage volume | Audio metadata/records are synchronized separately by periodic sync. |
-| Grammar and note details | Show supporting detail cards from practice and overview flows. | `GrammarDetailCard`, `VocabularyDetailCard`, note/grammar viewer hooks | `GrammarChunk`, `Notes`, linked IDs on items | Detail cards are feature-local UI over shared IndexedDB content. |
+| Feature | Main entrypoints | Data and state | Behavior |
+| --- | --- | --- | --- |
+| Grammar review | `/practice`, `/practice/grammar`, `PracticeCard`, `usePracticeDeck` | `UserItem`, review arrays | Selects due grammar items in an enabled review direction; saves each answer locally before advancing. |
+| Vocabulary review | `/practice/vocabulary`, `PracticeCard`, `usePracticeDeck` | `UserItem`, review arrays | Selects due vocabulary items and uses the same per-answer save path. |
+| Initial training | `/practice/initial-training`, `InitialTrainingPractice`, `useInitialTrainingDeck` | `UserItem`, `UserLesson`, `Groups` | Trains eligible unstarted items from the next lesson and records the lesson start under the user's daily limit. |
+| Practice details | `PracticeSessionCard`, `GrammarDetailCard`, `VocabularyDetailCard` | `notes`, `groups`, `group_items`, audio store | Shows available grammar/note details and audio alongside a practice item. |
+
+See [practice-flows.md](practice-flows.md) for queue and answer behavior.
 
 ## Overviews
 
-| Feature | User purpose | Main entrypoints | Data and state | Connection points |
-| --- | --- | --- | --- | --- |
-| Dashboard progress | Show progress grouped by course structure. | `Dashboard` on Home | `Levels`, `Lessons`, `UserItem`, `useUserStore` | Active-user live queries refresh cached progress after relevant commits. The dashboard is not a link. |
-| Topics overview | List ordered topics with initiated corresponding items. | `/topics`, `TopicsOverview` | `Topic`, `UserItem`, audio playback for items | Topics are independent of practice blocks and require at least one initiated item. |
-| Topic items | Show and reset initiated items inside one topic. | `/topics/:topicId`, `TopicItemsOverview` | `Topic`, `UserItem`, audio and detail links | Items link directly through nullable `items.topic_id`; initial-training skips are included. |
-| Grammar overview | List initiated groups with ordered chunk sections, playable curated examples, and reset group progress. | `/grammar`, `GrammarOverview` | `GrammarGroup`, `GrammarChunk`, `grammar_chunk_examples`, `UserItem` | Reset preserves unlock history and includes initial-training skips. |
-| Vocabulary overview | Search and inspect initiated vocabulary, then reset item progress. | `/vocabulary`, `VocabularyOverview` | `UserItem`, item detail data, localStorage `vocabulary_search_term_${userId}` | Search state persists per user; initial-training skips are included. |
+| Feature | Route | Main data source | Behavior |
+| --- | --- | --- | --- |
+| Overview menu | `/overviews` | Local availability queries | Links to sounds, pronunciation, vocabulary, topics, and grammar. |
+| Topics | `/topics`, `/topics/:topicId` | `groups`, `group_items`, started lessons/items | Lists topic groups and their initiated items. Topic membership is stored in `group_items`. |
+| Grammar | `/grammar` | `groups`, `group_items`, `group_relations` | Displays the grammar hierarchy and available examples using the unified group model. |
+| Vocabulary | `/vocabulary` | `user_items`, item content | Searches initiated vocabulary and stores the search term in localStorage. |
+| Sounds | `/sounds`, `/sounds/:groupId` | Sound-typed groups and item memberships | Organizes sounds by category and shows examples available from started lessons. |
+| Pronunciation contrasts | `/pronunciation`, `/pronunciation/:groupId` | Pronunciation groups, contrast relations, sound groups | Shows contrasts and examples with audio; a contrast becomes active when its linked sounds are available. |
+
+Feature adapters such as `Topic`, `GrammarTopic`, `GrammarChunk`, `SoundGroup`,
+and `PronunciationGroup` query `groups`, `group_items`, and `group_relations`; they
+do not correspond to separate current content tables.
 
 ## Data, Sync, And Offline Behavior
 
-| Feature | User purpose | Main entrypoints | Data and state | Connection points |
-| --- | --- | --- | --- | --- |
-| Local-first progress | Keep practice responsive and offline-capable. | Dexie models in `frontend/src/database/models` | IndexedDB user tables and shared content tables | UI reads/writes local models first; Supabase is reached through sync/auth/audio flows. |
-| Periodic sync | Push local changes and pull remote updates. | `usePeriodicSync`, `dataSync` | Supabase PostgreSQL, sync metadata, `useSyncStore` | Successful sync sets status flags; committed writes refresh live queries and audio archives sync separately. |
-| Full sync | Recover or refresh local content/user rows from remote data. | `dataSync(userId, true)` or stale full-sync timestamp | `last-full-sync-at_${userId}`, model `syncFromRemote` methods | Full sync timing is stored in localStorage; model support determines replace behavior. |
-| Unmount/logout sync | Try to save user data before leaving or signing out. | `dataSyncOnUnmount`, `handleLogout` | User-scoped models | Runs user-table sync only; failures are reported but should not trap the user in the app. |
-| Audio archive sync | Keep local audio records aligned with remote storage metadata. | `AudioRecord.syncFromRemote`, `AudioRecord.removeOrphaned` | Supabase Storage, IndexedDB audio records | Runs after data sync and reports archive errors separately. |
+| Feature | Main entrypoints | Behavior |
+| --- | --- | --- |
+| Local-first data | Dexie models under `frontend/src/database/models` | Practice and overview features read local content and user records. User progress writes land in IndexedDB first. |
+| Periodic sync | `usePeriodicSync`, `dataSync` | Pushes local user changes, pulls shared/user updates, refreshes practice availability, and then syncs audio archives. |
+| Full sync | `Profile`, `dataSync(userId, true)` | Reconciles local and remote records and refreshes the audio archive cache. |
+| Logout/unmount sync | `handleLogout`, `dataSyncOnUnmount` | Attempts an incremental sync of user items, lesson starts, and user settings when a valid session exists. |
+| Audio | `useAudioManager`, `AudioRecord`, `AudioMetadata` | Downloads audio from Supabase Storage on demand, caches blobs in IndexedDB, and refreshes changed archives. |
 
-## Global State, Events, And UI Infrastructure
+See [data-and-sync.md](data-and-sync.md) for cursors, storage keys, and merge
+behavior.
 
-| Feature | User purpose | Main entrypoints | Data and state | Connection points |
-| --- | --- | --- | --- | --- |
-| Auth store | Expose current user/session to the app. | `useAuthStore` | Supabase Auth session | Drives protected routes, user-scoped loaders, account UI, and sync user ID. |
-| Sync store | Expose synchronization status. | `useSyncStore` | In-memory status flags | Home reads `isSyncError`; data refresh follows IndexedDB commits. |
-| User stats store | Cache dashboard-level stats. | `useUserStore`, `useUserStoreSync` | Dexie live-query snapshots | Subscribes for the active user and current local date. |
-| Theme | Persist and apply user/guest theme. | `useThemeStore`, `useThemeLoader`, `ThemeSwitch` | localStorage theme key, DOM classes | Reloads on user change and affects global document styling. |
-| Toasts | Show transient app messages. | `useToastStore`, `ToastContainer` | In-memory toast list | Used by auth, sync, reset, practice, and simulation flows. |
-| Help and overlay | Coordinate help text, modals, and backdrop behavior. | `useHelpStore`, `useOverlayStore`, `HelpText`, `Modal`, `OverlayMask` | In-memory UI state | Overlay close can run a registered callback and then clears it. |
-| PWA install | Surface browser install prompt. | `InstallPWAButton`, `usePwaStore` | Browser `beforeinstallprompt` event | Prompt state is kept in memory and cleared after handling. |
-| Privacy and guide | Provide static user-facing reference pages. | `/privacy-policy`, `/guide` | Static route content | Public routes, no user model dependencies. |
+## Global UI And PWA
+
+| Feature | Main entrypoints | Behavior |
+| --- | --- | --- |
+| Theme | `useThemeLoader`, `useThemeStore`, `theme-utils` | Persists a light or dark choice for the user or guest and applies it to the document. |
+| Toasts | `useToastStore`, `ToastContainer` | Displays transient success, error, and loading messages. |
+| Help and overlay | `useHelpStore`, `useOverlayStore`, `HelpText`, `Modal`, `OverlayMask` | Coordinates contextual help, modal callbacks, and backdrop state. |
+| PWA install | `InstallPwaButton`, `usePwaStore` | Captures the browser install prompt event and lets the user invoke it. |
+| Service worker | `main.tsx`, `scripts/generate-sw.mjs`, `public/service-worker.js` | Production builds generate a precache manifest and register the worker after page load. Development removes an app-scoped registration and its caches. |
+| Responsive layout | `useResponsiveLayout`, `useSideHeaderOrientation` | Sets layout attributes used by the app shell at different viewport sizes. |
 
 ## Observability
 
-| Feature | User purpose | Main entrypoints | Data and state | Connection points |
-| --- | --- | --- | --- | --- |
-| Error/info reporting | Capture operational failures without blocking local-first use. | `monitoring-handler`, `reportError`, `reportInfo` | Sentry/monitoring configuration | Used by auth, sync, audio, practice saves, reset actions, and loaders. |
-| Google Analytics | Track app usage where configured. | `GoogleAnalytics` | Analytics configuration/environment | Mounted once by `App`; independent of IndexedDB progress state. |
+`monitoring-handler` reports errors and informational events from auth, sync,
+audio, route loading, and progress actions. `GoogleAnalytics` is mounted by the
+app shell when analytics is configured.
