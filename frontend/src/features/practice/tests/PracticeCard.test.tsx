@@ -590,7 +590,7 @@ describe('PracticeCard', () => {
     expect(screen.getByRole('button', { name: 'Next sound' }).className).toContain('h-button');
     const pronunciationTextButton = screen.getByTestId('pronunciation-sound-navigation')
       .querySelectorAll('button')[1] as HTMLButtonElement;
-    expect(pronunciationTextButton.textContent).toBe('həloʊ');
+    expect(pronunciationTextButton.textContent).toBe('həlˈoʊ');
     expect(pronunciationTextButton.disabled).toBe(true);
     expect(pronunciationTextButton.className).toContain('h-button');
     expect(pronunciationTextButton.querySelector('.text-blue-600')?.textContent).toBe('h');

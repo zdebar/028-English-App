@@ -24,7 +24,12 @@ import SecondaryControlButton from '@/components/UI/buttons/SecondaryControlButt
 import PronunciationIcon from '@/components/UI/icons/PronunciationIcon';
 import Groups from '@/database/models/groups';
 import PronunciationSoundDetailCard from '@/features/practice/PronunciationSoundDetailCard';
-import { getUniquePronunciationSounds, splitPronunciationIntoSounds } from '@/utils/pronunciation.utils';
+import {
+  getSoundsFromPronunciationSegments,
+  getUniquePronunciationSounds,
+  splitPronunciationIntoSegments,
+  type PronunciationSegment,
+} from '@/utils/pronunciation.utils';
 import type { GroupType } from '@/types/table.types';
 import { useState } from 'react';
 import { useLiveQueryData } from '@/hooks/use-live-query-data';
@@ -231,14 +236,14 @@ function VocabularyNoteButton({
 
 function VocabularyPronunciationDetail({
   sounds,
-  pronunciationSounds,
+  pronunciationSegments,
   audio,
   index,
   onIndexChange,
   onClose,
 }: Readonly<{
   sounds: readonly GroupType[];
-  pronunciationSounds: readonly GroupType[];
+  pronunciationSegments: readonly PronunciationSegment[];
   audio: string | null | undefined;
   index: number;
   onIndexChange: (index: number) => void;
@@ -247,7 +252,7 @@ function VocabularyPronunciationDetail({
   return (
     <PronunciationSoundDetailCard
       sounds={sounds}
-      pronunciationSounds={pronunciationSounds}
+      pronunciationSegments={pronunciationSegments}
       audio={audio}
       index={index}
       onIndexChange={onIndexChange}
@@ -326,8 +331,10 @@ export default function VocabularyDetailCard({
   const directionSections = getDirectionSections(selectedWord);
   const { data: sounds } = useLiveQueryData(() => Groups.getSounds(), { emptyData: [], sharedKey: JSON.stringify(['global', 'sounds-catalog']) });
   const [pronunciationIndex, setPronunciationIndex] = useState<number | null>(null);
-  const fullPronunciationSounds = splitPronunciationIntoSounds(cardValues.pronunciation, sounds);
-  const pronunciationSounds = getUniquePronunciationSounds(fullPronunciationSounds);
+  const pronunciationSegments = splitPronunciationIntoSegments(cardValues.pronunciation, sounds);
+  const pronunciationSounds = getUniquePronunciationSounds(
+    getSoundsFromPronunciationSegments(pronunciationSegments),
+  );
 
   const {
     playAudio,
@@ -351,7 +358,7 @@ export default function VocabularyDetailCard({
     return (
       <VocabularyPronunciationDetail
         sounds={pronunciationSounds}
-        pronunciationSounds={fullPronunciationSounds}
+        pronunciationSegments={pronunciationSegments}
         audio={cardValues.audio}
         index={pronunciationIndex}
         onIndexChange={setPronunciationIndex}
