@@ -105,6 +105,8 @@ například pro *bird* vrací `bˈɜːd`. Pro ověření konkrétní instalace s
 Funkce `fill_pronunciation_espeak_ng` v `scripts/utils/pronunciation.py`
 spouští eSpeak NG s argumenty `-q --ipa -v en-us`, odstraní čárky ze vstupu
 a uloží oříznutý text standardního výstupu do sloupce `pronunciation`.
+Pro anglické hlasy navíc normalizuje znak `ɐ` na `ə`. Proto se uložená hodnota
+může v tomto znaku lišit od přímého výstupu příkazu eSpeak uvedeného výše.
 Příprava slov používá tuto funkci v `scripts/prepare_words.py`.
 
 Ověřený příkaz v PowerShellu:

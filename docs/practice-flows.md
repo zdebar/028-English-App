@@ -1,48 +1,60 @@
 # Practice Flows
 
-Practice uses separate review and initial-training routes with the shared `PracticeSessionCard`.
+The app has three Home practice actions: grammar review, vocabulary review, and
+initial training. Review routes share `PracticeCard`; initial training uses a
+lesson-specific introduction and the shared practice card UI.
 
-## Unified Practice
+## Grammar And Vocabulary Review
 
-Route: `/practice`, rendered by `Practice` and `usePracticeDeck`.
+Routes: `/practice/grammar` and `/practice/vocabulary`. `/practice` is the
+grammar-review route alias. `router.tsx` loads the initial review deck from local
+IndexedDB before rendering `Practice`.
 
-`UserItem.getPracticeDeck` does not filter by `is_vocabulary`:
+A review candidate must be active, already started, unmastered in the selected
+direction, enabled for that direction, and match the selected item type. The
+selected direction is Czech-to-English when it has due items; if it has none, the
+loader can fall back to English-to-Czech. Items are ordered by their next review
+time, then curriculum order.
 
-1. Select due, unmastered practice items with odd progress, ordered by `next_at`. Return immediately when this fills the deck.
-2. Otherwise build an alternative deck from due even-progress items, then never-scheduled items in curriculum order.
-3. Return the even/new alternative when non-empty, otherwise return the partial odd deck.
+Each answer updates that direction's progress and schedule and is saved to
+IndexedDB before the queue advances. Failed writes stay on the current item and
+can be retried. After a successful write, the in-memory review arrays are updated.
+If an answered item is still due, it can re-enter the queue. Leaving practice
+keeps answers already saved; the remaining queue is not persisted as a session.
 
-Review progress is buffered in memory during the current batch and bulk-saved when that batch
-finishes. Unfinished in-memory answers are intentionally discarded if practice is interrupted.
+The card loads note and grammar detail separately from the selected review items.
+Failure to load optional detail does not prevent answering the card.
 
 ## Initial Training
 
-Route: `/practice/initial-training`, entered from the Home “Nové” button.
+Route: `/practice/initial-training`, opened by the Home “New” button.
 
-Home selects the first unstarted item by level, lesson, and item order. Selection then follows these
-rules:
+The first eligible unstarted item is selected in curriculum order. Training then
+includes all eligible unstarted items from that item's lesson. A lesson cannot be
+started while either review category has reached its configured review limit or
+the user's daily new-lesson limit has been reached. A lesson already started that
+day can be continued. The route rechecks eligibility and records the lesson start
+in `user_lessons` before showing training.
 
-- A blockless vocabulary item starts an automatic batch of up to
-  `config.practice.initialTrainingBatchSize` blockless vocabulary items. It can cross lessons and
-  explicit blocks while collecting items.
-- A blockless grammar item starts an automatic batch of up to
-  `config.practice.initialTrainingBatchSize` blockless grammar items from the same lesson. It stops
-  at a lesson change, item-type change, or explicit block.
-- An item with `block_id` loads all currently unstarted members of that explicit block and displays
-  its introduction before the four training rounds.
+The introduction shows the lesson and its items before the first prompt. A correct
+answer advances to the next item. An incorrect answer adds that item to the retry
+queue. Skipping completes the current item and marks it mastered. Each answer is
+saved immediately to the local `user_items` record; initial progress is mirrored
+to both review directions.
 
-Completion starts the exact session items, removes the session, and returns Home. Explicit blocks
-skipped while collecting a vocabulary batch remain unstarted and are selected next when they become
-the first remaining curriculum item. Empty blocks and blocks without unstarted items are ignored.
+There is no persisted training-session table. If the page is reloaded, the route
+selects the remaining eligible unstarted items from the next lesson selection.
+Completed answers remain saved, while the in-memory retry order is lost.
 
-Saved sessions retain their exact item IDs. Newly synchronized items are offered only after the
-active session completes. There is no previous-block or grammar unlock prerequisite.
+## Grammar And Supporting Details
 
-## Grammar Details
+Grammar groups, their hierarchy, and their examples use the unified `groups`,
+`group_relations`, and `group_items` data. `lessons.group_id` links a lesson to its
+grammar detail. The frontend's `GrammarTopic`, `GrammarGroup`, and `GrammarChunk`
+classes are query helpers over that unified model; they are not separate current
+database tables.
 
-Regular and training practice cards resolve their detail button through the item-derived
-`user_items.grammar_chunk_id` and display that chunk with every explicitly ordered
-`grammar_chunk_examples` item. Every chunk belongs to a grammar group. The grammar overview uses
-the group name and note, then composes only its initiated chunks in group-specific order while
-showing every curated example for each visible chunk. An initial-training skip counts as
-initiated even though it has no `started_at` timestamp.
+Practice cards can display the lesson's grammar detail and linked note. Grammar
+overviews arrange initiated grammar groups by hierarchy and detail relations,
+then show the linked examples that are available from started lessons. An initial
+training skip counts as initiated for overview visibility.

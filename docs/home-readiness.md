@@ -1,22 +1,37 @@
-# Home Practice Readiness
+# Home Practice Availability
 
-`PracticeButtons` renders Review and New controls from a shared availability store. The Home route
-waits for the first availability snapshot before rendering. After Home is mounted, its Dexie
-subscription keeps the store current and is stopped while Practice is active.
+`PracticeButton` renders three actions from
+`usePracticeAvailabilityStore`: New, Grammar Review, and Vocabulary Review. The
+Home route loader waits for the first availability snapshot so the controls do
+not briefly appear disabled while local data is loading.
 
-| Control | Ready condition | Badge | Refresh |
-| --- | --- | --- | --- |
-| Review | Threshold readiness reaches the configured minimum, or a review session is active | None | Asynchronous Home-scoped Dexie readiness query and future schedule timer |
-| New | Review is below its boundary and the lowest ordered unstarted practice block has items, or a valid new session is active | None | Asynchronous Home-scoped Dexie live query over items, blocks, and sessions |
+| Button | Enabled when | Badge |
+| --- | --- | --- |
+| Grammar Review | At least one due grammar review direction-item is available. | Number of due grammar direction-items. |
+| Vocabulary Review | At least one due vocabulary review direction-item is available. | Number of due vocabulary direction-items. |
+| New | An eligible unstarted lesson exists, review limits are below threshold, and the daily new-lesson limit allows it. A lesson already started today can be continued. | None. |
 
-Home readiness includes all unmastered practice items regardless of vocabulary/grammar
-classification: due scheduled items plus reset items. It performs capped indexed scans and stops as
-soon as the minimum threshold is known; it never calculates the exact review total. If the threshold
-is not currently met, it records the date of the future item that would reach it and schedules a
-refresh for that date.
+Review availability includes both review directions. A direction-item is due
+when it is active, already started, enabled for that direction, not mastered in
+that direction, and its schedule is ready. Grammar and vocabulary are classified
+by `user_items.is_vocabulary`.
 
-Review has priority at its boundary. Invalid new sessions are removed before availability is
-published, so a removed, started, or empty block cannot keep overriding current block ordering.
-The Home route does not render while its initial availability calculation is pending, so users do
-not see a default-disabled practice state. If a later refresh fails, both practice controls use the
-safe disabled/error state from the store.
+New training selects the next eligible unstarted lesson in curriculum order. It
+is blocked when either grammar or vocabulary reaches its configured review limit
+or when the user's maximum number of distinct lesson starts for the local day has
+been reached. The maximum is stored in `users.max_new_lessons_per_day` and can be
+changed on the Profile page. Continuing a lesson already started today bypasses
+both new-lesson checks.
+
+## Refresh Behavior
+
+`loadPracticeAvailabilitySnapshot` combines cached review arrays, the next
+initial-training lesson, user settings, and today's `user_lessons` starts.
+Availability is refreshed after sign-in, when the page gains focus or becomes
+visible, after sync, after progress resets, and after practice writes. Review
+counts are also updated after each saved answer.
+
+The controller schedules a refresh for the next review time or the next local
+day. While practice is active, it coalesces full availability refreshes until
+pending writes settle and the user exits the practice route. If loading fails,
+the store exposes the error state and disables the controls safely.

@@ -212,6 +212,14 @@ Included assets:
 - [frontend/public/robots.txt](frontend/public/robots.txt)
 - [frontend/public/sitemap.xml](frontend/public/sitemap.xml)
 
+The production build runs [frontend/scripts/generate-sw.mjs](frontend/scripts/generate-sw.mjs)
+through [frontend/scripts/build-with-version.mjs](frontend/scripts/build-with-version.mjs)
+to inject the built asset list into `dist/service-worker.js`. Run `npm run build:sw`
+from [frontend](frontend) to generate it separately. In production,
+[frontend/src/main.tsx](frontend/src/main.tsx) registers the service worker after
+the page loads. In development, the app unregisters a service worker in its scope
+and clears its associated caches.
+
 ## Styling and Build Configuration
 
 Relevant frontend files:
