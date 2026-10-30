@@ -24,7 +24,7 @@ function PracticeButtonLabel({ children }: Readonly<{ children: string }>): JSX.
         {TEXTS.grammarReviewButton}
       </span>
       <span
-        className="col-start-2 row-start-1 w-0 justify-self-start overflow-visible text-left whitespace-nowrap"
+        className="col-start-2 row-start-1 w-0 min-w-0 justify-self-start overflow-visible text-left whitespace-nowrap"
       >
         {children}
       </span>
