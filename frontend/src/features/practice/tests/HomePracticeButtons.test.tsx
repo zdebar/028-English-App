@@ -10,6 +10,7 @@ vi.mock('@/locales/cs', () => ({
     grammarReviewButton: 'Grammar review',
     vocabularyReviewButton: 'Vocabulary review',
     newButton: 'New',
+    pronunciationPractice: 'Pronunciation practice',
     loadingMessage: 'Loading',
     loadingError: 'Loading error',
     nothingToPractice: 'Nothing to practice',
@@ -144,7 +145,7 @@ describe('Home practice buttons', () => {
     expect(button('New').disabled).toBe(true);
   });
 
-  it('stacks review before new with the shared one-unit gap', () => {
+  it('places pronunciation practice directly below the next-lesson button', () => {
     const { container } = render(<PracticeButtons />);
     const buttonGroup = container.firstElementChild;
 
@@ -152,6 +153,7 @@ describe('Home practice buttons', () => {
     expect(buttonGroup?.className).toContain('gap-1');
     expect(screen.getAllByRole('button').map((item) => item.textContent)).toEqual([
       'New',
+      'Pronunciation practice',
       'Grammar review',
       'Vocabulary review',
     ]);

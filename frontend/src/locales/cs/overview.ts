@@ -60,7 +60,6 @@ export const OVERVIEW_TEXTS = {
   // Overviews Page
   overviews: 'Přehledy',
   progressOverviews: 'Pokrok',
-  pronunciationSettings: 'Porovnání hlásek',
   pronunciationConsonants: 'souhlásky',
   pronunciationVowels: 'samohlásky',
   topicsOverview: 'Přehled témat',
@@ -70,7 +69,6 @@ export const OVERVIEW_TEXTS = {
   vocabularyOverview: 'Přehled slovíček',
   vocabularyOverviewTooltip: 'Přehled započatých slovíček',
   pronunciationGroups: 'Skupiny výslovnosti',
-  pronunciationGroupsTooltip: 'Skupiny podobně znějících položek',
   playAllRandomly: 'Přehrát všechna náhodně',
   playSelectedRandomly: 'Přehrát vybraná náhodně',
   selectAllPronunciationWords: 'Vybrat nebo odvybrat všechna slovíčka',

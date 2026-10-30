@@ -158,6 +158,12 @@ export default function PracticeButtons(): JSX.Element {
   return (
     <div className="flex w-full flex-col gap-1">
       <NewPracticeButton />
+      <NavigationButton
+        to={ROUTES.pronunciationGroups}
+        className="h-button max-h-button w-full px-4"
+      >
+        {TEXTS.pronunciationPractice}
+      </NavigationButton>
       <ReviewPracticeButton reviewKind="grammar" to={ROUTES.grammarPractice}>
         {TEXTS.grammarReviewButton}
       </ReviewPracticeButton>

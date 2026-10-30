@@ -32,7 +32,7 @@ function splitContrastName(groupName: string): readonly [string, string] | null 
 
 export default function PronunciationOverview() {
   usePronunciationGroupsStoreSync(useAuthStore((state) => state.userId));
-  const closeRoute = useRouteClose(ROUTES.overviews);
+  const closeRoute = useRouteClose(ROUTES.home);
   const data = usePronunciationGroupsStore((state) => state.groups);
   const loading = usePronunciationGroupsStore((state) => state.loading);
   const error = usePronunciationGroupsStore((state) => state.error);
@@ -42,7 +42,7 @@ export default function PronunciationOverview() {
 
   return (
     <OverviewCard
-      buttonTitle={TEXTS.pronunciationSettings}
+      buttonTitle={TEXTS.pronunciationPractice}
       onClose={closeRoute}
       showResetAction={false}
     >

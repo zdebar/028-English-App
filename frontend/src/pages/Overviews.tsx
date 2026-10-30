@@ -44,7 +44,6 @@ export default function Overviews(): JSX.Element {
     TEXTS.noStartedVocabulary,
   );
   const soundsButton = { disabled: false, title: TEXTS.soundsOverview };
-  const pronunciationButton = { disabled: false, title: TEXTS.pronunciationGroupsTooltip };
   return (
     <div className="card-width grow-0 gap-1">
       <h1 className="sr-only">{TEXTS.overviews}</h1>
@@ -52,13 +51,6 @@ export default function Overviews(): JSX.Element {
         <div className="flex flex-col gap-1">
           <NavigationButton className="h-button w-full" to={ROUTES.sounds} {...soundsButton}>
             <MenuButtonText>{TEXTS.soundsOverview}</MenuButtonText>
-          </NavigationButton>
-          <NavigationButton
-            className="h-button w-full"
-            to={ROUTES.pronunciationGroups}
-            {...pronunciationButton}
-          >
-            <MenuButtonText>{TEXTS.pronunciationSettings}</MenuButtonText>
           </NavigationButton>
           <NavigationButton
             className="h-button w-full"

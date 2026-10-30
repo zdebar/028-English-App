@@ -4,9 +4,6 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 const mocks = vi.hoisted(() => ({
   navigate: vi.fn(),
   availability: {} as any,
-  pronunciationGroups: [] as unknown[],
-  pronunciationLoading: false,
-  pronunciationError: null as Error | null,
 }));
 
 vi.mock('react-router-dom', () => ({
@@ -30,21 +27,6 @@ vi.mock('@/hooks/use-overview-availability', () => ({
   useOverviewAvailability: () => mocks.availability,
 }));
 
-vi.mock('@/features/pronunciation/use-pronunciation-groups-store', () => ({
-  usePronunciationGroupsStore: (
-    selector: (state: {
-      groups: unknown[];
-      loading: boolean;
-      error: Error | null;
-    }) => unknown,
-  ) =>
-    selector({
-      groups: mocks.pronunciationGroups,
-      loading: mocks.pronunciationLoading,
-      error: mocks.pronunciationError,
-    }),
-}));
-
 vi.mock('@/locales/cs', () => ({
   TEXTS: {
     overviews: 'Přehledy',
@@ -56,8 +38,6 @@ vi.mock('@/locales/cs', () => ({
     topicsOverviewTooltip: 'Topics tooltip',
     vocabularyOverview: 'Přehled slovíček',
     vocabularyOverviewTooltip: 'Vocabulary tooltip',
-    pronunciationSettings: 'Výslovnost',
-    pronunciationGroupsTooltip: 'Pronunciation tooltip',
     noGrammar: 'No grammar',
     noSounds: 'No sounds',
     noTopics: 'No topics',
@@ -70,7 +50,7 @@ vi.mock('@/locales/cs', () => ({
 
 import Overviews from '@/pages/Overviews';
 
-const overviewKeys = ['grammar', 'topics', 'vocabulary', 'sounds'];
+const overviewKeys = ['grammar', 'topics', 'vocabulary'];
 
 describe('Overviews', () => {
   beforeEach(() => {
@@ -78,35 +58,20 @@ describe('Overviews', () => {
     mocks.availability = Object.fromEntries(
       overviewKeys.map((key) => [key, { hasData: true, loading: false, error: null }]),
     );
-    mocks.pronunciationGroups = [{}];
-    mocks.pronunciationLoading = false;
-    mocks.pronunciationError = null;
   });
 
   it('keeps all empty overviews visible but disabled with explanatory tooltips', () => {
     Object.values(mocks.availability).forEach((state: any) => {
       state.hasData = false;
     });
-    mocks.pronunciationGroups = [];
-
     render(<Overviews />);
 
     const buttons = screen.getAllByRole('button');
-    expect(buttons).toHaveLength(5);
-    expect(buttons.slice(0, 2).every((button) => !(button as HTMLButtonElement).disabled)).toBe(true);
-    expect(buttons.slice(2).every((button) => (button as HTMLButtonElement).disabled)).toBe(true);
-    buttons.slice(2).forEach((button) => fireEvent.click(button));
+    expect(buttons).toHaveLength(4);
+    expect((buttons[0] as HTMLButtonElement).disabled).toBe(false);
+    expect(buttons.slice(1).every((button) => (button as HTMLButtonElement).disabled)).toBe(true);
+    buttons.slice(1).forEach((button) => fireEvent.click(button));
     expect(mocks.navigate).not.toHaveBeenCalled();
-  });
-
-  it('keeps the pronunciation overview available while group availability is loading', () => {
-    mocks.pronunciationGroups = [];
-    mocks.pronunciationLoading = true;
-
-    render(<Overviews />);
-
-    const button = screen.getByRole('button', { name: 'Výslovnost' }) as HTMLButtonElement;
-    expect(button.disabled).toBe(false);
   });
 
   it.each([
@@ -114,7 +79,6 @@ describe('Overviews', () => {
     ['Přehled gramatiky', '/grammar'],
     ['Přehled témat', '/topics'],
     ['Přehled slovíček', '/vocabulary'],
-    ['Výslovnost', '/pronunciation'],
   ])('navigates from %s to %s', (buttonName, route) => {
     render(<Overviews />);
 
