@@ -16,7 +16,7 @@ export const PRACTICE_TEXTS = {
   reveal: 'odhalit',
   retry: 'Zkusit znovu',
   continuePractice: 'pokračovat',
-  repeat: 'opakovat',
+  repeat: 'nevím',
   known: 'znám',
   hard: 'těžké',
   good: 'dobře',

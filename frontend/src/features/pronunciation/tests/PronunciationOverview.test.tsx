@@ -99,7 +99,7 @@ vi.mock('@/locales/cs', () => ({
     pronunciationGroups: 'Skupiny výslovnosti',
     noPronunciationGroups: 'No groups',
     noPronunciationGroupItems: 'No items',
-    pronunciationSettings: 'Porovnání hlásek',
+    pronunciationPractice: 'Procvičování výslovnosti',
     pronunciationConsonants: 'Souhlásky',
     pronunciationVowels: 'Samohlásky',
     noAudio: 'No audio',
@@ -142,7 +142,7 @@ describe('Pronunciation overview screens', () => {
     render(<PronunciationOverview />);
 
     fireEvent.click(screen.getByTestId('close'));
-    expect(mocks.navigate).toHaveBeenCalledWith('/overviews', { replace: true });
+    expect(mocks.navigate).toHaveBeenCalledWith('/', { replace: true });
 
     fireEvent.click(screen.getByRole('button', { name: /æ/ }));
     expect(mocks.navigate).toHaveBeenCalledWith('/pronunciation/1');

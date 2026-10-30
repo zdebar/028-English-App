@@ -3,6 +3,9 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const mocks = vi.hoisted(() => ({
   navigationButtonRender: vi.fn(),
+  pronunciationGroups: [{ isActive: true }],
+  pronunciationLoading: false,
+  pronunciationError: null as Error | null,
 }));
 
 vi.mock('@/locales/cs', () => ({
@@ -10,11 +13,33 @@ vi.mock('@/locales/cs', () => ({
     grammarReviewButton: 'Grammar review',
     vocabularyReviewButton: 'Vocabulary review',
     newButton: 'New',
+    pronunciationPractice: 'Pronunciation practice',
     loadingMessage: 'Loading',
     loadingError: 'Loading error',
+    noActivePronunciationGroups: 'No pronunciation comparisons unlocked',
     nothingToPractice: 'Nothing to practice',
     dailyNewLessonLimitReached: 'Daily lesson limit reached',
   },
+}));
+vi.mock('@/features/auth/use-auth-store', () => ({
+  useAuthStore: (selector: (state: { userId: string }) => unknown) => selector({ userId: 'u1' }),
+}));
+vi.mock('@/features/pronunciation/use-pronunciation-groups-store', () => ({
+  usePronunciationGroupsStore: (
+    selector: (state: {
+      groups: typeof mocks.pronunciationGroups;
+      loading: boolean;
+      error: Error | null;
+    }) => unknown,
+  ) =>
+    selector({
+      groups: mocks.pronunciationGroups,
+      loading: mocks.pronunciationLoading,
+      error: mocks.pronunciationError,
+    }),
+}));
+vi.mock('@/features/pronunciation/use-pronunciation-groups-store-sync', () => ({
+  usePronunciationGroupsStoreSync: vi.fn(),
 }));
 vi.mock('@/routing/data-navigation', () => ({
   NavigationButton: ({ children, ...props }: any) => {
@@ -30,6 +55,9 @@ import config from '@/config/config';
 describe('Home practice buttons', () => {
   beforeEach(() => {
     mocks.navigationButtonRender.mockClear();
+    mocks.pronunciationGroups = [{ isActive: true }];
+    mocks.pronunciationLoading = false;
+    mocks.pronunciationError = null;
     usePracticeAvailabilityStore.setState({
       grammarReviewReadyAt: null,
       vocabularyReviewReadyAt: null,
@@ -144,7 +172,7 @@ describe('Home practice buttons', () => {
     expect(button('New').disabled).toBe(true);
   });
 
-  it('stacks review before new with the shared one-unit gap', () => {
+  it('places pronunciation practice directly below the next-lesson button', () => {
     const { container } = render(<PracticeButtons />);
     const buttonGroup = container.firstElementChild;
 
@@ -152,6 +180,7 @@ describe('Home practice buttons', () => {
     expect(buttonGroup?.className).toContain('gap-1');
     expect(screen.getAllByRole('button').map((item) => item.textContent)).toEqual([
       'New',
+      'Pronunciation practice',
       'Grammar review',
       'Vocabulary review',
     ]);

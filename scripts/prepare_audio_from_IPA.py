@@ -22,7 +22,7 @@ def get_lesson_id(file_name: str) -> int:
 async def prepare_audio(file_name: str, output_file: str, audio_folder: str, suffix: str = "") -> None:
     # 1. Read data
     df = read_vocab_csv(file_name, columns=[
-        "id", "czech", "english", "pronunciation", "audio", "sort_order",
+        "id", "czech", "czech_description", "english", "pronunciation", "audio", "sort_order",
         "note_id", "is_vocabulary"
     ])
     if df is None:

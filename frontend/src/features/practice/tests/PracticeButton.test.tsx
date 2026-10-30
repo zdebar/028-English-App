@@ -44,9 +44,9 @@ describe('PracticeButton', () => {
     expect(handleClick).toHaveBeenCalledTimes(1);
   });
 
-  it('places the repeat help text above the button', () => {
+  it('places the repeat help text below the button', () => {
     render(<RepeatButton onClick={vi.fn()} disabled={false} />);
 
-    expect(screen.getByTestId('help-text').dataset.classname).toBe('pos-help-top-left');
+    expect(screen.getByTestId('help-text').dataset.classname).toBe('pos-help-bottom-left');
   });
 });
