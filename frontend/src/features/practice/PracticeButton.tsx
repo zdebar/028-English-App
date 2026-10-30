@@ -14,6 +14,24 @@ import { usePronunciationGroupsStoreSync } from '@/features/pronunciation/use-pr
 
 type ReviewKind = 'grammar' | 'vocabulary';
 
+function PracticeButtonLabel({ children }: Readonly<{ children: string }>): JSX.Element {
+  return (
+    <span className="grid w-full grid-cols-[1fr_max-content_1fr]">
+      <span
+        aria-hidden="true"
+        className="invisible col-start-2 row-start-1 whitespace-nowrap"
+      >
+        {TEXTS.grammarReviewButton}
+      </span>
+      <span
+        className="col-start-2 row-start-1 w-0 justify-self-start overflow-visible text-left whitespace-nowrap"
+      >
+        {children}
+      </span>
+    </span>
+  );
+}
+
 function selectReviewDueCount(
   state: PracticeAvailabilityState,
   reviewKind: ReviewKind,
@@ -84,7 +102,7 @@ const NewPracticeButton = memo(function NewPracticeButton(): JSX.Element {
         disabled
         title={title}
       >
-        {TEXTS.newButton}
+        <PracticeButtonLabel>{TEXTS.newButton}</PracticeButtonLabel>
       </StyledButton>
     );
   }
@@ -96,7 +114,7 @@ const NewPracticeButton = memo(function NewPracticeButton(): JSX.Element {
       disabled={disabled}
       title={title}
     >
-      {TEXTS.newButton}
+      <PracticeButtonLabel>{TEXTS.newButton}</PracticeButtonLabel>
     </NavigationButton>
   );
 });
@@ -127,14 +145,12 @@ const ReviewCountBadge = memo(function ReviewCountBadge({
 type ReviewPracticeButtonProps = Readonly<{
   reviewKind: ReviewKind;
   to: string;
-  labelClassName?: string;
   children: string;
 }>;
 
 const ReviewPracticeButton = memo(function ReviewPracticeButton({
   reviewKind,
   to,
-  labelClassName = '',
   children,
 }: ReviewPracticeButtonProps): JSX.Element {
   const disabled = usePracticeAvailabilityStore((state) =>
@@ -152,7 +168,7 @@ const ReviewPracticeButton = memo(function ReviewPracticeButton({
       title={title}
     >
       <ReviewCountBadge reviewKind={reviewKind} />
-      <span className={`inline-block ${labelClassName}`}>{children}</span>
+      <PracticeButtonLabel>{children}</PracticeButtonLabel>
     </NavigationButton>
   );
 });
@@ -186,7 +202,7 @@ const PronunciationPracticeButton = memo(function PronunciationPracticeButton():
       disabled={disabled}
       title={getPronunciationPracticeButtonTitle(loading, error, hasActiveGroup)}
     >
-      {TEXTS.pronunciationPractice}
+      <PracticeButtonLabel>{TEXTS.pronunciationPractice}</PracticeButtonLabel>
     </NavigationButton>
   );
 });
@@ -199,11 +215,7 @@ export default function PracticeButtons(): JSX.Element {
       <ReviewPracticeButton reviewKind="grammar" to={ROUTES.grammarPractice}>
         {TEXTS.grammarReviewButton}
       </ReviewPracticeButton>
-      <ReviewPracticeButton
-        reviewKind="vocabulary"
-        labelClassName="-translate-x-1.5"
-        to={ROUTES.vocabularyPractice}
-      >
+      <ReviewPracticeButton reviewKind="vocabulary" to={ROUTES.vocabularyPractice}>
         {TEXTS.vocabularyReviewButton}
       </ReviewPracticeButton>
     </div>

@@ -4,7 +4,7 @@ export const COMMON_TEXTS = {
   notAvailable: 'Není k dispozici',
   notMastered: 'Nenaučeno',
   nothingToPractice: 'Nic k procvičování.',
-  pronunciationPractice: 'Procvičování výslovnosti',
+  pronunciationPractice: 'Cvičení výslovnosti',
   tryAgainLater: 'Zkuste to znovu později.',
   loadingMessage: 'Načítání ...',
   pageNotFound: 'Stránka nebyla nalezena.',
