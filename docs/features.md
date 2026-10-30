@@ -27,7 +27,7 @@ sources. Start here when a change crosses a route, model, store, or sync boundar
 | --- | --- | --- | --- |
 | Signed-out Home | `/`, `Home`, auth buttons | `useAuthStore` | Shows app information, guide/install links, anonymous sign-in, and Google sign-in. |
 | Signed-in Home | `Home`, `Dashboard`, `PracticeButton` | Local models, `useUserStore`, `useSyncStore` | Shows a test-mode notice, practice buttons, a lesson-start dashboard, and a sync warning when needed. |
-| Practice availability | `PracticeButton`, `practice-availability-controller` | `usePracticeAvailabilityStore` | Shows New, Pronunciation Practice, Grammar Review, and Vocabulary Review. Review buttons show due counts; availability rules are in [home-readiness.md](home-readiness.md). |
+| Practice availability | `PracticeButton`, `practice-availability-controller` | `usePracticeAvailabilityStore`, pronunciation groups | Shows New, Pronunciation Practice, Grammar Review, and Vocabulary Review. Pronunciation Practice is enabled when at least one contrast is active. Review buttons show due counts; availability rules are in [home-readiness.md](home-readiness.md). |
 | Lesson dashboard | `Dashboard`, `Levels.getOverview` | `levels`, `lessons`, `user_items`, `user_lessons` | Displays lesson progress by level. It is informational and does not navigate. |
 | Simulated progress | `SimulateDataButton`, `simulate-data-service` | `UserItem`, `UserLesson`, localStorage | For anonymous users, applies a local vocabulary fixture to the first 100 curriculum lessons with vocabulary and marks those lessons started. Requires sync completion and confirmation. |
 

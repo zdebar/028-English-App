@@ -76,5 +76,6 @@ export const OVERVIEW_TEXTS = {
   clickToRevealRandomWord: 'Kliknutím zobrazte',
   playNextRandomWordTooltip: 'Kliknutím přehrajete další náhodné slovo',
   noPronunciationGroups: 'Žádné dostupné skupiny výslovnosti.',
+  noActivePronunciationGroups: 'Zatím není odemčené žádné porovnání hlásek.',
   noPronunciationGroupItems: 'V této skupině nejsou dostupná slovíčka.',
 } as const;

@@ -8,6 +8,9 @@ import {
 } from './use-practice-availability-store';
 import StyledButton from '@/components/UI/buttons/StyledButton';
 import { hasReachedReviewLimit } from './practice-availability';
+import { useAuthStore } from '@/features/auth/use-auth-store';
+import { usePronunciationGroupsStore } from '@/features/pronunciation/use-pronunciation-groups-store';
+import { usePronunciationGroupsStoreSync } from '@/features/pronunciation/use-pronunciation-groups-store-sync';
 
 type ReviewKind = 'grammar' | 'vocabulary';
 
@@ -154,16 +157,45 @@ const ReviewPracticeButton = memo(function ReviewPracticeButton({
   );
 });
 
+function getPronunciationPracticeButtonTitle(
+  loading: boolean,
+  error: Error | null,
+  hasActiveGroup: boolean,
+): string | undefined {
+  if (loading) return TEXTS.loadingMessage;
+  if (error) return TEXTS.loadingError;
+  if (!hasActiveGroup) return TEXTS.noActivePronunciationGroups;
+  return undefined;
+}
+
+const PronunciationPracticeButton = memo(function PronunciationPracticeButton(): JSX.Element {
+  const userId = useAuthStore((state) => state.userId);
+  usePronunciationGroupsStoreSync(userId);
+
+  const hasActiveGroup = usePronunciationGroupsStore((state) =>
+    state.groups.some((group) => group.isActive),
+  );
+  const loading = usePronunciationGroupsStore((state) => state.loading);
+  const error = usePronunciationGroupsStore((state) => state.error);
+  const disabled = loading || error !== null || !hasActiveGroup;
+
+  return (
+    <NavigationButton
+      to={ROUTES.pronunciationGroups}
+      className="h-button max-h-button w-full px-4"
+      disabled={disabled}
+      title={getPronunciationPracticeButtonTitle(loading, error, hasActiveGroup)}
+    >
+      {TEXTS.pronunciationPractice}
+    </NavigationButton>
+  );
+});
+
 export default function PracticeButtons(): JSX.Element {
   return (
     <div className="flex w-full flex-col gap-1">
       <NewPracticeButton />
-      <NavigationButton
-        to={ROUTES.pronunciationGroups}
-        className="h-button max-h-button w-full px-4"
-      >
-        {TEXTS.pronunciationPractice}
-      </NavigationButton>
+      <PronunciationPracticeButton />
       <ReviewPracticeButton reviewKind="grammar" to={ROUTES.grammarPractice}>
         {TEXTS.grammarReviewButton}
       </ReviewPracticeButton>
