@@ -178,12 +178,13 @@ describe('Home practice buttons', () => {
 
     expect(buttonGroup?.className).toContain('flex-col');
     expect(buttonGroup?.className).toContain('gap-1');
-    expect(screen.getAllByRole('button').map((item) => item.textContent)).toEqual([
-      'New',
-      'Pronunciation practice',
-      'Grammar review',
-      'Vocabulary review',
-    ]);
+    const buttons = screen.getAllByRole('button');
+
+    expect(buttons).toHaveLength(4);
+    expect(buttons[0]).toBe(button('New'));
+    expect(buttons[1]).toBe(button('Pronunciation practice'));
+    expect(buttons[2]).toBe(button('Grammar review'));
+    expect(buttons[3]).toBe(button('Vocabulary review'));
   });
 
   it('keeps new visible but disabled when no unstarted lesson exists', () => {
