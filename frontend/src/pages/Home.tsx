@@ -50,10 +50,8 @@ export default function Home(): JSX.Element {
     <>
       {userId ? (
         <div className="card-width relative flex h-full w-full grow flex-col justify-start gap-8">
-          <div className="mt-3">
-            <div className="landscape:mt-6">
-              <HomeActionLinks />
-            </div>
+          <div className="mt-3 landscape:hidden">
+            <HomeActionLinks />
             <p className={`text-error-light dark:text-error-dark px-4 text-center text-sm`}>
               Aplikace v testovacím režimu! V tuto chvíli Vaše tréninková data nebudou zachována.
             </p>
