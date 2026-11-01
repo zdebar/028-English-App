@@ -1,7 +1,7 @@
 import type AppDB from '@/database/models/app-db';
 import { supabaseInstance } from '@/config/supabase.config';
 import { db } from '@/database/models/db';
-import Metadata from '@/database/models/metadata';
+import SyncMetadata from '@/database/models/metadata';
 import { getSyncTimestamps, splitDeleted } from '@/database/utils/sync-generic.utils';
 import { SupabaseError } from '@/types/error.types';
 import type { TableName } from '@/types/table.types';
@@ -65,7 +65,7 @@ export default abstract class SyncEntityModel extends Entity<AppDB> {
       if (toUpsert.length > 0) {
         await this.syncTable.bulkPut(toUpsert);
       }
-      await Metadata.markAsSynced(this.syncTableName, newSyncedAt);
+      await SyncMetadata.markAsSynced(this.syncTableName, newSyncedAt);
     });
 
     return remoteItems.length;

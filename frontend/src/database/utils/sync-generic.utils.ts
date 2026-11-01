@@ -1,5 +1,5 @@
 import config from '@/config/config';
-import Metadata from '@/database/models/metadata';
+import SyncMetadata from '@/database/models/metadata';
 import type { TableName } from '@/types/table.types';
 
 /**
@@ -39,7 +39,7 @@ export async function getSyncTimestamps(
 ): Promise<{ lastSyncedAt: string; newSyncedAt: string }> {
   const lastSyncedAt = doFullSync
     ? config.database.epochStartDate
-    : await Metadata.getSyncedAt(tableName, userId);
+    : await SyncMetadata.getSyncedAt(tableName, userId);
   const newSyncedAt = new Date().toISOString();
   return { lastSyncedAt, newSyncedAt };
 }

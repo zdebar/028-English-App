@@ -1,5 +1,5 @@
 import { supabaseInstance } from '@/config/supabase.config';
-import Metadata from '@/database/models/metadata';
+import SyncMetadata from '@/database/models/metadata';
 import UserItem from '@/database/models/user-items';
 import UserLesson from '@/database/models/user-lessons';
 import { clearAllLocalStorageForUser } from '@/utils/storage.utils';
@@ -49,7 +49,7 @@ export default function DeleteUserButton({ className }: DeleteUserButtonProps): 
     const cleanupSummary = await withSettledSummary(
       [
         UserItem.deleteByUserId(deletingUserId),
-        Metadata.deleteSyncRow(TableName.UserItems, deletingUserId),
+        SyncMetadata.deleteSyncRow(TableName.UserItems, deletingUserId),
         UserLesson.removeByUserId(deletingUserId),
       ],
       'Operation failed during local cleanup',

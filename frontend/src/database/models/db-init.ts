@@ -3,7 +3,7 @@ import AudioMetadata from '@/database/models/audio-metadata';
 import AudioRecord from '@/database/models/audio-records';
 import Lessons from '@/database/models/lessons';
 import Levels from '@/database/models/levels';
-import Metadata from '@/database/models/metadata';
+import SyncMetadata from '@/database/models/metadata';
 import UserItem from '@/database/models/user-items';
 import Notes from './notes';
 import UserLesson from './user-lessons';
@@ -22,7 +22,7 @@ export function initDbMappings(): void {
   db.lessons.mapToClass(Lessons);
   db.audio_records.mapToClass(AudioRecord);
   db.audio_metadata.mapToClass(AudioMetadata);
-  db.metadata.mapToClass(Metadata);
+  db.metadata.mapToClass(SyncMetadata);
   db.user_lessons.mapToClass(UserLesson);
   db.groups.mapToClass(Groups);
   db.group_items.mapToClass(GroupItem);

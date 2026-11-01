@@ -1,6 +1,6 @@
 import { supabaseInstance } from '@/config/supabase.config';
 import { db } from '@/database/models/db';
-import Metadata from '@/database/models/metadata';
+import SyncMetadata from '@/database/models/metadata';
 import { getSyncTimestamps, splitDeleted } from '@/database/utils/sync-generic.utils';
 import config from '@/config/config';
 import { reportInfo } from '@/features/logging/monitoring-handler';
@@ -92,7 +92,7 @@ export async function syncUserItemsFromRemote(
     const rowsToUpsert = toUpsert.filter((item) => !concurrentKeys.has(getUserItemKey(item)));
     if (rowsToUpsert.length > 0) await db.user_items.bulkPut(rowsToUpsert);
     if (!preservedConcurrentChanges) {
-      await Metadata.markAsSynced(TableName.UserItems, newSyncedAt, userId);
+      await SyncMetadata.markAsSynced(TableName.UserItems, newSyncedAt, userId);
     }
   });
 

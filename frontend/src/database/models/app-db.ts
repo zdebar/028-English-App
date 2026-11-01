@@ -3,7 +3,7 @@ import Dexie, { type EntityTable, type Table } from 'dexie';
 import type AudioRecord from '@/database/models/audio-records';
 import type UserItem from '@/database/models/user-items';
 import type AudioMetadata from '@/database/models/audio-metadata';
-import type Metadata from '@/database/models/metadata';
+import type SyncMetadata from '@/database/models/metadata';
 import type Lessons from '@/database/models/lessons';
 import type Levels from '@/database/models/levels';
 import type Notes from '@/database/models/notes';
@@ -21,7 +21,7 @@ const USER_ITEMS_SCHEMA_UNIFIED =
 type UserItemKey = [userId: string, itemId: number];
 type MetadataKey = [tableName: TableName, userId: string];
 type UserLessonKey = [userId: string, lessonId: number, startedAt: string];
-type MetadataRow = Pick<Metadata, 'table_name' | 'synced_at' | 'user_id'>;
+type MetadataRow = Pick<SyncMetadata, 'table_name' | 'synced_at' | 'user_id'>;
 type UserLessonRow = Pick<UserLesson, 'user_id' | 'lesson_id' | 'started_at'>;
 
 /**
@@ -38,7 +38,7 @@ export default class AppDB extends Dexie {
   user_items!: Table<UserItem, UserItemKey, UserItemLocal>;
   audio_records!: EntityTable<AudioRecord, 'filename'>;
   audio_metadata!: EntityTable<AudioMetadata, 'archive_name'>;
-  metadata!: Table<Metadata, MetadataKey, MetadataRow>;
+  metadata!: Table<SyncMetadata, MetadataKey, MetadataRow>;
   user_lessons!: Table<UserLesson, UserLessonKey, UserLessonRow>;
   groups!: EntityTable<GroupType, 'id'>;
   group_items!: EntityTable<GroupItemType, 'id'>;
