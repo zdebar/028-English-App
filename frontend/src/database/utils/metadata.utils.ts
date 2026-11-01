@@ -6,7 +6,7 @@ import { TableName } from '@/types/table.types';
  * @param tableName Table name to inspect.
  * @returns true for user-owned tables.
  */
-export function isUserSpecificTable(tableName: string): boolean {
+function isUserSpecificTable(tableName: TableName): boolean {
   return tableName === TableName.UserItems || tableName === TableName.UserLessons;
 }
 
@@ -18,14 +18,14 @@ export function isUserSpecificTable(tableName: string): boolean {
  * @returns true when the table is user-specific, false for shared tables.
  * @throws Error when userId is missing for a user-specific table or provided for a shared table.
  */
-export function validateUserIdUsage(tableName: TableName, userId?: string) {
+export function validateUserIdUsage(tableName: TableName, userId?: string): boolean {
   const isUserSpecific = isUserSpecificTable(tableName);
   if (isUserSpecific && !userId) {
-    throw new Error(`userId is required for user-specific tables: ${tableName} userId: ${userId}`);
+    throw new Error(`userId is required for user-specific table: ${tableName}.`);
   }
   if (!isUserSpecific && userId) {
     throw new Error(
-      `userId should not be provided for non-user-specific tables: ${tableName} userId: ${userId}`,
+      `userId must not be provided for shared table: ${tableName}.`,
     );
   }
   return isUserSpecific;
