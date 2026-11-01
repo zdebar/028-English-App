@@ -7,22 +7,13 @@ export type SyncSummary = {
   sampleErrors?: unknown[];
 };
 
-/**
- * Compute summary for an array of promises using Promise.allSettled.
- *
- * @param promises - Array of promises to summarize
- * @param context - Optional context string for error reporting
- * @param sampleLimit - Maximum number of rejected reasons to include in the summary
- * @param throwOnRejected - Whether to throw an AggregateError if any promise is rejected
- * @returns A summary object containing total, success, failed counts and optional sample errors
- */
-export async function withSettledSummary(
-  promises: Promise<unknown>[],
+/** Summarizes settled results and reports a limited sample of failures. */
+export function summarizeSettledResults(
+  results: PromiseSettledResult<unknown>[],
   context: string = '',
   sampleLimit: number = 3,
   throwOnRejected: boolean = false,
-): Promise<SyncSummary> {
-  const results = await Promise.allSettled(promises);
+): SyncSummary {
   const rejected = results.filter((r) => r.status === 'rejected') as PromiseRejectedResult[];
   const sampleErrors = rejected.slice(0, sampleLimit).map((r) => r.reason);
 
@@ -51,4 +42,15 @@ export async function withSettledSummary(
   }
 
   return summary;
+}
+
+/** Computes a settled summary for promises using Promise.allSettled. */
+export async function withSettledSummary(
+  promises: Promise<unknown>[],
+  context: string = '',
+  sampleLimit: number = 3,
+  throwOnRejected: boolean = false,
+): Promise<SyncSummary> {
+  const results = await Promise.allSettled(promises);
+  return summarizeSettledResults(results, context, sampleLimit, throwOnRejected);
 }

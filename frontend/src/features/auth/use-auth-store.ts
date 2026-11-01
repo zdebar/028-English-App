@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import type { Session } from '@supabase/supabase-js';
 import { supabaseInstance } from '@/config/supabase.config';
-import { dataSyncOnUnmount } from '@/database/utils/data-sync.utils';
+import { dataSyncBeforeSessionEnd } from '@/database/utils/data-sync.utils';
 import { reportError, reportInfo, setMonitoringUser } from '@/features/logging/monitoring-handler';
 import {
   clearAnonymousSessionFallback,
@@ -99,7 +99,7 @@ function showAuthErrorToast(): void {
 async function syncBeforeLogout(userId: string | null, skipSync: boolean): Promise<void> {
   if (!userId || skipSync) return;
   try {
-    await dataSyncOnUnmount(userId);
+    await dataSyncBeforeSessionEnd(userId);
   } catch (error) {
     reportError('Pre-logout synchronization failed', error);
   }

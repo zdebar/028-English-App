@@ -5,7 +5,7 @@ import { useSyncStore } from '@/features/synchronization/use-sync-store';
 const mocks = vi.hoisted(() => ({
   dataSync: vi.fn(),
   refreshAvailability: vi.fn().mockResolvedValue(undefined),
-  dataSyncOnUnmount: vi.fn(),
+  dataSyncBeforeSessionEnd: vi.fn(),
   syncFromRemote: vi.fn(),
   removeOrphaned: vi.fn(),
   showToast: vi.fn(),
@@ -41,7 +41,7 @@ vi.mock('@/config/config', () => ({
 
 vi.mock('@/database/utils/data-sync.utils', () => ({
   dataSync: (...args: unknown[]) => mocks.dataSync(...args),
-  dataSyncOnUnmount: (...args: unknown[]) => mocks.dataSyncOnUnmount(...args),
+  dataSyncBeforeSessionEnd: (...args: unknown[]) => mocks.dataSyncBeforeSessionEnd(...args),
 }));
 
 vi.mock('@/database/models/audio-records', () => ({
@@ -82,7 +82,7 @@ describe('usePeriodicSync', () => {
 
     mocks.dataSync.mockResolvedValue(undefined);
     mocks.syncFromRemote.mockResolvedValue({ total: 2, success: 2, failed: 0 });
-    mocks.dataSyncOnUnmount.mockResolvedValue(undefined);
+    mocks.dataSyncBeforeSessionEnd.mockResolvedValue(undefined);
     mocks.removeOrphaned.mockResolvedValue(0);
   });
 
@@ -166,7 +166,7 @@ describe('usePeriodicSync', () => {
 
     unmount();
 
-    expect(mocks.dataSyncOnUnmount).toHaveBeenCalledWith('u1');
+    expect(mocks.dataSyncBeforeSessionEnd).toHaveBeenCalledWith('u1');
     expect(useSyncStore.getState().isSynchronized).toBe(false);
     expect(useSyncStore.getState().isSynchronizing).toBe(false);
     expect(useSyncStore.getState().isSyncError).toBe(false);

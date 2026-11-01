@@ -9,7 +9,7 @@ const mocks = vi.hoisted(() => ({
   signOut: vi.fn(),
   onAuthStateChange: vi.fn(),
   unsubscribe: vi.fn(),
-  dataSyncOnUnmount: vi.fn(),
+  dataSyncBeforeSessionEnd: vi.fn(),
   setMonitoringUser: vi.fn(),
   reportError: vi.fn(),
   reportInfo: vi.fn(),
@@ -32,7 +32,7 @@ vi.mock('@/config/supabase.config', () => ({
 }));
 
 vi.mock('@/database/utils/data-sync.utils', () => ({
-  dataSyncOnUnmount: (...args: unknown[]) => mocks.dataSyncOnUnmount(...args),
+  dataSyncBeforeSessionEnd: (...args: unknown[]) => mocks.dataSyncBeforeSessionEnd(...args),
 }));
 
 vi.mock('@/features/logging/monitoring-handler', () => ({
@@ -91,7 +91,7 @@ describe('useAuthStore', () => {
       error: null,
     });
     mocks.refreshSession.mockResolvedValue({ data: { session: null }, error: null });
-    mocks.dataSyncOnUnmount.mockResolvedValue(undefined);
+    mocks.dataSyncBeforeSessionEnd.mockResolvedValue(undefined);
   });
 
   it('initializeAuth loads current session and updates auth state', async () => {
@@ -433,7 +433,7 @@ describe('useAuthStore', () => {
 
     await useAuthStore.getState().handleLogout();
 
-    expect(mocks.dataSyncOnUnmount).toHaveBeenCalledWith('u1');
+    expect(mocks.dataSyncBeforeSessionEnd).toHaveBeenCalledWith('u1');
     expect(mocks.signOut).toHaveBeenCalledWith({ scope: 'global' });
 
     const state = useAuthStore.getState();
@@ -451,7 +451,7 @@ describe('useAuthStore', () => {
       userFullName: 'User One',
       loading: false,
     });
-    mocks.dataSyncOnUnmount.mockRejectedValue(syncError);
+    mocks.dataSyncBeforeSessionEnd.mockRejectedValue(syncError);
 
     await useAuthStore.getState().handleLogout();
 
@@ -490,7 +490,7 @@ describe('useAuthStore', () => {
 
     await useAuthStore.getState().handleLogout({ skipSync: true });
 
-    expect(mocks.dataSyncOnUnmount).not.toHaveBeenCalled();
+    expect(mocks.dataSyncBeforeSessionEnd).not.toHaveBeenCalled();
     expect(mocks.signOut).toHaveBeenCalledWith({ scope: 'global' });
   });
 
@@ -499,7 +499,7 @@ describe('useAuthStore', () => {
 
     await useAuthStore.getState().handleLogout({ skipSync: true, skipRemoteSignOut: true });
 
-    expect(mocks.dataSyncOnUnmount).not.toHaveBeenCalled();
+    expect(mocks.dataSyncBeforeSessionEnd).not.toHaveBeenCalled();
     expect(mocks.signOut).not.toHaveBeenCalled();
 
     const state = useAuthStore.getState();

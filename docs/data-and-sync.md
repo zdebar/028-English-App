@@ -32,7 +32,7 @@ App works as PWA applicatin with frontend data storage inside IndexedDB. Backend
 | User becomes active | `usePeriodicSync` | Warms practice and overview caches and schedules the first sync after three seconds. |
 | Periodic interval | `usePeriodicSync` | Runs `dataSync`; the default interval is one day. |
 | Full sync due | `dataSync` | Uses the per-user localStorage timestamp; the default interval is seven days. |
-| App unmount or logout | `dataSyncOnUnmount` / `handleLogout` | Best-effort incremental sync of user items and lesson starts when a session exists. |
+| App unmount or logout | `dataSyncBeforeSessionEnd` / `handleLogout` | Best-effort incremental sync of user items and lesson starts when a session exists. |
 | Profile full-sync action | `Profile` | Forces a full data sync, refreshes audio archives, and removes orphaned local audio. |
 
 Overlapping periodic syncs reuse the current promise. A completed data sync

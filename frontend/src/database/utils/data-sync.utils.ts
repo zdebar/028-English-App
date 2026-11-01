@@ -1,18 +1,18 @@
 import config from '@/config/config';
 import { initDbMappings } from '@/database/models/db-init';
-import UserItem from '@/database/models/user-items';
-import { getFullSyncTime, setFullSyncTime } from '@/database/utils/sync-time.utils';
-import { withSettledSummary } from '@/features/logging/logging.utils';
+import GroupItem from '@/database/models/group-items';
+import GroupRelation from '@/database/models/group-relations';
+import Groups from '@/database/models/groups';
 import Lessons from '@/database/models/lessons';
 import Levels from '@/database/models/levels';
-import { assertNonEmptyString } from '@/utils/assertions.utils';
-import { reportInfo } from '@/features/logging/monitoring-handler';
+import Notes from '@/database/models/notes';
+import UserItem from '@/database/models/user-items';
+import UserLesson from '@/database/models/user-lessons';
 import { supabaseInstance } from '@/config/supabase.config';
-import Notes from '../models/notes';
-import UserLesson from '../models/user-lessons';
-import Groups from '../models/groups';
-import GroupItem from '../models/group-items';
-import GroupRelation from '../models/group-relations';
+import { getFullSyncTime, setFullSyncTime } from '@/database/utils/sync-time.utils';
+import { summarizeSettledResults } from '@/features/logging/logging.utils';
+import { reportInfo } from '@/features/logging/monitoring-handler';
+import { assertNonEmptyString } from '@/utils/assertions.utils';
 import { settleSyncWithAuthRecovery } from './sync-auth-recovery.utils';
 
 /**
@@ -30,51 +30,38 @@ export async function dataSync(userId: string): Promise<void> {
   const lastFullSync = getFullSyncTime(userId);
   const doFullSync = now - lastFullSync > config.sync.fullSyncInterval;
 
-  // Step 2: Perform shared stores data synchronization (grammar and audio metadata)
-  const tasks = [
-    () => Groups.syncFromRemote(doFullSync),
-    () => GroupItem.syncFromRemote(doFullSync),
-    () => GroupRelation.syncFromRemote(doFullSync),
-    () => Levels.syncFromRemote(doFullSync),
-    () => Lessons.syncFromRemote(doFullSync),
-    () => Notes.syncFromRemote(doFullSync),
-    () => UserItem.syncFromRemote(userId, doFullSync),
-    () => UserLesson.syncFromRemote(userId, doFullSync),
+  // Step 2: Sync shared reference data and user-owned progress in parallel.
+  const syncTasks = [
+    { tableName: 'Groups', sync: () => Groups.syncFromRemote(doFullSync) },
+    { tableName: 'GroupItems', sync: () => GroupItem.syncFromRemote(doFullSync) },
+    { tableName: 'GroupRelations', sync: () => GroupRelation.syncFromRemote(doFullSync) },
+    { tableName: 'Levels', sync: () => Levels.syncFromRemote(doFullSync) },
+    { tableName: 'Lessons', sync: () => Lessons.syncFromRemote(doFullSync) },
+    { tableName: 'Notes', sync: () => Notes.syncFromRemote(doFullSync) },
+    { tableName: 'UserItems', sync: () => UserItem.syncFromRemote(userId, doFullSync) },
+    { tableName: 'UserLessons', sync: () => UserLesson.syncFromRemote(userId, doFullSync) },
   ];
 
-  // Keep a parallel list of human-readable table names to report per-table completions.
-  const tableNames = [
-    'Groups',
-    'GroupItems',
-    'GroupRelations',
-    'Levels',
-    'Lessons',
-    'Notes',
-    'UserItems',
-    'UserLessons',
-  ];
+  const results = await settleSyncWithAuthRecovery(
+    userId,
+    syncTasks.map(({ sync }) => sync),
+  );
 
-  const results = await settleSyncWithAuthRecovery(userId, tasks);
+  // Report per-table completion counts when available (most syncFromRemote return number of items).
+  results.forEach((result, index) => {
+    const task = syncTasks[index];
+    if (!task || result.status !== 'fulfilled' || typeof result.value !== 'number') {
+      return;
+    }
 
-  // Report per-table completion counts when available (most syncFromRemote return number of items)
-  results.forEach((r, idx) => {
-    if (r.status === 'fulfilled') {
-      const val = r.value as unknown;
-      if (typeof val === 'number') {
-        try {
-          reportInfo(`Completed ${val} ${tableNames[idx]} pull from remote.`);
-        } catch {
-          // swallow logging errors
-        }
-      }
+    try {
+      reportInfo(`Completed ${result.value} ${task.tableName} pull from remote.`);
+    } catch {
+      // Swallow logging errors so they do not affect synchronization.
     }
   });
 
-  const finalPromises = results.map((result) => {
-    if (result.status === 'fulfilled') return Promise.resolve(result.value);
-    return Promise.reject(result.reason);
-  });
-  const summary = await withSettledSummary(finalPromises, 'Data sync', 3, false);
+  const summary = summarizeSettledResults(results, 'Data sync', 3, false);
 
   if (summary.failed > 0) {
     throw new Error('Data synchronization error');
@@ -85,13 +72,13 @@ export async function dataSync(userId: string): Promise<void> {
 }
 
 /**
- * Performs a best-effort incremental sync for user-owned tables during unmount.
+ * Performs a best-effort incremental sync for user-owned tables before the active session ends.
  *
  * @param userId User id whose personal data should sync.
  * @returns Resolves without syncing when there is no active Supabase session.
- * @throws Error when at least one unmount sync task rejects.
+ * @throws Error when at least one sync task rejects.
  */
-export async function dataSyncOnUnmount(userId: string): Promise<void> {
+export async function dataSyncBeforeSessionEnd(userId: string): Promise<void> {
   const { data: sessionData } = await supabaseInstance.auth.getSession();
   if (!sessionData.session) {
     return;
@@ -103,6 +90,6 @@ export async function dataSyncOnUnmount(userId: string): Promise<void> {
   ]);
 
   if (results.some((r) => r.status === 'rejected')) {
-    throw new Error('Unmount synchronization failed');
+    throw new Error('Session end synchronization failed');
   }
 }

@@ -64,7 +64,7 @@ do not correspond to separate current content tables.
 | Local-first data | Dexie models under `frontend/src/database/models` | Practice and overview features read local content and user records. User progress writes land in IndexedDB first. |
 | Periodic sync | `usePeriodicSync`, `dataSync` | Pushes local user changes, pulls shared/user updates, refreshes practice availability, and then syncs audio archives. |
 | Full sync | `Profile`, `dataSync(userId, true)` | Reconciles local and remote records and refreshes the audio archive cache. |
-| Logout/unmount sync | `handleLogout`, `dataSyncOnUnmount` | Attempts an incremental sync of user items and lesson starts when a valid session exists. |
+| Logout/unmount sync | `handleLogout`, `dataSyncBeforeSessionEnd` | Attempts an incremental sync of user items and lesson starts when a valid session exists. |
 | Audio | `useAudioManager`, `AudioRecord`, `AudioMetadata` | Downloads audio from Supabase Storage on demand, caches blobs in IndexedDB, and refreshes changed archives. |
 
 See [data-and-sync.md](data-and-sync.md) for cursors, storage keys, and merge

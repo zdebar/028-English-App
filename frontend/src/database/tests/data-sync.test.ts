@@ -4,7 +4,7 @@ const mocks = vi.hoisted(() => ({
   getFullSyncTime: vi.fn(),
   setFullSyncTime: vi.fn(),
   initDbMappings: vi.fn(),
-  withSettledSummary: vi.fn(),
+  summarizeSettledResults: vi.fn(),
   userItemSyncFromRemote: vi.fn(),
   userLessonSyncFromRemote: vi.fn(),
   groupsSyncFromRemote: vi.fn(),
@@ -40,10 +40,7 @@ vi.mock('@/database/models/db-init', () => ({
 }));
 
 vi.mock('@/features/logging/logging.utils', () => ({
-  withSettledSummary: async (promises: Promise<unknown>[], ...args: unknown[]) => {
-    await Promise.allSettled(promises);
-    return mocks.withSettledSummary(promises, ...args);
-  },
+  summarizeSettledResults: (...args: unknown[]) => mocks.summarizeSettledResults(...args),
 }));
 
 vi.mock('@/database/models/user-items', () => ({
@@ -103,7 +100,7 @@ vi.mock('@/config/supabase.config', () => ({
   },
 }));
 
-import { dataSync, dataSyncOnUnmount } from '@/database/utils/data-sync.utils';
+import { dataSync, dataSyncBeforeSessionEnd } from '@/database/utils/data-sync.utils';
 import { splitDeleted } from '@/database/utils/sync-generic.utils';
 
 describe('data-sync.utils', () => {
@@ -112,7 +109,7 @@ describe('data-sync.utils', () => {
 
     mocks.getFullSyncTime.mockReturnValue(0);
     mocks.initDbMappings.mockResolvedValue(undefined);
-    mocks.withSettledSummary.mockResolvedValue({ total: 8, success: 8, failed: 0 });
+    mocks.summarizeSettledResults.mockReturnValue({ total: 8, success: 8, failed: 0 });
 
     mocks.userItemSyncFromRemote.mockResolvedValue(undefined);
     mocks.userLessonSyncFromRemote.mockResolvedValue(0);
@@ -162,22 +159,22 @@ describe('data-sync.utils', () => {
   });
 
   it('dataSync throws when user sync reports rejected results', async () => {
-    mocks.withSettledSummary.mockResolvedValueOnce({ total: 8, success: 7, failed: 1 });
+    mocks.summarizeSettledResults.mockReturnValueOnce({ total: 8, success: 7, failed: 1 });
 
     await expect(dataSync('u1')).rejects.toThrow('Data synchronization error');
   });
 
-  it('dataSyncOnUnmount syncs only user stores in partial mode', async () => {
-    await dataSyncOnUnmount('u1');
+  it('dataSyncBeforeSessionEnd syncs only user stores in partial mode', async () => {
+    await dataSyncBeforeSessionEnd('u1');
 
     expect(mocks.userItemSyncFromRemote).toHaveBeenCalledWith('u1', false);
     expect(mocks.userLessonSyncFromRemote).toHaveBeenCalledWith('u1', false);
   });
 
-  it('dataSyncOnUnmount does nothing when no auth session exists', async () => {
+  it('dataSyncBeforeSessionEnd does nothing when no auth session exists', async () => {
     mocks.getSession.mockResolvedValue({ data: { session: null }, error: null });
 
-    await dataSyncOnUnmount('u1');
+    await dataSyncBeforeSessionEnd('u1');
 
     expect(mocks.userItemSyncFromRemote).not.toHaveBeenCalled();
   });

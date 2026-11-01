@@ -2,7 +2,7 @@ import { refreshPracticeAvailability } from '@/features/practice/practice-availa
 import { useEffect, useRef } from 'react';
 import config from '@/config/config';
 import AudioRecord from '@/database/models/audio-records';
-import { dataSync, dataSyncOnUnmount } from '@/database/utils/data-sync.utils';
+import { dataSync, dataSyncBeforeSessionEnd } from '@/database/utils/data-sync.utils';
 import { reportError, reportInfo } from '@/features/logging/monitoring-handler';
 import { TEXTS } from '@/locales/cs';
 import { useToastStore } from '@/features/toast/use-toast-store';
@@ -129,8 +129,8 @@ export function usePeriodicSync(userId: string | null): { loading: boolean } {
       }
 
       resetSyncState();
-      dataSyncOnUnmount(activeUserId).catch((error) => {
-        reportError('Unmount synchronization failed', error);
+      dataSyncBeforeSessionEnd(activeUserId).catch((error) => {
+        reportError('Session end synchronization failed', error);
       });
     };
   }, [resetSyncState, setSynchronizing, setSynchronized, showToast, userId]);
