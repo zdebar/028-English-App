@@ -18,9 +18,10 @@ const NULL_DATE = config.database.nullReplacementDate;
  * @param items User items already filtered for the target user.
  * @param lessons Lesson records used as aggregation buckets.
  * @param levels Level records used to group lesson summaries.
- * @returns Levels that contain at least one lesson with items, sorted by level sort_order. Lesson
- * summaries include total, initiated, started, and started-today counts. Initial-training skips
- * are initiated for curriculum progress, but are not included in started counts.
+ * @returns All non-deleted levels, sorted by level sort_order, including levels without lessons.
+ * Each level contains its non-deleted lessons, including lessons without items. Lesson summaries
+ * include total, initiated, started, and started-today counts. Initial-training skips are initiated
+ * for curriculum progress, but are not included in started counts.
  */
 export function aggregateLevels(
   items: UserItemLocal[],
