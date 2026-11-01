@@ -35,39 +35,6 @@ const NULL_DATE = config.database.nullReplacementDate;
 const SIM_LESSON_COUNT = config.progress.simulationLessonCount;
 const SIM_ITEM_PROGRESS = config.progress.simulationItemProgress;
 
-async function getUnstartedItems(userId: string): Promise<UserItemLocal[]> {
-  const items = await db.user_items.where('user_id').equals(userId).toArray();
-  return items
-    .filter(
-      (item) =>
-        item.deleted_at === NULL_DATE &&
-        item.is_cz_to_en_enabled !== false &&
-        item.started_at === NULL_DATE &&
-        !isInitialTrainingSkipped(item),
-    )
-    .sort((left, right) =>
-      compareCurriculumPaths(left.curriculum_sort_path, right.curriculum_sort_path),
-    );
-}
-
-function getLessonTrainingSelection(
-  firstItem: UserItemLocal,
-  unstartedItems: UserItemLocal[],
-): InitialTrainingSelection {
-  return {
-    lessonId: firstItem.lesson_id,
-    items: unstartedItems.filter((item) => item.lesson_id === firstItem.lesson_id),
-  };
-}
-
-function resolveInitialTrainingSelection(
-  unstartedItems: UserItemLocal[],
-): InitialTrainingSelection | null {
-  const firstItem = unstartedItems[0];
-  if (!firstItem) return null;
-  return getLessonTrainingSelection(firstItem, unstartedItems);
-}
-
 /**
  * Local Dexie model and sync API for user-specific vocabulary and grammar item progress.
  *
@@ -138,7 +105,7 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
    * Empty arrays are ignored.
    */
   static async savePracticeDeck(items: PracticeDeckItem[], direction: ReviewDirection = 'cz_to_en'): Promise<void> {
-    if (!items || items.length === 0) return;
+    if (items.length === 0) return;
 
     await db.transaction('rw', db.user_items, async () => {
       const updates: Array<{
@@ -200,6 +167,11 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
     return db.user_items.where('user_id').equals(userId).toArray();
   }
 
+  /**
+   * Reads the requested items for one user in curriculum order.
+   * @param userId Id of the user whose items should be read.
+   * @param itemIds Item ids to look up.
+   */
   static async getByItemIds(userId: string, itemIds: readonly number[]): Promise<UserItemLocal[]> {
     if (itemIds.length === 0) return [];
     const items = await db.user_items
@@ -335,6 +307,14 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
     return itemId;
   }
 
+  /**
+   * Resets initiated items in a grammar group and its descendants.
+   * @param userId Id of the user whose items should be reset.
+   * @param grammarGroupId Id of the grammar group to reset.
+   * @param direction Review direction to reset.
+   * @param dateTime Timestamp to record for the reset.
+   * @returns Number of reset items.
+   */
   static async resetItemsByGrammarGroupId(
     userId: string,
     grammarGroupId: number,
@@ -376,11 +356,9 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
    * Deletes all local item rows for an account being removed.
    *
    * @param userId User id whose local item rows should be deleted.
-   * @returns true after IndexedDB deletion completes.
    */
-  static async deleteByUserId(userId: string): Promise<boolean> {
+  static async deleteByUserId(userId: string): Promise<void> {
     await db.user_items.where('user_id').equals(userId).delete();
-    return true;
   }
 
   /** Returns vocabulary rows from the first configured lessons in curriculum order. */
@@ -502,6 +480,39 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
       if (updatedCount !== 1) throw new Error('The trained item no longer exists locally.');
     });
   }
+}
+
+async function getUnstartedItems(userId: string): Promise<UserItemLocal[]> {
+  const items = await db.user_items.where('user_id').equals(userId).toArray();
+  return items
+    .filter(
+      (item) =>
+        item.deleted_at === NULL_DATE &&
+        item.is_cz_to_en_enabled !== false &&
+        item.started_at === NULL_DATE &&
+        !isInitialTrainingSkipped(item),
+    )
+    .sort((left, right) =>
+      compareCurriculumPaths(left.curriculum_sort_path, right.curriculum_sort_path),
+    );
+}
+
+function getLessonTrainingSelection(
+  firstItem: UserItemLocal,
+  unstartedItems: UserItemLocal[],
+): InitialTrainingSelection {
+  return {
+    lessonId: firstItem.lesson_id,
+    items: unstartedItems.filter((item) => item.lesson_id === firstItem.lesson_id),
+  };
+}
+
+function resolveInitialTrainingSelection(
+  unstartedItems: UserItemLocal[],
+): InitialTrainingSelection | null {
+  const firstItem = unstartedItems[0];
+  if (!firstItem) return null;
+  return getLessonTrainingSelection(firstItem, unstartedItems);
 }
 
 async function getGroupAndDescendantIds(groupId: number): Promise<number[]> {
