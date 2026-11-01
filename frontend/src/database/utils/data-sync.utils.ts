@@ -19,21 +19,16 @@ import { settleSyncWithAuthRecovery } from './sync-auth-recovery.utils';
  * Synchronizes shared and user-specific tables with Supabase.
  *
  * @param userId Non-empty user id used for user-specific tables.
- * @param fullSync When true, forces all sync tasks to use the epoch start timestamp and refresh local rows.
- * When false, a full sync is selected only after the configured full-sync interval expires.
  * @throws Error when userId is empty or any table sync task fails.
  */
-export async function dataSync(userId: string, fullSync: boolean = false): Promise<void> {
+export async function dataSync(userId: string): Promise<void> {
   assertNonEmptyString(userId, 'userId');
 
   initDbMappings();
   // Step 1: Determine if a full sync is needed
   const now = Date.now();
-  let doFullSync = fullSync;
-  if (!fullSync) {
-    const lastFullSync = getFullSyncTime(userId);
-    doFullSync = now - lastFullSync > config.sync.fullSyncInterval;
-  }
+  const lastFullSync = getFullSyncTime(userId);
+  const doFullSync = now - lastFullSync > config.sync.fullSyncInterval;
 
   // Step 2: Perform shared stores data synchronization (grammar and audio metadata)
   const tasks = [
