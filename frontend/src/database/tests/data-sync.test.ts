@@ -1,4 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import config from '@/config/config';
 
 const mocks = vi.hoisted(() => ({
   getFullSyncTime: vi.fn(),
@@ -183,9 +184,13 @@ describe('data-sync.utils', () => {
     const result = splitDeleted([
       { id: 1, deleted_at: null },
       { id: 2, deleted_at: '2026-03-04T00:00:00.000Z' },
+      { id: 3, deleted_at: config.database.nullReplacementDate },
     ]);
 
-    expect(result.toUpsert).toEqual([{ id: 1, deleted_at: null }]);
+    expect(result.toUpsert).toEqual([
+      { id: 1, deleted_at: null },
+      { id: 3, deleted_at: config.database.nullReplacementDate },
+    ]);
     expect(result.toDelete).toEqual([{ id: 2, deleted_at: '2026-03-04T00:00:00.000Z' }]);
   });
 });

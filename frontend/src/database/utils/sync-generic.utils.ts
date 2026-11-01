@@ -14,7 +14,7 @@ export function splitDeleted<T extends { deleted_at: string | null }>(
   const toUpsert: T[] = [];
   const toDelete: T[] = [];
   items.forEach((item) => {
-    if (item.deleted_at == null || item.deleted_at === config.database.nullReplacementDate) {
+    if (item.deleted_at === null || item.deleted_at === config.database.nullReplacementDate) {
       toUpsert.push(item);
     } else {
       toDelete.push(item);
