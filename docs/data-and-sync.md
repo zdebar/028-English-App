@@ -1,21 +1,20 @@
 # Data And Sync
 
-Practice and overview pages read local Dexie models. User changes are written to
-IndexedDB first; sync later pushes local changes to Supabase and applies remote
-updates.
+App works as PWA applicatin with frontend data storage inside IndexedDB. Backend on Supabase serves as secure longterm storage. 
+
+| Place | Storage type |
+| --- | --- |
+| Backend | Supabase PostgreSQL |
+| Frontend | IndexedDB | 
 
 ## Local Writes
 
-| Action | Local write | Remote sync path |
-| --- | --- | --- |
-| Review answer | Save one direction's `user_items` progress before advancing. | `UserItem.syncFromRemote` calls `upsert_fetch_user_items`. |
-| Initial-training answer | Save progress immediately; mirror the initial result to both directions. | Pushed with the next user-item sync. |
-| Lesson start | Add a `user_lessons` record after validating the daily limit. | `UserLesson.syncFromRemote` merges lesson-start records. |
-| Progress reset | Update the affected local `user_items` rows. | Pushed with the next user-item sync. |
-| Daily lesson limit | Update the local `users` settings row. | `UserSettings.syncFromRemote` compares `updated_at` and writes the selected setting. |
-
-Route loaders, feature hooks, and models work from local data. Supabase calls are
-owned by auth, data sync, settings sync, and audio storage flows.
+| Action | Local write |
+| --- | --- |
+| Review answer | Saves each `user-item` progress individually immediately after advancing to next |
+| Initial-training answer | Save each `user-item` with default starting values individually immediately after advancing to next | 
+| Lesson start | Save each `user-lesson` immediately after starting each initial training | 
+| Progress reset | Update the affected local `user_items` rows. | 
 
 ## Sync Lifecycle
 

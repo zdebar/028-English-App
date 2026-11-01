@@ -1,55 +1,54 @@
-# eSpeak NG: IPA pro americkou angličtinu (`en-us`)
+# eSpeak NG: IPA for American English (`en-us`)
 
-**Ověřeno dne:** 2026-10-26  
-**Ověřená lokální verze:** eSpeak NG 1.52.0  
-**Použitý příkaz:** `espeak-ng -q --ipa -v en-us <slovo>`
+**Verified on:** 2026-10-26  
+**Verified local version:** eSpeak NG 1.52.0  
+**Command used:** `espeak-ng -q --ipa -v en-us <word>`
 
-## Jak eSpeak tvoří přepis
+## How eSpeak generates transcriptions
 
-Příprava slov v projektu předává anglický text do eSpeak NG s hlasem `en-us`
-a přepínačem `--ipa`. eSpeak vybere výslovnost podle svého anglického slovníku
-a pravidel pro převod písmen na hlásky a zapíše ji pomocí IPA znaků v Unicode.
-Přepis obsahuje zvolenou výslovnost konkrétního slova, nikoli jen seznam jeho
-základních fonémů.
+The project's word preparation passes English text to eSpeak NG using the `en-us` voice
+and the `--ipa` option. eSpeak selects a pronunciation based on its English dictionary
+and letter-to-sound rules, then writes it using Unicode IPA symbols. The transcription
+contains the selected pronunciation of a specific word, not just a list of its
+underlying phonemes.
 
-Holé `--ipa` používá standardní IPA výstup. eSpeak NG také nabízí varianty
-`--ipa=1`, `--ipa=2` a `--ipa=3`, které mění způsob oddělení nebo spojení
-víceznakových hlásek. Příznak `-q` potlačí zvukový výstup; textový přepis
-zůstává na standardním výstupu.
+Plain `--ipa` uses standard IPA output. eSpeak NG also offers the `--ipa=1`,
+`--ipa=2`, and `--ipa=3` variants, which change how multi-character sounds are
+separated or joined. The `-q` option suppresses audio output; the text transcription
+remains on standard output.
 
-Hlas `en-us` je v dokumentaci eSpeak NG označen jako **General American**.
-Anglické samohlásky jsou popsány pomocí lexikálních sad Johna Wellse. Ty
-pojmenovávají skupiny slov se stejným typem samohlásky, například KIT (*sit*),
-FLEECE (*see*) nebo NURSE (*bird*).
+The `en-us` voice is labeled **General American** in the eSpeak NG documentation.
+English vowels are described using John Wells's lexical sets. These name groups of
+words with the same type of vowel, such as KIT (*sit*), FLEECE (*see*), or NURSE (*bird*).
 
-Zdroje: [transkripční režimy eSpeak NG](https://github.com/espeak-ng/espeak-ng/blob/master/docs/phonemes.md),
-[dokumentace anglických přízvuků a samohláskových sad](https://github.com/espeak-ng/espeak-ng/blob/master/docs/languages/gmw/en.md),
-[definice fonémů pro americkou angličtinu](https://github.com/espeak-ng/espeak-ng/blob/master/phsource/ph_english_us)
-a [pravidla anglického slovníku](https://github.com/espeak-ng/espeak-ng/blob/master/docs/dictionary.md).
+Sources: [eSpeak NG transcription modes](https://github.com/espeak-ng/espeak-ng/blob/master/docs/phonemes.md),
+[documentation on English accents and vowel sets](https://github.com/espeak-ng/espeak-ng/blob/master/docs/languages/gmw/en.md),
+[phoneme definitions for American English](https://github.com/espeak-ng/espeak-ng/blob/master/phsource/ph_english_us)
+and [English dictionary rules](https://github.com/espeak-ng/espeak-ng/blob/master/docs/dictionary.md).
 
-## Hlavní souhlásky
+## Main consonants
 
-Základní souhláskové fonémy General American lze zapsat takto:
+The basic consonant phonemes of General American can be transcribed as follows:
 
-| Skupina | IPA |
+| Category | IPA |
 | --- | --- |
-| Závěrové | `p b t d k ɡ` |
-| Afrikáty | `tʃ dʒ` |
-| Frikativy | `f v θ ð s z ʃ ʒ h` |
-| Nazály | `m n ŋ` |
-| Aproximanty a likvidy | `l ɹ j w` |
+| Plosives | `p b t d k ɡ` |
+| Affricates | `tʃ dʒ` |
+| Fricatives | `f v θ ð s z ʃ ʒ h` |
+| Nasals | `m n ŋ` |
+| Approximants and liquids | `l ɹ j w` |
 
-To je **24 základních souhláskových fonémů**. Výslovnost /t/ se v některých
-pozicích mění na krátký alveolární flap `ɾ`, například v *city* nebo *water*.
-Je to kontextová výslovnostní varianta, ne další základní souhláskový foném.
-Pravidla eSpeak NG pro americkou angličtinu ji zapisují přímo jako `ɾ`.
+These are **24 basic consonant phonemes**. In some positions, /t/ is pronounced as a
+short alveolar flap `ɾ`, for example in *city* or *water*. This is a contextual
+pronunciation variant, not another basic consonant phoneme. The eSpeak NG rules for
+American English write it directly as `ɾ`.
 
-## Samohláskové sady
+## Vowel sets
 
-V následujícím přehledu jsou IPA podoby doložené dokumentací General American
-a běžné příklady:
+The following table shows IPA forms documented for General American, along with
+common examples:
 
-| Lexikální sada | Příklad | IPA v dokumentaci GenAm |
+| Lexical set | Example | IPA in GenAm documentation |
 | --- | --- | --- |
 | KIT | *sit* | `ɪ` |
 | DRESS | *bed* | `ɛ` |
@@ -70,25 +69,25 @@ a běžné příklady:
 | MOUTH | *now* | `aʊ` |
 | GOAT | *go* | `oʊ` |
 
-Samohláskový systém se může lišit podle mluvčího a regionu. Například /ɔ/ ve
-slovech jako *thought* splývá u mluvčích s *cot–caught merger* s /ɑ/.
+The vowel system can vary by speaker and region. For example, /ɔ/ in words such as
+*thought* merges with /ɑ/ for speakers with the *cot–caught merger*.
 
-## Značky a další hlásky ve výstupu
+## Symbols and other sounds in the output
 
-| Znak | Význam | Ukázka z lokální verze 1.52.0 |
+| Symbol | Meaning | Example from local version 1.52.0 |
 | --- | --- | --- |
-| `ˈ` | Hlavní přízvuk následující slabiky | *see* → `sˈiː` |
-| `ˌ` | Vedlejší přízvuk | Může se objevit u víceslabičných slov |
-| `ː` | Délka samohlásky | *food* → `fˈuːd` |
-| `ɾ` | Krátký flap místo /t/ v některých pozicích | *city* → `sˈɪɾi` |
-| `ɚ` | Nepřízvučná r-zabarvená samohláska | *teacher* → `tˈiːtʃɚ` |
-| `ɐ` | Redukovaná samohláska | *about* → `ɐbˈaʊt` |
-| `ʔ` | Ráz, tedy glotální závěr | *button* → `bˈʌʔn̩` |
-| `◌̩` | Značka slabičné souhlásky | *button* → koncové `n̩` |
+| `ˈ` | Primary stress on the following syllable | *see* → `sˈiː` |
+| `ˌ` | Secondary stress | May appear in multisyllabic words |
+| `ː` | Vowel length | *food* → `fˈuːd` |
+| `ɾ` | Short flap in place of /t/ in some positions | *city* → `sˈɪɾi` |
+| `ɚ` | Unstressed rhotic vowel | *teacher* → `tˈiːtʃɚ` |
+| `ɐ` | Reduced vowel | *about* → `ɐbˈaʊt` |
+| `ʔ` | Glottal stop | *button* → `bˈʌʔn̩` |
+| `◌̩` | Syllabic consonant marker | *button* → final `n̩` |
 
-Při přímém ověření lokální verze 1.52.0 vyšly například tyto přepisy:
+Direct checks with local version 1.52.0 produced the following transcriptions, for example:
 
-| Slovo | Výstup `--ipa -v en-us` |
+| Word | `--ipa -v en-us` output |
 | --- | --- |
 | *see* | `sˈiː` |
 | *chair* | `tʃˈɛɹ` |
@@ -96,24 +95,24 @@ Při přímém ověření lokální verze 1.52.0 vyšly například tyto přepis
 | *about* | `ɐbˈaʊt` |
 | *button* | `bˈʌʔn̩` |
 
-Přesný výstup závisí na verzi eSpeak NG a jejím slovníku. Verze 1.52.0
-například pro *bird* vrací `bˈɜːd`. Pro ověření konkrétní instalace spusťte
-`espeak-ng --version` a následně příkaz uvedený výše.
+The exact output depends on the eSpeak NG version and its dictionary. For example,
+version 1.52.0 returns `bˈɜːd` for *bird*. To check a specific installation, run
+`espeak-ng --version`, then run the command shown above.
 
-## Použití v projektu
+## Use in the project
 
-Funkce `fill_pronunciation_espeak_ng` v `scripts/utils/pronunciation.py`
-spouští eSpeak NG s argumenty `-q --ipa -v en-us`, odstraní čárky ze vstupu
-a uloží oříznutý text standardního výstupu do sloupce `pronunciation`.
-Pro anglické hlasy navíc normalizuje znak `ɐ` na `ə`. Proto se uložená hodnota
-může v tomto znaku lišit od přímého výstupu příkazu eSpeak uvedeného výše.
-Příprava slov používá tuto funkci v `scripts/prepare_words.py`.
+The `fill_pronunciation_espeak_ng` function in `scripts/utils/pronunciation.py`
+runs eSpeak NG with the arguments `-q --ipa -v en-us`, removes commas from the input,
+and saves the trimmed standard output text in the `pronunciation` column. For English
+voices, it also normalizes `ɐ` to `ə`. Therefore, the stored value may differ in this
+character from the direct output of the eSpeak command shown above. Word preparation
+uses this function in `scripts/prepare_words.py`.
 
-Ověřený příkaz v PowerShellu:
+Verified command in PowerShell:
 
 ```powershell
 & 'C:\Program Files\eSpeak NG\espeak-ng.exe' -q --ipa -v en-us water
 ```
 
-Projekt verzi eSpeak NG v Python závislostech neuzamyká. Uvedené datum a
-konkrétní ukázky proto popisují lokální verzi ověřenou dne 2026-10-26.
+The project does not pin the eSpeak NG version in its Python dependencies. The date
+and specific examples above therefore describe the local version verified on 2026-10-26.
