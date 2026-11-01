@@ -164,34 +164,17 @@ describe('useFetch', () => {
     expect(result.current.error).toBeNull();
   });
 
-  it('invalidates an older request when replacement initial data arrives', async () => {
-    let resolveRequest: ((value: string) => void) | undefined;
-    const fetchFunction = vi.fn().mockImplementation(
-      () =>
-        new Promise<string>((resolve) => {
-          resolveRequest = resolve;
-        }),
-    );
+  it('uses initial data only on mount', () => {
+    const fetchFunction = vi.fn().mockResolvedValue('fetched');
     const { result, rerender } = renderHook(
       ({ initialData }: { initialData: string }) =>
         useFetch(fetchFunction, { initialData }),
       { initialProps: { initialData: 'initial' } },
     );
 
-    act(() => {
-      void result.current.reload();
-    });
-    await waitFor(() => expect(result.current.loading).toBe(true));
-
     rerender({ initialData: 'replacement' });
-    expect(result.current.data).toBe('replacement');
+    expect(result.current.data).toBe('initial');
     expect(result.current.loading).toBe(false);
-
-    act(() => {
-      resolveRequest?.('stale response');
-    });
-
-    await waitFor(() => expect(result.current.data).toBe('replacement'));
-    expect(result.current.error).toBeNull();
+    expect(fetchFunction).not.toHaveBeenCalled();
   });
 });

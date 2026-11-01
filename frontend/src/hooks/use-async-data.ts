@@ -22,6 +22,7 @@ export function useAsyncData<T>(
   assertFunction(fetchFunction, 'fetchFunction');
 
   const hasInitialData = options.initialData !== undefined;
+
   const [data, setData] = useState<T>(() => options.initialData ?? options.emptyData);
   const [loading, setLoading] = useState(!hasInitialData);
   const [error, setError] = useState<Error | null>(null);
@@ -30,15 +31,6 @@ export function useAsyncData<T>(
   const requestGenerationRef = useRef(0);
   const hasResolvedDataRef = useRef(hasInitialData);
   const initialFetchFunctionRef = useRef(hasInitialData ? fetchFunction : null);
-
-  useEffect(() => {
-    requestGenerationRef.current += 1;
-    if (options.initialData === undefined) return;
-    setData(options.initialData);
-    hasResolvedDataRef.current = true;
-    setError(null);
-    setLoading(false);
-  }, [options.initialData]);
 
   const load = useCallback(async () => {
     if (!isActiveRef.current) return;
