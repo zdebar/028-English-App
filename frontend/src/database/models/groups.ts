@@ -6,8 +6,10 @@ import { isInitiated } from '@/utils/progress.utils';
 import config from '@/config/config';
 import SyncEntityModel from './sync-entity-model';
 
+/** A group with the user's started example items. */
 export type VisibleGroup = GroupRow & { examples: UserItemLocal[] };
 
+/** IndexedDB model and queries for curriculum groups. */
 export default class Groups extends SyncEntityModel implements GroupRow {
   id!: number;
   type!: GroupTypeName;
@@ -25,12 +27,16 @@ export default class Groups extends SyncEntityModel implements GroupRow {
   static override readonly syncSelect =
     'id, type, name, note, sort_order, sound_class, sound_category, updated_at, deleted_at';
 
+  /** Returns an active group by id, or null when it is missing or deleted. */
   static async getById(groupId: number): Promise<GroupRow | null> {
     const group = await db.groups.get(groupId);
     return group && !group.deleted_at ? group : null;
   }
 
-  /** Returns a group and its ancestors in parent-to-child order. */
+  /**
+   * Returns a group and its ancestors in parent-to-child order.
+   * @param groupId Id of the group to start from.
+   */
   static async getAncestry(groupId: number): Promise<GroupRow[]> {
     const [groups, relations] = await Promise.all([
       db.groups.toArray(),
@@ -70,6 +76,7 @@ export default class Groups extends SyncEntityModel implements GroupRow {
     return result;
   }
 
+  /** Returns all active sound groups ordered by sort order. */
   static getSounds(): Promise<GroupRow[]> {
     return db.groups
       .where('type')
@@ -78,15 +85,21 @@ export default class Groups extends SyncEntityModel implements GroupRow {
       .sortBy('sort_order');
   }
 
+  /**
+   * Returns the user's items belonging to a group, in membership order.
+   * @param groupId Id of the group to read.
+   * @param userId Id of the user whose items should be returned.
+   */
   static async getExamples(groupId: number, userId: string): Promise<UserItemLocal[]> {
     const memberships = await db.group_items
       .where('group_id')
       .equals(groupId)
       .filter((membership) => !membership.deleted_at)
       .toArray();
-    const orderedMemberships = [...memberships];
-    orderedMemberships.sort((left, right) => left.sort_order - right.sort_order);
-    const itemIds = orderedMemberships.map((membership) => membership.item_id);
+    memberships.sort((left, right) => left.sort_order - right.sort_order);
+    const itemIds = memberships.map((membership) => membership.item_id);
+    if (itemIds.length === 0) return [];
+
     const items = await db.user_items
       .where('[user_id+item_id]')
       .anyOf(itemIds.map((itemId) => [userId, itemId]))
@@ -98,6 +111,11 @@ export default class Groups extends SyncEntityModel implements GroupRow {
     });
   }
 
+  /**
+   * Returns groups with started examples from lessons the user has started.
+   * @param userId Id of the user whose progress should be used.
+   * @param type Optional group type to include.
+   */
   static async getStartedByUser(userId: string, type?: GroupTypeName): Promise<VisibleGroup[]> {
     const [groups, memberships, userItems, userLessons] = await Promise.all([
       db.groups.toArray(),
@@ -138,7 +156,11 @@ export default class Groups extends SyncEntityModel implements GroupRow {
     });
   }
 
-  /** Returns groups that have an active item in a lesson the user has started. */
+  /**
+   * Returns groups of a type that contain an active item in a started lesson.
+   * @param userId Id of the user whose progress should be used.
+   * @param type Group type to include.
+   */
   static async getByTypeWithStartedLessons(
     userId: string,
     type: GroupTypeName,
@@ -176,6 +198,11 @@ export default class Groups extends SyncEntityModel implements GroupRow {
       .sort((left, right) => left.sort_order - right.sort_order || left.id - right.id);
   }
 
+  /**
+   * Returns every active group of a type with the user's started examples, if any.
+   * @param userId Id of the user whose progress should be used.
+   * @param type Group type to include.
+   */
   static async getAllByTypeWithStartedExamples(
     userId: string,
     type: GroupTypeName,
