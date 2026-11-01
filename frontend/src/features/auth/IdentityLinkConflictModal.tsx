@@ -65,6 +65,7 @@ export default function IdentityLinkConflictModal(): JSX.Element | null {
     <Modal
       onConfirm={signInToExistingAccount}
       onClose={dismiss}
+      ariaLabel={TEXTS.identityLinkConflictTitle}
       cancelLabel={TEXTS.continueAsGuest}
       confirmLabel={TEXTS.signInExistingAccount}
       actionsLayout="vertical"

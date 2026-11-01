@@ -57,6 +57,7 @@ export default function SimulateDataButton(): JSX.Element | null {
         <Modal
           onConfirm={simulateData}
           onClose={() => setShowConfirmation(false)}
+          ariaLabel={TEXTS.simulateDataModalTitle}
           confirmLabel={TEXTS.simulateDataConfirm}
         >
           <p className="font-bold">{TEXTS.simulateDataModalTitle}</p>

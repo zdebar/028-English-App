@@ -8,7 +8,7 @@ import { useCallback, useState } from 'react';
 
 type ButtonWithModalProps = Readonly<{
   /** Action executed after confirmation; the button remains loading for at least the configured minimum time. */
-  onConfirm?: () => Promise<void> | void;
+  onConfirm: () => Promise<void> | void;
   /** Confirmation modal title; defaults to the shared modal title text. */
   modalTitle?: string;
   /** Confirmation modal body text; defaults to the shared modal text. */
@@ -36,9 +36,10 @@ export default function ButtonWithModal({
   const { isLoading, setIsLoading } = useMinLoading(config.buttons.minLoadingTime);
   const isDisabled = disabled || isLoading;
 
-  const handleConfirm = useCallback(async () => {
-    if (!onConfirm) return;
+  const handleOpen = useCallback(() => setShowModal(true), []);
+  const handleClose = useCallback(() => setShowModal(false), []);
 
+  const handleConfirm = useCallback(async () => {
     setIsLoading(true);
     try {
       await onConfirm();
@@ -50,15 +51,16 @@ export default function ButtonWithModal({
   return (
     <>
       <StyledButton
-        onClick={() => setShowModal(true)}
+        onClick={handleOpen}
         title={title}
+        aria-haspopup="dialog"
         disabled={isDisabled}
         className={['h-button', className].filter(Boolean).join(' ')}
       >
         {children}
       </StyledButton>
       {showModal && (
-        <Modal onConfirm={handleConfirm} onClose={() => setShowModal(false)}>
+        <Modal onConfirm={handleConfirm} onClose={handleClose} ariaLabel={modalTitle}>
           <p className="font-bold">{modalTitle}</p>
           <p>{modalText}</p>
         </Modal>
