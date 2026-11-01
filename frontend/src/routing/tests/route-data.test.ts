@@ -26,7 +26,7 @@ vi.mock('@/database/models/sound-groups', () => ({ default: {
 } }));
 vi.mock('@/database/models/grammar-groups', () => ({ default: {} }));
 vi.mock('@/database/models/pronunciation-groups', () => ({ default: {} }));
-vi.mock('@/database/utils/practice-content.utils', () => ({
+vi.mock('@/features/practice/review-deck-data', () => ({
   loadReviewDeckData: (...args: unknown[]) => mocks.loadReviewDeckData(...args),
 }));
 

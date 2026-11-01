@@ -58,8 +58,11 @@ vi.mock('@/database/models/user-items', () => ({
 }));
 
 vi.mock('@/database/utils/practice-content.utils', () => ({
-  loadReviewDeckData: (...args: unknown[]) => mocks.loadReviewDeckData(...args),
   loadReviewEntryDetails: (...args: unknown[]) => mocks.loadReviewEntryDetails(...args),
+}));
+
+vi.mock('@/features/practice/review-deck-data', () => ({
+  loadReviewDeckData: (...args: unknown[]) => mocks.loadReviewDeckData(...args),
 }));
 
 vi.mock('@/features/practice/hooks/use-practice-card-state', () => ({

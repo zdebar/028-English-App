@@ -60,12 +60,11 @@ vi.mock('@/config/config', () => ({
 }));
 
 import {
-  loadReviewDeck,
-  loadReviewDeckData,
   loadReviewEntryDetails,
   resolvePracticeEntries,
   resolvePracticeGrammarContext,
 } from '@/database/utils/practice-content.utils';
+import { loadReviewDeckData } from '@/features/practice/review-deck-data';
 import { clearReviewArrays } from '@/features/practice/review-prefetch';
 
 function makeItem(overrides: Partial<UserItemLocal> = {}): UserItemLocal {
@@ -188,18 +187,6 @@ describe('practice content resolution', () => {
       noteLoadFailed: false,
       grammarLoadFailed: true,
     });
-  });
-
-  it('keeps missing relations null and propagates a core deck failure', async () => {
-    mocks.notesBulkGet.mockResolvedValue([undefined]);
-    mocks.groupsBulkGet.mockResolvedValue([undefined]);
-    const item = makeItem() as PracticeDeckItem;
-    mocks.getReviewDeck.mockResolvedValue([item]);
-
-    await expect(loadReviewDeck('u1', 'grammar')).resolves.toEqual([{ item: { ...item, review_direction: 'cz_to_en' }, note: null, grammar: null }]);
-    const error = new Error('items unavailable');
-    mocks.getReviewDeck.mockRejectedValue(error);
-    await expect(loadReviewDeck('u1', 'grammar')).rejects.toBe(error);
   });
 
   it('loads the complete review batch without storing a review session', async () => {

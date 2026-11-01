@@ -29,11 +29,10 @@ import {
   type ReviewAvailability,
 } from '../review-prefetch';
 import {
-  loadReviewDeckData,
   loadReviewEntryDetails,
   type ReviewEntryDetails,
-  type ReviewDeckData,
 } from '@/database/utils/practice-content.utils';
+import { loadReviewDeckData, type ReviewDeckData } from '@/features/practice/review-deck-data';
 import type { PracticeDetail } from '../PracticeSessionCard';
 
 type SecondaryContentRequest = Readonly<{

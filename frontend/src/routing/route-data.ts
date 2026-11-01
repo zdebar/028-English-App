@@ -5,7 +5,7 @@ import UserItem from '@/database/models/user-items';
 import {
   loadReviewDeckData,
   type ReviewDeckData,
-} from '@/database/utils/practice-content.utils';
+} from '@/features/practice/review-deck-data';
 import {
   loadOverviewAvailability,
   loadOverviewQuery,

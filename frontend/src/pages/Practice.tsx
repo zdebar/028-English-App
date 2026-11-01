@@ -1,5 +1,5 @@
 import PracticeCard from '@/features/practice/PracticeCard';
-import type { ReviewDeckData } from '@/database/utils/practice-content.utils';
+import type { ReviewDeckData } from '@/features/practice/review-deck-data';
 import { useLoaderData } from 'react-router-dom';
 import type { JSX } from 'react';
 
