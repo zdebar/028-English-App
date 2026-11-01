@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react';
 import { TEXTS } from '@/locales/cs';
 import DelayedMessage from './DelayedMessage';
 import Notification from './Notification';
@@ -6,7 +7,7 @@ type DataStateProps = Readonly<{
   loading: boolean;
   hasData: boolean;
   noDataMessage?: string;
-  children?: React.ReactNode;
+  children: ReactNode;
 }>;
 
 export function DataState({
