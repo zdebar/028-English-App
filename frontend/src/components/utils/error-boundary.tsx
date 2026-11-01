@@ -1,4 +1,4 @@
-import { Component, type ReactNode } from 'react';
+import { Component, type ErrorInfo, type ReactNode } from 'react';
 import { TEXTS } from '@/locales/cs';
 import { reportError } from '@/features/logging/monitoring-handler';
 import Notification from '@/components/UI/Notification';
@@ -9,26 +9,20 @@ interface ErrorBoundaryProps {
 
 interface ErrorBoundaryState {
   hasError: boolean;
-  error: Error | null;
 }
 
 /**
  * React error boundary component for catching and displaying errors in child components.
  */
 export default class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
-  constructor(props: ErrorBoundaryProps) {
-    super(props);
-    this.state = { hasError: false, error: null };
+  state: ErrorBoundaryState = { hasError: false };
+
+  static getDerivedStateFromError(): ErrorBoundaryState {
+    return { hasError: true };
   }
 
-  static getDerivedStateFromError(error: Error) {
-    // Update state so the next render shows the fallback UI
-    return { hasError: true, error };
-  }
-
-  componentDidCatch(error: Error) {
-    // Log the error to an error reporting service
-    reportError('ErrorBoundary', error);
+  componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+    reportError('ErrorBoundary', error, { componentStack: errorInfo.componentStack });
   }
 
   render() {
