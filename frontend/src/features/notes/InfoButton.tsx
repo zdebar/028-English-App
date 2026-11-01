@@ -26,7 +26,7 @@ export default function InfoButton({
 
   return (
     <SecondaryControlButton
-      ariaLabel={noteAriaLabel}
+      aria-label={noteAriaLabel}
       title={title}
       onClick={onClick}
       className={className}

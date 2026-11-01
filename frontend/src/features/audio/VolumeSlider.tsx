@@ -73,7 +73,7 @@ export default function VolumeSlider({ className = '', disabled = false }: Volum
         }}
         disabled={disabled}
         title={TEXTS.volume}
-        ariaLabel={ARIA_TEXTS.setVolume}
+        aria-label={ARIA_TEXTS.setVolume}
       >
         {getVolumeIcon(volume)}
       </SecondaryControlButton>

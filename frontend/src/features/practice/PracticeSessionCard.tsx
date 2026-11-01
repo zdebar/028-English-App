@@ -664,7 +664,7 @@ function PracticeCardActionBar({
         <PlayButton onClick={playAudio} disabled={display.audioButtonDisabled} />
         <SecondaryControlButton
           title={TEXTS.pronunciationGuide}
-          ariaLabel={TEXTS.pronunciationGuide}
+          aria-label={TEXTS.pronunciationGuide}
           onClick={(event) => {
             event.stopPropagation();
             onOpenPronunciation(pronunciationSegments);
@@ -681,7 +681,7 @@ function PracticeCardActionBar({
       <div className="pos-bottom-right-control">
         <SecondaryControlButton
           title={TEXTS.grammar}
-          ariaLabel={TEXTS.grammar}
+          aria-label={TEXTS.grammar}
           onClick={() =>
             void openGrammarDetail(
               grammar,

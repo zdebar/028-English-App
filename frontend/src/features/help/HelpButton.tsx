@@ -17,7 +17,7 @@ export default function HelpButton({ className = '' }: HelpButtonProps): JSX.Ele
       className={`size-help-button ${className}`}
       onClick={openHelp}
       title={TEXTS.tooltipHelp}
-      ariaLabel={TEXTS.tooltipHelp}
+      aria-label={TEXTS.tooltipHelp}
     >
       <QuestionMarkIcon />
     </SecondaryControlButton>

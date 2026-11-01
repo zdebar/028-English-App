@@ -9,7 +9,7 @@ describe('SecondaryControlButton', () => {
 
     render(
       <SecondaryControlButton
-        ariaLabel="Secondary"
+        aria-label="Secondary"
         title="Secondary"
         className="custom-class"
         onClick={onClick}

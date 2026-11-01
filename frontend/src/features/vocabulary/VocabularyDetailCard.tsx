@@ -203,7 +203,7 @@ function VocabularyAudioControls({
       />
       <SecondaryControlButton
         title={TEXTS.pronunciationGuide}
-        ariaLabel={TEXTS.pronunciationGuide}
+        aria-label={TEXTS.pronunciationGuide}
         onClick={onOpenPronunciation}
         disabled={pronunciationSounds.length === 0}
       >
