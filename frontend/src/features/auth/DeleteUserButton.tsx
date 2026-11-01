@@ -35,9 +35,13 @@ export default function DeleteUserButton({ className }: DeleteUserButtonProps): 
     const deletingUserId = userId;
 
     try {
-      const { error: deleteError } = await supabaseInstance.rpc('hard_delete_user');
+      const { data: deletionConfirmed, error: deleteError } =
+        await supabaseInstance.rpc('hard_delete_user');
       if (deleteError) {
         throw new Error(deleteError.message);
+      }
+      if (deletionConfirmed !== true) {
+        throw new Error('The server did not confirm account deletion.');
       }
     } catch (err) {
       reportError('Error deleting user', err);
@@ -50,6 +54,7 @@ export default function DeleteUserButton({ className }: DeleteUserButtonProps): 
       [
         UserItem.deleteByUserId(deletingUserId),
         SyncMetadata.deleteSyncRow(TableName.UserItems, deletingUserId),
+        SyncMetadata.deleteSyncRow(TableName.UserLessons, deletingUserId),
         UserLesson.removeByUserId(deletingUserId),
       ],
       'Operation failed during local cleanup',
@@ -65,7 +70,7 @@ export default function DeleteUserButton({ className }: DeleteUserButtonProps): 
     }
 
     try {
-      await handleLogout({ skipSync: true, skipRemoteSignOut: true });
+      await handleLogout({ skipSync: true, scope: 'local' });
     } catch (err) {
       reportError('Failed to finish account logout after deletion', err);
     }

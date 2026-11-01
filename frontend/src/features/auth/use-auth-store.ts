@@ -25,7 +25,6 @@ interface AuthState {
   handleLogout: (options?: {
     skipSync?: boolean;
     scope?: 'global' | 'local';
-    skipRemoteSignOut?: boolean;
   }) => Promise<void>;
 }
 
@@ -105,12 +104,7 @@ async function syncBeforeLogout(userId: string | null, skipSync: boolean): Promi
   }
 }
 
-async function signOutRemotely(
-  skipRemoteSignOut: boolean,
-  scope: 'global' | 'local',
-): Promise<void> {
-  if (skipRemoteSignOut) return;
-
+async function signOutAuthSession(scope: 'global' | 'local'): Promise<void> {
   const { error } = await supabaseInstance.auth.signOut({ scope });
   if (error && error.message !== 'Auth session missing!') {
     throw new Error(error.message);
@@ -314,22 +308,23 @@ export const useAuthStore = create<AuthState>((set) => {
       let subscription: { unsubscribe: () => void } | null = null;
       let isActive = true;
 
-      const fetchSession = async () => {
-        const { error: initializationError } = await supabaseInstance.auth.initialize();
-        if (!isActive) {
-          return;
-        }
-
-        const redirectResolution = await resolveAuthRedirect(initializationError);
-
-        if (!isActive) {
-          return;
-        }
-
+      const fetchSession = async (): Promise<void> => {
         try {
+          const { error: initializationError } = await supabaseInstance.auth.initialize();
+          if (!isActive) return;
+
+          const redirectResolution = await resolveAuthRedirect(initializationError);
+          if (!isActive) return;
+
           const session = await loadInitializedSession(redirectResolution.session);
+          if (!isActive) return;
+
           applyInitializedSession(session, redirectResolution, initializationError);
-        } catch {
+        } catch (error) {
+          if (!isActive) return;
+
+          reportError('Auth initialization failed', error);
+          showAuthErrorToast();
           clearSession();
         }
       };
@@ -351,7 +346,7 @@ export const useAuthStore = create<AuthState>((set) => {
     handleLogout: async (options) => {
       const currentUserId = useAuthStore.getState().userId;
       await syncBeforeLogout(currentUserId, options?.skipSync ?? false);
-      await signOutRemotely(options?.skipRemoteSignOut ?? false, options?.scope ?? 'global');
+      await signOutAuthSession(options?.scope ?? 'global');
       clearSession();
     },
   };

@@ -494,13 +494,13 @@ describe('useAuthStore', () => {
     expect(mocks.signOut).toHaveBeenCalledWith({ scope: 'global' });
   });
 
-  it('handleLogout can clear local auth state without remote signout', async () => {
+  it('handleLogout can sign out locally without a global signout', async () => {
     useAuthStore.setState({ userId: 'u1', userEmail: 'u1@example.com', userFullName: 'User One' });
 
-    await useAuthStore.getState().handleLogout({ skipSync: true, skipRemoteSignOut: true });
+    await useAuthStore.getState().handleLogout({ skipSync: true, scope: 'local' });
 
     expect(mocks.dataSyncBeforeSessionEnd).not.toHaveBeenCalled();
-    expect(mocks.signOut).not.toHaveBeenCalled();
+    expect(mocks.signOut).toHaveBeenCalledWith({ scope: 'local' });
 
     const state = useAuthStore.getState();
     expect(state.userId).toBeNull();

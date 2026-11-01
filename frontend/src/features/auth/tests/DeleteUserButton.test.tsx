@@ -81,6 +81,7 @@ vi.mock('@/locales/cs', () => ({
 vi.mock('@/types/table.types', () => ({
   TableName: {
     UserItems: 'user_items',
+    UserLessons: 'user_lessons',
   },
 }));
 
@@ -104,7 +105,7 @@ describe('DeleteUserButton', () => {
     vi.clearAllMocks();
     mocks.userId = 'u1';
 
-    mocks.rpc.mockResolvedValue({ error: null });
+    mocks.rpc.mockResolvedValue({ data: true, error: null });
     mocks.deleteAllByUserId.mockResolvedValue(0);
     mocks.deleteSyncRow.mockResolvedValue(true);
     mocks.clearTheme.mockResolvedValue(undefined);
@@ -131,7 +132,7 @@ describe('DeleteUserButton', () => {
       expect(mocks.rpc).toHaveBeenCalledWith('hard_delete_user');
       expect(mocks.handleLogout).toHaveBeenCalledWith({
         skipSync: true,
-        skipRemoteSignOut: true,
+        scope: 'local',
       });
       expect(mocks.showToast).toHaveBeenCalledWith('Delete success', 'success');
     });
@@ -168,7 +169,7 @@ describe('DeleteUserButton', () => {
     );
     expect(mocks.handleLogout).toHaveBeenCalledWith({
       skipSync: true,
-      skipRemoteSignOut: true,
+      scope: 'local',
     });
   });
 });

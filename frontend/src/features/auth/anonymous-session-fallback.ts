@@ -121,7 +121,13 @@ export async function restoreAnonymousSessionFallback(
 
     const restoredSession = data.session;
     if (!isAnonymousSession(restoredSession) || restoredSession.user.id !== fallback.userId) {
-      await supabaseInstance.auth.signOut({ scope: 'local' });
+      const { error: signOutError } = await supabaseInstance.auth.signOut({ scope: 'local' });
+      if (signOutError && signOutError.message !== 'Auth session missing!') {
+        throw new Error(
+          `Failed to clear mismatched restored auth session: ${signOutError.message}`,
+        );
+      }
+
       throw new Error('Restored session does not match the anonymous session fallback.');
     }
 
