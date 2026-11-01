@@ -3,6 +3,30 @@
     --responsive-card-width: var(--max-width-card);
   }
 
+  .bilingual-item-button {
+    container-type: inline-size;
+    container-name: bilingual-item;
+  }
+
+  .bilingual-item-content {
+    display: flex;
+    width: 100%;
+    gap: 0.75rem;
+    overflow: hidden;
+  }
+
+  @container bilingual-item (max-width: 280px) {
+    .bilingual-item-content--responsive {
+      flex-direction: column;
+      gap: 0.25rem;
+    }
+
+    .bilingual-item-content--responsive > span {
+      flex: none;
+      width: 100%;
+    }
+  }
+
   /** GUIDE STYLES **/
   .guide p {
     @apply m-6 text-left leading-relaxed;

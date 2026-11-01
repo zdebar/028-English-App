@@ -40,9 +40,10 @@
 
   .pronunciation-item-list {
     container-type: inline-size;
+    container-name: pronunciation-list;
   }
 
-  @container (max-width: 420px) {
+  @container pronunciation-list (max-width: 420px) {
     .pronunciation-item-list .pronunciation-item-czech {
       display: none;
     }

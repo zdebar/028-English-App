@@ -1,6 +1,6 @@
 import { TEXTS } from '@/locales/cs';
 import type { UserItemLocal } from '@/types/user-item.types';
-import { useLayoutEffect, useRef, useState, type RefObject } from 'react';
+import type { JSX } from 'react';
 import { ListButton } from './ListButton';
 
 type BilingualItemButtonProps = Readonly<{
@@ -15,203 +15,88 @@ type BilingualItemButtonProps = Readonly<{
   title?: string;
 }>;
 
-function czechTextClassName(hideCzechOnNarrow: boolean | undefined): string {
-  const narrowRowClass = hideCzechOnNarrow ? 'pronunciation-item-czech' : '';
-  return `min-w-0 flex-1 overflow-hidden text-left text-ellipsis whitespace-nowrap ${narrowRowClass}`.trim();
-}
-
-function pronunciationTitle(pronunciation: string): string {
-  if (!pronunciation) return '';
-  return typeof TEXTS.pronunciationTitle === 'function'
-    ? TEXTS.pronunciationTitle(pronunciation)
-    : pronunciation;
-}
-
-function intrinsicTextWidth(element: HTMLElement): number {
-  const measurement = element.cloneNode(true) as HTMLElement;
-  const computedStyle = getComputedStyle(element);
-  measurement.setAttribute('aria-hidden', 'true');
-  measurement.style.position = 'fixed';
-  measurement.style.visibility = 'hidden';
-  measurement.style.pointerEvents = 'none';
-  measurement.style.width = 'max-content';
-  measurement.style.minWidth = '0';
-  measurement.style.maxWidth = 'none';
-  measurement.style.flex = 'none';
-  measurement.style.overflow = 'visible';
-  measurement.style.whiteSpace = 'nowrap';
-  measurement.style.font = computedStyle.font;
-  measurement.style.letterSpacing = computedStyle.letterSpacing;
-  document.body.appendChild(measurement);
-  const measuredWidth = measurement.getBoundingClientRect().width;
-  measurement.remove();
-  if (measuredWidth > 0) return measuredWidth;
-  return element.scrollWidth;
-}
-
-type BilingualItemLayout = Readonly<{ stacked: boolean; truncated: boolean }>;
-
-function measureBilingualItemLayout(
-  container: HTMLDivElement | null,
-  czech: HTMLSpanElement | null,
-  english: HTMLSpanElement | null,
-): BilingualItemLayout | null {
-  if (!container || !czech || !english) return null;
-
-  const gap = 12;
-  const czechWidth = intrinsicTextWidth(czech);
-  const englishWidth = intrinsicTextWidth(english);
-  const horizontalWidth = Math.max(0, (container.clientWidth - gap) / 2);
-  const stacked = czechWidth > horizontalWidth || englishWidth > horizontalWidth;
-  const finalWidth = stacked ? container.clientWidth : horizontalWidth;
-
-  return { stacked, truncated: czechWidth > finalWidth || englishWidth > finalWidth };
-}
-
-function useBilingualItemLayout(
-  containerRef: RefObject<HTMLDivElement | null>,
-  czechRef: RefObject<HTMLSpanElement | null>,
-  englishRef: RefObject<HTMLSpanElement | null>,
-  czechText: string,
-  englishText: string,
-): BilingualItemLayout {
-  const [layout, setLayout] = useState<BilingualItemLayout>({ stacked: false, truncated: false });
-
-  useLayoutEffect(() => {
-    const measure = () => {
-      const nextLayout = measureBilingualItemLayout(
-        containerRef.current,
-        czechRef.current,
-        englishRef.current,
-      );
-      if (nextLayout) setLayout(nextLayout);
-    };
-
-    measure();
-    const container = containerRef.current;
-    if (!container || typeof ResizeObserver === 'undefined') return;
-    const observer = new ResizeObserver(measure);
-    observer.observe(container);
-    return () => observer.disconnect();
-  }, [containerRef, czechRef, englishRef, czechText, englishText]);
-
-  return layout;
-}
-
-/** A shared, content-aware Czech/English item row used by all item lists. */
-export default function BilingualItemButton({ ...props }: BilingualItemButtonProps) {
-  const {
-    item,
-    onClick,
-    disabled,
-    className,
-    leadingLanguage,
-    showPronunciation,
-    forceSingleLine,
-    hideCzechOnNarrow,
-    title: customTitle,
-  } = {
-    disabled: false,
-    className: '',
-    leadingLanguage: 'czech' as const,
-    showPronunciation: false,
-    forceSingleLine: false,
-    hideCzechOnNarrow: false,
-    ...props,
-  };
-  const containerRef = useRef<HTMLDivElement>(null);
-  const czechRef = useRef<HTMLSpanElement>(null);
-  const englishRef = useRef<HTMLSpanElement>(null);
-  const { stacked, truncated } = useBilingualItemLayout(
-    containerRef,
-    czechRef,
-    englishRef,
-    item.czech,
-    item.english,
-  );
-
-  const audioTitle = pronunciationTitle(item.pronunciation);
-  const title = customTitle ?? (truncated
-    ? [
-        `${TEXTS.czech ?? 'Čeština'}: ${item.czech}`,
-        `${TEXTS.english ?? 'Angličtina'}: ${item.english}`,
-        audioTitle,
-      ]
-        .filter(Boolean)
-        .join('\n')
-    : audioTitle || undefined);
-
-  const czechText = (
-    <span
-      key="czech"
-      ref={czechRef}
-      className={czechTextClassName(hideCzechOnNarrow)}
-    >
-      {item.czech}
-    </span>
-  );
+/** A shared responsive Czech/English item row used by all item lists. */
+export default function BilingualItemButton({
+  item,
+  onClick,
+  disabled = false,
+  className = '',
+  leadingLanguage = 'czech',
+  showPronunciation = false,
+  forceSingleLine = false,
+  hideCzechOnNarrow = false,
+  title: customTitle,
+}: BilingualItemButtonProps): JSX.Element {
+  const title = customTitle ?? getItemTitle(item);
+  const canStackLanguages = shouldStackLanguages(showPronunciation, forceSingleLine);
+  const czechText = <span className={getCzechTextClassName(hideCzechOnNarrow)}>{item.czech}</span>;
   const englishText = (
-    <span
-      key="english"
-      ref={englishRef}
-      className="min-w-0 flex-1 overflow-hidden text-left font-bold text-ellipsis whitespace-nowrap"
-    >
+    <span className="min-w-0 flex-1 overflow-hidden text-left font-bold text-ellipsis whitespace-nowrap">
       {item.english}
     </span>
   );
-  const languageTexts =
-    leadingLanguage === 'english' ? [englishText, czechText] : [czechText, englishText];
-  const { itemHeightClass, shouldStack } = getBilingualItemDisplayState(
-    stacked,
-    showPronunciation,
-    forceSingleLine,
-  );
+  const languageTexts = getLanguageTexts(leadingLanguage, czechText, englishText);
 
   return (
     <ListButton
       flexibleHeight
-      className={`${itemHeightClass} px-4 py-2 ${className}`}
+      className={`bilingual-item-button px-4 py-2 ${className}`}
       title={title}
       disabled={disabled}
       onClick={() => void onClick()}
     >
       <div
-        ref={containerRef}
-        className={`flex w-full gap-3 overflow-hidden ${shouldStack ? 'flex-col gap-1' : 'flex-row'}`}
+        className={`bilingual-item-content ${canStackLanguages ? 'bilingual-item-content--responsive' : ''}`}
       >
         {languageTexts}
-        {showPronunciation && item.pronunciation && (
-          <span className="min-w-0 flex-1 overflow-hidden text-left text-ellipsis whitespace-nowrap">
-            {item.pronunciation}
-          </span>
-        )}
+        {getPronunciationText(showPronunciation, item.pronunciation)}
       </div>
     </ListButton>
   );
 }
 
-function getItemHeightClass(stacked: boolean, showPronunciation: boolean): string {
-  if (showPronunciation) return '';
-  if (stacked) return 'min-h-[calc(var(--height-input)*2)]';
-  return '';
+function getCzechTextClassName(hideCzechOnNarrow: boolean): string {
+  const narrowRowClass = hideCzechOnNarrow ? 'pronunciation-item-czech' : '';
+  return `min-w-0 flex-1 overflow-hidden text-left text-ellipsis whitespace-nowrap ${narrowRowClass}`.trim();
 }
 
-function shouldStackLanguageTexts(stacked: boolean, showPronunciation: boolean): boolean {
-  if (showPronunciation) return false;
-  return stacked;
+function getPronunciationTitle(pronunciation: string): string {
+  if (!pronunciation) return '';
+  return TEXTS.pronunciationTitle(pronunciation);
 }
 
-function getBilingualItemDisplayState(
-  stacked: boolean,
+function getItemTitle(item: BilingualItemButtonProps['item']): string {
+  return [
+    `${TEXTS.czech}: ${item.czech}`,
+    `${TEXTS.english}: ${item.english}`,
+    getPronunciationTitle(item.pronunciation),
+  ]
+    .filter(Boolean)
+    .join('\n');
+}
+
+function getLanguageTexts(
+  leadingLanguage: 'czech' | 'english',
+  czechText: JSX.Element,
+  englishText: JSX.Element,
+): JSX.Element[] {
+  if (leadingLanguage === 'english') return [englishText, czechText];
+  return [czechText, englishText];
+}
+
+function shouldStackLanguages(showPronunciation: boolean, forceSingleLine: boolean): boolean {
+  return !showPronunciation && !forceSingleLine;
+}
+
+function getPronunciationText(
   showPronunciation: boolean,
-  forceSingleLine: boolean | undefined,
-): Readonly<{ itemHeightClass: string; shouldStack: boolean }> {
-  const shouldStack = forceSingleLine
-    ? false
-    : shouldStackLanguageTexts(stacked, showPronunciation);
-
-  return {
-    itemHeightClass: getItemHeightClass(shouldStack, showPronunciation),
-    shouldStack,
-  };
+  pronunciation: string,
+): JSX.Element | null {
+  if (!showPronunciation || !pronunciation) return null;
+  return (
+    <span className="min-w-0 flex-1 overflow-hidden text-left text-ellipsis whitespace-nowrap">
+      {pronunciation}
+    </span>
+  );
 }
+
