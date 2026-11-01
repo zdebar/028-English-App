@@ -1,4 +1,4 @@
-import PronunciationGroup from '@/database/models/pronunciation-groups';
+import { getPronunciationGroupOverview } from '@/database/queries/pronunciation-group-queries';
 import { reportError } from '@/features/logging/monitoring-handler';
 import { useEffect } from 'react';
 import { observeSharedQuery, sharedQueryKey } from '@/hooks/shared-query-store';
@@ -18,7 +18,7 @@ export function usePronunciationGroupsStoreSync(userId: string | null) {
     let isActive = true;
     usePronunciationGroupsStore.setState({ groups: [], loading: true, error: null });
 
-    const unsubscribe = observeSharedQuery(sharedQueryKey(userId, 'pronunciation-overview')!, 'pronunciation', () => PronunciationGroup.getOverview(userId), ({ data: groups, error }) => {
+    const unsubscribe = observeSharedQuery(sharedQueryKey(userId, 'pronunciation-overview')!, 'pronunciation', () => getPronunciationGroupOverview(userId), ({ data: groups, error }) => {
       if (error) {
         const normalizedError = toError(error);
         usePronunciationGroupsStore.setState({ groups: [], loading: false, error: normalizedError });

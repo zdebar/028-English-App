@@ -25,10 +25,8 @@ vi.mock('@/routing/data-navigation', () => ({
   ),
 }));
 
-vi.mock('@/database/models/topics', () => ({
-  default: {
-    getInitiatedByUserId: (...args: unknown[]) => mocks.getInitiatedByUserId(...args),
-  },
+vi.mock('@/database/queries/topic-queries', () => ({
+  getInitiatedTopicsByUserId: (...args: unknown[]) => mocks.getInitiatedByUserId(...args),
 }));
 
 vi.mock('@/features/auth/use-auth-store', () => ({

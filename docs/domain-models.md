@@ -30,9 +30,9 @@ migrations or local Dexie upgrades; they are not current application tables.
 | `user_lessons` | Records a user's lesson starts with `started_at`; a user may have start records for different dates. |
 
 `groups.type` is `topic`, `grammar`, `sound`, or `pronunciation`. Sound groups also
-carry a sound class/category. The grammar, topic, sound, and pronunciation query
-helpers in `frontend/src/database/models` read this unified group model; their
-names do not imply separate current Supabase tables.
+carry a sound class/category. Feature queries in
+`frontend/src/database/queries` read this unified group model; their names do not
+imply separate current Supabase tables.
 
 ## Progress And Sync Fields
 
@@ -67,7 +67,10 @@ mastered). Lesson-start state in the Home dashboard comes from `user_lessons`.
 | `UserLesson` | Record and synchronize lesson starts. |
 | `AudioRecord`, `AudioMetadata` | Track local audio records and archive metadata. |
 | `Metadata` | Store local per-table, per-user sync metadata. |
-| `Topic`, `GrammarTopic`, `GrammarGroup`, `GrammarChunk`, `SoundGroup`, `PronunciationGroup` | Feature query helpers backed by the unified group tables. |
+
+Feature query functions and feature-specific result types live in
+`frontend/src/database/queries`; they are separate from the IndexedDB model
+classes above. Grammar hierarchy queries share `grammar-queries.ts`.
 
 ## Active IndexedDB Tables And Indexes
 

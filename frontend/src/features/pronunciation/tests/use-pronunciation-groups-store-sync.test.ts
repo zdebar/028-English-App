@@ -14,8 +14,8 @@ const mocks = vi.hoisted(() => ({
   reportError: vi.fn(),
 }));
 
-vi.mock('@/database/models/pronunciation-groups', () => ({
-  default: { getOverview: (...args: unknown[]) => mocks.getOverview(...args) },
+vi.mock('@/database/queries/pronunciation-group-queries', () => ({
+  getPronunciationGroupOverview: (...args: unknown[]) => mocks.getOverview(...args),
 }));
 
 vi.mock('@/features/logging/monitoring-handler', () => ({

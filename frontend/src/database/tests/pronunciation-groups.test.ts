@@ -61,7 +61,10 @@ vi.mock('@/config/supabase.config', () => ({
   supabaseInstance: {},
 }));
 
-import PronunciationGroup from '@/database/models/pronunciation-groups';
+import {
+  getPronunciationGroupDetail,
+  getPronunciationGroupOverview,
+} from '@/database/queries/pronunciation-group-queries';
 
 function item(overrides: Record<string, unknown>) {
   return {
@@ -108,7 +111,7 @@ function linkSoundExamples(itemIds: number[]): void {
   );
 }
 
-describe('PronunciationGroup', () => {
+describe('pronunciation group queries', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mocks.groups = [
@@ -142,7 +145,7 @@ describe('PronunciationGroup', () => {
   });
 
   it('shows ordered started examples and derives unlocked counts', async () => {
-    await expect(PronunciationGroup.getOverview('u1')).resolves.toEqual([
+    await expect(getPronunciationGroupOverview('u1')).resolves.toEqual([
       expect.objectContaining({
         id: 1,
         examples: ['man', 'men'],
@@ -182,7 +185,7 @@ describe('PronunciationGroup', () => {
       { id: 2, parent_group_id: 1, child_group_id: 51, relation_type: 'contrast', deleted_at: null },
     ];
 
-    const vowelOverview = await PronunciationGroup.getOverview('u1');
+    const vowelOverview = await getPronunciationGroupOverview('u1');
     expect(vowelOverview[0]?.contrast_class).toBe('vowel');
 
     mocks.groups[2] = {
@@ -190,7 +193,7 @@ describe('PronunciationGroup', () => {
       sound_class: 'consonant',
       sound_category: 'voiced_consonant',
     };
-    const mixedOverview = await PronunciationGroup.getOverview('u1');
+    const mixedOverview = await getPronunciationGroupOverview('u1');
     expect(mixedOverview[0]?.contrast_class).toBe('consonant');
   });
 
@@ -198,7 +201,7 @@ describe('PronunciationGroup', () => {
     mocks.items[1].started_at = '1970-01-01T00:00:00.000Z';
     mocks.items[1].mastered_at_cz_to_en = '2026-07-01T00:00:00.000Z';
 
-    const overview = await PronunciationGroup.getOverview('u1');
+    const overview = await getPronunciationGroupOverview('u1');
 
     expect(overview[0]).toMatchObject({ unlocked_count: 2 });
   });
@@ -215,7 +218,7 @@ describe('PronunciationGroup', () => {
       { group_id: 2, item_id: 2, sort_order: 2 },
     ];
 
-    const groups = await PronunciationGroup.getOverview('u1');
+    const groups = await getPronunciationGroupOverview('u1');
 
     expect(groups.map((group) => group.id)).toEqual([1, 2]);
   });
@@ -225,14 +228,14 @@ describe('PronunciationGroup', () => {
       entry.started_at = '1970-01-01T00:00:00.000Z';
       delete entry.mastered_at_cz_to_en;
     });
-    await expect(PronunciationGroup.getOverview('u1')).resolves.toEqual([
+    await expect(getPronunciationGroupOverview('u1')).resolves.toEqual([
       expect.objectContaining({ id: 1, examples: [], unlocked_count: 0, total_count: 0 }),
     ]);
   });
 
   it('hides started items while their lesson is not started', async () => {
     mocks.lessons = [];
-    await expect(PronunciationGroup.getOverview('u1')).resolves.toEqual([
+    await expect(getPronunciationGroupOverview('u1')).resolves.toEqual([
       expect.objectContaining({ id: 1, examples: [], unlocked_count: 0, total_count: 0 }),
     ]);
   });
@@ -257,16 +260,16 @@ describe('PronunciationGroup', () => {
       sort_order: 1,
       deleted_at: null,
     }];
-    await expect(PronunciationGroup.getOverview('u1')).resolves.toEqual([
+    await expect(getPronunciationGroupOverview('u1')).resolves.toEqual([
       expect.objectContaining({ id: 1 }),
     ]);
-    await expect(PronunciationGroup.getDetail('u1', 1)).resolves.toMatchObject({
+    await expect(getPronunciationGroupDetail('u1', 1)).resolves.toMatchObject({
       group: { id: 1 },
       items: [],
     });
 
     mocks.memberships.push({ group_id: 50, item_id: 1, sort_order: 1, deleted_at: null });
-    const result = await PronunciationGroup.getOverview('u1');
+    const result = await getPronunciationGroupOverview('u1');
     expect(result.map((group) => group.id)).toEqual([1]);
   });
 
@@ -275,7 +278,7 @@ describe('PronunciationGroup', () => {
       entry.audio = null;
     });
 
-    await expect(PronunciationGroup.getOverview('u1')).resolves.toEqual([
+    await expect(getPronunciationGroupOverview('u1')).resolves.toEqual([
       expect.objectContaining({ id: 1, examples: [], unlocked_count: 0, total_count: 0 }),
     ]);
   });
@@ -289,7 +292,7 @@ describe('PronunciationGroup', () => {
       ...mocks.memberships.filter((membership) => membership.group_id === 50),
     ];
 
-    const detail = await PronunciationGroup.getDetail('u1', 1);
+    const detail = await getPronunciationGroupDetail('u1', 1);
 
     expect(detail?.items.map((entry) => entry.item_id)).toEqual([2, 1]);
   });
@@ -298,7 +301,7 @@ describe('PronunciationGroup', () => {
     linkSoundExamples([1, 2]);
     mocks.items[1].is_vocabulary = 0;
 
-    const detail = await PronunciationGroup.getDetail('u1', 1);
+    const detail = await getPronunciationGroupDetail('u1', 1);
 
     expect(detail?.items.map((entry) => entry.item_id)).toEqual([1, 2]);
   });
@@ -325,7 +328,7 @@ describe('PronunciationGroup', () => {
     }];
     mocks.memberships.push({ group_id: 50, item_id: 1, sort_order: 1, deleted_at: null });
 
-    const detail = await PronunciationGroup.getDetail('u1', 1);
+    const detail = await getPronunciationGroupDetail('u1', 1);
 
     expect(detail?.sounds).toEqual([{ id: 50, name: '/æ/', note: 'Open front vowel' }]);
   });

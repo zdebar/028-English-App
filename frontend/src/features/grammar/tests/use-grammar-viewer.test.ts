@@ -5,10 +5,8 @@ const getGrammarByIdMock = vi.fn();
 const showToastMock = vi.fn();
 const errorHandlerMock = vi.fn();
 
-vi.mock('@/database/models/grammar-chunks', () => ({
-  default: {
-    getDetail: (...args: unknown[]) => getGrammarByIdMock(...args),
-  },
+vi.mock('@/database/queries/grammar-queries', () => ({
+  getGrammarChunkDetail: (...args: unknown[]) => getGrammarByIdMock(...args),
 }));
 
 vi.mock('@/features/auth/use-auth-store', () => ({

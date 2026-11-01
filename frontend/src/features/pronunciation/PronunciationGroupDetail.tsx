@@ -5,7 +5,7 @@ import BilingualItemButton from '@/components/UI/buttons/BilingualItemButton';
 import AudioItemList from '@/components/UI/AudioItemList';
 import { ListButton } from '@/components/UI/buttons/ListButton';
 import { ROUTES } from '@/config/routes.config';
-import PronunciationGroup from '@/database/models/pronunciation-groups';
+import { getPronunciationGroupDetail } from '@/database/queries/pronunciation-group-queries';
 import { useAudioManager } from '@/features/audio/use-audio-manager';
 import { getItemAudioSources, isAudioPlayable, playAudioWithToast } from '@/features/audio/audio.utils';
 import VolumeSlider from '@/features/audio/VolumeSlider';
@@ -29,7 +29,7 @@ function parseGroupId(value: string | undefined): number | null {
 
 function fetchGroupDetail(userId: string | null, groupId: number | null) {
   if (!userId || !groupId) return Promise.resolve(null);
-  return PronunciationGroup.getDetail(userId, groupId);
+  return getPronunciationGroupDetail(userId, groupId);
 }
 
 function PronunciationGroupNote({ note }: Readonly<{ note: string | null | undefined }>) {

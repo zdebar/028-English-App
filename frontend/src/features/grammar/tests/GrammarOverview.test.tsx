@@ -54,10 +54,8 @@ vi.mock('react-router-dom', () => ({
   useLocation: () => ({ key: 'default' }),
 }));
 
-vi.mock('@/database/models/grammar-topics', () => ({
-  default: {
-    getStarted: vi.fn(),
-  },
+vi.mock('@/database/queries/grammar-queries', () => ({
+  getInitiatedGrammarTopics: vi.fn(),
 }));
 
 vi.mock('@/database/models/user-items', () => ({

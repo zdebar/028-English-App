@@ -1,6 +1,9 @@
-import PronunciationGroup from '@/database/models/pronunciation-groups';
-import SoundGroup, { type SoundGroupDetailType } from '@/database/models/sound-groups';
-import Topic from '@/database/models/topics';
+import { getPronunciationGroupDetail } from '@/database/queries/pronunciation-group-queries';
+import {
+  getSoundGroupDetail,
+  type SoundGroupDetailType,
+} from '@/database/queries/sound-group-queries';
+import { getTopicById } from '@/database/queries/topic-queries';
 import UserItem from '@/database/models/user-items';
 import {
   loadReviewDeckData,
@@ -55,7 +58,7 @@ export async function loadTopicDetailData(
   topicId: number,
 ): Promise<TopicDetailData> {
   const [topic, items] = await Promise.all([
-    loadSharedQuery(userId, `topic:${topicId}`, () => Topic.getById(userId, topicId)),
+    loadSharedQuery(userId, `topic:${topicId}`, () => getTopicById(userId, topicId)),
     loadSharedQuery(userId, `topic-items:${topicId}`, () => UserItem.getInitiatedByTopicId(userId, topicId)),
   ]);
   return { topic, items };
@@ -77,7 +80,7 @@ export function loadSoundGroupDetailData(
   userId: string,
   groupId: number,
 ): Promise<SoundGroupDetailData | null> {
-  return loadSharedQuery(userId, `sound:${groupId}`, () => SoundGroup.getDetail(userId, groupId));
+  return loadSharedQuery(userId, `sound:${groupId}`, () => getSoundGroupDetail(userId, groupId));
 }
 
 export function loadPronunciationGroupDetailData(
@@ -87,6 +90,6 @@ export function loadPronunciationGroupDetailData(
   return loadSharedQuery(
     userId,
     `pronunciation:${groupId}`,
-    () => PronunciationGroup.getDetail(userId, groupId),
+    () => getPronunciationGroupDetail(userId, groupId),
   );
 }

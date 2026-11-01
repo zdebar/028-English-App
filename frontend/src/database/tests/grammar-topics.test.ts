@@ -18,9 +18,9 @@ vi.mock('@/database/models/groups', () => ({
   default: { getStartedByUser: async () => mocks.startedGroups },
 }));
 
-import GrammarTopic from '@/database/models/grammar-topics';
+import { getInitiatedGrammarTopics } from '@/database/queries/grammar-queries';
 
-describe('GrammarTopic.getInitiated', () => {
+describe('getInitiatedGrammarTopics', () => {
   beforeEach(() => {
     mocks.groups = [
       { id: 100, type: 'grammar', name: 'Tense', sort_order: 1, deleted_at: null },
@@ -40,7 +40,7 @@ describe('GrammarTopic.getInitiated', () => {
   });
 
   it('builds the initiated three-level grammar hierarchy from group relations', async () => {
-    await expect(GrammarTopic.getInitiated('u1')).resolves.toEqual([
+    await expect(getInitiatedGrammarTopics('u1')).resolves.toEqual([
       {
         ...mocks.groups[0],
         groups: [
@@ -59,6 +59,6 @@ describe('GrammarTopic.getInitiated', () => {
 
   it('hides hierarchy nodes without started example items', async () => {
     mocks.startedGroups = [];
-    await expect(GrammarTopic.getInitiated('u1')).resolves.toEqual([]);
+    await expect(getInitiatedGrammarTopics('u1')).resolves.toEqual([]);
   });
 });

@@ -4,7 +4,7 @@ import {
   resolvePracticeEntries,
   resolvePracticeGrammarContext,
 } from '@/database/utils/practice-content.utils';
-import type { GrammarChunkWithExamples } from '@/database/models/grammar-chunks';
+import type { GrammarChunkWithExamples } from '@/database/queries/grammar-queries';
 import type { LessonType } from '@/types/generic.types';
 import type { GroupType } from '@/types/table.types';
 import type {

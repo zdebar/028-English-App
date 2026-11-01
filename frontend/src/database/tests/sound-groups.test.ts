@@ -13,7 +13,10 @@ vi.mock('@/database/models/groups', () => ({
   },
 }));
 
-import SoundGroup from '@/database/models/sound-groups';
+import {
+  getSoundGroupDetail,
+  hasAvailableSoundGroups,
+} from '@/database/queries/sound-group-queries';
 
 const sound = {
   id: 3,
@@ -26,20 +29,20 @@ const sound = {
 };
 const startedSound = { ...sound, examples: [{ item_id: 8, english: 'man' }] };
 
-describe('SoundGroup', () => {
+describe('sound group queries', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mocks.getByTypeWithStartedLessons.mockResolvedValue([sound]);
     mocks.getStartedByUser.mockResolvedValue([startedSound]);
   });
 
-  it('lists sounds with linked items in started lessons', async () => {
-    await expect(SoundGroup.getOverview('u1')).resolves.toEqual([sound]);
+  it('checks for sounds with linked items in started lessons', async () => {
+    await expect(hasAvailableSoundGroups('u1')).resolves.toBe(true);
     expect(mocks.getByTypeWithStartedLessons).toHaveBeenCalledWith('u1', 'sound');
   });
 
   it('returns only initiated examples in a visible sound detail', async () => {
-    await expect(SoundGroup.getDetail('u1', 3)).resolves.toEqual({
+    await expect(getSoundGroupDetail('u1', 3)).resolves.toEqual({
       group: sound,
       items: [{ item_id: 8, english: 'man' }],
     });
@@ -48,6 +51,6 @@ describe('SoundGroup', () => {
 
   it('hides a sound with no linked item in a started lesson', async () => {
     mocks.getByTypeWithStartedLessons.mockResolvedValue([]);
-    await expect(SoundGroup.getDetail('u1', 3)).resolves.toBeNull();
+    await expect(getSoundGroupDetail('u1', 3)).resolves.toBeNull();
   });
 });

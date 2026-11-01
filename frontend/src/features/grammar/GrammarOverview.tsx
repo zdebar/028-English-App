@@ -7,8 +7,10 @@ import { TEXTS } from '@/locales/cs';
 import type { JSX } from 'react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { ListButton } from '@/components/UI/buttons/ListButton';
-import type { GrammarGroupWithChunks } from '@/database/models/grammar-groups';
-import type { GrammarTopicWithGroups } from '@/database/models/grammar-topics';
+import type {
+  GrammarGroupWithChunks,
+  GrammarTopicWithGroups,
+} from '@/database/queries/grammar-queries';
 import UserItem from '@/database/models/user-items';
 import { useQueryErrorToast } from '@/features/logging/use-query-error-toast';
 import { DataState } from '@/components/UI/DataState';

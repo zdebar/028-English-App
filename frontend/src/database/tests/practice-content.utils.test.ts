@@ -35,8 +35,8 @@ vi.mock('@/database/models/db', () => ({
   },
 }));
 
-vi.mock('@/database/models/grammar-chunks', () => ({
-  default: { addExamples: (...args: unknown[]) => mocks.addExamples(...args) },
+vi.mock('@/database/queries/grammar-queries', () => ({
+  getGrammarChunkWithExamples: (...args: unknown[]) => mocks.addExamples(...args),
 }));
 
 vi.mock('@/database/models/user-items', () => ({

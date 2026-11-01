@@ -9,7 +9,7 @@ import { getItemAudioSources } from '@/features/audio/audio.utils';
 import { TEXTS } from '@/locales/cs';
 import type { UserItemLocal } from '@/types/user-item.types';
 import { useCallback, useEffect, useMemo } from 'react';
-import Topic from '@/database/models/topics';
+import { getTopicById } from '@/database/queries/topic-queries';
 import { useNavigate, useParams } from 'react-router-dom';
 import type { GroupType } from '@/types/table.types';
 import { DataState } from '@/components/UI/DataState';
@@ -43,7 +43,7 @@ export default function TopicItemsOverview({
 
   const fetchTopic = useCallback(async (): Promise<GroupType | null> => {
     if (!userId || !topicId) return null;
-    return Topic.getById(userId, topicId);
+    return getTopicById(userId, topicId);
   }, [topicId, userId]);
 
   const {

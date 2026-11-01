@@ -27,11 +27,11 @@ vi.mock('dexie', () => ({
   }),
 }));
 
-vi.mock('@/database/models/topics', () => ({
-  default: { hasInitiatedByUserId: vi.fn(async () => mocks.topics.length > 0) },
+vi.mock('@/database/queries/topic-queries', () => ({
+  hasInitiatedTopicsByUserId: vi.fn(async () => mocks.topics.length > 0),
 }));
-vi.mock('@/database/models/grammar-topics', () => ({
-  default: { getInitiated: vi.fn(async () => []) },
+vi.mock('@/database/queries/grammar-queries', () => ({
+  getInitiatedGrammarTopics: vi.fn(async () => []),
 }));
 vi.mock('@/database/models/user-items', () => ({
   default: {
@@ -42,8 +42,8 @@ vi.mock('@/database/models/user-items', () => ({
     hasInitiatedVocabulary: vi.fn(async () => mocks.vocabulary.length > 0),
   },
 }));
-vi.mock('@/database/models/sound-groups', () => ({
-  default: { getOverview: vi.fn(async () => mocks.sounds) },
+vi.mock('@/database/queries/sound-group-queries', () => ({
+  hasAvailableSoundGroups: vi.fn(async () => mocks.sounds.length > 0),
 }));
 vi.mock('@/features/toast/use-toast-store', () => ({
   useToastStore: (selector: (state: { showToast: typeof mocks.showToast }) => unknown) =>

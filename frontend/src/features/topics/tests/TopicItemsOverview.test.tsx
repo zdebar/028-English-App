@@ -68,10 +68,8 @@ vi.mock('@/database/models/user-items', () => ({
   },
 }));
 
-vi.mock('@/database/models/topics', () => ({
-  default: {
-    getById: vi.fn(),
-  },
+vi.mock('@/database/queries/topic-queries', () => ({
+  getTopicById: vi.fn(),
 }));
 
 vi.mock('@/features/logging/monitoring-handler', () => ({

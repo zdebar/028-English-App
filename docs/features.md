@@ -53,9 +53,12 @@ See [practice-flows.md](practice-flows.md) for queue and answer behavior.
 | Sounds | `/sounds`, `/sounds/:groupId` | Sound-typed groups and item memberships | Organizes sounds by category and shows examples available from started lessons. |
 | Pronunciation contrasts | `/pronunciation`, `/pronunciation/:groupId` | Pronunciation groups, contrast relations, sound groups | Shows contrasts and examples with audio; a contrast becomes active when its linked sounds are available. |
 
-Feature adapters such as `Topic`, `GrammarTopic`, `GrammarChunk`, `SoundGroup`,
-and `PronunciationGroup` query `groups`, `group_items`, and `group_relations`; they
-do not correspond to separate current content tables.
+Feature queries live in `frontend/src/database/queries`, separately from the
+IndexedDB models. The grammar topic, group, and chunk types share one
+`grammar-queries.ts` module; topic, sound, and pronunciation queries remain in
+feature-specific modules because their result shapes and availability rules differ.
+All of them read the unified `groups`, `group_items`, and `group_relations` tables;
+they do not correspond to separate current content tables.
 
 ## Data, Sync, And Offline Behavior
 

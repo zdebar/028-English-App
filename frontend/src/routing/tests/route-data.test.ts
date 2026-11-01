@@ -15,17 +15,19 @@ vi.mock('@/database/models/user-items', () => ({ default: {
   hasInitiatedVocabulary: mocks.hasVocabulary,
   getInitiatedVocabulary: mocks.vocabulary,
 } }));
-vi.mock('@/database/models/topics', () => ({ default: {
-  hasInitiatedByUserId: mocks.hasTopics,
-  getInitiatedByUserId: mocks.topics,
-} }));
-vi.mock('@/database/models/sound-groups', () => ({ default: {
-  getOverview: (...args: unknown[]) => mocks.sounds(...args),
-  getAllForOverview: (...args: unknown[]) => mocks.allSoundsForOverview(...args),
-  getDetail: vi.fn(),
-} }));
-vi.mock('@/database/models/grammar-groups', () => ({ default: {} }));
-vi.mock('@/database/models/pronunciation-groups', () => ({ default: {} }));
+vi.mock('@/database/queries/topic-queries', () => ({
+  hasInitiatedTopicsByUserId: mocks.hasTopics,
+  getInitiatedTopicsByUserId: mocks.topics,
+  getTopicById: vi.fn(),
+}));
+vi.mock('@/database/queries/sound-group-queries', () => ({
+  hasAvailableSoundGroups: (...args: unknown[]) => mocks.sounds(...args),
+  getAllSoundGroupsForOverview: (...args: unknown[]) => mocks.allSoundsForOverview(...args),
+  getSoundGroupDetail: vi.fn(),
+}));
+vi.mock('@/database/queries/pronunciation-group-queries', () => ({
+  getPronunciationGroupDetail: vi.fn(),
+}));
 vi.mock('@/features/practice/review-deck-data', () => ({
   loadReviewDeckData: (...args: unknown[]) => mocks.loadReviewDeckData(...args),
 }));
@@ -45,7 +47,7 @@ describe('route data queries', () => {
     mocks.hasGrammar.mockResolvedValue(true);
     mocks.hasTopics.mockResolvedValue(false);
     mocks.hasVocabulary.mockResolvedValue(true);
-    mocks.sounds.mockResolvedValue([{ id: 4 }]);
+    mocks.sounds.mockResolvedValue(true);
     mocks.allSoundsForOverview.mockResolvedValue([{ id: 4, isActive: true }]);
     await expect(loadOverviewAvailabilityData('u1')).resolves.toEqual({
       grammar: true, topics: false, vocabulary: true, sounds: true,

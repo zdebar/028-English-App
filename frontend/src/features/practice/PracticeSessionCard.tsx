@@ -28,7 +28,7 @@ import MasterItemButton from './buttons/MasterItemButton';
 import RepeatButton from './buttons/RepeatButton';
 import ReviewRatingButton from './buttons/ReviewRatingButton';
 import { usePointerReleaseLock } from './hooks/use-pointer-release-lock';
-import type { GrammarChunkWithExamples } from '@/database/models/grammar-chunks';
+import type { GrammarChunkWithExamples } from '@/database/queries/grammar-queries';
 import type { NoteType } from '@/types/generic.types';
 import { useEffect, useRef, useState, type MouseEvent } from 'react';
 

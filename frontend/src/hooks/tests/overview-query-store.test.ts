@@ -20,15 +20,13 @@ vi.mock('@/hooks/shared-query-store', () => ({
   sharedQueryKey: (userId: string, name: string) => JSON.stringify([userId, name]),
 }));
 
-vi.mock('@/database/models/grammar-topics', () => ({
-  default: { getInitiated: (...args: unknown[]) => mocks.getInitiatedGrammar(...args) },
+vi.mock('@/database/queries/grammar-queries', () => ({
+  getInitiatedGrammarTopics: (...args: unknown[]) => mocks.getInitiatedGrammar(...args),
 }));
 
-vi.mock('@/database/models/topics', () => ({
-  default: {
-    hasInitiatedByUserId: (...args: unknown[]) => mocks.hasInitiatedByUserId(...args),
-    getInitiatedByUserId: (...args: unknown[]) => mocks.getInitiatedByUserId(...args),
-  },
+vi.mock('@/database/queries/topic-queries', () => ({
+  hasInitiatedTopicsByUserId: (...args: unknown[]) => mocks.hasInitiatedByUserId(...args),
+  getInitiatedTopicsByUserId: (...args: unknown[]) => mocks.getInitiatedByUserId(...args),
 }));
 
 vi.mock('@/database/models/user-items', () => ({
@@ -38,11 +36,9 @@ vi.mock('@/database/models/user-items', () => ({
     getInitiatedVocabulary: (...args: unknown[]) => mocks.getInitiatedVocabulary(...args),
   },
 }));
-vi.mock('@/database/models/sound-groups', () => ({
-  default: {
-    getOverview: (...args: unknown[]) => mocks.getInitiatedSounds(...args),
-    getAllForOverview: (...args: unknown[]) => mocks.getAllSoundsForOverview(...args),
-  },
+vi.mock('@/database/queries/sound-group-queries', () => ({
+  hasAvailableSoundGroups: (...args: unknown[]) => mocks.getInitiatedSounds(...args),
+  getAllSoundGroupsForOverview: (...args: unknown[]) => mocks.getAllSoundsForOverview(...args),
 }));
 
 import {
@@ -67,7 +63,7 @@ describe('overview query store', () => {
     mocks.getInitiatedGrammar.mockResolvedValue([{ id: 1 }]);
     mocks.getInitiatedByUserId.mockResolvedValue([{ id: 2 }]);
     mocks.getInitiatedVocabulary.mockResolvedValue([{ item_id: 3 }]);
-    mocks.getInitiatedSounds.mockResolvedValue([{ id: 5 }]);
+    mocks.getInitiatedSounds.mockResolvedValue(true);
     mocks.getAllSoundsForOverview.mockResolvedValue([{ id: 5, isActive: true }]);
   });
 

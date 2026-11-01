@@ -2,7 +2,10 @@ import { DataState } from '@/components/UI/DataState';
 import OverviewCard from '@/components/UI/OverviewCard';
 import AudioItemList from '@/components/UI/AudioItemList';
 import { ROUTES } from '@/config/routes.config';
-import SoundGroup from '@/database/models/sound-groups';
+import {
+  getSoundGroupDetail,
+  type SoundGroupDetailType,
+} from '@/database/queries/sound-group-queries';
 import { useAuthStore } from '@/features/auth/use-auth-store';
 import { useAudioManager } from '@/features/audio/use-audio-manager';
 import { getItemAudioSources } from '@/features/audio/audio.utils';
@@ -12,7 +15,6 @@ import { useToastStore } from '@/features/toast/use-toast-store';
 import { sharedQueryKey } from '@/hooks/shared-query-store';
 import { useLiveQueryData } from '@/hooks/use-live-query-data';
 import { TEXTS } from '@/locales/cs';
-import type { SoundGroupDetailType } from '@/database/models/sound-groups';
 import { useCallback, useEffect, useMemo } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useRouteClose } from '@/routing/use-route-close';
@@ -48,7 +50,7 @@ export default function SoundGroupDetail({
   const closeRoute = useRouteClose(ROUTES.sounds);
   const fetchDetail = useCallback(() => {
     if (!userId || !groupId) return Promise.resolve(null);
-    return SoundGroup.getDetail(userId, groupId);
+    return getSoundGroupDetail(userId, groupId);
   }, [groupId, userId]);
   const { data, loading, error } = useLiveQueryData<SoundGroupDetailType | null>(fetchDetail, {
     emptyData: null,

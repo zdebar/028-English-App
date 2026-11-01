@@ -49,9 +49,9 @@ Completed answers remain saved, while the in-memory retry order is lost.
 
 Grammar groups, their hierarchy, and their examples use the unified `groups`,
 `group_relations`, and `group_items` data. `lessons.group_id` links a lesson to its
-grammar detail. The frontend's `GrammarTopic`, `GrammarGroup`, and `GrammarChunk`
-classes are query helpers over that unified model; they are not separate current
-database tables.
+grammar detail. The frontend's grammar hierarchy types and queries are grouped
+in `frontend/src/database/queries/grammar-queries.ts`; they are separate from
+IndexedDB model classes and do not represent separate current database tables.
 
 Practice cards can display the lesson's grammar detail and linked note. Grammar
 overviews arrange initiated grammar groups by hierarchy and detail relations,

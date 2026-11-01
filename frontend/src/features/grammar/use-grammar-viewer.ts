@@ -1,4 +1,4 @@
-import GrammarChunk from '@/database/models/grammar-chunks';
+import { getGrammarChunkDetail } from '@/database/queries/grammar-queries';
 import { reportError } from '@/features/logging/monitoring-handler';
 import { useToastStore } from '@/features/toast/use-toast-store';
 import { TEXTS } from '@/locales/cs';
@@ -17,7 +17,7 @@ export function useGrammarViewer() {
       if (typeof grammarChunkId !== 'number' || !userId) return;
 
       try {
-        const grammar = await GrammarChunk.getDetail(userId, grammarChunkId);
+        const grammar = await getGrammarChunkDetail(userId, grammarChunkId);
         if (!grammar) return;
 
         setGrammarData({ ...grammar, kind: 'chunk' });

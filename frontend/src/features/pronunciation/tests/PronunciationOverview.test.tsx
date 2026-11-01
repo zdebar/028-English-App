@@ -34,11 +34,9 @@ vi.mock('@/features/toast/use-toast-store', () => ({
     selector({ showToast: vi.fn() }),
 }));
 
-vi.mock('@/database/models/pronunciation-groups', () => ({
-  default: {
-    getOverview: vi.fn(),
-    getDetail: vi.fn(),
-  },
+vi.mock('@/database/queries/pronunciation-group-queries', () => ({
+  getPronunciationGroupOverview: vi.fn(),
+  getPronunciationGroupDetail: vi.fn(),
 }));
 
 vi.mock('../use-pronunciation-groups-store', () => ({

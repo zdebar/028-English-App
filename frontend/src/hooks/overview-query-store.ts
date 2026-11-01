@@ -1,7 +1,14 @@
-import GrammarTopic, { type GrammarTopicWithGroups } from '@/database/models/grammar-topics';
-import Topic from '@/database/models/topics';
+import { getInitiatedGrammarTopics, type GrammarTopicWithGroups } from '@/database/queries/grammar-queries';
+import {
+  getInitiatedTopicsByUserId,
+  hasInitiatedTopicsByUserId,
+} from '@/database/queries/topic-queries';
 import UserItem from '@/database/models/user-items';
-import SoundGroup from '@/database/models/sound-groups';
+import {
+  getAllSoundGroupsForOverview,
+  hasAvailableSoundGroups,
+  type SoundOverviewGroup,
+} from '@/database/queries/sound-group-queries';
 import type { UserItemLocal } from '@/types/user-item.types';
 import { getSharedQuery, loadSharedQuery, sharedQueryKey } from './shared-query-store';
 
@@ -21,9 +28,9 @@ export type OverviewQueryData = {
   'has-vocabulary': boolean;
   'has-sounds': boolean;
   grammar: GrammarTopicWithGroups[];
-  topics: Awaited<ReturnType<typeof Topic.getInitiatedByUserId>>;
+  topics: Awaited<ReturnType<typeof getInitiatedTopicsByUserId>>;
   vocabulary: UserItemLocal[];
-  sounds: Awaited<ReturnType<typeof SoundGroup.getAllForOverview>>;
+  sounds: SoundOverviewGroup[];
 };
 
 export type OverviewAvailabilityData = Readonly<{
@@ -53,19 +60,19 @@ export function getOverviewQuery<T extends OverviewQueryName>(
       case 'has-grammar':
         return UserItem.hasInitiatedGrammar(userId) as Promise<OverviewQueryData[T]>;
       case 'has-topics':
-        return Topic.hasInitiatedByUserId(userId) as Promise<OverviewQueryData[T]>;
+        return hasInitiatedTopicsByUserId(userId) as Promise<OverviewQueryData[T]>;
       case 'has-vocabulary':
         return UserItem.hasInitiatedVocabulary(userId) as Promise<OverviewQueryData[T]>;
       case 'has-sounds':
-        return SoundGroup.getOverview(userId).then((groups) => groups.length > 0) as Promise<OverviewQueryData[T]>;
+        return hasAvailableSoundGroups(userId) as Promise<OverviewQueryData[T]>;
       case 'grammar':
-        return GrammarTopic.getInitiated(userId) as Promise<OverviewQueryData[T]>;
+        return getInitiatedGrammarTopics(userId) as Promise<OverviewQueryData[T]>;
       case 'topics':
-        return Topic.getInitiatedByUserId(userId) as Promise<OverviewQueryData[T]>;
+        return getInitiatedTopicsByUserId(userId) as Promise<OverviewQueryData[T]>;
       case 'vocabulary':
         return UserItem.getInitiatedVocabulary(userId) as Promise<OverviewQueryData[T]>;
       case 'sounds':
-        return SoundGroup.getAllForOverview(userId) as Promise<OverviewQueryData[T]>;
+        return getAllSoundGroupsForOverview(userId) as Promise<OverviewQueryData[T]>;
     }
   };
 }

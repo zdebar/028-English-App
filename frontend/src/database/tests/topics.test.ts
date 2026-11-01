@@ -27,9 +27,13 @@ vi.mock('@/database/models/db', () => ({
   },
 }));
 
-import Topic from '@/database/models/topics';
+import {
+  getInitiatedTopicsByUserId,
+  getTopicById,
+  hasInitiatedTopicsByUserId,
+} from '@/database/queries/topic-queries';
 
-describe('Topic', () => {
+describe('topic queries', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mocks.groups = [
@@ -54,21 +58,21 @@ describe('Topic', () => {
   });
 
   it('lists topic groups only when both lesson and example item are started', async () => {
-    await expect(Topic.hasInitiatedByUserId('u1')).resolves.toBe(true);
-    const topics = await Topic.getInitiatedByUserId('u1');
+    await expect(hasInitiatedTopicsByUserId('u1')).resolves.toBe(true);
+    const topics = await getInitiatedTopicsByUserId('u1');
     expect(topics.map((topic) => topic.id)).toEqual([2, 1]);
   });
 
   it('returns topic metadata only for topic typed groups', async () => {
-    await expect(Topic.getById('u1', 2)).resolves.toMatchObject({ id: 2, name: 'Months' });
-    await expect(Topic.getById('u1', 99)).resolves.toBeNull();
+    await expect(getTopicById('u1', 2)).resolves.toMatchObject({ id: 2, name: 'Months' });
+    await expect(getTopicById('u1', 99)).resolves.toBeNull();
     mocks.groups[0].type = 'grammar';
-    await expect(Topic.getById('u1', 1)).resolves.toBeNull();
+    await expect(getTopicById('u1', 1)).resolves.toBeNull();
   });
 
   it('hides topic groups when lesson starts are missing', async () => {
     mocks.lessons = [];
-    await expect(Topic.hasInitiatedByUserId('u1')).resolves.toBe(false);
-    await expect(Topic.getInitiatedByUserId('u1')).resolves.toEqual([]);
+    await expect(hasInitiatedTopicsByUserId('u1')).resolves.toBe(false);
+    await expect(getInitiatedTopicsByUserId('u1')).resolves.toEqual([]);
   });
 });

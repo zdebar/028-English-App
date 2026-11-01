@@ -1,5 +1,8 @@
 import { db } from '@/database/models/db';
-import GrammarChunk, { type GrammarChunkWithExamples } from '@/database/models/grammar-chunks';
+import {
+  getGrammarChunkWithExamples,
+  type GrammarChunkWithExamples,
+} from '@/database/queries/grammar-queries';
 import { reportError } from '@/features/logging/monitoring-handler';
 import type { LessonType, NoteType } from '@/types/generic.types';
 import type { GroupType } from '@/types/table.types';
@@ -54,7 +57,7 @@ async function loadGrammar(
   const resolved = await Promise.all(groups.map(async (group) => {
     if (group?.type !== 'grammar') return null;
     try {
-      return await GrammarChunk.addExamples(userId, group);
+      return await getGrammarChunkWithExamples(userId, group);
     } catch (error) {
       failed = true;
       reportError('Failed to resolve practice grammar examples', error, { groupId: group.id });

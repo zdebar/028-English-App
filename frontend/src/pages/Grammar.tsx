@@ -1,7 +1,7 @@
 import GrammarOverview from '@/features/grammar/GrammarOverview';
 import type { JSX } from 'react';
 import { useLoaderData } from 'react-router-dom';
-import type { GrammarTopicWithGroups } from '@/database/models/grammar-topics';
+import type { GrammarTopicWithGroups } from '@/database/queries/grammar-queries';
 
 /**
  * Grammar page component.
