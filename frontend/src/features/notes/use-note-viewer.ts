@@ -3,7 +3,7 @@ import { reportError } from '@/features/logging/logging-handler';
 import { useToastStore } from '@/features/toast/use-toast-store';
 import { TEXTS } from '@/locales/cs';
 import { useCallback, useState } from 'react';
-import type { NoteDetail } from './NoteDetailCard';
+import type { NoteDetail } from './note.types';
 
 export function useNoteViewer() {
   const [isNoteVisible, setIsNoteVisible] = useState(false);
