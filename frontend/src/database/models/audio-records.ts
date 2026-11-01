@@ -2,7 +2,10 @@ import config from '@/config/config';
 import type AppDB from '@/database/models/app-db';
 import AudioMetadata from '@/database/models/audio-metadata';
 import { db } from '@/database/models/db';
-import { fetchStorage, fetchStorageBucketMetadata } from '@/database/utils/audio-records.utils';
+import {
+  downloadStorageObject,
+  fetchZipArchiveMetadata,
+} from '@/database/utils/audio-records.utils';
 import { withSettledSummary, type SyncSummary } from '@/features/logging/logging.utils';
 import { ZipExtractionError } from '@/types/error.types';
 import type { AudioRecordLocal } from '@/types/audio.types';
@@ -65,7 +68,7 @@ export default class AudioRecord extends Entity<AppDB> implements AudioRecordLoc
    * @throws SupabaseError when bucket metadata cannot be listed.
    */
   static async syncFromRemote(): Promise<SyncSummary> {
-    const bucketMetadata = await fetchStorageBucketMetadata(config.audio.archiveBucketName);
+    const bucketMetadata = await fetchZipArchiveMetadata(config.audio.archiveBucketName);
 
     if (!bucketMetadata || bucketMetadata.size === 0) {
       return { total: 0, success: 0, failed: 0 };
@@ -121,7 +124,7 @@ export default class AudioRecord extends Entity<AppDB> implements AudioRecordLoc
     const localUpdatedAt = await AudioMetadata.getRemoteUpdatedAt(archiveName);
     if (localUpdatedAt && localUpdatedAt >= remoteUpdatedAt) return;
 
-    const zipBlob = await fetchStorage(config.audio.archiveBucketName, archiveName);
+    const zipBlob = await downloadStorageObject(config.audio.archiveBucketName, archiveName);
     const extractedFiles = await this.extractZip(zipBlob);
 
     await db.transaction('rw', db.audio_records, db.audio_metadata, async () => {
@@ -190,7 +193,7 @@ export default class AudioRecord extends Entity<AppDB> implements AudioRecordLoc
     attempt = 1,
   ): Promise<Blob> {
     try {
-      const audioBlob = await fetchStorage(config.audio.audioBucketName, audioName);
+      const audioBlob = await downloadStorageObject(config.audio.audioBucketName, audioName);
       if (!isValidAudioBlob(audioBlob)) {
         throw new Error(`Downloaded audio file is empty: ${audioName}`);
       }

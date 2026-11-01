@@ -32,7 +32,7 @@ import {
   getTodayLocalDateKey,
 } from '@/database/utils/database.utils';
 import { getNextAt, resetUserItem } from '@/database/utils/user-items.utils';
-import { fetchStorage } from '@/database/utils/audio-records.utils';
+import { downloadStorageObject } from '@/database/utils/audio-records.utils';
 
 describe('database.utils', () => {
   beforeEach(() => {
@@ -59,12 +59,12 @@ describe('database.utils', () => {
     });
   });
 
-  describe('fetchStorage', () => {
+  describe('downloadStorageObject', () => {
     it('downloads blob from storage using the normalized object path', async () => {
       const blob = new Blob(['ok']);
       mocks.download.mockResolvedValue({ data: blob, error: null });
 
-      const result = await fetchStorage('bucket-a', '/file.json');
+      const result = await downloadStorageObject('bucket-a', '/file.json');
 
       expect(mocks.download).toHaveBeenCalledWith('file.json');
       expect(result).toBe(blob);
@@ -73,7 +73,7 @@ describe('database.utils', () => {
     it('throws when storage download returns error', async () => {
       mocks.download.mockResolvedValue({ data: null, error: { message: 'not found' } });
 
-      await expect(fetchStorage('bucket-a', 'missing.json')).rejects.toThrow(
+      await expect(downloadStorageObject('bucket-a', 'missing.json')).rejects.toThrow(
         'Error fetching file missing.json from bucket bucket-a: not found',
       );
     });
