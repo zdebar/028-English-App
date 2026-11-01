@@ -1,4 +1,5 @@
 import UserItem from '@/database/models/user-items';
+import { compareCurriculumPaths } from '@/database/utils/user-item-practice.utils';
 import {
   isReviewItemCandidate,
   isReviewItemFuture,
@@ -245,16 +246,4 @@ function getReviewNextAt(item: PracticeDeckItem | null): string | null {
   if (!item) return null;
   if (item.review_direction === 'en_to_cz') return item.next_at_en_to_cz ?? item.next_at_cz_to_en;
   return item.next_at_cz_to_en;
-}
-
-function compareCurriculumPaths(
-  left: readonly number[],
-  right: readonly number[],
-): number {
-  const length = Math.min(left.length, right.length);
-  for (let index = 0; index < length; index += 1) {
-    const difference = (left[index] ?? 0) - (right[index] ?? 0);
-    if (difference !== 0) return difference;
-  }
-  return left.length - right.length;
 }
