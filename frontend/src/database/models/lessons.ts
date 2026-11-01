@@ -8,7 +8,7 @@ import SyncEntityModel from './sync-entity-model';
  * Shared lesson lookup model.
  *
  * Public API:
- * - `getAll` returns local lessons in display order.
+ * - `getAll` returns all local lessons for consumers to order as needed.
  * - `syncFromRemote` is inherited from `SyncEntityModel`.
  */
 export default class Lessons extends SyncEntityModel implements LessonType {
@@ -26,14 +26,15 @@ export default class Lessons extends SyncEntityModel implements LessonType {
   static override readonly syncSelect = 'id, name, note, level_id, sort_order, deleted_at, group_id';
 
   /**
-   * Reads all local lessons in display order.
+   * Reads all local lessons without applying an order.
    *
-   * @returns Lesson records ordered by sort_order.
+   * @returns All local lesson records.
    */
-  static async getAll(): Promise<LessonType[]> {
-    return await db.lessons.orderBy('sort_order').toArray();
+  static getAll(): Promise<LessonType[]> {
+    return db.lessons.toArray();
   }
 
+  /** Returns a local lesson by id, or null when it is missing. */
   static async getById(lessonId: number): Promise<LessonType | null> {
     return (await db.lessons.get(lessonId)) ?? null;
   }
