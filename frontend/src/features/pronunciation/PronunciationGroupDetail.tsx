@@ -2,11 +2,12 @@ import { sharedQueryKey } from '@/hooks/shared-query-store';
 import { DataState } from '@/components/UI/DataState';
 import OverviewCard from '@/components/UI/OverviewCard';
 import BilingualItemButton from '@/components/UI/buttons/BilingualItemButton';
+import AudioItemList from '@/components/UI/AudioItemList';
 import { ListButton } from '@/components/UI/buttons/ListButton';
 import { ROUTES } from '@/config/routes.config';
 import PronunciationGroup from '@/database/models/pronunciation-groups';
 import { useAudioManager } from '@/features/audio/use-audio-manager';
-import { getItemAudioSources, playAudioWithToast } from '@/features/audio/audio.utils';
+import { getItemAudioSources, isAudioPlayable, playAudioWithToast } from '@/features/audio/audio.utils';
 import VolumeSlider from '@/features/audio/VolumeSlider';
 import { useQueryErrorToast } from '@/features/logging/use-query-error-toast';
 import { useAuthStore } from '@/features/auth/use-auth-store';
@@ -19,7 +20,6 @@ import { useNavigate, useParams } from 'react-router-dom';
 import type { PronunciationGroupDetailType } from '@/types/pronunciation.types';
 import { useRouteClose } from '@/routing/use-route-close';
 import type { UserItemLocal } from '@/types/user-item.types';
-import { reportError } from '@/features/logging/monitoring-handler';
 
 function parseGroupId(value: string | undefined): number | null {
   const groupId = Number(value);
@@ -104,8 +104,8 @@ function RandomPronunciationPractice({
   const [phase, setPhase] = useState<RandomWordPhase>('initial');
   const [selectedItem, setSelectedItem] = useState<UserItemLocal | null>(null);
   const itemSetKey = items.map((item) => item.item_id).join(',');
-  const playableItems = items.filter(
-    (item) => item.audio?.trim() && (audioLoading || isAudioReady(item.audio)),
+  const playableItems = items.filter((item) =>
+    isAudioPlayable(item.audio, audioLoading, isAudioReady),
   );
 
   useEffect(() => {
@@ -264,13 +264,6 @@ function PronunciationGroupItems({
     });
   };
 
-  const handleItemPlay = (item: UserItemLocal) => {
-    stopAudio();
-    void playAudioWithToast(item.audio, playAudio, showToast).catch((error: unknown) => {
-      reportError('Failed to play pronunciation item', error);
-    });
-  };
-
   if (items.length === 0) return null;
 
   return (
@@ -304,37 +297,30 @@ function PronunciationGroupItems({
           />
         </div>
       </div>
-      <div className="pronunciation-item-list mt-3 flex flex-col gap-1">
-        {items.map((item) => {
-          const hasAudio = hasItemAudio(item);
-          const audio = item.audio?.trim();
-          const disabled = !audio || (!audioLoading && !isAudioReady(audio));
-
-          return (
-            <div key={item.item_id} className="relative">
-              <BilingualItemButton
-                item={item}
-                showPronunciation
-                forceSingleLine
-                hideCzechOnNarrow
-                className="min-w-0 pr-12"
-                disabled={disabled}
-                onClick={() => handleItemPlay(item)}
-              />
-              <input
-                type="checkbox"
-                checked={selectedItemIdSet.has(item.item_id)}
-                disabled={!hasAudio}
-                aria-label={`${TEXTS.selectPronunciationWord}: ${item.czech}`}
-                title={`${TEXTS.selectPronunciationWord}: ${item.czech}`}
-                className="color-info absolute top-1/2 right-3 z-10 size-5 -translate-y-1/2 cursor-pointer disabled:cursor-default"
-                style={{ accentColor: 'currentColor' }}
-                onChange={(event) => toggleItem(item.item_id, event.target.checked)}
-              />
-            </div>
-          );
-        })}
-      </div>
+      <AudioItemList
+        items={items}
+        audioLoading={audioLoading}
+        isAudioReady={isAudioReady}
+        playAudio={playAudio}
+        showToast={showToast}
+        showPronunciation
+        forceSingleLine
+        hideCzechOnNarrow
+        itemClassName="min-w-0 pr-12"
+        listClassName="mt-3"
+        renderItemAction={(item) => (
+          <input
+            type="checkbox"
+            checked={selectedItemIdSet.has(item.item_id)}
+            disabled={!hasItemAudio(item)}
+            aria-label={`${TEXTS.selectPronunciationWord}: ${item.czech}`}
+            title={`${TEXTS.selectPronunciationWord}: ${item.czech}`}
+            className="color-info absolute top-1/2 right-3 z-10 size-5 -translate-y-1/2 cursor-pointer disabled:cursor-default"
+            style={{ accentColor: 'currentColor' }}
+            onChange={(event) => toggleItem(item.item_id, event.target.checked)}
+          />
+        )}
+      />
     </div>
   );
 }

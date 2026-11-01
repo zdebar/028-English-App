@@ -9,7 +9,7 @@ import {
 } from '@/features/vocabulary/vocabulary.utils';
 import type { UserItemLocal } from '@/types/user-item.types';
 import { useAudioManager } from '@/features/audio/use-audio-manager';
-import { playAudioWithToast } from '@/features/audio/audio.utils';
+import { isAudioPlayable, playAudioWithToast } from '@/features/audio/audio.utils';
 import PlayButton from '@/features/audio/PlayButton';
 import VolumeSlider from '../audio/VolumeSlider';
 import InfoButton from '@/features/notes/InfoButton';
@@ -105,11 +105,9 @@ function getDirectionSections(
 function isVocabularyAudioDisabled(
   selectedWord: UserItemLocal | null,
   audioLoading: boolean,
-  audioError: boolean,
   isAudioReady: (audio: string) => boolean,
 ): boolean {
-  if (!selectedWord?.audio?.trim()) return true;
-  return audioError || (!audioLoading && !isAudioReady(selectedWord.audio));
+  return !isAudioPlayable(selectedWord?.audio, audioLoading, isAudioReady);
 }
 
 async function playVocabularyAudio(
@@ -337,7 +335,6 @@ export default function VocabularyDetailCard({
 
   const {
     playAudio,
-    audioError,
     isAudioReady,
     loading: audioLoading,
   } = useAudioManager(cardValues.audio);
@@ -345,7 +342,6 @@ export default function VocabularyDetailCard({
   const audioControlsDisabled = isVocabularyAudioDisabled(
     selectedWord,
     audioLoading,
-    audioError,
     isAudioReady,
   );
 

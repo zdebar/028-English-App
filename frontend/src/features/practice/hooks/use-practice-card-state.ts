@@ -1,4 +1,5 @@
 import { useAudioManager } from '@/features/audio/use-audio-manager';
+import { isAudioPlayable } from '@/features/audio/audio.utils';
 import { reportError } from '@/features/logging/monitoring-handler';
 import type { UserItemLocal } from '@/types/user-item.types';
 import { useCallback, useEffect, useRef, type Dispatch, type SetStateAction } from 'react';
@@ -15,9 +16,12 @@ function isPracticeAudioDisabled(
   revealed: boolean,
   isEnToCz: boolean,
   currentItem: UserItemLocal | null,
-  audioError: boolean,
+  audioLoading: boolean,
+  isAudioReady: (audio: string) => boolean,
 ): boolean {
-  return (!revealed && !isEnToCz) || !currentItem?.audio || audioError;
+  const shouldHideAudio = !revealed && !isEnToCz;
+  const audioUnavailable = !isAudioPlayable(currentItem?.audio, audioLoading, isAudioReady);
+  return shouldHideAudio || audioUnavailable;
 }
 
 function getCzechText(currentItem: UserItemLocal | null): string | undefined {
@@ -121,10 +125,17 @@ export function usePracticeCardState({
     stopAudio,
     audioError,
     loading: audioLoading,
+    isAudioReady,
     isPlaying,
   } = useAudioManager(currentItem?.audio ?? null);
 
-  const audioDisabled = isPracticeAudioDisabled(revealed, isEnToCz, currentItem, audioError);
+  const audioDisabled = isPracticeAudioDisabled(
+    revealed,
+    isEnToCz,
+    currentItem,
+    audioLoading,
+    isAudioReady,
+  );
   usePracticeAudioPhases({
     currentItem,
     isEnToCz,
