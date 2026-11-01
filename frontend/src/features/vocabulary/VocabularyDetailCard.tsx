@@ -136,7 +136,6 @@ function VocabularyPropertyList({
           className="grid grid-cols-2"
           classNameLabel={labelClassName}
           classNameValue={`min-w-0 break-words [overflow-wrap:anywhere] ${property.classNameValue ?? ''}`}
-          alignTop
         >
           {property.value ?? NOT_AVAILABLE}
         </PropertyView>

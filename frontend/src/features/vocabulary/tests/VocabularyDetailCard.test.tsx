@@ -100,8 +100,8 @@ vi.mock('@/components/UI/OverviewCard', () => ({
 }));
 
 vi.mock('@/components/UI/PropertyView', () => ({
-  default: ({ label, children, alignTop, classNameValue }: any) => (
-    <div data-testid={`property-${label}`} data-align-top={alignTop ? 'true' : 'false'} data-value-class={classNameValue}>
+  default: ({ label, children, classNameValue }: any) => (
+    <div data-testid={`property-${label}`} data-value-class={classNameValue}>
       {label}:{String(children)}
     </div>
   ),
@@ -170,7 +170,7 @@ describe('VocabularyDetailCard', () => {
     expect(resetButton.className).not.toContain('mx-4');
   });
 
-  it('top-aligns and wraps long vocabulary descriptions', () => {
+  it('wraps long vocabulary descriptions', () => {
     const longDescription = 'unbroken-description-'.repeat(10);
     render(
       <VocabularyDetailCard
@@ -181,7 +181,6 @@ describe('VocabularyDetailCard', () => {
     );
 
     const description = screen.getByTestId('property-czech description');
-    expect(description.dataset.alignTop).toBe('true');
     expect(description.dataset.valueClass).toContain('break-words');
     expect(description.dataset.valueClass).toContain('[overflow-wrap:anywhere]');
   });
