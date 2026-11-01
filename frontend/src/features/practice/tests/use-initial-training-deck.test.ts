@@ -36,7 +36,7 @@ vi.mock('@/database/models/user-items', () => ({
     applyPracticeProgress: (...args: unknown[]) => mocks.applyPracticeProgress(...args),
   },
 }));
-vi.mock('@/database/utils/practice-content.utils', () => ({
+vi.mock('@/database/practice/practice-content', () => ({
   resolvePracticeEntries: vi.fn(),
   resolvePracticeGrammarContext: vi.fn(),
 }));

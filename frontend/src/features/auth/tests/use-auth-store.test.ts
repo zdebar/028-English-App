@@ -31,7 +31,7 @@ vi.mock('@/config/supabase.config', () => ({
   },
 }));
 
-vi.mock('@/database/utils/data-sync.utils', () => ({
+vi.mock('@/database/sync/data-sync', () => ({
   dataSyncBeforeSessionEnd: (...args: unknown[]) => mocks.dataSyncBeforeSessionEnd(...args),
 }));
 

@@ -3,7 +3,7 @@ import { SupabaseError } from '@/types/error.types';
 
 const mocks = vi.hoisted(() => ({ getSession: vi.fn(), refreshSession: vi.fn() }));
 vi.mock('@/config/supabase.config', () => ({ supabaseInstance: { auth: mocks } }));
-import { settleSyncWithAuthRecovery } from '../utils/sync-auth-recovery.utils';
+import { settleSyncWithAuthRecovery } from '../sync/auth-recovery';
 
 const jwtError = new SupabaseError('Table sync failed', Object.assign(
   new Error('JWT issued at future'), { code: 'PGRST303' },

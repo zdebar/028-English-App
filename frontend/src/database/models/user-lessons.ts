@@ -1,7 +1,7 @@
 import { supabaseInstance } from '@/config/supabase.config';
 import SyncMetadata from '@/database/models/metadata';
 import { db } from '@/database/models/db';
-import { getSyncTimestamps } from '@/database/utils/sync-generic.utils';
+import { getSyncTimestamps } from '@/database/sync/sync-helpers';
 import type { UserLessonType } from '@/types/generic.types';
 import { SupabaseError } from '@/types/error.types';
 import { TableName } from '@/types/table.types';

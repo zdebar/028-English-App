@@ -3,7 +3,7 @@ import UserItem from '@/database/models/user-items';
 import {
   resolvePracticeEntries,
   resolvePracticeGrammarContext,
-} from '@/database/utils/practice-content.utils';
+} from '@/database/practice/practice-content';
 import type { GrammarChunkWithExamples } from '@/database/queries/grammar-queries';
 import type { LessonType } from '@/types/generic.types';
 import type { GroupType } from '@/types/table.types';

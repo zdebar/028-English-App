@@ -35,7 +35,7 @@ vi.mock('@/config/config', () => ({
   },
 }));
 
-vi.mock('@/database/utils/audio-records.utils', () => ({
+vi.mock('@/database/audio/audio-storage', () => ({
   downloadStorageObject: (...args: unknown[]) => mocks.downloadStorageObject(...args),
   fetchZipArchiveMetadata: (...args: unknown[]) => mocks.fetchZipArchiveMetadata(...args),
 }));

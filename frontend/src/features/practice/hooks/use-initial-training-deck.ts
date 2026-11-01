@@ -25,7 +25,7 @@ import type { InitialTrainingData } from '../initial-training-data';
 import {
   resolvePracticeEntries,
   resolvePracticeGrammarContext,
-} from '@/database/utils/practice-content.utils';
+} from '@/database/practice/practice-content';
 import {
   invalidateReviewArrays,
   rebuildReviewArrays,

@@ -31,7 +31,7 @@ import {
 import {
   loadReviewEntryDetails,
   type ReviewEntryDetails,
-} from '@/database/utils/practice-content.utils';
+} from '@/database/practice/practice-content';
 import { loadReviewDeckData, type ReviewDeckData } from '@/features/practice/review-deck-data';
 import type { PracticeDetail } from '../PracticeSessionCard';
 

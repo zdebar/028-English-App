@@ -1,6 +1,6 @@
 import { db } from '@/database/models/db';
 import UserItem from '@/database/models/user-items';
-import { isReviewItemDue } from '@/database/utils/review-items.utils';
+import { isReviewItemDue } from '@/database/practice/review-items';
 import type { ReviewDirection, ReviewKind } from '@/types/practice.types';
 import type { PracticeDeckEntry, UserItemLocal } from '@/types/user-item.types';
 import { getPrefetchedReviewItems } from './review-prefetch';

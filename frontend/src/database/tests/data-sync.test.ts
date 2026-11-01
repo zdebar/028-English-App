@@ -92,10 +92,10 @@ vi.mock('@/config/supabase.config', () => ({
   },
 }));
 
-import { dataSync, dataSyncBeforeSessionEnd } from '@/database/utils/data-sync.utils';
-import { splitDeleted } from '@/database/utils/sync-generic.utils';
+import { dataSync, dataSyncBeforeSessionEnd } from '@/database/sync/data-sync';
+import { splitDeleted } from '@/database/sync/sync-helpers';
 
-describe('data-sync.utils', () => {
+describe('data synchronization', () => {
   beforeEach(() => {
     vi.clearAllMocks();
 

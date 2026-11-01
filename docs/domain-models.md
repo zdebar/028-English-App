@@ -72,6 +72,11 @@ Feature query functions and feature-specific result types live in
 `frontend/src/database/queries`; they are separate from the IndexedDB model
 classes above. Grammar hierarchy queries share `grammar-queries.ts`.
 
+The remaining database code is grouped by responsibility: `sync` contains sync
+orchestration and shared sync helpers, `practice` contains user-item practice
+rules and practice data loading, and `audio` contains remote audio-storage
+access. Helpers used only by one model stay in that model's file.
+
 ## Active IndexedDB Tables And Indexes
 
 The current Dexie schema is version 15 in

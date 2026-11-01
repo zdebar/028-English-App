@@ -39,7 +39,7 @@ vi.mock('@/config/config', () => ({
   },
 }));
 
-vi.mock('@/database/utils/data-sync.utils', () => ({
+vi.mock('@/database/sync/data-sync', () => ({
   dataSync: (...args: unknown[]) => mocks.dataSync(...args),
   dataSyncBeforeSessionEnd: (...args: unknown[]) => mocks.dataSyncBeforeSessionEnd(...args),
 }));

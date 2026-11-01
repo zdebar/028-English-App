@@ -1,9 +1,13 @@
-import { describe, expect, it } from 'vitest';
-import { aggregateLevels } from '@/database/utils/levels.utils';
+import { afterEach, describe, expect, it, vi } from 'vitest';
+import {
+  aggregateLevels,
+  getLocalDateKeyFromUTC,
+  getTodayLocalDateKey,
+} from '@/database/models/levels';
 import type { LessonType, LevelType } from '@/types/generic.types';
 import type { UserItemLocal } from '@/types/user-item.types';
 
-describe('aggregateLevels', () => {
+describe('level overview aggregation', () => {
   it('aggregates initiated counts while excluding unstarted items from started counts', () => {
     const levels = [{ id: 1, name: 'A1', sort_order: 1 }] as LevelType[];
     const lessons = [{ id: 10, level_id: 1, name: 'Lesson 1', sort_order: 1 }] as LessonType[];
@@ -53,4 +57,19 @@ describe('aggregateLevels', () => {
     expect(result[0]).not.toHaveProperty('masteredCount');
     expect(result[0].lessons[0]).not.toHaveProperty('masteredTodayCount');
   });
+
+  it('returns the current local date key', () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-02-28T12:00:00.000Z'));
+
+    expect(getTodayLocalDateKey()).toBe('2026-02-28');
+  });
+
+  it('converts a timestamp to a local date key', () => {
+    expect(getLocalDateKeyFromUTC('2026-02-28T00:00:00.000Z')).toBe('2026-02-28');
+  });
+});
+
+afterEach(() => {
+  vi.useRealTimers();
 });

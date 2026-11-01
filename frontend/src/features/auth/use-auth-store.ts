@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import type { Session } from '@supabase/supabase-js';
 import { supabaseInstance } from '@/config/supabase.config';
-import { dataSyncBeforeSessionEnd } from '@/database/utils/data-sync.utils';
+import { dataSyncBeforeSessionEnd } from '@/database/sync/data-sync';
 import { reportError, reportInfo, setMonitoringUser } from '@/features/logging/monitoring-handler';
 import {
   clearAnonymousSessionFallback,

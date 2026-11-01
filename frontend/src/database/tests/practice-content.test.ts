@@ -63,7 +63,7 @@ import {
   loadReviewEntryDetails,
   resolvePracticeEntries,
   resolvePracticeGrammarContext,
-} from '@/database/utils/practice-content.utils';
+} from '@/database/practice/practice-content';
 import { loadReviewDeckData } from '@/features/practice/review-deck-data';
 import { clearReviewArrays } from '@/features/practice/review-prefetch';
 

@@ -1,7 +1,7 @@
 import { supabaseInstance } from '@/config/supabase.config';
 import { db } from '@/database/models/db';
 import SyncMetadata from '@/database/models/metadata';
-import { getSyncTimestamps, splitDeleted } from '@/database/utils/sync-generic.utils';
+import { getSyncTimestamps, splitDeleted } from '@/database/sync/sync-helpers';
 import config from '@/config/config';
 import { reportInfo } from '@/features/logging/monitoring-handler';
 import { SupabaseError } from '@/types/error.types';

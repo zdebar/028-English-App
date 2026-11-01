@@ -5,7 +5,7 @@ import { db } from '@/database/models/db';
 import {
   downloadStorageObject,
   fetchZipArchiveMetadata,
-} from '@/database/utils/audio-records.utils';
+} from '@/database/audio/audio-storage';
 import { withSettledSummary, type SyncSummary } from '@/features/logging/logging.utils';
 import { ZipExtractionError } from '@/types/error.types';
 import type { AudioRecordLocal } from '@/types/audio.types';

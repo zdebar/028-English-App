@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { UserItemLocal } from '@/types/user-item.types';
 import config from '@/config/config';
 
@@ -70,12 +70,12 @@ vi.mock('@/config/supabase.config', () => ({
 vi.mock('@/database/models/metadata', () => ({
   default: { markAsSynced: (...args: unknown[]) => mocks.markAsSynced(...args) },
 }));
-vi.mock('@/database/utils/sync-generic.utils', () => ({
+vi.mock('@/database/sync/sync-helpers', () => ({
   getSyncTimestamps: (...args: unknown[]) => mocks.getSyncTimestamps(...args),
   splitDeleted: (...args: unknown[]) => mocks.splitDeleted(...args),
 }));
 
-import UserItem from '@/database/models/user-items';
+import UserItem, { resetUserItem } from '@/database/models/user-items';
 
 function makeItem(overrides: Partial<UserItemLocal> = {}): UserItemLocal {
   return {
@@ -402,6 +402,59 @@ describe('UserItem', () => {
     expect(mocks.bulkPut).toHaveBeenCalledWith([expect.objectContaining({ item_id: 1 })]);
     expect(mocks.markAsSynced).not.toHaveBeenCalled();
   });
+});
+
+describe('resetUserItem', () => {
+  it('resets CZ-to-EN progress while preserving the start timestamp', () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-02-28T08:00:00.000Z'));
+    const item = makeItem({
+      progress_cz_to_en: 4,
+      started_at: 'started',
+      next_at_cz_to_en: 'old-next',
+      mastered_at_cz_to_en: 'old-mastered',
+      updated_at: 'old',
+    });
+
+    resetUserItem(item);
+
+    expect(item).toMatchObject({
+      progress_cz_to_en: 0,
+      started_at: 'started',
+      next_at_cz_to_en: '2026-02-28T08:00:00.000Z',
+      mastered_at_cz_to_en: NULL_DATE,
+      updated_at: '2026-02-28T08:00:00.000Z',
+    });
+  });
+
+  it('resets only EN-to-CZ progress', () => {
+    const item = makeItem({
+      progress_cz_to_en: 4,
+      next_at_cz_to_en: 'cz-next',
+      mastered_at_cz_to_en: 'cz-mastered',
+      progress_en_to_cz: 3,
+      next_at_en_to_cz: 'en-next',
+      mastered_at_en_to_cz: 'en-mastered',
+      updated_at: 'old',
+    });
+
+    resetUserItem(item, '2026-02-28T08:00:00.000Z', 'en_to_cz');
+
+    expect(item).toMatchObject({
+      progress_cz_to_en: 4,
+      next_at_cz_to_en: 'cz-next',
+      mastered_at_cz_to_en: 'cz-mastered',
+      progress_en_to_cz: 0,
+      next_at_en_to_cz: '2026-02-28T08:00:00.000Z',
+      mastered_at_en_to_cz: NULL_DATE,
+      started_at: '2026-01-01T00:00:00.000Z',
+      updated_at: '2026-02-28T08:00:00.000Z',
+    });
+  });
+});
+
+afterEach(() => {
+  vi.useRealTimers();
 });
 
 function toApiItem(item: UserItemLocal, overrides: Partial<UserItemLocal> = {}) {

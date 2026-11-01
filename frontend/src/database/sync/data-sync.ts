@@ -11,7 +11,7 @@ import { supabaseInstance } from '@/config/supabase.config';
 import { summarizeSettledResults } from '@/features/logging/logging.utils';
 import { reportInfo } from '@/features/logging/monitoring-handler';
 import { assertNonEmptyString } from '@/utils/assertions.utils';
-import { settleSyncWithAuthRecovery } from './sync-auth-recovery.utils';
+import { settleSyncWithAuthRecovery } from './auth-recovery';
 
 /**
  * Synchronizes shared and user-specific tables with Supabase.

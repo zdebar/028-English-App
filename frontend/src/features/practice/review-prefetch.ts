@@ -1,10 +1,10 @@
 import UserItem from '@/database/models/user-items';
-import { compareCurriculumPaths } from '@/database/utils/user-item-practice.utils';
+import { compareCurriculumPaths } from '@/database/practice/user-item-practice';
 import {
   isReviewItemCandidate,
   isReviewItemFuture,
   isReviewItemReadyAt,
-} from '@/database/utils/review-items.utils';
+} from '@/database/practice/review-items';
 import config from '@/config/config';
 import type { ReviewDirection, ReviewKind } from '@/types/practice.types';
 import type { PracticeDeckItem } from '@/types/user-item.types';

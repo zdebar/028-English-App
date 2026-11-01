@@ -12,8 +12,7 @@ import type {
 import type { ReviewDirection, ReviewKind } from '@/types/practice.types';
 import Dexie, { Entity } from 'dexie';
 
-import { resetUserItem } from '@/database/utils/user-items.utils';
-import { isReviewItemCandidate, isReviewItemDue } from '@/database/utils/review-items.utils';
+import { isReviewItemCandidate, isReviewItemDue } from '@/database/practice/review-items';
 import {
   applyPracticeProgress as applyUserItemPracticeProgress,
   compareCurriculumPaths,
@@ -25,9 +24,9 @@ import {
   getReadyAt,
   isInitialTrainingSkipped,
   isReviewDirectionEnabled,
-} from '@/database/utils/user-item-practice.utils';
+} from '@/database/practice/user-item-practice';
 import type { ReadyPracticeState } from '@/types/generic.types';
-import { syncUserItemsFromRemote } from '@/database/utils/sync-user-items';
+import { syncUserItemsFromRemote } from '@/database/sync/user-items-sync';
 import { assertNonEmptyString } from '@/utils/assertions.utils';
 import { isInitiated } from '@/utils/progress.utils';
 
@@ -549,4 +548,23 @@ async function resetItems(items: UserItemLocal[], dateTime: string, direction: R
     await db.user_items.bulkPut(updatedItems);
     return updatedItems.length;
   });
+}
+
+/** Resets one item's progress in the selected review direction. */
+export function resetUserItem(
+  item: UserItemLocal,
+  dateTime: string = new Date().toISOString(),
+  direction: ReviewDirection = 'cz_to_en',
+): void {
+  if (direction === 'en_to_cz') {
+    item.next_at_en_to_cz = dateTime;
+    item.mastered_at_en_to_cz = NULL_DATE;
+    item.updated_at = dateTime;
+    item.progress_en_to_cz = 0;
+    return;
+  }
+  item.next_at_cz_to_en = dateTime;
+  item.mastered_at_cz_to_en = NULL_DATE;
+  item.updated_at = dateTime;
+  item.progress_cz_to_en = 0;
 }

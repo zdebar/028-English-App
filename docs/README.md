@@ -26,7 +26,7 @@ behavior and point to the code that owns it.
 | Debug authentication or account actions | [features.md](features.md) | `frontend/src/features/auth` |
 | Change Home practice availability | [home-readiness.md](home-readiness.md) | `frontend/src/features/practice/PracticeButton.tsx` |
 | Change review or initial training | [practice-flows.md](practice-flows.md) | `frontend/src/features/practice` |
-| Debug synchronization | [data-and-sync.md](data-and-sync.md) | `frontend/src/database/utils/data-sync.utils.ts` |
+| Debug synchronization | [data-and-sync.md](data-and-sync.md) | `frontend/src/database/sync/data-sync.ts` |
 | Change database entities or query indexes | [domain-models.md](domain-models.md) | `frontend/src/database/models/app-db.ts` |
 | Debug reactive query refresh | [state-and-events.md](state-and-events.md) | `frontend/src/hooks/shared-query-store.ts` |
 | Change overview pages | [features.md](features.md) | `frontend/src/features/{topics,grammar,vocabulary,sounds,pronunciation}` |

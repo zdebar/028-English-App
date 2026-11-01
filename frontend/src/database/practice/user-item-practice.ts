@@ -1,14 +1,23 @@
 import config from '@/config/config';
 import type { ReviewDirection, ReviewKind } from '@/types/practice.types';
 import type { CurriculumSortPath, PracticeOutcome, UserItemLocal } from '@/types/user-item.types';
-import { getNextAt } from './user-items.utils';
 import {
   isReviewItemCandidate,
   isReviewItemFuture,
   isReviewItemReadyAt,
-} from './review-items.utils';
+} from './review-items';
 
 const NULL_DATE = config.database.nullReplacementDate;
+
+/** Calculates the next SRS review timestamp for a progress level. */
+export function getNextAt(progress: number): string {
+  const interval = config.srs.intervals[progress];
+  if (interval == null) return NULL_DATE;
+
+  const randomFactor = 1 + config.srs.randomness * (getRandomUnitInterval() * 2 - 1);
+  const randomizedInterval = Math.round(interval * randomFactor);
+  return new Date(Date.now() + randomizedInterval * 1000).toISOString();
+}
 
 export function isReviewDirectionEnabled(item: UserItemLocal, direction: ReviewDirection): boolean {
   if (direction === 'cz_to_en') return item.is_cz_to_en_enabled;
@@ -213,4 +222,10 @@ function isReviewKind(
   reviewKind: ReviewKind,
 ): boolean {
   return reviewKind === 'vocabulary' ? item.is_vocabulary === 1 : item.is_vocabulary === 0;
+}
+
+function getRandomUnitInterval(): number {
+  const randomValues = new Uint32Array(1);
+  globalThis.crypto.getRandomValues(randomValues);
+  return randomValues[0] / 2 ** 32;
 }

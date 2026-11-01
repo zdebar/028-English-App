@@ -57,7 +57,7 @@ vi.mock('@/database/models/user-items', () => ({
   },
 }));
 
-vi.mock('@/database/utils/practice-content.utils', () => ({
+vi.mock('@/database/practice/practice-content', () => ({
   loadReviewEntryDetails: (...args: unknown[]) => mocks.loadReviewEntryDetails(...args),
 }));
 

@@ -18,7 +18,7 @@ vi.mock('@/database/models/user-items', () => ({
 vi.mock('@/database/models/lessons', () => ({
   default: { getById: (...args: unknown[]) => mocks.getLesson(...args) },
 }));
-vi.mock('@/database/utils/practice-content.utils', () => ({
+vi.mock('@/database/practice/practice-content', () => ({
   resolvePracticeEntries: (...args: unknown[]) => mocks.resolveEntries(...args),
   resolvePracticeGrammarContext: (...args: unknown[]) => mocks.resolveGrammarContext(...args),
 }));
