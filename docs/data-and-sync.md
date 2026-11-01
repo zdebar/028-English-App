@@ -18,23 +18,22 @@ App works as PWA applicatin with frontend data storage inside IndexedDB. Backend
 
 ## Sync Lifecycle
 
-`frontend/src/database/utils/data-sync.utils.ts` synchronizes groups, group items,
-group relations, levels, lessons, notes, user items, user lessons, and user
-settings. The shared table models pull rows whose `updated_at` is newer than the
-local sync cursor. They apply soft-deleted content as local deletes.
+`frontend/src/database/utils/data-sync.utils.ts` synchronizes `groups`,
+`group-items`, `group-relations`, `levels`, `lessons`, `notes`, `user-items`, and
+`user-lessons`. The shared table models pull rows whose `updated_at` is newer than
+the local sync cursor. They apply soft-deleted content as local deletes.
 
 User-item sync exports local rows within the incremental sync window to the
 `upsert_fetch_user_items` RPC. The RPC upserts progress and returns current item
 content with user progress. The model merges those results into IndexedDB while
-preserving concurrent local edits. User-lesson sync merges start records; user
-settings use their own timestamp comparison.
+preserving concurrent local edits. User-lesson sync merges start records.
 
 | Moment | Owner | Behavior |
 | --- | --- | --- |
 | User becomes active | `usePeriodicSync` | Warms practice and overview caches and schedules the first sync after three seconds. |
 | Periodic interval | `usePeriodicSync` | Runs `dataSync`; the default interval is one day. |
 | Full sync due | `dataSync` | Uses the per-user localStorage timestamp; the default interval is seven days. |
-| App unmount or logout | `dataSyncOnUnmount` / `handleLogout` | Best-effort incremental sync of user items, lesson starts, and user settings when a session exists. |
+| App unmount or logout | `dataSyncOnUnmount` / `handleLogout` | Best-effort incremental sync of user items and lesson starts when a session exists. |
 | Profile full-sync action | `Profile` | Forces a full data sync, refreshes audio archives, and removes orphaned local audio. |
 
 Overlapping periodic syncs reuse the current promise. A completed data sync
@@ -59,8 +58,7 @@ throttle timestamp is stored under `last-full-sync-at_${userId}` in localStorage
 | Storage | Key/data | Purpose |
 | --- | --- | --- |
 | IndexedDB `user_items` | Item content plus per-user progress locally | Practice, review scheduling, and incremental sync. |
-| IndexedDB `user_lessons` | User, lesson, and start timestamp | Lesson continuation and daily new-lesson limit. |
-| IndexedDB `users` | User ID and `max_new_lessons_per_day` | Per-user training limit. |
+| IndexedDB `user_lessons` | User, lesson, and start timestamp | Lesson start status and continuation. |
 | IndexedDB `metadata` | Table name, optional user ID, sync timestamp | Incremental sync cursors. |
 | IndexedDB `audio_records`, `audio_metadata` | Audio blobs and archive timestamps | Offline audio playback and archive refresh. |
 | localStorage | `theme_${userId}`, `theme_guest`, `theme_active` | Theme preference and pre-paint theme. |

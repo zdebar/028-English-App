@@ -39,9 +39,6 @@ async function loadInitialTrainingData(userId: string): Promise<InitialTrainingD
   if (!continuingLesson && await shouldBlockInitialTraining(userId)) {
     return emptyInitialTrainingData();
   }
-  if (!(await UserLesson.canStartToday(userId, prepared.lesson.id))) {
-    return emptyInitialTrainingData();
-  }
   return prepared;
 }
 

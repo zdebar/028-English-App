@@ -18,7 +18,6 @@ vi.mock('@/locales/cs', () => ({
     loadingError: 'Loading error',
     noActivePronunciationGroups: 'No pronunciation comparisons unlocked',
     nothingToPractice: 'Nothing to practice',
-    dailyNewLessonLimitReached: 'Daily lesson limit reached',
   },
 }));
 vi.mock('@/features/auth/use-auth-store', () => ({
@@ -66,7 +65,6 @@ describe('Home practice buttons', () => {
       nextReviewAt: null,
       initialTrainingAvailable: true,
       continuingInitialLessonToday: false,
-      dailyNewLessonLimitReached: false,
       practiceLoading: false,
       practiceError: null,
     });
@@ -196,17 +194,6 @@ describe('Home practice buttons', () => {
     expect(newButton.className).not.toContain('preserve-disabled-text-color');
   });
 
-  it('disables new when the daily lesson limit is reached', () => {
-    usePracticeAvailabilityStore.setState({
-      grammarReviewReadyAt: null,
-      vocabularyReviewReadyAt: null,
-      dailyNewLessonLimitReached: true,
-    });
-    render(<PracticeButtons />);
-    expect(button('Grammar review').disabled).toBe(true);
-    expect(button('Vocabulary review').disabled).toBe(true);
-    expect(button('New').disabled).toBe(true);
-  });
 });
 
 function button(name: string): HTMLButtonElement {

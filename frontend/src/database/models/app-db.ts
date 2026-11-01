@@ -8,7 +8,6 @@ import type Lessons from '@/database/models/lessons';
 import type Levels from '@/database/models/levels';
 import type Notes from '@/database/models/notes';
 import type UserLesson from '@/database/models/user-lessons';
-import type UserSettings from '@/database/models/user-settings';
 import type { GroupType, GroupItemType, GroupRelationType } from '@/types/table.types';
 
 const USER_ITEMS_SCHEMA =
@@ -34,7 +33,6 @@ export default class AppDB extends Dexie {
   audio_metadata!: EntityTable<AudioMetadata, 'archive_name'>;
   metadata!: EntityTable<Metadata, any>;
   user_lessons!: EntityTable<UserLesson, any>;
-  users!: EntityTable<UserSettings, 'id'>;
   groups!: EntityTable<GroupType, 'id'>;
   group_items!: EntityTable<GroupItemType, 'id'>;
   group_relations!: EntityTable<GroupRelationType, 'id'>;
@@ -189,5 +187,10 @@ export default class AppDB extends Dexie {
           delete (lesson as Record<string, unknown>).grammar_chunk_id;
         });
       });
+
+    this.version(14).stores({ users: null });
+    this.version(15).stores({
+      user_lessons: '[user_id+lesson_id+started_at]',
+    });
   }
 }

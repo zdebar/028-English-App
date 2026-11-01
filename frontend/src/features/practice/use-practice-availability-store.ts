@@ -10,9 +10,6 @@ type PracticeAvailabilityValues = Pick<
   | 'nextReviewAt'
   | 'initialTrainingAvailable'
   | 'continuingInitialLessonToday'
-  | 'dailyNewLessonLimitReached'
-  | 'newLessonsStartedTodayCount'
-  | 'maxNewLessonsPerDay'
 >;
 
 type ReviewAvailabilityValues = Pick<
@@ -33,15 +30,11 @@ export type PracticeAvailabilityState = {
   nextReviewAt: string | null;
   initialTrainingAvailable: boolean;
   continuingInitialLessonToday: boolean;
-  dailyNewLessonLimitReached: boolean;
-  newLessonsStartedTodayCount: number;
-  maxNewLessonsPerDay: number;
   practiceLoading: boolean;
   practiceError: Error | null;
   setLoading: (userId: string) => void;
   setSnapshot: (userId: string, values: PracticeAvailabilityValues) => void;
   setReviewSnapshot: (userId: string, values: ReviewAvailabilityValues) => void;
-  setMaxNewLessonsPerDay: (limit: number) => void;
   setError: (userId: string, error: Error) => void;
   reset: () => void;
 };
@@ -55,9 +48,6 @@ const EMPTY_AVAILABILITY = {
   nextReviewAt: null,
   initialTrainingAvailable: false,
   continuingInitialLessonToday: false,
-  dailyNewLessonLimitReached: false,
-  newLessonsStartedTodayCount: 0,
-  maxNewLessonsPerDay: 1,
   practiceLoading: true,
   practiceError: null,
 };
@@ -75,9 +65,6 @@ export const usePracticeAvailabilityStore = create<PracticeAvailabilityState>((s
       nextReviewAt: null,
       initialTrainingAvailable: false,
       continuingInitialLessonToday: false,
-      dailyNewLessonLimitReached: false,
-      newLessonsStartedTodayCount: 0,
-      maxNewLessonsPerDay: 1,
       practiceLoading: true,
       practiceError: null,
     }),
@@ -91,9 +78,6 @@ export const usePracticeAvailabilityStore = create<PracticeAvailabilityState>((s
       nextReviewAt: values.nextReviewAt,
       initialTrainingAvailable: values.initialTrainingAvailable,
       continuingInitialLessonToday: values.continuingInitialLessonToday,
-      dailyNewLessonLimitReached: values.dailyNewLessonLimitReached,
-      newLessonsStartedTodayCount: values.newLessonsStartedTodayCount,
-      maxNewLessonsPerDay: values.maxNewLessonsPerDay,
       practiceLoading: false,
       practiceError: null,
     }),
@@ -102,12 +86,6 @@ export const usePracticeAvailabilityStore = create<PracticeAvailabilityState>((s
       if (state.availabilityUserId !== userId) return state;
       return values;
     }),
-  setMaxNewLessonsPerDay: (limit) =>
-    set((state) => ({
-      maxNewLessonsPerDay: limit,
-      dailyNewLessonLimitReached:
-        state.newLessonsStartedTodayCount >= limit && !state.continuingInitialLessonToday,
-    })),
   setError: (userId, error) =>
     set({
       availabilityUserId: userId,
@@ -118,9 +96,6 @@ export const usePracticeAvailabilityStore = create<PracticeAvailabilityState>((s
       nextReviewAt: null,
       initialTrainingAvailable: false,
       continuingInitialLessonToday: false,
-      dailyNewLessonLimitReached: false,
-      newLessonsStartedTodayCount: 0,
-      maxNewLessonsPerDay: 1,
       practiceLoading: false,
       practiceError: error,
     }),

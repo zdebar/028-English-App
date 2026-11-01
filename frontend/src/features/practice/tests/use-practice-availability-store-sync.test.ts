@@ -33,9 +33,6 @@ const snapshot: import('../practice-availability').PracticeAvailabilitySnapshot 
   nextReviewAt: '2026-07-21T10:00:00.000Z',
   initialTrainingAvailable: true,
   continuingInitialLessonToday: false,
-  dailyNewLessonLimitReached: false,
-  newLessonsStartedTodayCount: 0,
-  maxNewLessonsPerDay: 1,
 };
 
 function deferred<T>() {

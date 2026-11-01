@@ -9,7 +9,6 @@ const mocks = vi.hoisted(() => ({
   saveCurrentThemeAsGuest: vi.fn(),
   deleteAllByUserId: vi.fn(),
   deleteUserLessons: vi.fn(),
-  deleteUserSettings: vi.fn(),
   deleteSyncRow: vi.fn(),
   clearSyncTimes: vi.fn(),
   rpc: vi.fn(),
@@ -60,9 +59,6 @@ vi.mock('@/database/models/metadata', () => ({
 
 vi.mock('@/database/models/user-lessons', () => ({
   default: { removeByUserId: (...args: unknown[]) => mocks.deleteUserLessons(...args) },
-}));
-vi.mock('@/database/models/user-settings', () => ({
-  default: { removeLocal: (...args: unknown[]) => mocks.deleteUserSettings(...args) },
 }));
 
 vi.mock('@/database/utils/sync-time.utils', () => ({

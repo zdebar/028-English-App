@@ -10,7 +10,7 @@ synchronization.
 | --- | --- | --- |
 | `public` shared content | `levels`, `lessons`, `items`, `notes` | Ordered course content, practice items, and supporting notes. |
 | `public` group catalog | `groups`, `group_items`, `group_relations` | Topics, grammar, sounds, pronunciation groups, their item examples, and relationships. |
-| `public` user data | `users`, `user_lessons`, `user_items` | User settings, lesson starts, and per-item progress. |
+| `public` user data | `users`, `user_lessons`, `user_items` | User identity rows, lesson starts, and per-item progress. |
 | `private` | `private.settings` | Operational settings used by database functions. |
 
 The active schema is defined in `supabase/schemas/00_tables.sql`. Older names such
@@ -64,17 +64,16 @@ mastered). Lesson-start state in the Home dashboard comes from `user_lessons`.
 | --- | --- |
 | `Levels`, `Lessons`, `Notes`, `Groups`, `GroupItem`, `GroupRelation` | Read and synchronize shared catalog data. |
 | `UserItem` | Local user progress, review selection, initial-training selection, resets, and item sync. |
-| `UserLesson` | Record and synchronize lesson starts; enforce the daily new-lesson limit. |
-| `UserSettings` | Read and synchronize `users.max_new_lessons_per_day`. |
+| `UserLesson` | Record and synchronize lesson starts. |
 | `AudioRecord`, `AudioMetadata` | Track local audio records and archive metadata. |
 | `Metadata` | Store local per-table, per-user sync metadata. |
 | `Topic`, `GrammarTopic`, `GrammarGroup`, `GrammarChunk`, `SoundGroup`, `PronunciationGroup` | Feature query helpers backed by the unified group tables. |
 
 ## Active IndexedDB Tables And Indexes
 
-The current Dexie schema is version 13 in
+The current Dexie schema is version 15 in
 `frontend/src/database/models/app-db.ts`. Its active tables are `levels`,
-`lessons`, `notes`, `user_items`, `user_lessons`, `users`, `groups`,
+`lessons`, `notes`, `user_items`, `user_lessons`, `groups`,
 `group_items`, `group_relations`, `audio_records`, `audio_metadata`, and
 `metadata`. Upgrades remove legacy block, topic, grammar, pronunciation, score,
 history, and practice-session stores.
@@ -91,5 +90,5 @@ Key indexes on `user_items`:
 | `[user_id+next_at_cz_to_en+mastered_at_cz_to_en+curriculum_sort_path]` | Czech-to-English review selection and order. |
 | `[user_id+next_at_en_to_cz+mastered_at_en_to_cz+curriculum_sort_path]` | English-to-Czech review selection and order. |
 
-`user_lessons` uses `[user_id+lesson_id+started_at]` and
-`[user_id+started_at]` to check lesson continuation and daily starts.
+`user_lessons` uses `[user_id+lesson_id+started_at]` to check lesson continuation
+and show started lessons.

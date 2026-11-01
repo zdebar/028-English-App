@@ -11,7 +11,6 @@ export const HOME_TEXTS = {
   grammarReviewButton: 'Opakování gramatiky',
   vocabularyReviewButton: 'Opakování slovíček',
   newButton: 'Další lekce',
-  dailyNewLessonLimitReached: 'Denní limit nových lekcí byl dosažen. Změňte jej v Profilu.',
 
   // User
   authInitErrorToast: 'Nastala chyba při přihlašování.',

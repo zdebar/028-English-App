@@ -18,7 +18,7 @@ sources. Start here when a change crosses a route, model, store, or sync boundar
 | Session initialization | `startAuthLifecycle`, `useAuthStore` | Restores and validates the Supabase session, handles OAuth callbacks, and keeps auth state current. |
 | Anonymous sign-in | `AnonymousSigninButton`, `anonymous-auth-service` | Creates a guest account for trying the app. |
 | Google sign-in and conversion | `GoogleAuthButton`, `ConvertAnonymousUserButton`, `anonymous-session-fallback` | Signs in or links a guest account. A short-lived sessionStorage fallback supports OAuth recovery and identity-link conflict handling. |
-| Profile | `/profile`, `Profile` | Shows the account name/email, offers full sync and sign-out/delete actions, and saves `max_new_lessons_per_day`. |
+| Profile | `/profile`, `Profile` | Shows the account name/email and offers full sync and sign-out/delete actions. |
 | Account deletion | `DeleteUserButton`, `useAuthStore`, `hard_delete_user` RPC | Permanently deletes the authenticated Supabase user and their linked data after confirmation. |
 
 ## Home
@@ -37,7 +37,7 @@ sources. Start here when a change crosses a route, model, store, or sync boundar
 | --- | --- | --- | --- |
 | Grammar review | `/practice`, `/practice/grammar`, `PracticeCard`, `usePracticeDeck` | `UserItem`, review arrays | Selects due grammar items in an enabled review direction; saves each answer locally before advancing. |
 | Vocabulary review | `/practice/vocabulary`, `PracticeCard`, `usePracticeDeck` | `UserItem`, review arrays | Selects due vocabulary items and uses the same per-answer save path. |
-| Initial training | `/practice/initial-training`, `InitialTrainingPractice`, `useInitialTrainingDeck` | `UserItem`, `UserLesson`, `Groups` | Trains eligible unstarted items from the next lesson and records the lesson start under the user's daily limit. |
+| Initial training | `/practice/initial-training`, `InitialTrainingPractice`, `useInitialTrainingDeck` | `UserItem`, `UserLesson`, `Groups` | Trains eligible unstarted items from the next lesson and records the lesson start. |
 | Practice details | `PracticeSessionCard`, `GrammarDetailCard`, `VocabularyDetailCard` | `notes`, `groups`, `group_items`, audio store | Shows available grammar/note details and audio alongside a practice item. |
 
 See [practice-flows.md](practice-flows.md) for queue and answer behavior.
@@ -64,7 +64,7 @@ do not correspond to separate current content tables.
 | Local-first data | Dexie models under `frontend/src/database/models` | Practice and overview features read local content and user records. User progress writes land in IndexedDB first. |
 | Periodic sync | `usePeriodicSync`, `dataSync` | Pushes local user changes, pulls shared/user updates, refreshes practice availability, and then syncs audio archives. |
 | Full sync | `Profile`, `dataSync(userId, true)` | Reconciles local and remote records and refreshes the audio archive cache. |
-| Logout/unmount sync | `handleLogout`, `dataSyncOnUnmount` | Attempts an incremental sync of user items, lesson starts, and user settings when a valid session exists. |
+| Logout/unmount sync | `handleLogout`, `dataSyncOnUnmount` | Attempts an incremental sync of user items and lesson starts when a valid session exists. |
 | Audio | `useAudioManager`, `AudioRecord`, `AudioMetadata` | Downloads audio from Supabase Storage on demand, caches blobs in IndexedDB, and refreshes changed archives. |
 
 See [data-and-sync.md](data-and-sync.md) for cursors, storage keys, and merge

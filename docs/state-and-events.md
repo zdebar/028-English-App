@@ -10,7 +10,7 @@ derived views current after transactions that touch their source tables.
 | --- | --- | --- | --- |
 | `useAuthStore` | `features/auth` | Current user, email/name, anonymous state, auth loading, identity-link conflict | Initialized by the auth lifecycle; cleared on sign-out or invalid session. |
 | `useSyncStore` | `features/synchronization` | Sync status and errors | Updated by periodic, full, and unmount sync flows; reset when there is no active user. |
-| `usePracticeAvailabilityStore` | `features/practice` | Grammar/vocabulary due counts, next review time, next lesson availability, daily lesson limit | Rebuilt by the availability controller after sign-in, sync, reset, practice, focus, or visibility changes. |
+| `usePracticeAvailabilityStore` | `features/practice` | Grammar/vocabulary due counts, next review time, and next lesson availability | Rebuilt by the availability controller after sign-in, sync, reset, practice, focus, or visibility changes. |
 | `useUserStore` | `features/user-stats` | Level and lesson overview snapshot | Filled from an observed IndexedDB query and cleared on sign-out. It does not hold daily score records. |
 | `usePronunciationGroupsStore` | `features/pronunciation` | Pronunciation group overview, loading, and error state | Loaded from the local unified group model when the overview is mounted. |
 | `useAudioStore` | `features/audio` | Active user and volume | Initialized from `volume-${userId}` in localStorage. |

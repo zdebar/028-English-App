@@ -3,9 +3,7 @@ import DeleteUserButton from '@/features/auth/DeleteUserButton';
 import SignoutButton from '@/features/auth/SignoutButton';
 import { useAuthStore } from '@/features/auth/use-auth-store';
 import { TEXTS } from '@/locales/cs';
-import { useEffect, useState, type ChangeEvent, type JSX, type KeyboardEvent } from 'react';
-import UserSettings from '@/database/models/user-settings';
-import { usePracticeAvailabilityStore } from '@/features/practice/use-practice-availability-store';
+import { type JSX } from 'react';
 import { refreshPracticeAvailability } from '@/features/practice/practice-availability-controller';
 import { reportError } from '@/features/logging/monitoring-handler';
 import { useToastStore } from '@/features/toast/use-toast-store';
@@ -27,13 +25,6 @@ export default function Profile(): JSX.Element {
   const userEmail = useAuthStore((state) => state.userEmail);
   const userFullName = useAuthStore((state) => state.userFullName);
   const userId = useAuthStore((state) => state.userId);
-  const maxNewLessonsPerDay = usePracticeAvailabilityStore(
-    (state) => state.maxNewLessonsPerDay,
-  );
-  const [dailyLimit, setDailyLimit] = useState(String(maxNewLessonsPerDay));
-  const setMaxNewLessonsPerDay = usePracticeAvailabilityStore(
-    (state) => state.setMaxNewLessonsPerDay,
-  );
   const showToast = useToastStore((state) => state.showToast);
   const isSynchronizing = useSyncStore((state) => state.isSynchronizing);
   const setManualSyncing = useSyncStore((state) => state.setManualSyncing);
@@ -78,41 +69,6 @@ export default function Profile(): JSX.Element {
     }
   };
 
-  useEffect(() => {
-    setDailyLimit(String(maxNewLessonsPerDay));
-  }, [maxNewLessonsPerDay]);
-
-  const handleDailyLimitChange = (event: ChangeEvent<HTMLInputElement>) => {
-    setDailyLimit(event.currentTarget.value);
-  };
-
-  const saveDailyLimit = () => {
-    const limit = Number(dailyLimit);
-    if (!userId || !Number.isInteger(limit) || limit < 1) {
-      setDailyLimit(String(maxNewLessonsPerDay));
-      return;
-    }
-    if (limit === maxNewLessonsPerDay) return;
-
-    setMaxNewLessonsPerDay(limit);
-    void UserSettings.updateDailyNewLessonLimit(userId, limit)
-      .then(() => refreshPracticeAvailability(userId))
-      .catch((error: unknown) => {
-        setMaxNewLessonsPerDay(maxNewLessonsPerDay);
-        setDailyLimit(String(maxNewLessonsPerDay));
-        reportError('Failed to save daily new lesson limit', error);
-        showToast(TEXTS.syncErrorToast, 'error');
-      });
-  };
-
-  const handleDailyLimitBlur = () => {
-    saveDailyLimit();
-  };
-
-  const handleDailyLimitKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
-    if (event.key === 'Enter') event.currentTarget.blur();
-  };
-
   return (
     <div className="card-width grow-0 gap-1">
       <div className="mx-auto mt-4 mb-4 w-64 text-left">
@@ -145,25 +101,6 @@ export default function Profile(): JSX.Element {
       </StyledButton>
       <SignoutButton />
       <DeleteUserButton />
-      <div className="mx-auto mt-4 w-64 text-left">
-        <div className="flex items-center gap-1">
-          <label htmlFor="daily-new-lesson-limit" className="w-46 shrink-0 font-bold">
-            {TEXTS.profileDailyNewLessonLimit}
-          </label>
-          <input
-            id="daily-new-lesson-limit"
-            type="number"
-            min={1}
-            step={1}
-            value={dailyLimit}
-            onChange={handleDailyLimitChange}
-            onBlur={handleDailyLimitBlur}
-            onKeyDown={handleDailyLimitKeyDown}
-            title={TEXTS.profileDailyNewLessonLimitHint}
-            className="h-input color-base min-w-0 grow border border-dashed px-4 text-right focus:outline-none"
-          />
-        </div>
-      </div>
     </div>
   );
 }

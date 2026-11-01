@@ -31,10 +31,9 @@ Route: `/practice/initial-training`, opened by the Home “New” button.
 
 The first eligible unstarted item is selected in curriculum order. Training then
 includes all eligible unstarted items from that item's lesson. A lesson cannot be
-started while either review category has reached its configured review limit or
-the user's daily new-lesson limit has been reached. A lesson already started that
-day can be continued. The route rechecks eligibility and records the lesson start
-in `user_lessons` before showing training.
+started while either review category has reached its configured review limit. A
+lesson already started that day can be continued. The route rechecks eligibility
+and records the lesson start in `user_lessons` before showing training.
 
 The introduction shows the lesson and its items before the first prompt. A correct
 answer advances to the next item. An incorrect answer adds that item to the retry

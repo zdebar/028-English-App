@@ -7,7 +7,6 @@ import Metadata from '@/database/models/metadata';
 import UserItem from '@/database/models/user-items';
 import Notes from './notes';
 import UserLesson from './user-lessons';
-import UserSettings from './user-settings';
 import Groups from './groups';
 import GroupItem from './group-items';
 import GroupRelation from './group-relations';
@@ -25,7 +24,6 @@ export function initDbMappings(): void {
   db.audio_metadata.mapToClass(AudioMetadata);
   db.metadata.mapToClass(Metadata);
   db.user_lessons.mapToClass(UserLesson);
-  db.users.mapToClass(UserSettings);
   db.groups.mapToClass(Groups);
   db.group_items.mapToClass(GroupItem);
   db.group_relations.mapToClass(GroupRelation);

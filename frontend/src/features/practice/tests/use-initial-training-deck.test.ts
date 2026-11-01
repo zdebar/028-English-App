@@ -26,7 +26,7 @@ vi.mock('@/config/config', () => ({
   },
 }));
 vi.mock('@/database/models/user-lessons', () => ({
-  default: { startIfAllowed: (...args: unknown[]) => mocks.startLesson(...args) },
+  default: { startIfEligible: (...args: unknown[]) => mocks.startLesson(...args) },
 }));
 vi.mock('@/database/models/lessons', () => ({ default: { getById: vi.fn() } }));
 vi.mock('@/database/models/user-items', () => ({

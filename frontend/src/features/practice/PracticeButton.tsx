@@ -75,13 +75,10 @@ function selectNewDisabled(state: PracticeAvailabilityState): boolean {
   if (state.practiceLoading || state.practiceError) return true;
   if (!selectNewAvailable(state)) return true;
   if (state.continuingInitialLessonToday) return false;
-  return hasReachedReviewLimit(state) || state.dailyNewLessonLimitReached;
+  return hasReachedReviewLimit(state);
 }
 
 function selectNewTitle(state: PracticeAvailabilityState): string | undefined {
-  if (state.dailyNewLessonLimitReached && !state.continuingInitialLessonToday) {
-    return TEXTS.dailyNewLessonLimitReached;
-  }
   return resolveButtonTitle(
     state.practiceLoading,
     state.practiceError,

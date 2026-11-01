@@ -174,7 +174,7 @@ async function loadInitialTrainingData(
   const entries = await resolveTrainingEntries(userId, initialData, items);
   const grammarContext = await resolveTrainingGrammarContext(userId, initialData, lesson);
   const lessonGroup = lesson.group_id == null ? null : await Groups.getById(lesson.group_id);
-  const didStart = await UserLesson.startIfAllowed(
+  const didStart = await UserLesson.startIfEligible(
     userId,
     lesson.id,
     items.map((item) => item.item_id),
