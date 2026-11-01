@@ -3,7 +3,7 @@ import {
   getGrammarChunkWithExamples,
   type GrammarChunkWithExamples,
 } from '@/database/queries/grammar-queries';
-import { reportError } from '@/features/logging/monitoring-handler';
+import { reportError } from '@/features/logging/logging-handler';
 import type { LessonType, NoteType } from '@/types/generic.types';
 import type { GroupType } from '@/types/table.types';
 import type { ResolvedPracticeEntry, UserItemLocal } from '@/types/user-item.types';

@@ -3,7 +3,7 @@ import { db } from '@/database/models/db';
 import SyncMetadata from '@/database/models/metadata';
 import { getSyncTimestamps, splitDeleted } from '@/database/sync/sync-helpers';
 import config from '@/config/config';
-import { reportInfo } from '@/features/logging/monitoring-handler';
+import { reportInfo } from '@/features/logging/logging-handler';
 import { SupabaseError } from '@/types/error.types';
 import { TableName } from '@/types/table.types';
 import type { UserItemLocal } from '@/types/user-item.types';

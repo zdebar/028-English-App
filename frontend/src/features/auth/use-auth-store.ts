@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import type { Session } from '@supabase/supabase-js';
 import { supabaseInstance } from '@/config/supabase.config';
 import { dataSyncBeforeSessionEnd } from '@/database/sync/data-sync';
-import { reportError, reportInfo, setMonitoringUser } from '@/features/logging/monitoring-handler';
+import { reportError, reportInfo } from '@/features/logging/logging-handler';
 import {
   clearAnonymousSessionFallback,
   clearAuthErrorParameters,
@@ -210,7 +210,6 @@ export const useAuthStore = create<AuthState>((set) => {
   const applySession = (session: Session | null) => {
     const nextUserId = session?.user?.id ?? null;
     const anonymous = isAnonymousSession(session);
-    setMonitoringUser(nextUserId);
 
     set({
       userId: nextUserId,
@@ -223,7 +222,6 @@ export const useAuthStore = create<AuthState>((set) => {
   };
 
   const clearSession = () => {
-    setMonitoringUser(null);
     set({ ...INITIAL_AUTH_STATE, loading: false });
   };
 

@@ -38,7 +38,7 @@ vi.mock('@/database/models/audio-records', () => ({
   },
 }));
 
-vi.mock('@/features/logging/monitoring-handler', () => ({
+vi.mock('@/features/logging/logging-handler', () => ({
   reportError: (...args: unknown[]) => errorHandlerMock(...args),
 }));
 

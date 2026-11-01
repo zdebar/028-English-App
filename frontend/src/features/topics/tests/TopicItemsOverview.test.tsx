@@ -72,7 +72,7 @@ vi.mock('@/database/queries/topic-queries', () => ({
   getTopicById: vi.fn(),
 }));
 
-vi.mock('@/features/logging/monitoring-handler', () => ({
+vi.mock('@/features/logging/logging-handler', () => ({
   reportInfo: (...args: unknown[]) => mocks.reportInfo(...args),
   reportError: (...args: unknown[]) => mocks.reportError(...args),
 }));

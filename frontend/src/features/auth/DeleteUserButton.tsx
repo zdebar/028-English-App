@@ -11,7 +11,7 @@ import { TableName } from '@/types/table.types';
 import { type JSX } from 'react';
 import { useThemeStore } from '../theme/use-theme-store';
 import { MenuButtonText } from '@/components/UI/MenuButtonText';
-import { reportError, reportInfo } from '../logging/monitoring-handler';
+import { reportError, reportInfo } from '../logging/logging-handler';
 import { useToastStore } from '../toast/use-toast-store';
 
 type DeleteUserButtonProps = Readonly<{
@@ -76,7 +76,7 @@ export default function DeleteUserButton({ className }: DeleteUserButtonProps): 
     }
 
     showToast(TEXTS.deleteUserSuccessToast, 'success');
-    reportInfo(`User ${deletingUserId} hard deleted their account`);
+    reportInfo('User account deletion completed.');
   };
 
   return (

@@ -11,7 +11,7 @@ import type { PracticeDeckEntry, PracticeOutcome, UserItemLocal } from '@/types/
 import type { ReviewDirection, ReviewKind } from '@/types/practice.types';
 import { useFetch } from '@/hooks/use-fetch';
 import UserItem from '@/database/models/user-items';
-import { reportError } from '@/features/logging/monitoring-handler';
+import { reportError } from '@/features/logging/logging-handler';
 import { toError } from '@/utils/error.utils';
 import { NBSP } from './use-hint';
 import { usePracticeCardState } from './use-practice-card-state';

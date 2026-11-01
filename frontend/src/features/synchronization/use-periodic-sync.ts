@@ -3,7 +3,7 @@ import { useEffect, useRef } from 'react';
 import config from '@/config/config';
 import AudioRecord from '@/database/models/audio-records';
 import { dataSync, dataSyncBeforeSessionEnd } from '@/database/sync/data-sync';
-import { reportError, reportInfo } from '@/features/logging/monitoring-handler';
+import { reportError, reportInfo } from '@/features/logging/logging-handler';
 import { TEXTS } from '@/locales/cs';
 import { useToastStore } from '@/features/toast/use-toast-store';
 import { useSyncStore } from './use-sync-store';

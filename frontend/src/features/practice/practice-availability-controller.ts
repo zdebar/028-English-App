@@ -1,5 +1,5 @@
 import config from '@/config/config';
-import { reportError } from '@/features/logging/monitoring-handler';
+import { reportError } from '@/features/logging/logging-handler';
 import { useToastStore } from '@/features/toast/use-toast-store';
 import { TEXTS } from '@/locales/cs';
 import { loadPracticeAvailabilitySnapshot } from './practice-availability';

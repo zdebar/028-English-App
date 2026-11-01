@@ -1,5 +1,5 @@
 import { getPronunciationGroupOverview } from '@/database/queries/pronunciation-group-queries';
-import { reportError } from '@/features/logging/monitoring-handler';
+import { reportError } from '@/features/logging/logging-handler';
 import { useEffect } from 'react';
 import { observeSharedQuery, sharedQueryKey } from '@/hooks/shared-query-store';
 import { toError } from '@/utils/error.utils';

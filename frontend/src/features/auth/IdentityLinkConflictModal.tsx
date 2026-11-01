@@ -4,7 +4,7 @@ import {
   saveAnonymousSessionFallback,
 } from '@/features/auth/anonymous-session-fallback';
 import { useAuthStore } from '@/features/auth/use-auth-store';
-import { reportError } from '@/features/logging/monitoring-handler';
+import { reportError } from '@/features/logging/logging-handler';
 import { Modal } from '@/features/modal/Modal';
 import { useToastStore } from '@/features/toast/use-toast-store';
 import { AUTH_REDIRECT_TO } from '@/features/auth/auth-redirect';

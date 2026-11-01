@@ -81,7 +81,7 @@ vi.mock('@/features/practice/hooks/use-practice-card-state', () => ({
   }),
 }));
 
-vi.mock('@/features/logging/monitoring-handler', () => ({ reportError: vi.fn() }));
+vi.mock('@/features/logging/logging-handler', () => ({ reportError: vi.fn() }));
 
 vi.mock('../review-prefetch', () => ({
   compareReviewItems: (

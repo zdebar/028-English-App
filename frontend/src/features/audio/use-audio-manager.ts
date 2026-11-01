@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import AudioRecord from '@/database/models/audio-records';
-import { reportError } from '@/features/logging/monitoring-handler';
+import { reportError } from '@/features/logging/logging-handler';
 import { useAudioStore } from './use-audio-store';
 
 type AudioInput = string | string[] | null;

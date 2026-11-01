@@ -1,6 +1,6 @@
 import { invalidateReviewArrays } from './review-prefetch';
 import { refreshPracticeAvailability } from './practice-availability-controller';
-import { reportError, reportInfo } from '@/features/logging/monitoring-handler';
+import { reportError, reportInfo } from '@/features/logging/logging-handler';
 import { useToastStore } from '@/features/toast/use-toast-store';
 import { TEXTS } from '@/locales/cs';
 

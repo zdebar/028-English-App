@@ -1,6 +1,6 @@
 import config from '@/config/config';
 import Levels from '@/database/models/levels';
-import { reportError } from '@/features/logging/monitoring-handler';
+import { reportError } from '@/features/logging/logging-handler';
 import { useEffect, useState } from 'react';
 import { observeSharedQuery, sharedQueryKey } from '@/hooks/shared-query-store';
 import { toError } from '@/utils/error.utils';

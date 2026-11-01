@@ -2,7 +2,7 @@ import { useCallback, useState, useRef, type JSX } from 'react';
 import SigninButton from '@/features/auth/SigninButton';
 import { loginAnonymous } from '@/features/auth/anonymous-auth-service';
 import { useToastStore } from '@/features/toast/use-toast-store';
-import { reportError } from '@/features/logging/monitoring-handler';
+import { reportError } from '@/features/logging/logging-handler';
 import { TEXTS } from '@/locales/cs';
 import HCaptcha from '@hcaptcha/react-hcaptcha';
 
@@ -42,7 +42,7 @@ export default function AnonymousSigninButton(): JSX.Element {
           ref={captcha}
           sitekey={CAPTCHA_SITE_KEY}
           onVerify={(token) => {
-            startAnonymous(token);
+            void startAnonymous(token);
           }}
           onExpire={() => {
             setShowCaptcha(false);

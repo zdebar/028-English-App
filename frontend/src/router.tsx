@@ -7,7 +7,7 @@ import { waitForAuthReady } from '@/features/auth/auth-lifecycle';
 import { useAuthStore } from '@/features/auth/use-auth-store';
 import { loadInitialTrainingData } from '@/features/practice/initial-training-data';
 import { loadHome } from '@/routing/home-loader';
-import { reportError } from '@/features/logging/monitoring-handler';
+import { reportError } from '@/features/logging/logging-handler';
 import { TEXTS } from '@/locales/cs';
 import InitialTrainingPractice from '@/pages/InitialTrainingPractice';
 import Grammar from '@/pages/Grammar';

@@ -20,7 +20,7 @@ vi.mock('@/features/practice/practice-availability', () => ({
   loadPracticeAvailabilitySnapshot: (...args: unknown[]) =>
     mocks.loadPracticeAvailabilitySnapshot(...args),
 }));
-vi.mock('@/features/logging/monitoring-handler', () => ({
+vi.mock('@/features/logging/logging-handler', () => ({
   reportError: (...args: unknown[]) => mocks.reportError(...args),
 }));
 vi.mock('@/features/toast/use-toast-store', () => ({

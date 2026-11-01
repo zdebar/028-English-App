@@ -49,7 +49,7 @@ vi.mock('@/features/toast/use-toast-store', () => ({
   useToastStore: (selector: (state: { showToast: typeof mocks.showToast }) => unknown) =>
     selector({ showToast: mocks.showToast }),
 }));
-vi.mock('@/features/logging/monitoring-handler', () => ({
+vi.mock('@/features/logging/logging-handler', () => ({
   reportError: (...args: unknown[]) => mocks.reportError(...args),
 }));
 vi.mock('@/locales/cs', () => ({

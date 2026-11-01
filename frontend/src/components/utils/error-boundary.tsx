@@ -1,6 +1,6 @@
 import { Component, type ErrorInfo, type ReactNode } from 'react';
 import { TEXTS } from '@/locales/cs';
-import { reportError } from '@/features/logging/monitoring-handler';
+import { reportError } from '@/features/logging/logging-handler';
 import Notification from '@/components/UI/Notification';
 
 interface ErrorBoundaryProps {

@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "node scripts/build-with-version.mjs",
+    "build": "node scripts/build.mjs",
     "build:sw": "node scripts/generate-sw.mjs",
     "lint": "eslint .",
     "preview": "vite preview",
@@ -14,7 +14,6 @@
   },
   "dependencies": {
     "@hcaptcha/react-hcaptcha": "^2.0.2",
-    "@sentry/react": "^10.53.1",
     "@supabase/auth-ui-react": "^0.4.7",
     "@supabase/auth-ui-shared": "^0.1.8",
     "@supabase/supabase-js": "^2.77.0",

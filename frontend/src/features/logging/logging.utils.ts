@@ -1,4 +1,4 @@
-import { reportError } from './monitoring-handler';
+import { reportError } from './logging-handler';
 
 export type SyncSummary = {
   total: number;

@@ -1,6 +1,6 @@
 import { useAudioManager } from '@/features/audio/use-audio-manager';
 import { isAudioPlayable } from '@/features/audio/audio.utils';
-import { reportError } from '@/features/logging/monitoring-handler';
+import { reportError } from '@/features/logging/logging-handler';
 import type { UserItemLocal } from '@/types/user-item.types';
 import { useCallback, useEffect, useRef, type Dispatch, type SetStateAction } from 'react';
 import { NBSP, useHint } from './use-hint';

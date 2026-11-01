@@ -3,7 +3,7 @@ import config from '@/config/config';
 import SigninButton from '@/features/auth/SigninButton';
 import { simulateUserProgress } from '@/features/synchronization/simulate-data-service';
 import { useToastStore } from '@/features/toast/use-toast-store';
-import { reportError } from '@/features/logging/monitoring-handler';
+import { reportError } from '@/features/logging/logging-handler';
 import { TEXTS } from '@/locales/cs';
 import { useAuthStore } from '../auth/use-auth-store';
 import { useLocalStorageSync } from '@/hooks/use-local-storage-sync';

@@ -29,7 +29,7 @@ vi.mock('@/features/theme/use-theme-store', () => ({
   ) => selector({ saveCurrentThemeAsGuest: mocks.saveCurrentThemeAsGuest }),
 }));
 
-vi.mock('@/features/logging/monitoring-handler', () => ({
+vi.mock('@/features/logging/logging-handler', () => ({
   reportError: (...args: unknown[]) => mocks.reportError(...args),
 }));
 

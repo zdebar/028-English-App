@@ -5,7 +5,7 @@ import UserItem from '@/database/models/user-items';
 import UserLesson from '@/database/models/user-lessons';
 import Groups from '@/database/models/groups';
 import type { GrammarDetail } from '@/features/grammar/GrammarDetailCard';
-import { reportError } from '@/features/logging/monitoring-handler';
+import { reportError } from '@/features/logging/logging-handler';
 import { toError } from '@/utils/error.utils';
 import type { LessonType } from '@/types/generic.types';
 import type { GroupType } from '@/types/table.types';

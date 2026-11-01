@@ -24,7 +24,7 @@ vi.mock('@/features/auth/anonymous-session-fallback', () => ({
   clearAnonymousSessionFallback: (...args: unknown[]) => mocks.clearFallback(...args),
 }));
 
-vi.mock('@/features/logging/monitoring-handler', () => ({
+vi.mock('@/features/logging/logging-handler', () => ({
   reportError: (...args: unknown[]) => mocks.reportError(...args),
 }));
 

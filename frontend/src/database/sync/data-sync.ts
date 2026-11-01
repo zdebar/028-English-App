@@ -9,7 +9,7 @@ import UserItem from '@/database/models/user-items';
 import UserLesson from '@/database/models/user-lessons';
 import { supabaseInstance } from '@/config/supabase.config';
 import { summarizeSettledResults } from '@/features/logging/logging.utils';
-import { reportInfo } from '@/features/logging/monitoring-handler';
+import { reportInfo } from '@/features/logging/logging-handler';
 import { assertNonEmptyString } from '@/utils/assertions.utils';
 import { settleSyncWithAuthRecovery } from './auth-recovery';
 

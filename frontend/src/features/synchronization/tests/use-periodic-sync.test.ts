@@ -56,7 +56,7 @@ vi.mock('@/features/toast/use-toast-store', () => ({
     selector({ showToast: mocks.showToast }),
 }));
 
-vi.mock('@/features/logging/monitoring-handler', () => ({
+vi.mock('@/features/logging/logging-handler', () => ({
   reportError: (...args: unknown[]) => mocks.reportError(...args),
   reportInfo: (...args: unknown[]) => mocks.reportInfo(...args),
 }));

@@ -23,7 +23,7 @@ vi.mock('@/database/models/levels', () => ({
   default: { getOverview: (...args: unknown[]) => mocks.getOverview(...args) },
 }));
 
-vi.mock('@/features/logging/monitoring-handler', () => ({
+vi.mock('@/features/logging/logging-handler', () => ({
   reportError: (...args: unknown[]) => mocks.reportError(...args),
 }));
 

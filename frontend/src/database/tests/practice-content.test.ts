@@ -48,7 +48,7 @@ vi.mock('@/database/models/user-items', () => ({
 }));
 
 
-vi.mock('@/features/logging/monitoring-handler', () => ({
+vi.mock('@/features/logging/logging-handler', () => ({
   reportError: (...args: unknown[]) => mocks.reportError(...args),
 }));
 

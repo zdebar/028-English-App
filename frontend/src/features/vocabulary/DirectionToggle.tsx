@@ -1,6 +1,6 @@
 import { TEXTS } from '@/locales/cs';
 import { useEffect, useMemo } from 'react';
-import { reportError } from '../logging/monitoring-handler';
+import { reportError } from '../logging/logging-handler';
 import StyledButton from '@/components/UI/buttons/StyledButton';
 
 type DirectionToggleProps<T> = Readonly<{

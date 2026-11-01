@@ -10,7 +10,6 @@ const mocks = vi.hoisted(() => ({
   onAuthStateChange: vi.fn(),
   unsubscribe: vi.fn(),
   dataSyncBeforeSessionEnd: vi.fn(),
-  setMonitoringUser: vi.fn(),
   reportError: vi.fn(),
   reportInfo: vi.fn(),
   showToast: vi.fn(),
@@ -35,10 +34,9 @@ vi.mock('@/database/sync/data-sync', () => ({
   dataSyncBeforeSessionEnd: (...args: unknown[]) => mocks.dataSyncBeforeSessionEnd(...args),
 }));
 
-vi.mock('@/features/logging/monitoring-handler', () => ({
+vi.mock('@/features/logging/logging-handler', () => ({
   reportError: (...args: unknown[]) => mocks.reportError(...args),
   reportInfo: (...args: unknown[]) => mocks.reportInfo(...args),
-  setMonitoringUser: (...args: unknown[]) => mocks.setMonitoringUser(...args),
 }));
 
 vi.mock('@/features/toast/use-toast-store', () => ({

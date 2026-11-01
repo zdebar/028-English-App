@@ -9,7 +9,7 @@ const mocks = vi.hoisted(() => ({
 vi.mock('../practice-availability', () => ({
   loadPracticeAvailabilitySnapshot: (...args: unknown[]) => mocks.load(...args),
 }));
-vi.mock('@/features/logging/monitoring-handler', () => ({
+vi.mock('@/features/logging/logging-handler', () => ({
   reportError: (...args: unknown[]) => mocks.reportError(...args),
 }));
 vi.mock('@/features/toast/use-toast-store', () => ({

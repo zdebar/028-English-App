@@ -83,8 +83,7 @@ behavior.
 | Service worker | `main.tsx`, `scripts/generate-sw.mjs`, `public/service-worker.js` | Production builds generate a precache manifest and register the worker after page load. Development removes an app-scoped registration and its caches. |
 | Responsive layout | `useResponsiveLayout`, `useSideHeaderOrientation` | Sets layout attributes used by the app shell at different viewport sizes. |
 
-## Observability
+## Logging
 
-`monitoring-handler` reports errors and informational events from auth, sync,
-audio, route loading, and progress actions. `GoogleAnalytics` is mounted by the
-app shell when analytics is configured.
+`logging-handler` writes errors to the console and limits informational logs to
+development or an explicit `VITE_VERBOSE_INFO_LOGS=true` setting.
