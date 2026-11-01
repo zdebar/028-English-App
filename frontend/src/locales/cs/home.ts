@@ -1,5 +1,7 @@
 export const HOME_TEXTS = {
   // Home Page
+  testModeWarning:
+    'Aplikace v testovacím režimu! V tuto chvíli Vaše tréninková data nebudou zachována.',
   appTitle: 'Angličtina',
   appDescription: 'Bez stresu. Bez přemýšlení. Jen dril.',
   guide: 'Návod',

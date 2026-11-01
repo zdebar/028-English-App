@@ -1,6 +1,7 @@
 import { useAuthStore } from '@/features/auth/use-auth-store';
 import DelayedMessage from '@/components/UI/DelayedMessage';
 import Dashboard from '@/features/dashboard/Dashboard';
+import { ROUTES } from '@/config/routes.config';
 import { TEXTS } from '@/locales/cs';
 import type { JSX } from 'react';
 import { Link } from 'react-router-dom';
@@ -19,10 +20,10 @@ const HOME_TEXT_ACTION_CLASS_NAME =
 function HomeActionLinks(): JSX.Element {
   return (
     <div className="flex items-center justify-center gap-6 px-4">
-      <Link to="/guide" className={HOME_TEXT_ACTION_CLASS_NAME}>
+      <Link to={ROUTES.guide} className={HOME_TEXT_ACTION_CLASS_NAME}>
         {TEXTS.guide}
       </Link>
-      <InstallPWAButton className={`${HOME_TEXT_ACTION_CLASS_NAME}`} />
+      <InstallPWAButton className={HOME_TEXT_ACTION_CLASS_NAME} />
     </div>
   );
 }
@@ -52,8 +53,8 @@ export default function Home(): JSX.Element {
         <div className="card-width relative flex h-full w-full grow flex-col justify-start gap-8">
           <div className="mt-3 landscape:hidden">
             <HomeActionLinks />
-            <p className={`text-error-light dark:text-error-dark px-4 text-center text-sm`}>
-              Aplikace v testovacím režimu! V tuto chvíli Vaše tréninková data nebudou zachována.
+            <p className="text-error-light dark:text-error-dark px-4 text-center text-sm">
+              {TEXTS.testModeWarning}
             </p>
           </div>
           {isAnonymousUser && (
