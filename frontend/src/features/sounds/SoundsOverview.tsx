@@ -26,34 +26,6 @@ const SOUND_CATEGORY_PRESENTATION: readonly SoundCategoryPresentation[] = [
 const SOUND_CATEGORY_HEADING_CLASS_NAME =
   'h-input border-disabled-light text-light dark:border-disabled-dark dark:text-dark flex w-full items-center justify-start border border-dashed px-4 text-left';
 
-function SoundCategoryRow({
-  category,
-  sounds,
-}: Readonly<{
-  category: SoundCategoryPresentation;
-  sounds: readonly SoundOverviewGroup[];
-}>) {
-  return (
-    <section className="flex flex-col gap-1">
-      <div className={SOUND_CATEGORY_HEADING_CLASS_NAME}>{category.title}</div>
-      <div className="grid grid-cols-9 gap-1">
-        {sounds.map((sound) => (
-          <NavigationButton
-            key={sound.id}
-            className="h-input w-full min-w-0 grow-0 px-1 text-center"
-            to={ROUTES.soundDetail.replace(':groupId', String(sound.id))}
-            title={sound.name}
-            aria-label={sound.name}
-            disabled={!sound.isActive}
-          >
-            {sound.name}
-          </NavigationButton>
-        ))}
-      </div>
-    </section>
-  );
-}
-
 export default function SoundsOverview({
   initialSounds,
 }: Readonly<{ initialSounds?: SoundOverviewGroup[] }>) {
@@ -87,5 +59,33 @@ export default function SoundsOverview({
         ))}
       </StackedList>
     </OverviewCard>
+  );
+}
+
+function SoundCategoryRow({
+  category,
+  sounds,
+}: Readonly<{
+  category: SoundCategoryPresentation;
+  sounds: readonly SoundOverviewGroup[];
+}>) {
+  return (
+    <section className="flex flex-col gap-1">
+      <div className={SOUND_CATEGORY_HEADING_CLASS_NAME}>{category.title}</div>
+      <div className="grid grid-cols-9 gap-1">
+        {sounds.map((sound) => (
+          <NavigationButton
+            key={sound.id}
+            className="h-input w-full min-w-0 grow-0 px-1 text-center"
+            to={ROUTES.soundDetail.replace(':groupId', String(sound.id))}
+            title={sound.name}
+            aria-label={sound.name}
+            disabled={!sound.isActive}
+          >
+            {sound.name}
+          </NavigationButton>
+        ))}
+      </div>
+    </section>
   );
 }

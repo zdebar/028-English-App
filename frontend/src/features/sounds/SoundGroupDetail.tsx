@@ -7,9 +7,9 @@ import {
   type SoundGroupDetailType,
 } from '@/database/queries/sound-group-queries';
 import { useAuthStore } from '@/features/auth/use-auth-store';
+import { AudioItemListControls } from '@/features/audio/AudioItemListControls';
 import { useAudioManager } from '@/features/audio/use-audio-manager';
 import { getItemAudioSources } from '@/features/audio/audio.utils';
-import VolumeSlider from '@/features/audio/VolumeSlider';
 import { useQueryErrorToast } from '@/features/logging/use-query-error-toast';
 import { useToastStore } from '@/features/toast/use-toast-store';
 import { sharedQueryKey } from '@/hooks/shared-query-store';
@@ -18,26 +18,6 @@ import { TEXTS } from '@/locales/cs';
 import { useCallback, useEffect, useMemo } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useRouteClose } from '@/routing/use-route-close';
-
-function parseGroupId(value: string | undefined): number | null {
-  const groupId = Number(value);
-  return Number.isSafeInteger(groupId) && groupId > 0 ? groupId : null;
-}
-
-function SoundDetailControls({
-  items,
-}: Readonly<{ items: SoundGroupDetailType['items'] }>) {
-  if (items.length === 0) return null;
-  const hasAudio = items.some((item) => Boolean(item.audio?.trim()));
-
-  return (
-    <div className="secondary-controls-after-list">
-      <div className="pos-bottom-left-control">
-        <VolumeSlider disabled={!hasAudio} />
-      </div>
-    </div>
-  );
-}
 
 export default function SoundGroupDetail({
   initialData,
@@ -66,9 +46,9 @@ export default function SoundGroupDetail({
   }, [groupId, navigate]);
 
   useEffect(() => {
-    if (loading || !userId || !groupId || data !== null) return;
+    if (loading || error || !userId || !groupId || data !== null) return;
     void navigate(ROUTES.sounds, { replace: true });
-  }, [data, groupId, loading, navigate, userId]);
+  }, [data, error, groupId, loading, navigate, userId]);
 
   useQueryErrorToast(error, 'Failed to fetch sound group detail');
 
@@ -95,8 +75,13 @@ export default function SoundGroupDetail({
           showPronunciation
           hideCzechOnNarrow
         />
-        <SoundDetailControls items={items} />
+        <AudioItemListControls items={items} />
       </DataState>
     </OverviewCard>
   );
+}
+
+function parseGroupId(value: string | undefined): number | null {
+  const groupId = Number(value);
+  return Number.isSafeInteger(groupId) && groupId > 0 ? groupId : null;
 }

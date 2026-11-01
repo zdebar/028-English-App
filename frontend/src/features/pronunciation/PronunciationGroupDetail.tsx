@@ -8,7 +8,7 @@ import { ROUTES } from '@/config/routes.config';
 import { getPronunciationGroupDetail } from '@/database/queries/pronunciation-group-queries';
 import { useAudioManager } from '@/features/audio/use-audio-manager';
 import { getItemAudioSources, isAudioPlayable, playAudioWithToast } from '@/features/audio/audio.utils';
-import VolumeSlider from '@/features/audio/VolumeSlider';
+import { AudioItemListControls } from '@/features/audio/AudioItemListControls';
 import { useQueryErrorToast } from '@/features/logging/use-query-error-toast';
 import { useAuthStore } from '@/features/auth/use-auth-store';
 import { useToastStore } from '@/features/toast/use-toast-store';
@@ -98,21 +98,6 @@ function RelatedPronunciationSounds({
           )}
         </div>
       ))}
-    </div>
-  );
-}
-
-function PronunciationDetailControls({
-  items,
-}: Readonly<{ items: PronunciationGroupDetailType['items'] }>) {
-  if (items.length === 0) return null;
-  const hasAudio = items.some((item) => Boolean(item.audio?.trim()));
-
-  return (
-    <div className="secondary-controls-after-list">
-      <div className="pos-bottom-left-control">
-        <VolumeSlider disabled={!hasAudio} />
-      </div>
     </div>
   );
 }
@@ -441,7 +426,7 @@ function PronunciationGroupOverviewCard({
           stopAudio={stopAudio}
           showToast={showToast}
         />
-        <PronunciationDetailControls items={items} />
+        <AudioItemListControls items={items} />
       </DataState>
     </OverviewCard>
   );
