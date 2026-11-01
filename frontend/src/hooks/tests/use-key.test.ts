@@ -1,24 +1,8 @@
 import { renderHook, act } from '@testing-library/react';
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { useKey } from '../use-key';
 
-// Mock the overlay store
-vi.mock('@/features/overlay/use-overlay-store', () => ({
-  useOverlayStore: vi.fn(),
-}));
-
-import { useOverlayStore } from '@/features/overlay/use-overlay-store';
-
 describe('useKey', () => {
-  let mockUseOverlayStore: any;
-  let isOverlayOpen = false;
-
-  beforeEach(() => {
-    mockUseOverlayStore = vi.mocked(useOverlayStore);
-    isOverlayOpen = false;
-    mockUseOverlayStore.mockImplementation((selector: any) => selector({ isOverlayOpen }));
-  });
-
   it('calls onKeyPress when specified key is pressed', () => {
     const onKeyPress = vi.fn();
 
@@ -59,11 +43,10 @@ describe('useKey', () => {
     expect(onKeyPress).toHaveBeenCalledTimes(2);
   });
 
-  it('does not call onKeyPress when disabledOnOverlayOpen is true and overlay is open', () => {
+  it('does not call onKeyPress when disabled', () => {
     const onKeyPress = vi.fn();
-    isOverlayOpen = true;
 
-    renderHook(() => useKey({ onKeyPress, keys: ['Enter'], disabledOnOverlayOpen: true }));
+    renderHook(() => useKey({ onKeyPress, keys: ['Enter'], enabled: false }));
 
     act(() => {
       globalThis.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter' }));
@@ -72,10 +55,10 @@ describe('useKey', () => {
     expect(onKeyPress).not.toHaveBeenCalled();
   });
 
-  it('calls onKeyPress when disabledOnOverlayOpen is true but overlay is closed', () => {
+  it('calls onKeyPress when enabled', () => {
     const onKeyPress = vi.fn();
 
-    renderHook(() => useKey({ onKeyPress, keys: ['Enter'], disabledOnOverlayOpen: true }));
+    renderHook(() => useKey({ onKeyPress, keys: ['Enter'], enabled: true }));
 
     act(() => {
       globalThis.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter' }));
@@ -84,22 +67,8 @@ describe('useKey', () => {
     expect(onKeyPress).toHaveBeenCalledTimes(1);
   });
 
-  it('calls onKeyPress when disabledOnOverlayOpen is false and overlay is open', () => {
+  it('is enabled by default', () => {
     const onKeyPress = vi.fn();
-    isOverlayOpen = true;
-
-    renderHook(() => useKey({ onKeyPress, keys: ['Enter'], disabledOnOverlayOpen: false }));
-
-    act(() => {
-      globalThis.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter' }));
-    });
-
-    expect(onKeyPress).toHaveBeenCalledTimes(1);
-  });
-
-  it('uses default disabledOnOverlayOpen=false and still responds when overlay is open', () => {
-    const onKeyPress = vi.fn();
-    isOverlayOpen = true;
 
     renderHook(() => useKey({ onKeyPress, keys: ['Enter'] }));
 
@@ -120,11 +89,12 @@ describe('useKey', () => {
     expect(removeSpy).toHaveBeenCalledWith('keydown', expect.any(Function));
   });
 
-  it('reacts to overlay state changes when disabledOnOverlayOpen is true', () => {
+  it('adds and removes the listener when enabled changes', () => {
     const onKeyPress = vi.fn();
 
-    const { rerender } = renderHook(() =>
-      useKey({ onKeyPress, keys: ['Enter'], disabledOnOverlayOpen: true }),
+    const { rerender } = renderHook(
+      ({ enabled }: { enabled: boolean }) => useKey({ onKeyPress, keys: ['Enter'], enabled }),
+      { initialProps: { enabled: true } },
     );
 
     act(() => {
@@ -132,16 +102,14 @@ describe('useKey', () => {
     });
     expect(onKeyPress).toHaveBeenCalledTimes(1);
 
-    isOverlayOpen = true;
-    rerender();
+    rerender({ enabled: false });
 
     act(() => {
       globalThis.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter' }));
     });
     expect(onKeyPress).toHaveBeenCalledTimes(1);
 
-    isOverlayOpen = false;
-    rerender();
+    rerender({ enabled: true });
 
     act(() => {
       globalThis.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter' }));

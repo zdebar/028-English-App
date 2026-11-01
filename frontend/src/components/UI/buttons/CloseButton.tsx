@@ -1,5 +1,6 @@
 import CloseIcon from '@/components/UI/icons/CloseIcon';
 import { KEYBOARD_LISTENERS } from '@/config/keyboard-listeners.config';
+import { useOverlayStore } from '@/features/overlay/use-overlay-store';
 import { useKey } from '@/hooks/use-key';
 import { TEXTS } from '@/locales/cs';
 import type { ButtonHTMLAttributes, JSX } from 'react';
@@ -26,19 +27,20 @@ export default function CloseButton({
   ...rest
 }: CloseButtonProps): JSX.Element {
   const navigate = useNavigate();
+  const isOverlayOpen = useOverlayStore((state) => state.isOverlayOpen);
   const handleClose = () => {
     if (onClick) {
       onClick();
     } else if (navigateTo) {
-      navigate(navigateTo);
+      void navigate(navigateTo);
     } else if (globalThis.history.length > 1) {
-      navigate(-1);
+      void navigate(-1);
     }
   };
   useKey({
     onKeyPress: () => handleClose(),
     keys: KEYBOARD_LISTENERS.Exit,
-    disabledOnOverlayOpen: true,
+    enabled: !isOverlayOpen,
   });
 
   return (
