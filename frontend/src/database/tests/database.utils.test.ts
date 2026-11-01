@@ -28,8 +28,8 @@ vi.mock('@/config/supabase.config', () => ({
 }));
 
 import {
-  getLocalDateFromUTC,
-  getTodayShortDate,
+  getLocalDateKeyFromUTC,
+  getTodayLocalDateKey,
 } from '@/database/utils/database.utils';
 import { getNextAt, resetUserItem } from '@/database/utils/user-items.utils';
 import { fetchStorage } from '@/database/utils/audio-records.utils';
@@ -51,11 +51,11 @@ describe('database.utils', () => {
       vi.useFakeTimers();
       vi.setSystemTime(new Date('2026-02-28T12:00:00.000Z'));
 
-      expect(getTodayShortDate()).toBe('2026-02-28');
+      expect(getTodayLocalDateKey()).toBe('2026-02-28');
     });
 
     it('converts UTC date string to local en-CA short date', () => {
-      expect(getLocalDateFromUTC('2026-02-28T00:00:00.000Z')).toBe('2026-02-28');
+      expect(getLocalDateKeyFromUTC('2026-02-28T00:00:00.000Z')).toBe('2026-02-28');
     });
   });
 

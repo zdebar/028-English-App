@@ -6,7 +6,7 @@ import type {
   ProgressCountsType,
 } from '@/types/generic.types';
 import type { UserItemLocal } from '@/types/user-item.types';
-import { getTodayShortDate, getLocalDateFromUTC } from './database.utils';
+import { getTodayLocalDateKey, getLocalDateKeyFromUTC } from './database.utils';
 import config from '@/config/config';
 import { isInitiated } from '@/utils/progress.utils';
 
@@ -26,7 +26,7 @@ export function aggregateLevels(
   items: UserItemLocal[],
   lessons: LessonType[],
   levels: LevelType[],
-  today: string = getTodayShortDate(),
+  today: string = getTodayLocalDateKey(),
   startedLessonIds: ReadonlySet<number> = new Set(),
 ): LevelOverviewType[] {
   const countKeys: (keyof ProgressCountsType)[] = [
@@ -60,7 +60,7 @@ export function aggregateLevels(
 
       if (isInitiated(item)) counts.initiatedCount++;
       if (isStarted) counts.startedCount++;
-      if (isStarted && getLocalDateFromUTC(item.started_at) === today)
+      if (isStarted && getLocalDateKeyFromUTC(item.started_at) === today)
         counts.startedTodayCount++;
       counts.totalCount++;
     });
