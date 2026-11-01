@@ -12,7 +12,7 @@ import { formatProgress } from '@/utils/progress.utils';
 import { useCallback, useState, type JSX } from 'react';
 import { useLoaderData, useNavigate } from 'react-router-dom';
 import { ROUTES } from '@/config/routes.config';
-import type { InitialTrainingData } from '@/routing/route-data';
+import type { InitialTrainingData } from '@/features/practice/initial-training-data';
 
 type InitialTrainingDeck = ReturnType<typeof useInitialTrainingDeck>;
 

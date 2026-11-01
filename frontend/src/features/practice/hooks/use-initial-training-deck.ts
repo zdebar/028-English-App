@@ -21,7 +21,7 @@ import {
 } from 'react';
 import { NBSP } from './use-hint';
 import { usePracticeCardState } from './use-practice-card-state';
-import type { InitialTrainingData } from '@/routing/route-data';
+import type { InitialTrainingData } from '../initial-training-data';
 import {
   resolvePracticeEntries,
   resolvePracticeGrammarContext,

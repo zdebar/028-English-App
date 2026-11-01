@@ -8,7 +8,7 @@ import {
 import { TEXTS } from '@/locales/cs';
 import type { JSX } from 'react';
 import { useLoaderData } from 'react-router-dom';
-import type { OverviewAvailabilityData } from '@/routing/route-data';
+import type { OverviewAvailabilityData } from '@/hooks/overview-query-store';
 import { NavigationButton } from '@/routing/data-navigation';
 
 function getOverviewButtonState(

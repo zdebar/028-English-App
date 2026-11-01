@@ -5,6 +5,7 @@ import ProtectedLayout from '@/components/utils/protected-layout';
 import { ROUTES } from '@/config/routes.config';
 import { waitForAuthReady } from '@/features/auth/auth-lifecycle';
 import { useAuthStore } from '@/features/auth/use-auth-store';
+import { loadInitialTrainingData } from '@/features/practice/initial-training-data';
 import { loadHome } from '@/routing/home-loader';
 import { reportError } from '@/features/logging/monitoring-handler';
 import { TEXTS } from '@/locales/cs';
@@ -24,18 +25,16 @@ import Vocabulary from '@/pages/Vocabulary';
 import Sounds from '@/pages/Sounds';
 import SoundGroupPage from '@/pages/SoundGroupPage';
 import Notification from '@/components/UI/Notification';
-import type { RouteDataDescriptor } from '@/routing/route-data';
 import {
-  initialTrainingDescriptor,
-  grammarDescriptor,
-  overviewAvailabilityDescriptor,
-  reviewPracticeDescriptor,
-  soundsDescriptor,
-  soundGroupDetailDescriptor,
-  pronunciationGroupDetailDescriptor,
-  topicDetailDescriptor,
-  topicsDescriptor,
-  vocabularyDescriptor,
+  loadGrammarOverviewData,
+  loadOverviewAvailabilityData,
+  loadPronunciationGroupDetailData,
+  loadReviewPracticeData,
+  loadSoundGroupDetailData,
+  loadSoundsOverviewData,
+  loadTopicDetailData,
+  loadTopicsOverviewData,
+  loadVocabularyOverviewData,
 } from '@/routing/route-data';
 import { createHashRouter, redirect, type LoaderFunctionArgs } from 'react-router-dom';
 
@@ -57,11 +56,11 @@ async function requireUserId(): Promise<string> {
 
 async function loadProtectedData<T>(
   routeName: string,
-  createDescriptor: (userId: string) => RouteDataDescriptor<T>,
+  loadData: (userId: string) => Promise<T>,
 ): Promise<T> {
   const userId = await requireUserId();
   try {
-    return await createDescriptor(userId).load();
+    return await loadData(userId);
   } catch (error) {
     reportError(`Failed to load ${routeName} route data`, error);
     throw error;
@@ -78,7 +77,7 @@ async function loadTopicDetail({ params }: LoaderFunctionArgs) {
   if (!topicId) throw redirect(ROUTES.topics);
   const userId = await requireUserId();
   try {
-    const data = await topicDetailDescriptor(userId, topicId).load();
+    const data = await loadTopicDetailData(userId, topicId);
     if (!data.topic) throw redirect(ROUTES.topics);
     return data;
   } catch (error) {
@@ -93,7 +92,7 @@ async function loadPronunciationGroupDetail({ params }: LoaderFunctionArgs) {
   if (!groupId) throw redirect(ROUTES.pronunciationGroups);
   const userId = await requireUserId();
   try {
-    const data = await pronunciationGroupDetailDescriptor(userId, groupId).load();
+    const data = await loadPronunciationGroupDetailData(userId, groupId);
     if (!data) throw redirect(ROUTES.pronunciationGroups);
     return data;
   } catch (error) {
@@ -108,7 +107,7 @@ async function loadSoundGroupDetail({ params }: LoaderFunctionArgs) {
   if (!groupId) throw redirect(ROUTES.sounds);
   const userId = await requireUserId();
   try {
-    const data = await soundGroupDetailDescriptor(userId, groupId).load();
+    const data = await loadSoundGroupDetailData(userId, groupId);
     if (!data) throw redirect(ROUTES.sounds);
     return data;
   } catch (error) {
@@ -121,7 +120,7 @@ async function loadSoundGroupDetail({ params }: LoaderFunctionArgs) {
 async function loadInitialTraining() {
   const userId = await requireUserId();
   try {
-    const data = await initialTrainingDescriptor(userId).load();
+    const data = await loadInitialTrainingData(userId);
     if (data.items.length === 0) throw redirect(ROUTES.home);
     return data;
   } catch (error) {
@@ -150,7 +149,7 @@ export const router = createHashRouter([
             path: ROUTES.practice,
             loader: () =>
               loadProtectedData('grammar review', (userId) =>
-                reviewPracticeDescriptor(userId, 'grammar'),
+                loadReviewPracticeData(userId, 'grammar'),
               ),
             Component: Practice,
           },
@@ -158,7 +157,7 @@ export const router = createHashRouter([
             path: ROUTES.grammarPractice,
             loader: () =>
               loadProtectedData('grammar review', (userId) =>
-                reviewPracticeDescriptor(userId, 'grammar'),
+                loadReviewPracticeData(userId, 'grammar'),
               ),
             Component: Practice,
           },
@@ -166,7 +165,7 @@ export const router = createHashRouter([
             path: ROUTES.vocabularyPractice,
             loader: () =>
               loadProtectedData('vocabulary review', (userId) =>
-                reviewPracticeDescriptor(userId, 'vocabulary'),
+                loadReviewPracticeData(userId, 'vocabulary'),
               ),
             Component: Practice,
           },
@@ -177,13 +176,13 @@ export const router = createHashRouter([
           },
           {
             path: ROUTES.overviews,
-            loader: () => loadProtectedData('overviews', overviewAvailabilityDescriptor),
+            loader: () => loadProtectedData('overviews', loadOverviewAvailabilityData),
             Component: Overviews,
           },
           { path: ROUTES.profile, Component: Profile },
           {
             path: ROUTES.topics,
-            loader: () => loadProtectedData('topics', topicsDescriptor),
+            loader: () => loadProtectedData('topics', loadTopicsOverviewData),
             Component: Topics,
           },
           {
@@ -193,17 +192,17 @@ export const router = createHashRouter([
           },
           {
             path: ROUTES.grammar,
-            loader: () => loadProtectedData('grammar', grammarDescriptor),
+            loader: () => loadProtectedData('grammar', loadGrammarOverviewData),
             Component: Grammar,
           },
           {
             path: ROUTES.vocabulary,
-            loader: () => loadProtectedData('vocabulary', vocabularyDescriptor),
+            loader: () => loadProtectedData('vocabulary', loadVocabularyOverviewData),
             Component: Vocabulary,
           },
           {
             path: ROUTES.sounds,
-            loader: () => loadProtectedData('sound groups', soundsDescriptor),
+            loader: () => loadProtectedData('sound groups', loadSoundsOverviewData),
             Component: Sounds,
           },
           {

@@ -31,11 +31,11 @@ vi.mock('@/database/utils/practice-content.utils', () => ({
 }));
 
 import {
-  overviewAvailabilityDescriptor,
-  reviewPracticeDescriptor,
-  topicsDescriptor,
-  soundsDescriptor,
-  vocabularyDescriptor,
+  loadOverviewAvailabilityData,
+  loadReviewPracticeData,
+  loadTopicsOverviewData,
+  loadSoundsOverviewData,
+  loadVocabularyOverviewData,
 } from '../route-data';
 
 describe('route data queries', () => {
@@ -47,7 +47,7 @@ describe('route data queries', () => {
     mocks.hasVocabulary.mockResolvedValue(true);
     mocks.sounds.mockResolvedValue([{ id: 4 }]);
     mocks.allSoundsForOverview.mockResolvedValue([{ id: 4, isActive: true }]);
-    await expect(overviewAvailabilityDescriptor('u1').load()).resolves.toEqual({
+    await expect(loadOverviewAvailabilityData('u1')).resolves.toEqual({
       grammar: true, topics: false, vocabulary: true, sounds: true,
     });
     expect(mocks.topics).not.toHaveBeenCalled();
@@ -60,9 +60,9 @@ describe('route data queries', () => {
     mocks.topics.mockResolvedValue(topics);
     mocks.vocabulary.mockResolvedValue(vocabulary);
     mocks.allSoundsForOverview.mockResolvedValue([{ id: 4, isActive: true }]);
-    await expect(topicsDescriptor('u1').load()).resolves.toBe(topics);
-    await expect(vocabularyDescriptor('u1').load()).resolves.toBe(vocabulary);
-    await expect(soundsDescriptor('u1').load()).resolves.toEqual([{ id: 4, isActive: true }]);
+    await expect(loadTopicsOverviewData('u1')).resolves.toBe(topics);
+    await expect(loadVocabularyOverviewData('u1')).resolves.toBe(vocabulary);
+    await expect(loadSoundsOverviewData('u1')).resolves.toEqual([{ id: 4, isActive: true }]);
     expect(mocks.hasTopics).not.toHaveBeenCalled();
     expect(mocks.hasVocabulary).not.toHaveBeenCalled();
   });
@@ -71,7 +71,7 @@ describe('route data queries', () => {
     const reviewData = { entries: [], reviewKind: 'vocabulary' };
     mocks.loadReviewDeckData.mockResolvedValue(reviewData);
 
-    await expect(reviewPracticeDescriptor('u1', 'vocabulary').load()).resolves.toBe(reviewData);
+    await expect(loadReviewPracticeData('u1', 'vocabulary')).resolves.toBe(reviewData);
 
     expect(mocks.loadReviewDeckData).toHaveBeenCalledWith('u1', 'vocabulary');
   });
