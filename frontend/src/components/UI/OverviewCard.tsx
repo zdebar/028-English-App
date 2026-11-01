@@ -21,7 +21,7 @@ function getOverviewCardButtonContent(
 ): ReactNode {
   if (buttonTitle !== undefined) return buttonTitle;
   if (loading) return '';
-  return <DelayedNotification>{TEXTS.notAvailable}</DelayedNotification>;
+  return <DelayedNotification message={TEXTS.notAvailable} />;
 }
 
 async function confirmOverviewCardAction(

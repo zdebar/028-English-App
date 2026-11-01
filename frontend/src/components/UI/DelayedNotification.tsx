@@ -1,28 +1,25 @@
 import Delayed from './Delayed';
 import Notification from './Notification';
 import { TEXTS } from '@/locales/cs';
-import type { JSX, ReactNode } from 'react';
+import type { JSX } from 'react';
 
 type DelayedNotificationProps = Readonly<{
   message?: string;
   timeDelay?: number;
   className?: string;
-  children?: ReactNode;
 }>;
 
 /**
- * Shows a notification after a short delay (for loading or info states).
- * If children are provided, they are rendered inside Notification instead of the default message.
+ * Shows a text notification after a short delay.
  */
 export default function DelayedNotification({
   message = TEXTS.loadingMessage,
   timeDelay,
   className = '',
-  children,
 }: DelayedNotificationProps): JSX.Element {
   return (
     <Delayed timeDelay={timeDelay} className="w-full">
-      <Notification className={className}>{children ?? message}</Notification>
+      <Notification className={className}>{message}</Notification>
     </Delayed>
   );
 }

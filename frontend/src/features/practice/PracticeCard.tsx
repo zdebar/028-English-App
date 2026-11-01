@@ -3,7 +3,7 @@ import { usePracticeDeck } from './hooks/use-practice-deck';
 import PracticeSessionCard, { type PracticeDetail } from './PracticeSessionCard';
 import PracticeEmptyState from './PracticeEmptyState';
 import { TEXTS } from '@/locales/cs';
-import DelayedMessage from '@/components/UI/DelayedMessage';
+import DelayedNotification from '@/components/UI/DelayedNotification';
 import { useToastStore } from '../toast/use-toast-store';
 import { useQueryErrorToast } from '@/features/logging/use-query-error-toast';
 import { useCallback, useEffect, useRef } from 'react';
@@ -74,7 +74,7 @@ export default function PracticeCard({ initialData }: PracticeCardProps) {
   useQueryErrorToast(error, 'Failed to fetch practice deck');
 
   if (loading && !currentItem) {
-    return <DelayedMessage />;
+    return <DelayedNotification />;
   }
 
   if (finishedReview) return null;

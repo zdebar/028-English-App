@@ -1,5 +1,5 @@
 import { useAuthStore } from '@/features/auth/use-auth-store';
-import DelayedMessage from '@/components/UI/DelayedMessage';
+import DelayedNotification from '@/components/UI/DelayedNotification';
 import Dashboard from '@/features/dashboard/Dashboard';
 import { ROUTES } from '@/config/routes.config';
 import { TEXTS } from '@/locales/cs';
@@ -42,7 +42,7 @@ export default function Home(): JSX.Element {
   if (authLoading) {
     return (
       <div className="card-width mt-20 w-full">
-        <DelayedMessage />
+        <DelayedNotification />
       </div>
     );
   }

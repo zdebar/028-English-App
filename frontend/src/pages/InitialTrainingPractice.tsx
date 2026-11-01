@@ -1,4 +1,4 @@
-import DelayedMessage from '@/components/UI/DelayedMessage';
+import DelayedNotification from '@/components/UI/DelayedNotification';
 import Notification from '@/components/UI/Notification';
 import { useAuthStore } from '@/features/auth/use-auth-store';
 import { useQueryErrorToast } from '@/features/logging/use-query-error-toast';
@@ -25,7 +25,7 @@ function InitialTrainingContent({
   introDismissed: boolean;
   dismissIntro: () => void;
 }>): JSX.Element | null {
-  if (deck.loading) return <DelayedMessage />;
+  if (deck.loading) return <DelayedNotification />;
   if (deck.isComplete) return null;
   if (!deck.currentItem) return <PracticeEmptyState />;
 

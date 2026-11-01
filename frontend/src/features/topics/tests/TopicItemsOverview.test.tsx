@@ -97,7 +97,7 @@ vi.mock('@/locales/cs', () => ({
 }));
 
 vi.mock('@/components/UI/DelayedNotification', () => ({
-  default: ({ children, message }: any) => <div>{children ?? message}</div>,
+  default: ({ message }: any) => <div>{message}</div>,
 }));
 
 vi.mock('@/components/UI/Notification', () => ({

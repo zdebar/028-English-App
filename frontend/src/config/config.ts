@@ -64,12 +64,11 @@ const config = {
   },
 
   loading: {
-    dataStateDelayMs: 300, // Delay before showing loading indicator for data views
+    dataStateDelayMs: 300, // Delay before showing loading or status messages
   },
 
   buttons: {
     minLoadingTime: 400, // Minimum loading time for loading buttons in milliseconds
-    loadingMessageDelay: 300, // Delay before showing loading message in milliseconds
   },
 };
 

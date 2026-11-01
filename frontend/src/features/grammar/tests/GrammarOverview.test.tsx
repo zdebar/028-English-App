@@ -123,7 +123,7 @@ vi.mock('@/components/UI/buttons/ListButton', () => ({
 }));
 
 vi.mock('@/components/UI/DelayedNotification', () => ({
-  default: ({ children }: any) => <div>{children}</div>,
+  default: ({ message }: any) => <div>{message}</div>,
 }));
 
 vi.mock('@/components/UI/PropertyView', () => ({

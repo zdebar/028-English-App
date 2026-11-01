@@ -14,7 +14,7 @@ type DelayedProps = Readonly<
  * @param timeDelay Delay before showing the content (ms).
  */
 export default function Delayed({
-  timeDelay = config.buttons.loadingMessageDelay,
+  timeDelay = config.loading.dataStateDelayMs,
   children,
   ...rest
 }: DelayedProps): JSX.Element | null {

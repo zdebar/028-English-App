@@ -92,7 +92,6 @@ vi.mock('@/config/config', () => ({
       audioDelay: 300,
     },
     srs: { intervals: Array.from({ length: 8 }) },
-    buttons: { loadingMessageDelay: 300 },
     loading: { dataStateDelayMs: 1000 },
   },
 }));

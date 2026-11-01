@@ -89,7 +89,7 @@ vi.mock('@/features/logging/monitoring-handler', () => ({
 }));
 
 vi.mock('@/components/UI/DelayedNotification', () => ({
-  default: ({ children }: any) => <div>{children ?? 'Loading'}</div>,
+  default: ({ message }: any) => <div>{message ?? 'Loading'}</div>,
 }));
 
 vi.mock('@/locales/cs', () => ({

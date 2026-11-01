@@ -1,5 +1,5 @@
 import App from '@/App';
-import DelayedMessage from '@/components/UI/DelayedMessage';
+import DelayedNotification from '@/components/UI/DelayedNotification';
 import RouteDataError from '@/components/utils/route-data-error';
 import ProtectedLayout from '@/components/utils/protected-laout';
 import { ROUTES } from '@/config/routes.config';
@@ -46,7 +46,7 @@ export async function protectedLoader() {
 }
 
 function InitialLoadingFallback() {
-  return <DelayedMessage className="mt-20" />;
+  return <DelayedNotification className="mt-20" />;
 }
 
 async function requireUserId(): Promise<string> {
