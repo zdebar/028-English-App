@@ -7,11 +7,17 @@ import type { ButtonHTMLAttributes, JSX } from 'react';
 import { useNavigate } from 'react-router-dom';
 import StyledButton from './StyledButton';
 
-type CloseButtonProps = Readonly<{
-  onClick?: () => void;
-  navigateTo?: string;
-}> &
-  ButtonHTMLAttributes<HTMLButtonElement>;
+type CloseButtonProps = Readonly<
+  Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'onClick'> & {
+    onClick?: () => void;
+    navigateTo?: string;
+  }
+>;
+
+const DEFAULT_CLOSE_TITLE = [
+  TEXTS.close,
+  ...KEYBOARD_LISTENERS.Exit.map((key) => `(${key})`),
+].join(' ');
 
 /**
  * Button component for closing dialogs.
@@ -24,6 +30,9 @@ type CloseButtonProps = Readonly<{
 export default function CloseButton({
   onClick,
   navigateTo,
+  className = '',
+  title,
+  'aria-label': ariaLabel,
   ...rest
 }: CloseButtonProps): JSX.Element {
   const navigate = useNavigate();
@@ -38,18 +47,19 @@ export default function CloseButton({
     }
   };
   useKey({
-    onKeyPress: () => handleClose(),
+    onKeyPress: handleClose,
     keys: KEYBOARD_LISTENERS.Exit,
     enabled: !isOverlayOpen,
   });
 
   return (
     <StyledButton
-      type="button"
-      className={`w-button h-button shrink-0 grow-0 ${rest.className}`}
-      onClick={handleClose}
-      title={TEXTS.close + ' ' + KEYBOARD_LISTENERS.Exit.map((key) => '(' + key + ')').join(' ')}
       {...rest}
+      type="button"
+      className={`w-button h-button shrink-0 grow-0 ${className}`}
+      onClick={handleClose}
+      aria-label={ariaLabel ?? TEXTS.close}
+      title={title ?? DEFAULT_CLOSE_TITLE}
     >
       <CloseIcon />
     </StyledButton>
