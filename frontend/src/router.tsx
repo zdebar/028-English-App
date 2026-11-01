@@ -1,7 +1,7 @@
 import App from '@/App';
 import DelayedNotification from '@/components/UI/DelayedNotification';
 import RouteDataError from '@/components/utils/route-data-error';
-import ProtectedLayout from '@/components/utils/protected-laout';
+import ProtectedLayout from '@/components/utils/protected-layout';
 import { ROUTES } from '@/config/routes.config';
 import { waitForAuthReady } from '@/features/auth/auth-lifecycle';
 import { useAuthStore } from '@/features/auth/use-auth-store';

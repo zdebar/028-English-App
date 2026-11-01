@@ -22,7 +22,7 @@ vi.mock('react-router-dom', () => ({
   Outlet: () => <div data-testid="outlet" />,
 }));
 
-import ProtectedLayout from '@/components/utils/protected-laout';
+import ProtectedLayout from '@/components/utils/protected-layout';
 
 describe('ProtectedLayout', () => {
   beforeEach(() => {
