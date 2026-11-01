@@ -61,9 +61,9 @@ export async function syncUserItemsFromRemote(
   const localItems = localSnapshot
     .filter((item) => isWithinSyncWindow(item, lastSyncedAt, newSyncedAt))
     .map(convertLocalToExport);
-  reportInfo(`Completed ${localItems.length} UserItems push to remote`);
 
   const updatedItems = await syncWithRemote(userId, localItems, lastSyncedAt, newSyncedAt);
+  reportInfo(`Completed ${localItems.length} UserItems push to remote`);
   const { toUpsert, toDelete } = splitDeleted(updatedItems);
   let preservedConcurrentChanges = false;
 
@@ -174,7 +174,24 @@ function hasChangedSinceSnapshot(
   snapshotByKey: ReadonlyMap<string, UserItemLocal>,
 ): boolean {
   const snapshot = snapshotByKey.get(getUserItemKey(item));
-  return snapshot?.updated_at !== item.updated_at;
+  if (snapshot?.updated_at !== item.updated_at) return true;
+  return !areUserItemsEqual(snapshot, item);
+}
+
+function areUserItemsEqual(left: UserItemLocal, right: UserItemLocal): boolean {
+  // updated_at has millisecond precision, so compare the complete row when timestamps match.
+  const leftValues = left as unknown as Record<string, unknown>;
+  const rightValues = right as unknown as Record<string, unknown>;
+  const fields = new Set([...Object.keys(leftValues), ...Object.keys(rightValues)]);
+
+  return [...fields].every((field) => areSnapshotValuesEqual(leftValues[field], rightValues[field]));
+}
+
+function areSnapshotValuesEqual(left: unknown, right: unknown): boolean {
+  if (Array.isArray(left) && Array.isArray(right)) {
+    return left.length === right.length && left.every((value, index) => value === right[index]);
+  }
+  return left === right;
 }
 
 function getUserItemKey(item: Pick<UserItemLocal, 'user_id' | 'item_id'>): string {
