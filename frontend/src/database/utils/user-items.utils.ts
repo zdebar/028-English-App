@@ -1,4 +1,5 @@
 import type { UserItemLocal } from '@/types/user-item.types';
+import type { ReviewDirection } from '@/types/practice.types';
 import config from '@/config/config';
 
 const NULL_DATE = config.database.nullReplacementDate;
@@ -31,7 +32,11 @@ function getRandomUnitInterval(): number {
  *
  * @param item Local user item object to reset in place.
  */
-export function resetUserItem(item: UserItemLocal, dateTime: string = new Date().toISOString(), direction: 'cz_to_en' | 'en_to_cz' = 'cz_to_en'): void {
+export function resetUserItem(
+  item: UserItemLocal,
+  dateTime: string = new Date().toISOString(),
+  direction: ReviewDirection = 'cz_to_en',
+): void {
   if (direction === 'en_to_cz') {
     item.next_at_en_to_cz = dateTime;
     item.mastered_at_en_to_cz = NULL_DATE;
