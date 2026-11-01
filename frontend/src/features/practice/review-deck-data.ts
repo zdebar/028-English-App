@@ -24,26 +24,14 @@ export async function loadReviewDeckData(
   const now = new Date().toISOString();
   const allowDirectionFallback = reviewDirection === undefined;
   let selectedDirection = reviewDirection ?? 'cz_to_en';
+  let prefetchedItems: readonly UserItemLocal[];
+  let otherDirectionItems: readonly UserItemLocal[];
+
   try {
-    let [prefetchedItems, otherDirectionItems] = await Promise.all([
+    [prefetchedItems, otherDirectionItems] = await Promise.all([
       getPrefetchedReviewItems(userId, reviewKind, selectedDirection),
       getPrefetchedReviewItems(userId, reviewKind, getOtherReviewDirection(selectedDirection)),
     ]);
-    let entries = prefetchedItems.filter((item) => isReviewItemDue(item, now, selectedDirection));
-    if (entries.length === 0 && allowDirectionFallback && selectedDirection === 'cz_to_en') {
-      selectedDirection = 'en_to_cz';
-      [prefetchedItems, otherDirectionItems] = [otherDirectionItems, prefetchedItems];
-      entries = prefetchedItems.filter((item) => isReviewItemDue(item, now, selectedDirection));
-    }
-    return {
-      entries: entries.map(toPracticeDeckEntry),
-      prefetchedEntries: prefetchedItems.map(toPracticeDeckEntry),
-      availabilityCheckedAt: now,
-      abandoned: entries.length === 0,
-      reviewKind,
-      reviewDirection: selectedDirection,
-      availableCount: countDueItems(prefetchedItems, otherDirectionItems, now),
-    };
   } catch {
     const [czToEnItems, enToCzItems] = await db.transaction('r', db.user_items, () => Promise.all([
       UserItem.getReviewDeck(userId, reviewKind, now, 'cz_to_en'),
@@ -65,6 +53,22 @@ export async function loadReviewDeckData(
       availableCount: czToEnItems.length + enToCzItems.length,
     };
   }
+
+  let entries = prefetchedItems.filter((item) => isReviewItemDue(item, now, selectedDirection));
+  if (entries.length === 0 && allowDirectionFallback && selectedDirection === 'cz_to_en') {
+    selectedDirection = 'en_to_cz';
+    [prefetchedItems, otherDirectionItems] = [otherDirectionItems, prefetchedItems];
+    entries = prefetchedItems.filter((item) => isReviewItemDue(item, now, selectedDirection));
+  }
+  return {
+    entries: entries.map(toPracticeDeckEntry),
+    prefetchedEntries: prefetchedItems.map(toPracticeDeckEntry),
+    availabilityCheckedAt: now,
+    abandoned: entries.length === 0,
+    reviewKind,
+    reviewDirection: selectedDirection,
+    availableCount: countDueItems(prefetchedItems, otherDirectionItems, now),
+  };
 }
 
 function getOtherReviewDirection(direction: ReviewDirection): ReviewDirection {
