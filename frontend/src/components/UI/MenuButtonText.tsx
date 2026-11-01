@@ -6,5 +6,5 @@ type MenuButtonTextProps = Readonly<{
 }>;
 
 export function MenuButtonText({ children, className = '' }: MenuButtonTextProps) {
-  return <p className={`mx-auto w-40 text-left ${className}`}>{children}</p>;
+  return <span className={`mx-auto block w-40 text-left ${className}`}>{children}</span>;
 }
