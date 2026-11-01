@@ -24,7 +24,7 @@ export function NavigationButton({
       onClick={(event) => {
         onClick?.(event);
         if (event.defaultPrevented) return;
-        navigate(to, navigateOptions);
+        void navigate(to, navigateOptions);
       }}
     >
       {children}
@@ -32,6 +32,6 @@ export function NavigationButton({
   );
 }
 
-export function NavigationLink({ to, ...rest }: LinkProps) {
+export function NavigationLink({ to, ...rest }: Readonly<LinkProps>) {
   return <Link to={to} {...rest} />;
 }
