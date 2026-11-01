@@ -1,17 +1,17 @@
 import type { ReactNode, HTMLAttributes, JSX } from 'react';
 import CloseButton from '@/components/UI/buttons/CloseButton';
 
-type CardHeaderProps = HTMLAttributes<HTMLDivElement> &
-  Readonly<{
+type CardHeaderProps = Readonly<
+  Omit<HTMLAttributes<HTMLDivElement>, 'children' | 'onClose'> & {
     children: ReactNode;
     onClose?: () => void;
-    className?: string;
-  }>;
+  }
+>;
 
 /**
  * CardHeader component for displaying a header with a close button.
  * @param children - Content to display in the header, typically a title or heading.
- * @param onClose - Callback function to invoke when the close button is clicked.
+ * @param onClose - Optional close callback. Without it, the close button uses its default history-back behavior.
  * @param className - Additional CSS classes for custom styling of the header container.
  * @returns A JSX element representing the card header.
  */
