@@ -77,7 +77,7 @@ practice writes, resets, focus, and visibility changes.
 | Dexie IndexedDB | Models under `frontend/src/database/models` | Local read/write store for practice, content, and user progress. |
 | Zustand | Auth, sync, availability, theme, audio, toasts, help, overlay, and pronunciation UI state | Runtime state and cached view data; not the durable progress store. |
 | React state | Current card, reveal state, selected detail, modal state, vocabulary search | Feature-local interaction state. |
-| localStorage | Theme, audio volume, full-sync timestamp, search text, simulation toggle | Small browser-persisted preferences and sync metadata. |
+| localStorage | Theme, audio volume, search text, simulation toggle | Small browser-persisted preferences. |
 | sessionStorage | Temporary anonymous session fallback during Google sign-in | Short-lived OAuth recovery data. |
 
 ## Page Composition

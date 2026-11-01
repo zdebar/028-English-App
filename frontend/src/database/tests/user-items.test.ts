@@ -201,7 +201,7 @@ describe('UserItem', () => {
     });
     mocks.rpc.mockResolvedValue({ data: [apiItem], error: null });
 
-    await UserItem.syncFromRemote('u1', true);
+    await UserItem.syncFromRemote('u1');
 
     expect(mocks.bulkPut).toHaveBeenCalledWith([
       expect.objectContaining({ czech_description: 'Pozdrav' }),
@@ -352,7 +352,7 @@ describe('UserItem', () => {
       return { data: [toApiItem(snapshot, { progress_cz_to_en: 2 })], error: null };
     });
 
-    await UserItem.syncFromRemote('u1', false);
+    await UserItem.syncFromRemote('u1');
 
     expect(mocks.rpc).toHaveBeenCalledWith(
       'upsert_fetch_user_items',
@@ -365,7 +365,7 @@ describe('UserItem', () => {
     expect(mocks.currentItems).toEqual([changedLocally]);
 
     mocks.rpc.mockResolvedValue({ data: [], error: null });
-    await UserItem.syncFromRemote('u1', false);
+    await UserItem.syncFromRemote('u1');
 
     expect(mocks.rpc).toHaveBeenNthCalledWith(
       2,
@@ -380,7 +380,7 @@ describe('UserItem', () => {
     );
   });
 
-  it('preserves a newly created local row during full synchronization', async () => {
+  it('preserves a newly created local row during date-based synchronization', async () => {
     const snapshot = makeItem({ item_id: 1, updated_at: '2026-01-10T00:00:00.000Z' });
     const createdDuringSync = makeItem({
       item_id: 2,
@@ -388,7 +388,7 @@ describe('UserItem', () => {
     });
     mocks.currentItems = [snapshot];
     mocks.getSyncTimestamps.mockResolvedValue({
-      lastSyncedAt: '1970-01-01T00:00:00.000Z',
+      lastSyncedAt: '2025-01-01T00:00:00.000Z',
       newSyncedAt: '2026-02-01T00:00:00.000Z',
     });
     mocks.rpc.mockImplementation(async () => {
@@ -396,9 +396,9 @@ describe('UserItem', () => {
       return { data: [toApiItem(snapshot)], error: null };
     });
 
-    await UserItem.syncFromRemote('u1', true);
+    await UserItem.syncFromRemote('u1');
 
-    expect(mocks.bulkDelete).toHaveBeenCalledWith([['u1', 1]]);
+    expect(mocks.bulkDelete).not.toHaveBeenCalled();
     expect(mocks.bulkPut).toHaveBeenCalledWith([expect.objectContaining({ item_id: 1 })]);
     expect(mocks.markAsSynced).not.toHaveBeenCalled();
   });

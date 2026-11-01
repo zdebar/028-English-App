@@ -4,7 +4,6 @@ const config = {
     releaseByFeature: {} as Record<string, boolean>,
   },
   sync: {
-    fullSyncInterval: 7 * 24 * 60 * 60 * 1000, // Interval for performing a full sync in milliseconds (7 days)
     periodicSyncInterval: 24 * 60 * 60 * 1000, // Interval for periodic sync in milliseconds (1 day)
     scoreResetCheckInterval: 60 * 1000, // Interval for resetting daily scores in milliseconds (1 minute)
   },

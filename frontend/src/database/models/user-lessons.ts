@@ -1,7 +1,10 @@
 import { supabaseInstance } from '@/config/supabase.config';
+import SyncMetadata from '@/database/models/metadata';
 import { db } from '@/database/models/db';
+import { getSyncTimestamps } from '@/database/utils/sync-generic.utils';
 import type { UserLessonType } from '@/types/generic.types';
 import { SupabaseError } from '@/types/error.types';
+import { TableName } from '@/types/table.types';
 import { Entity } from 'dexie';
 import type AppDB from './app-db';
 import config from '@/config/config';
@@ -70,15 +73,18 @@ export default class UserLesson extends Entity<AppDB> implements UserLessonType 
   }
 
   /**
-   * Reconciles the full lesson-start history between IndexedDB and Supabase.
+   * Synchronizes lesson starts newer than the stored date checkpoint.
    * @returns Number of remote lesson-start rows fetched.
    */
   static async syncFromRemote(userId: string): Promise<number> {
-    const [remoteResult, localRows] = await Promise.all([
+    const { lastSyncedAt, newSyncedAt } = await getSyncTimestamps(TableName.UserLessons, userId);
+    const [remoteResult, localSnapshot] = await Promise.all([
       supabaseInstance
         .from('user_lessons')
         .select('user_id, lesson_id, started_at')
         .eq('user_id', userId)
+        .gt('started_at', lastSyncedAt)
+        .lte('started_at', newSyncedAt)
         .order('started_at'),
       db.user_lessons.where('user_id').equals(userId).toArray(),
     ]);
@@ -91,20 +97,30 @@ export default class UserLesson extends Entity<AppDB> implements UserLessonType 
       ...row,
       started_at: new Date(row.started_at).toISOString(),
     }));
-    if (localRows.length > 0) {
-      const { error } = await supabaseInstance.from('user_lessons').upsert(localRows, {
+    const localRowsToPush = localSnapshot.filter((row) =>
+      isWithinSyncWindow(row.started_at, lastSyncedAt, newSyncedAt),
+    );
+    if (localRowsToPush.length > 0) {
+      const { error } = await supabaseInstance.from('user_lessons').upsert(localRowsToPush, {
         onConflict: 'user_id,lesson_id,started_at',
         ignoreDuplicates: true,
       });
       if (error) throw new SupabaseError('Failed to sync user lesson history to Supabase', error);
     }
 
-    await db.transaction('rw', db.user_lessons, async () => {
+    let hasUnpushedConcurrentRows = false;
+    await db.transaction('rw', db.user_lessons, db.metadata, async () => {
       const currentLocalRows = await db.user_lessons.where('user_id').equals(userId).toArray();
-      const rowsByKey = new Map(
-        [...remoteRows, ...localRows, ...currentLocalRows].map((row) => [getUserLessonKey(row), row]),
+      const initialKeys = new Set(localSnapshot.map(getUserLessonKey));
+      hasUnpushedConcurrentRows = currentLocalRows.some(
+        (row) =>
+          isWithinSyncWindow(row.started_at, lastSyncedAt, newSyncedAt) &&
+          !initialKeys.has(getUserLessonKey(row)),
       );
-      if (rowsByKey.size > 0) await db.user_lessons.bulkPut([...rowsByKey.values()]);
+      if (remoteRows.length > 0) await db.user_lessons.bulkPut(remoteRows);
+      if (!hasUnpushedConcurrentRows) {
+        await SyncMetadata.markAsSynced(TableName.UserLessons, newSyncedAt, userId);
+      }
     });
     return remoteRows.length;
   }
@@ -117,4 +133,8 @@ export default class UserLesson extends Entity<AppDB> implements UserLessonType 
 
 function getUserLessonKey(row: UserLessonType): string {
   return `${row.user_id}:${row.lesson_id}:${row.started_at}`;
+}
+
+function isWithinSyncWindow(startedAt: string, lastSyncedAt: string, newSyncedAt: string): boolean {
+  return startedAt > lastSyncedAt && startedAt <= newSyncedAt;
 }

@@ -2,8 +2,6 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import config from '@/config/config';
 
 const mocks = vi.hoisted(() => ({
-  getFullSyncTime: vi.fn(),
-  setFullSyncTime: vi.fn(),
   initDbMappings: vi.fn(),
   summarizeSettledResults: vi.fn(),
   userItemSyncFromRemote: vi.fn(),
@@ -19,9 +17,7 @@ const mocks = vi.hoisted(() => ({
 
 vi.mock('@/config/config', () => ({
   default: {
-    sync: {
-      fullSyncInterval: 1000,
-    },
+    sync: {},
     database: {
       nullReplacementDate: '9999-12-31T23:59:59+00:00',
     },
@@ -29,11 +25,6 @@ vi.mock('@/config/config', () => ({
       archiveBucketName: 'archive-bucket',
     },
   },
-}));
-
-vi.mock('@/database/utils/sync-time.utils', () => ({
-  getFullSyncTime: (...args: unknown[]) => mocks.getFullSyncTime(...args),
-  setFullSyncTime: (...args: unknown[]) => mocks.setFullSyncTime(...args),
 }));
 
 vi.mock('@/database/models/db-init', () => ({
@@ -108,7 +99,6 @@ describe('data-sync.utils', () => {
   beforeEach(() => {
     vi.clearAllMocks();
 
-    mocks.getFullSyncTime.mockReturnValue(0);
     mocks.initDbMappings.mockResolvedValue(undefined);
     mocks.summarizeSettledResults.mockReturnValue({ total: 8, success: 8, failed: 0 });
 
@@ -127,36 +117,16 @@ describe('data-sync.utils', () => {
     vi.restoreAllMocks();
   });
 
-  it('dataSync runs full sync and stores full sync time', async () => {
-    vi.spyOn(Date, 'now').mockReturnValue(5000);
-    mocks.getFullSyncTime.mockReturnValue(0);
-
+  it('dataSync runs date-based sync for each table', async () => {
     await dataSync('u1');
 
-    expect(mocks.userItemSyncFromRemote).toHaveBeenCalledWith('u1', true);
-    expect(mocks.userLessonSyncFromRemote).toHaveBeenCalledWith('u1', true);
-    expect(mocks.groupsSyncFromRemote).toHaveBeenCalledWith(true);
-    expect(mocks.groupItemsSyncFromRemote).toHaveBeenCalledWith(true);
-    expect(mocks.groupRelationsSyncFromRemote).toHaveBeenCalledWith(true);
-    expect(mocks.levelsSyncFromRemote).toHaveBeenCalledWith(true);
-    expect(mocks.lessonsSyncFromRemote).toHaveBeenCalledWith(true);
-    expect(mocks.setFullSyncTime).toHaveBeenCalledWith('u1', 5000);
-  });
-
-  it('dataSync runs partial sync and does not store full sync time', async () => {
-    vi.spyOn(Date, 'now').mockReturnValue(500);
-    mocks.getFullSyncTime.mockReturnValue(0);
-
-    await dataSync('u1');
-
-    expect(mocks.userItemSyncFromRemote).toHaveBeenCalledWith('u1', false);
-    expect(mocks.userLessonSyncFromRemote).toHaveBeenCalledWith('u1', false);
-    expect(mocks.groupsSyncFromRemote).toHaveBeenCalledWith(false);
-    expect(mocks.groupItemsSyncFromRemote).toHaveBeenCalledWith(false);
-    expect(mocks.groupRelationsSyncFromRemote).toHaveBeenCalledWith(false);
-    expect(mocks.levelsSyncFromRemote).toHaveBeenCalledWith(false);
-    expect(mocks.lessonsSyncFromRemote).toHaveBeenCalledWith(false);
-    expect(mocks.setFullSyncTime).not.toHaveBeenCalled();
+    expect(mocks.userItemSyncFromRemote).toHaveBeenCalledWith('u1');
+    expect(mocks.userLessonSyncFromRemote).toHaveBeenCalledWith('u1');
+    expect(mocks.groupsSyncFromRemote).toHaveBeenCalledWith();
+    expect(mocks.groupItemsSyncFromRemote).toHaveBeenCalledWith();
+    expect(mocks.groupRelationsSyncFromRemote).toHaveBeenCalledWith();
+    expect(mocks.levelsSyncFromRemote).toHaveBeenCalledWith();
+    expect(mocks.lessonsSyncFromRemote).toHaveBeenCalledWith();
   });
 
   it('dataSync throws when user sync reports rejected results', async () => {
@@ -165,11 +135,11 @@ describe('data-sync.utils', () => {
     await expect(dataSync('u1')).rejects.toThrow('Data synchronization error');
   });
 
-  it('dataSyncBeforeSessionEnd syncs only user stores in partial mode', async () => {
+  it('dataSyncBeforeSessionEnd syncs only user stores', async () => {
     await dataSyncBeforeSessionEnd('u1');
 
-    expect(mocks.userItemSyncFromRemote).toHaveBeenCalledWith('u1', false);
-    expect(mocks.userLessonSyncFromRemote).toHaveBeenCalledWith('u1', false);
+    expect(mocks.userItemSyncFromRemote).toHaveBeenCalledWith('u1');
+    expect(mocks.userLessonSyncFromRemote).toHaveBeenCalledWith('u1');
   });
 
   it('dataSyncBeforeSessionEnd does nothing when no auth session exists', async () => {

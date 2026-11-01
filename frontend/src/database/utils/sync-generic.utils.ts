@@ -24,22 +24,18 @@ export function splitDeleted<T extends { deleted_at: string | null }>(
 }
 
 /**
- * Resolves the timestamp window for an incremental or full sync.
+ * Resolves the stored sync checkpoint and a new timestamp for the current sync.
  *
- * @param doFullSync When true, uses the configured epoch start date instead of stored metadata.
  * @param tableName Table whose sync metadata should be read.
  * @param userId Required for user-specific tables and omitted for shared tables.
  * @returns The lower bound for remote changes and the new sync timestamp to persist after success.
  * @throws Error from metadata validation when userId usage does not match the table type.
  */
 export async function getSyncTimestamps(
-  doFullSync: boolean,
   tableName: TableName,
   userId?: string,
 ): Promise<{ lastSyncedAt: string; newSyncedAt: string }> {
-  const lastSyncedAt = doFullSync
-    ? config.database.epochStartDate
-    : await SyncMetadata.getSyncedAt(tableName, userId);
+  const lastSyncedAt = await SyncMetadata.getSyncedAt(tableName, userId);
   const newSyncedAt = new Date().toISOString();
   return { lastSyncedAt, newSyncedAt };
 }

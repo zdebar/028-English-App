@@ -18,7 +18,7 @@ sources. Start here when a change crosses a route, model, store, or sync boundar
 | Session initialization | `startAuthLifecycle`, `useAuthStore` | Restores and validates the Supabase session, handles OAuth callbacks, and keeps auth state current. |
 | Anonymous sign-in | `AnonymousSigninButton`, `anonymous-auth-service` | Creates a guest account for trying the app. |
 | Google sign-in and conversion | `GoogleAuthButton`, `ConvertAnonymousUserButton`, `anonymous-session-fallback` | Signs in or links a guest account. A short-lived sessionStorage fallback supports OAuth recovery and identity-link conflict handling. |
-| Profile | `/profile`, `Profile` | Shows the account name/email and offers full sync and sign-out/delete actions. |
+| Profile | `/profile`, `Profile` | Shows the account name/email and offers sign-out/delete actions. |
 | Account deletion | `DeleteUserButton`, `useAuthStore`, `hard_delete_user` RPC | Permanently deletes the authenticated Supabase user and their linked data after confirmation. |
 
 ## Home
@@ -63,7 +63,6 @@ do not correspond to separate current content tables.
 | --- | --- | --- |
 | Local-first data | Dexie models under `frontend/src/database/models` | Practice and overview features read local content and user records. User progress writes land in IndexedDB first. |
 | Periodic sync | `usePeriodicSync`, `dataSync` | Pushes local user changes, pulls shared/user updates, refreshes practice availability, and then syncs audio archives. |
-| Full sync | `Profile`, `dataSync(userId, true)` | Reconciles local and remote records and refreshes the audio archive cache. |
 | Logout/unmount sync | `handleLogout`, `dataSyncBeforeSessionEnd` | Attempts an incremental sync of user items and lesson starts when a valid session exists. |
 | Audio | `useAudioManager`, `AudioRecord`, `AudioMetadata` | Downloads audio from Supabase Storage on demand, caches blobs in IndexedDB, and refreshes changed archives. |
 

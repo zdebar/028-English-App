@@ -1,4 +1,3 @@
-import config from '@/config/config';
 import { initDbMappings } from '@/database/models/db-init';
 import GroupItem from '@/database/models/group-items';
 import GroupRelation from '@/database/models/group-relations';
@@ -9,7 +8,6 @@ import Notes from '@/database/models/notes';
 import UserItem from '@/database/models/user-items';
 import UserLesson from '@/database/models/user-lessons';
 import { supabaseInstance } from '@/config/supabase.config';
-import { getFullSyncTime, setFullSyncTime } from '@/database/utils/sync-time.utils';
 import { summarizeSettledResults } from '@/features/logging/logging.utils';
 import { reportInfo } from '@/features/logging/monitoring-handler';
 import { assertNonEmptyString } from '@/utils/assertions.utils';
@@ -25,20 +23,15 @@ export async function dataSync(userId: string): Promise<void> {
   assertNonEmptyString(userId, 'userId');
 
   initDbMappings();
-  // Step 1: Determine if a full sync is needed
-  const now = Date.now();
-  const lastFullSync = getFullSyncTime(userId);
-  const doFullSync = now - lastFullSync > config.sync.fullSyncInterval;
-
-  // Step 2: Sync shared reference data and user-owned progress in parallel.
+  // Sync shared reference data and user-owned progress in parallel.
   const syncTasks = [
-    { tableName: 'Groups', sync: () => Groups.syncFromRemote(doFullSync) },
-    { tableName: 'GroupItems', sync: () => GroupItem.syncFromRemote(doFullSync) },
-    { tableName: 'GroupRelations', sync: () => GroupRelation.syncFromRemote(doFullSync) },
-    { tableName: 'Levels', sync: () => Levels.syncFromRemote(doFullSync) },
-    { tableName: 'Lessons', sync: () => Lessons.syncFromRemote(doFullSync) },
-    { tableName: 'Notes', sync: () => Notes.syncFromRemote(doFullSync) },
-    { tableName: 'UserItems', sync: () => UserItem.syncFromRemote(userId, doFullSync) },
+    { tableName: 'Groups', sync: () => Groups.syncFromRemote() },
+    { tableName: 'GroupItems', sync: () => GroupItem.syncFromRemote() },
+    { tableName: 'GroupRelations', sync: () => GroupRelation.syncFromRemote() },
+    { tableName: 'Levels', sync: () => Levels.syncFromRemote() },
+    { tableName: 'Lessons', sync: () => Lessons.syncFromRemote() },
+    { tableName: 'Notes', sync: () => Notes.syncFromRemote() },
+    { tableName: 'UserItems', sync: () => UserItem.syncFromRemote(userId) },
     { tableName: 'UserLessons', sync: () => UserLesson.syncFromRemote(userId) },
   ];
 
@@ -66,9 +59,6 @@ export async function dataSync(userId: string): Promise<void> {
   if (summary.failed > 0) {
     throw new Error('Data synchronization error');
   }
-  if (doFullSync) {
-    setFullSyncTime(userId, now);
-  }
 }
 
 /**
@@ -85,7 +75,7 @@ export async function dataSyncBeforeSessionEnd(userId: string): Promise<void> {
   }
 
   const results = await settleSyncWithAuthRecovery(userId, [
-    () => UserItem.syncFromRemote(userId, false),
+    () => UserItem.syncFromRemote(userId),
     () => UserLesson.syncFromRemote(userId),
   ]);
 

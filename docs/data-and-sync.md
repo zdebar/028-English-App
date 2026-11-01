@@ -1,6 +1,6 @@
 # Data And Sync
 
-App works as PWA applicatin with frontend data storage inside IndexedDB. Backend on Supabase serves as secure longterm storage. 
+The app runs as a PWA with frontend data in IndexedDB and Supabase as the remote store.
 
 | Place | Storage type |
 | --- | --- |
@@ -16,24 +16,25 @@ App works as PWA applicatin with frontend data storage inside IndexedDB. Backend
 | Lesson start | Save each `user-lesson` immediately after starting each initial training | 
 | Progress reset | Update the affected local `user_items` rows. | 
 
-## Sync Lifecycle
+## Date-Based Sync
 
-`frontend/src/database/utils/data-sync.utils.ts` synchronizes `groups`, `group-items`,
-`group-relations`, `levels`, `lessons`, `notes`, `user-items`, `user-lessons`, and `user-settings`.
+`dataSync` synchronizes `groups`, `group_items`, `group_relations`, `levels`,
+`lessons`, `notes`, `user_items`, and `user_lessons`. Each table uses its own
+timestamp in the IndexedDB `metadata` table. When a table has no saved timestamp,
+its first pull starts at the configured epoch date.
 
-`updated_at` - Attribute common for most tables. Determines which record is newer. Records newer than last updated table at `metadata` table is push to backend. Records pulled back with newer `updated_at` are saved to IndexedDB.
-
-`deleted_at` - Attribute common for most tables. Determines which record ws
-
-
+Shared content tables pull rows whose `updated_at` is newer than the stored
+timestamp. Active rows are upserted locally and remote tombstones remove their
+local rows. User items push local changes and merge remote changes within the
+date window, preserving concurrent local edits. Lesson-start history uses
+`started_at` as its cursor and merges local and remote entries in that window.
+Each cursor advances only after the corresponding local write succeeds.
 
 | Moment | Owner | Behavior |
 | --- | --- | --- |
 | User becomes active | `usePeriodicSync` | Warms practice and overview caches and schedules the first sync after three seconds. |
 | Periodic interval | `usePeriodicSync` | Runs `dataSync`; the default interval is one day. |
-| Full sync due | `dataSync` | Uses the per-user localStorage timestamp; the default interval is seven days. |
-| App unmount or logout | `dataSyncBeforeSessionEnd` / `handleLogout` | Best-effort incremental sync of user items and lesson starts when a session exists. |
-| Profile full-sync action | `Profile` | Forces a full data sync, refreshes audio archives, and removes orphaned local audio. |
+| App unmount or logout | `dataSyncBeforeSessionEnd` / `handleLogout` | Best-effort date-based sync of user items and lesson starts when a session exists. |
 
 Overlapping periodic syncs reuse the current promise. A completed data sync
 invalidates and rebuilds practice caches and refreshes Home availability. Audio
@@ -41,16 +42,6 @@ archive sync then checks remote bucket metadata, downloads changed archives,
 updates local audio records, and removes records no longer referenced by items.
 Sync status lives in `useSyncStore`; failure leaves local reads available and
 sets the Home sync warning.
-
-## Full And Incremental Sync
-
-| Mode | Behavior |
-| --- | --- |
-| Full | Reads from the epoch cursor and replaces local shared rows where supported. User-item sync reconciles remote results while preserving changes made during the sync. |
-| Incremental | Pushes local changes newer than the stored cursor, then applies remote changes within the sync window. |
-
-Sync cursors are stored in the local Dexie `metadata` table. The full-sync
-throttle timestamp is stored under `last-full-sync-at_${userId}` in localStorage.
 
 ## Local And Browser Storage
 

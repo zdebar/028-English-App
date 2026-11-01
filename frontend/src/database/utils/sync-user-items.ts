@@ -48,15 +48,8 @@ type UserItemExport = Pick<
 const NULL_DATE = config.database.nullReplacementDate;
 
 /** Pushes local changes, merges the remote response, and saves its sync cursor. */
-export async function syncUserItemsFromRemote(
-  userId: string,
-  doFullSync: boolean,
-): Promise<number> {
-  const { lastSyncedAt, newSyncedAt } = await getSyncTimestamps(
-    doFullSync,
-    TableName.UserItems,
-    userId,
-  );
+export async function syncUserItemsFromRemote(userId: string): Promise<number> {
+  const { lastSyncedAt, newSyncedAt } = await getSyncTimestamps(TableName.UserItems, userId);
   const localSnapshot = await getUserItems(userId);
   const localItems = localSnapshot
     .filter((item) => isWithinSyncWindow(item, lastSyncedAt, newSyncedAt))
@@ -77,12 +70,7 @@ export async function syncUserItemsFromRemote(
     );
     preservedConcurrentChanges = concurrentKeys.size > 0;
 
-    if (doFullSync) {
-      const keysToDelete = currentItems
-        .filter((item) => !concurrentKeys.has(getUserItemKey(item)))
-        .map((item) => [item.user_id, item.item_id] as [string, number]);
-      if (keysToDelete.length > 0) await db.user_items.bulkDelete(keysToDelete);
-    } else if (toDelete.length > 0) {
+    if (toDelete.length > 0) {
       const keysToDelete = toDelete
         .filter((item) => !concurrentKeys.has(getUserItemKey(item)))
         .map((item) => [item.user_id, item.item_id] as [string, number]);

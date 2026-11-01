@@ -20,7 +20,7 @@ interface SyncEntityModelStatic<T extends SyncRow> {
  * Base model for shared lookup tables synced from Supabase into IndexedDB.
  *
  * Subclasses provide the table, table name, entity label, and select list. The shared
- * `syncFromRemote` implementation handles full/incremental pulls, tombstones, and metadata updates.
+ * `syncFromRemote` implementation handles date-based pulls, tombstones, and metadata updates.
  */
 export default abstract class SyncEntityModel extends Entity<AppDB> {
   static readonly syncTable: Dexie.Table<SyncRow, number>;
@@ -29,19 +29,14 @@ export default abstract class SyncEntityModel extends Entity<AppDB> {
   static readonly syncSelect: string;
 
   /**
-   * Synchronizes a shared lookup table from Supabase into IndexedDB.
+   * Synchronizes a shared lookup table from Supabase into IndexedDB using its stored timestamp.
    *
-   * @param doFullSync When true, clears the local table before applying remote rows from the epoch.
-   * Defaults to false for incremental sync using stored metadata.
    * @returns Number of remote rows returned by the query, including tombstones.
    * @throws SupabaseError when the remote select fails.
    * @throws Error when metadata validation fails.
    */
-  static async syncFromRemote<T extends SyncRow>(
-    this: SyncEntityModelStatic<T>,
-    doFullSync: boolean = false,
-  ): Promise<number> {
-    const { lastSyncedAt, newSyncedAt } = await getSyncTimestamps(doFullSync, this.syncTableName);
+  static async syncFromRemote<T extends SyncRow>(this: SyncEntityModelStatic<T>): Promise<number> {
+    const { lastSyncedAt, newSyncedAt } = await getSyncTimestamps(this.syncTableName);
     const { data, error } = await supabaseInstance
       .from(this.syncTableName)
       .select(this.syncSelect)
@@ -57,9 +52,7 @@ export default abstract class SyncEntityModel extends Entity<AppDB> {
     const { toUpsert, toDelete } = splitDeleted(remoteItems);
 
     await db.transaction('rw', this.syncTable, db.metadata, async () => {
-      if (doFullSync) {
-        await this.syncTable.clear();
-      } else if (toDelete.length > 0) {
+      if (toDelete.length > 0) {
         await this.syncTable.bulkDelete(toDelete.map((item) => item.id));
       }
       if (toUpsert.length > 0) {

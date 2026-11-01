@@ -420,8 +420,8 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
   }
 
   /** Pushes local progress and merges remote item updates. */
-  static syncFromRemote(userId: string, doFullSync: boolean): Promise<number> {
-    return syncUserItemsFromRemote(userId, doFullSync);
+  static syncFromRemote(userId: string): Promise<number> {
+    return syncUserItemsFromRemote(userId);
   }
 
   /** Reads due, unmastered CZ-to-EN practice items. */
