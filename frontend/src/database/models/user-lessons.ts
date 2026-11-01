@@ -11,15 +11,20 @@ export default class UserLesson extends Entity<AppDB> implements UserLessonType 
   lesson_id!: number;
   started_at!: string;
 
-  static async recordStart(userId: string, lessonId: number, startedAt: string): Promise<void> {
+  /** Adds a lesson start to the local history. */
+  private static async recordStart(userId: string, lessonId: number, startedAt: string): Promise<void> {
     await db.user_lessons.put({ user_id: userId, lesson_id: lessonId, started_at: startedAt });
   }
 
+  /** Returns lesson start records for a user. */
   static getByUserId(userId: string): Promise<UserLessonType[]> {
     return db.user_lessons.where('user_id').equals(userId).toArray();
   }
 
-  /** Records an eligible lesson start once per local day. */
+  /**
+   * Records a lesson start once per local day when all supplied items are eligible.
+   * @returns True when eligible or already started today; otherwise false.
+   */
   static startIfEligible(
     userId: string,
     lessonId: number,
@@ -53,6 +58,7 @@ export default class UserLesson extends Entity<AppDB> implements UserLessonType 
     });
   }
 
+  /** Checks whether the user has a lesson start in the local calendar day of `now`. */
   static async hasStartedToday(userId: string, lessonId: number, now: Date = new Date()): Promise<boolean> {
     const start = new Date(now.getFullYear(), now.getMonth(), now.getDate()).toISOString();
     const end = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1).toISOString();
@@ -63,7 +69,11 @@ export default class UserLesson extends Entity<AppDB> implements UserLessonType 
     return row !== undefined;
   }
 
-  static async syncFromRemote(userId: string, _doFullSync = false): Promise<number> {
+  /**
+   * Reconciles the full lesson-start history between IndexedDB and Supabase.
+   * @returns Number of remote lesson-start rows fetched.
+   */
+  static async syncFromRemote(userId: string): Promise<number> {
     const [remoteResult, localRows] = await Promise.all([
       supabaseInstance
         .from('user_lessons')
@@ -99,6 +109,7 @@ export default class UserLesson extends Entity<AppDB> implements UserLessonType 
     return remoteRows.length;
   }
 
+  /** Removes all local lesson-start records for a user. */
   static async removeByUserId(userId: string): Promise<void> {
     await db.user_lessons.where('user_id').equals(userId).delete();
   }

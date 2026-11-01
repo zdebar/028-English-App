@@ -39,7 +39,7 @@ export async function dataSync(userId: string): Promise<void> {
     { tableName: 'Lessons', sync: () => Lessons.syncFromRemote(doFullSync) },
     { tableName: 'Notes', sync: () => Notes.syncFromRemote(doFullSync) },
     { tableName: 'UserItems', sync: () => UserItem.syncFromRemote(userId, doFullSync) },
-    { tableName: 'UserLessons', sync: () => UserLesson.syncFromRemote(userId, doFullSync) },
+    { tableName: 'UserLessons', sync: () => UserLesson.syncFromRemote(userId) },
   ];
 
   const results = await settleSyncWithAuthRecovery(
@@ -86,7 +86,7 @@ export async function dataSyncBeforeSessionEnd(userId: string): Promise<void> {
 
   const results = await settleSyncWithAuthRecovery(userId, [
     () => UserItem.syncFromRemote(userId, false),
-    () => UserLesson.syncFromRemote(userId, false),
+    () => UserLesson.syncFromRemote(userId),
   ]);
 
   if (results.some((r) => r.status === 'rejected')) {
