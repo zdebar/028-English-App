@@ -1,31 +1,20 @@
 import DelayedMessage from '@/components/UI/DelayedMessage';
 import Notification from '@/components/UI/Notification';
 import { useAuthStore } from '@/features/auth/use-auth-store';
-import { reportError } from '@/features/logging/monitoring-handler';
+import { useQueryErrorToast } from '@/features/logging/use-query-error-toast';
 import LessonTrainingOverviewCard from '@/features/practice/LessonTrainingOverviewCard';
 import PracticeEmptyState from '@/features/practice/PracticeEmptyState';
 import PracticeSessionCard from '@/features/practice/PracticeSessionCard';
 import { useInitialTrainingDeck } from '@/features/practice/hooks/use-initial-training-deck';
 import { usePracticeExitBlocker } from '@/features/practice/hooks/use-practice-exit-blocker';
-import { useToastStore } from '@/features/toast/use-toast-store';
 import { TEXTS } from '@/locales/cs';
 import { formatProgress } from '@/utils/progress.utils';
-import { useCallback, useEffect, useState, type JSX } from 'react';
+import { useCallback, useState, type JSX } from 'react';
 import { useLoaderData, useNavigate } from 'react-router-dom';
 import { ROUTES } from '@/config/routes.config';
 import type { InitialTrainingData } from '@/routing/route-data';
 
 type InitialTrainingDeck = ReturnType<typeof useInitialTrainingDeck>;
-
-function reportInitialTrainingError(
-  error: Error | null,
-  showToast: (message: string, type: 'error') => void,
-): void {
-  if (!error) return;
-  showToast(TEXTS.loadingError, 'error');
-  reportError('Failed to fetch initial training deck', error);
-}
-
 
 function InitialTrainingContent({
   deck,
@@ -40,8 +29,7 @@ function InitialTrainingContent({
   if (deck.isComplete) return null;
   if (!deck.currentItem) return <PracticeEmptyState />;
 
-  const showIntro = Boolean(deck.lesson) && !deck.hasProgress && !introDismissed;
-  if (showIntro && deck.lesson) {
+  if (deck.lesson && !deck.hasProgress && !introDismissed) {
     return (
       <LessonTrainingOverviewCard
         lesson={deck.lesson}
@@ -80,7 +68,6 @@ function InitialTrainingContent({
 
 export default function InitialTrainingPractice(): JSX.Element {
   const userId = useAuthStore((state) => state.userId);
-  const showToast = useToastStore((state) => state.showToast);
   const navigate = useNavigate();
   const [introDismissed, setIntroDismissed] = useState(false);
   const initialData = useLoaderData() as InitialTrainingData;
@@ -89,10 +76,7 @@ export default function InitialTrainingPractice(): JSX.Element {
   }, [navigate]);
   const deck = useInitialTrainingDeck(userId, initialData, handlePracticeComplete);
   usePracticeExitBlocker(deck.finishPractice);
-
-  useEffect(() => {
-    reportInitialTrainingError(deck.error, showToast);
-  }, [deck.error, showToast]);
+  useQueryErrorToast(deck.error, 'Failed to fetch initial training deck');
 
   if (!userId) {
     return <Notification>{TEXTS.notAvailable}</Notification>;
