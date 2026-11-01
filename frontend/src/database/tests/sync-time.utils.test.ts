@@ -1,7 +1,6 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 
 import {
-  clearSyncTimes,
   getFullSyncKey,
   getFullSyncTime,
   setFullSyncTime,
@@ -31,24 +30,4 @@ describe('sync-time.utils', () => {
     });
   });
 
-  describe('clearSyncTimes', () => {
-    it('removes full sync time for a user', () => {
-      setFullSyncTime('user-1', 111);
-
-      clearSyncTimes('user-1');
-
-      expect(getFullSyncTime('user-1')).toBe(0);
-      expect(localStorage.getItem('last-full-sync-at_user-1')).toBeNull();
-    });
-
-    it('does not affect sync times of other users', () => {
-      setFullSyncTime('user-1', 100);
-      setFullSyncTime('user-2', 300);
-
-      clearSyncTimes('user-1');
-
-      expect(getFullSyncTime('user-1')).toBe(0);
-      expect(getFullSyncTime('user-2')).toBe(300);
-    });
-  });
 });

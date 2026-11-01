@@ -28,17 +28,14 @@ export function setFullSyncTime(userId: string, time: number): void {
  * Reads the last full sync time for a user.
  *
  * @param userId User id whose sync timestamp should be read.
- * @returns Stored timestamp in milliseconds, or 0 when no value exists.
+ * @returns Stored timestamp in milliseconds, or 0 when missing or invalid.
  */
 export function getFullSyncTime(userId: string): number {
-  return Number(localStorage.getItem(getFullSyncKey(userId)) || 0);
-}
+  const storedTime = localStorage.getItem(getFullSyncKey(userId));
+  if (storedTime === null) return 0;
 
-/**
- * Clears the stored full sync time for a user.
- *
- * @param userId User id whose sync timestamp should be removed.
- */
-export function clearSyncTimes(userId: string): void {
-  localStorage.removeItem(getFullSyncKey(userId));
+  const time = Number(storedTime);
+  if (!Number.isFinite(time) || time < 0) return 0;
+
+  return time;
 }

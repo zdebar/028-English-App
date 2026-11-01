@@ -10,7 +10,6 @@ const mocks = vi.hoisted(() => ({
   deleteAllByUserId: vi.fn(),
   deleteUserLessons: vi.fn(),
   deleteSyncRow: vi.fn(),
-  clearSyncTimes: vi.fn(),
   rpc: vi.fn(),
   signOut: vi.fn(),
   reportError: vi.fn(),
@@ -59,10 +58,6 @@ vi.mock('@/database/models/metadata', () => ({
 
 vi.mock('@/database/models/user-lessons', () => ({
   default: { removeByUserId: (...args: unknown[]) => mocks.deleteUserLessons(...args) },
-}));
-
-vi.mock('@/database/utils/sync-time.utils', () => ({
-  clearSyncTimes: (...args: unknown[]) => mocks.clearSyncTimes(...args),
 }));
 
 vi.mock('@/config/supabase.config', () => ({
@@ -114,7 +109,6 @@ describe('DeleteUserButton', () => {
     mocks.deleteSyncRow.mockResolvedValue(true);
     mocks.clearTheme.mockResolvedValue(undefined);
     mocks.saveCurrentThemeAsGuest.mockReturnValue(undefined);
-    mocks.clearSyncTimes.mockReturnValue(undefined);
     mocks.handleLogout.mockResolvedValue(undefined);
     mocks.signOut.mockResolvedValue({ error: null });
   });
