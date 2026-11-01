@@ -1,11 +1,11 @@
 import { useEffect, useEffectEvent } from 'react';
 import { useOverlayStore } from '@/features/overlay/use-overlay-store';
 
-interface UseKeyState {
+type UseKeyOptions = Readonly<{
   onKeyPress: () => void;
   keys: readonly string[];
   disabledOnOverlayOpen?: boolean;
-}
+}>;
 
 /**
  * Registers a global keydown listener for one or more KeyboardEvent.key values.
@@ -17,7 +17,7 @@ interface UseKeyState {
  * @throws TypeError when onKeyPress is not a function.
  * @throws Error when keys is empty or not an array.
  */
-export function useKey({ onKeyPress, keys, disabledOnOverlayOpen = false }: UseKeyState) {
+export function useKey({ onKeyPress, keys, disabledOnOverlayOpen = false }: UseKeyOptions) {
   if (typeof onKeyPress !== 'function') {
     throw new TypeError('onKeyPress must be a function.');
   }
