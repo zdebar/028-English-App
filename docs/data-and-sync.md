@@ -18,15 +18,14 @@ App works as PWA applicatin with frontend data storage inside IndexedDB. Backend
 
 ## Sync Lifecycle
 
-`frontend/src/database/utils/data-sync.utils.ts` synchronizes `groups`,
-`group-items`, `group-relations`, `levels`, `lessons`, `notes`, `user-items`, and
-`user-lessons`. The shared table models pull rows whose `updated_at` is newer than
-the local sync cursor. They apply soft-deleted content as local deletes.
+`frontend/src/database/utils/data-sync.utils.ts` synchronizes `groups`, `group-items`,
+`group-relations`, `levels`, `lessons`, `notes`, `user-items`, `user-lessons`, and `user-settings`.
 
-User-item sync exports local rows within the incremental sync window to the
-`upsert_fetch_user_items` RPC. The RPC upserts progress and returns current item
-content with user progress. The model merges those results into IndexedDB while
-preserving concurrent local edits. User-lesson sync merges start records.
+`updated_at` - Attribute common for most tables. Determines which record is newer. Records newer than last updated table at `metadata` table is push to backend. Records pulled back with newer `updated_at` are saved to IndexedDB.
+
+`deleted_at` - Attribute common for most tables. Determines which record ws
+
+
 
 | Moment | Owner | Behavior |
 | --- | --- | --- |

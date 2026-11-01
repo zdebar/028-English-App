@@ -6,6 +6,8 @@ let cleanup: (() => void) | null = null;
 export function startPwaLifecycle(): void {
   if (cleanup !== null) return;
 
+  requestPersistentStorage();
+
   const handleBeforeInstallPrompt = (event: Event): void => {
     event.preventDefault();
     usePwaStore.getState().setPromptEvent(event as any);
@@ -58,6 +60,20 @@ export function startPwaLifecycle(): void {
     globalThis.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
     cleanup = null;
   };
+}
+
+function requestPersistentStorage(): void {
+  const storage = globalThis.navigator?.storage;
+  if (typeof storage?.persist !== 'function' || typeof storage.persisted !== 'function') return;
+
+  storage.persisted()
+    .then((alreadyPersistent) => alreadyPersistent || storage.persist())
+    .then((isPersistent) => {
+      if (!isPersistent) console.info('Browser did not grant persistent storage.');
+    })
+    .catch((error: unknown) => {
+      console.warn('Persistent storage request failed:', error);
+    });
 }
 
 /** Removes only this app's service workers and caches while running the dev server. */

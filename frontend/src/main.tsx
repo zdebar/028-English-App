@@ -7,21 +7,6 @@ import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { RouterProvider } from 'react-router-dom';
 
-function requestPersistentStorage(): void {
-  const storage = globalThis.navigator?.storage;
-  if (typeof storage?.persist !== 'function' || typeof storage.persisted !== 'function') return;
-
-  storage.persisted()
-    .then((alreadyPersistent) => alreadyPersistent || storage.persist())
-    .then((isPersistent) => {
-      if (!isPersistent) console.info('Browser did not grant persistent storage.');
-    })
-    .catch((error: unknown) => {
-      console.warn('Persistent storage request failed:', error);
-    });
-}
-
-requestPersistentStorage();
 void startAuthLifecycle();
 startPwaLifecycle();
 
@@ -34,6 +19,7 @@ root.render(
   </StrictMode>,
 );
 
+// Hot Module Replacement (HMR) - Cleanup on module replacement
 if (import.meta.hot) {
   import.meta.hot.dispose(() => {
     stopPwaLifecycle();
