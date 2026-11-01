@@ -29,9 +29,16 @@ export default function BilingualItemButton({
 }: BilingualItemButtonProps): JSX.Element {
   const title = customTitle ?? getItemTitle(item);
   const canStackLanguages = shouldStackLanguages(showPronunciation, forceSingleLine);
-  const czechText = <span className={getCzechTextClassName(hideCzechOnNarrow)}>{item.czech}</span>;
+  const czechText = (
+    <span key="czech" className={getCzechTextClassName(hideCzechOnNarrow)}>
+      {item.czech}
+    </span>
+  );
   const englishText = (
-    <span className="min-w-0 flex-1 overflow-hidden text-left font-bold text-ellipsis whitespace-nowrap">
+    <span
+      key="english"
+      className="min-w-0 flex-1 overflow-hidden text-left font-bold text-ellipsis whitespace-nowrap"
+    >
       {item.english}
     </span>
   );
