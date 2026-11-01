@@ -4,6 +4,7 @@ import type { GroupItemType } from '@/types/table.types';
 import { TableName } from '@/types/table.types';
 import SyncEntityModel from './sync-entity-model';
 
+/** IndexedDB model and sync adapter for group-to-item memberships. */
 export default class GroupItem extends SyncEntityModel implements GroupItemType {
   id!: number;
   group_id!: number;
