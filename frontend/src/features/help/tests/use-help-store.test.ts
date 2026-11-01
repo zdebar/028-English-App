@@ -47,12 +47,4 @@ describe('useHelpStore', () => {
 
     expect(useHelpStore.getState().isHelpOpened).toBe(false);
   });
-
-  it('closeHelp closes help directly', () => {
-    useHelpStore.setState({ isHelpOpened: true });
-
-    useHelpStore.getState().closeHelp();
-
-    expect(useHelpStore.getState().isHelpOpened).toBe(false);
-  });
 });

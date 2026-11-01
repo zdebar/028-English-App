@@ -5,13 +5,12 @@ import { devtools } from 'zustand/middleware';
 interface HelpState {
   isHelpOpened: boolean;
   openHelp: () => void;
-  closeHelp: () => void;
 }
 
 /**
  * Stores help overlay visibility and coordinates it with the shared overlay mask.
  *
- * @returns Zustand hook exposing isHelpOpened plus openHelp and closeHelp actions.
+ * @returns Zustand hook exposing isHelpOpened and the openHelp action.
  * openHelp also registers an overlay close callback that clears the help state.
  */
 export const useHelpStore = create<HelpState>()(
@@ -23,9 +22,6 @@ export const useHelpStore = create<HelpState>()(
         useOverlayStore.getState().openOverlay(() => {
           set({ isHelpOpened: false });
         });
-      },
-      closeHelp: () => {
-        set({ isHelpOpened: false });
       },
     }),
     { name: 'HelpStore' },
