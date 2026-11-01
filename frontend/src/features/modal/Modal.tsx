@@ -46,7 +46,7 @@ export function Modal({
   const showToast = useToastStore((state) => state.showToast);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const isSubmittingRef = useRef(false);
-  const dialogRef = useRef<HTMLDivElement>(null);
+  const dialogRef = useRef<HTMLDialogElement>(null);
   const onCloseRef = useRef(onClose);
   const previouslyFocusedElementRef = useRef<HTMLElement | null>(null);
 
@@ -78,7 +78,7 @@ export function Modal({
     if (succeeded) closeOverlay();
   }, [closeOverlay, onConfirm, setOverlayDismissible, showToast]);
 
-  const handleDialogKeyDown = useCallback((event: KeyboardEvent<HTMLDivElement>) => {
+  const handleDialogKeyDown = useCallback((event: KeyboardEvent<HTMLDialogElement>) => {
     if (event.key !== 'Tab') return;
 
     const dialog = dialogRef.current;
@@ -139,15 +139,15 @@ export function Modal({
 
   return createPortal(
     <div className="z-modal min-[800px]:items:start pointer-events-none fixed inset-0 flex items-center justify-center min-[800px]:pt-[calc(50vh-12rem)]">
-      <div
+      <dialog
         ref={dialogRef}
-        role="dialog"
+        open
         aria-modal="true"
         aria-label={ariaLabel}
         aria-busy={isSubmitting}
         tabIndex={-1}
         onKeyDown={handleDialogKeyDown}
-        className="card-width color-base pointer-events-auto gap-1 pt-4"
+        className="card-width color-base pointer-events-auto static m-0 gap-1 border-0 p-0 pt-4"
       >
         <div className="flex grow flex-col items-center gap-2 p-6 text-center">{children}</div>
         <div className={`flex gap-1 ${actionsLayout === 'vertical' ? 'flex-col' : ''}`}>
@@ -166,7 +166,7 @@ export function Modal({
             {confirmLabel}
           </StyledButton>
         </div>
-      </div>
+      </dialog>
     </div>,
     modalRoot,
   );
