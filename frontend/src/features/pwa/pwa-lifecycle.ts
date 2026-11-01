@@ -1,4 +1,5 @@
 import { usePwaStore } from './use-pwa-store';
+import type { BeforeInstallPromptEvent } from './pwa.types';
 
 let cleanup: (() => void) | null = null;
 
@@ -10,10 +11,15 @@ export function startPwaLifecycle(): void {
 
   const handleBeforeInstallPrompt = (event: Event): void => {
     event.preventDefault();
-    usePwaStore.getState().setPromptEvent(event as any);
+    usePwaStore.getState().setPromptEvent(event as BeforeInstallPromptEvent);
+  };
+
+  const handleAppInstalled = (): void => {
+    usePwaStore.getState().clearPromptEvent();
   };
 
   globalThis.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+  globalThis.addEventListener('appinstalled', handleAppInstalled);
 
   if ('serviceWorker' in navigator) {
     const serviceWorker = navigator.serviceWorker;
@@ -51,6 +57,7 @@ export function startPwaLifecycle(): void {
       globalThis.removeEventListener('load', handleWindowLoad);
       serviceWorker.removeEventListener('message', handleServiceWorkerMessage);
       globalThis.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+      globalThis.removeEventListener('appinstalled', handleAppInstalled);
       cleanup = null;
     };
     return;
@@ -58,6 +65,7 @@ export function startPwaLifecycle(): void {
 
   cleanup = () => {
     globalThis.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    globalThis.removeEventListener('appinstalled', handleAppInstalled);
     cleanup = null;
   };
 }
