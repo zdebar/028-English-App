@@ -21,15 +21,6 @@ const CONTRAST_CLASS_PRESENTATION: readonly ContrastClassPresentation[] = [
 const CATEGORY_HEADING_CLASS_NAME =
   'h-input border-disabled-light text-light dark:border-disabled-dark dark:text-dark flex w-full items-center justify-start border border-dashed px-4 text-left';
 
-function splitContrastName(groupName: string): readonly [string, string] | null {
-  const separatorIndex = groupName.indexOf('|');
-  if (separatorIndex < 0) return null;
-  return [
-    groupName.slice(0, separatorIndex).trim(),
-    groupName.slice(separatorIndex + 1).trim(),
-  ];
-}
-
 export default function PronunciationOverview() {
   usePronunciationGroupsStoreSync(useAuthStore((state) => state.userId));
   const closeRoute = useRouteClose(ROUTES.home);
@@ -86,4 +77,13 @@ export default function PronunciationOverview() {
       </DataState>
     </OverviewCard>
   );
+}
+
+function splitContrastName(groupName: string): readonly [string, string] | null {
+  const separatorIndex = groupName.indexOf('|');
+  if (separatorIndex < 0) return null;
+  return [
+    groupName.slice(0, separatorIndex).trim(),
+    groupName.slice(separatorIndex + 1).trim(),
+  ];
 }

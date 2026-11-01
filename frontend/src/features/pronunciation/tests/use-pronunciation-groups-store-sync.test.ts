@@ -11,15 +11,10 @@ const mocks = vi.hoisted(() => ({
   queries: [] as Array<() => Promise<unknown>>,
   unsubscribes: [] as ReturnType<typeof vi.fn>[],
   getOverview: vi.fn(),
-  reportError: vi.fn(),
 }));
 
 vi.mock('@/database/queries/pronunciation-group-queries', () => ({
   getPronunciationGroupOverview: (...args: unknown[]) => mocks.getOverview(...args),
-}));
-
-vi.mock('@/features/logging/logging-handler', () => ({
-  reportError: (...args: unknown[]) => mocks.reportError(...args),
 }));
 
 vi.mock('dexie', () => ({
@@ -94,7 +89,7 @@ describe('usePronunciationGroupsStoreSync', () => {
     });
   });
 
-  it('stores and reports observer errors', () => {
+  it('stores observer errors for the consuming component to handle', () => {
     renderHook(() => usePronunciationGroupsStoreSync('u1'));
     const error = new Error('query failed');
 
@@ -105,6 +100,5 @@ describe('usePronunciationGroupsStoreSync', () => {
       loading: false,
       error,
     });
-    expect(mocks.reportError).toHaveBeenCalledWith('Error observing pronunciation groups', error);
   });
 });

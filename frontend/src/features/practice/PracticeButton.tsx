@@ -9,6 +9,7 @@ import {
 import StyledButton from '@/components/UI/buttons/StyledButton';
 import { hasReachedReviewLimit } from './practice-availability';
 import { useAuthStore } from '@/features/auth/use-auth-store';
+import { useQueryErrorToast } from '@/features/logging/use-query-error-toast';
 import { usePronunciationGroupsStore } from '@/features/pronunciation/use-pronunciation-groups-store';
 import { usePronunciationGroupsStoreSync } from '@/features/pronunciation/use-pronunciation-groups-store-sync';
 
@@ -191,6 +192,8 @@ const PronunciationPracticeButton = memo(function PronunciationPracticeButton():
   const loading = usePronunciationGroupsStore((state) => state.loading);
   const error = usePronunciationGroupsStore((state) => state.error);
   const disabled = loading || error !== null || !hasActiveGroup;
+
+  useQueryErrorToast(error, 'Failed to fetch pronunciation groups for practice');
 
   return (
     <NavigationButton

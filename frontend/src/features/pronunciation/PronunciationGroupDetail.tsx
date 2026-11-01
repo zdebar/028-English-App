@@ -21,6 +21,52 @@ import type { PronunciationGroupDetailType } from '@/types/pronunciation.types';
 import { useRouteClose } from '@/routing/use-route-close';
 import type { UserItemLocal } from '@/types/user-item.types';
 
+export default function PronunciationGroupDetail({
+  initialData,
+}: Readonly<{ initialData?: PronunciationGroupDetailType | null }>) {
+  const userId = useAuthStore((state) => state.userId);
+  const showToast = useToastStore((state) => state.showToast);
+  const navigate = useNavigate();
+  const closeRoute = useRouteClose(ROUTES.pronunciationGroups);
+  const { groupId: groupIdText } = useParams<{ groupId: string }>();
+  const validGroupId = parseGroupId(groupIdText);
+  const selectionStorageKey =
+    `pronunciation_group_selected_words_${userId ?? 'guest'}_${validGroupId ?? 'unknown'}`;
+  const fetchDetail = useCallback(
+    () => fetchGroupDetail(userId, validGroupId),
+    [userId, validGroupId],
+  );
+  const { data, loading, error } = useLiveQueryData(fetchDetail, {
+    emptyData: null,
+    initialData,
+    sharedKey: sharedQueryKey(userId, `pronunciation:${validGroupId}`),
+  });
+  const audios = useMemo(() => getItemAudioSources(data?.items ?? []), [data]);
+  const {
+    playAudio,
+    stopAudio,
+    isAudioReady,
+    loading: audioLoading,
+  } = useAudioManager(audios);
+  usePronunciationGroupNavigation(validGroupId, loading, userId, data, navigate);
+
+  useQueryErrorToast(error, 'Failed to fetch pronunciation group detail');
+
+  return (
+    <PronunciationGroupOverviewCard
+      data={data}
+      selectionStorageKey={selectionStorageKey}
+      loading={loading}
+      closeRoute={closeRoute}
+      audioLoading={audioLoading}
+      isAudioReady={isAudioReady}
+      playAudio={playAudio}
+      stopAudio={stopAudio}
+      showToast={showToast}
+    />
+  );
+}
+
 function parseGroupId(value: string | undefined): number | null {
   const groupId = Number(value);
   if (!Number.isSafeInteger(groupId) || groupId <= 0) return null;
@@ -74,6 +120,7 @@ function PronunciationDetailControls({
 type RandomWordPhase = 'initial' | 'reveal' | 'revealed';
 const RANDOM_WORD_REVEAL_TIMEOUT_MS = 5000;
 const EMPTY_SELECTED_ITEM_IDS: number[] = [];
+const EMPTY_PRONUNCIATION_ITEMS: PronunciationGroupDetailType['items'] = [];
 
 function chooseRandomItem(
   items: readonly UserItemLocal[],
@@ -228,21 +275,20 @@ function PronunciationGroupItems({
     EMPTY_SELECTED_ITEM_IDS,
   );
   const selectedItemIdSet = useMemo(() => new Set(selectedItemIds), [selectedItemIds]);
-  const itemKey = JSON.stringify(items.map((item) => [item.item_id, item.audio]));
-  const selectableItems = items.filter(hasItemAudio);
+  const selectableItems = useMemo(() => items.filter(hasItemAudio), [items]);
   const selectedItems = selectableItems.filter((item) => selectedItemIdSet.has(item.item_id));
   const allItemsSelected = selectableItems.length > 0 &&
     selectedItems.length === selectableItems.length;
   const someItemsSelected = selectedItems.length > 0 && !allItemsSelected;
 
   useEffect(() => {
-    const availableIds = new Set(items.map((item) => item.item_id));
+    const availableIds = new Set(selectableItems.map((item) => item.item_id));
     setSelectedItemIds((previousIds) => {
       const validIds = [...previousIds].filter((itemId) => availableIds.has(itemId));
       if (validIds.length === previousIds.length) return previousIds;
       return validIds;
     });
-  }, [itemKey]);
+  }, [selectableItems, setSelectedItemIds]);
 
   useEffect(
     () => () => stopAudio(),
@@ -368,7 +414,7 @@ function PronunciationGroupOverviewCard({
   stopAudio: () => void;
   showToast: (message: string, type: 'error') => void;
 }>) {
-  const items = data?.items ?? [];
+  const items = data?.items ?? EMPTY_PRONUNCIATION_ITEMS;
   return (
     <OverviewCard
       buttonTitle={data?.group.name}
@@ -398,51 +444,5 @@ function PronunciationGroupOverviewCard({
         <PronunciationDetailControls items={items} />
       </DataState>
     </OverviewCard>
-  );
-}
-
-export default function PronunciationGroupDetail({
-  initialData,
-}: Readonly<{ initialData?: PronunciationGroupDetailType | null }>) {
-  const userId = useAuthStore((state) => state.userId);
-  const showToast = useToastStore((state) => state.showToast);
-  const navigate = useNavigate();
-  const closeRoute = useRouteClose(ROUTES.pronunciationGroups);
-  const { groupId: groupIdText } = useParams<{ groupId: string }>();
-  const validGroupId = parseGroupId(groupIdText);
-  const selectionStorageKey =
-    `pronunciation_group_selected_words_${userId ?? 'guest'}_${validGroupId ?? 'unknown'}`;
-  const fetchDetail = useCallback(
-    () => fetchGroupDetail(userId, validGroupId),
-    [userId, validGroupId],
-  );
-  const { data, loading, error } = useLiveQueryData(fetchDetail, {
-    emptyData: null,
-    initialData,
-    sharedKey: sharedQueryKey(userId, `pronunciation:${validGroupId}`),
-  });
-  const audios = useMemo(() => getItemAudioSources(data?.items ?? []), [data]);
-  const {
-    playAudio,
-    stopAudio,
-    isAudioReady,
-    loading: audioLoading,
-  } = useAudioManager(audios);
-  usePronunciationGroupNavigation(validGroupId, loading, userId, data, navigate);
-
-  useQueryErrorToast(error, 'Failed to fetch pronunciation group detail');
-
-  return (
-    <PronunciationGroupOverviewCard
-      data={data}
-      selectionStorageKey={selectionStorageKey}
-      loading={loading}
-      closeRoute={closeRoute}
-      audioLoading={audioLoading}
-      isAudioReady={isAudioReady}
-      playAudio={playAudio}
-      stopAudio={stopAudio}
-      showToast={showToast}
-    />
   );
 }
