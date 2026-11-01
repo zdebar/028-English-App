@@ -4,6 +4,7 @@ import type { GroupRelationType } from '@/types/table.types';
 import { TableName } from '@/types/table.types';
 import SyncEntityModel from './sync-entity-model';
 
+/** IndexedDB model and sync adapter for group relations. */
 export default class GroupRelation extends SyncEntityModel implements GroupRelationType {
   id!: number;
   parent_group_id!: number;
