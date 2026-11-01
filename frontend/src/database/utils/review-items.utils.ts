@@ -39,12 +39,7 @@ function matchesReviewKind(item: UserItemLocal, reviewKind: ReviewKind): boolean
 }
 
 export function isReviewItemDue(item: UserItemLocal, nowIso: string, direction: ReviewDirection = 'cz_to_en'): boolean {
-  const nextAt = direction === 'cz_to_en' ? item.next_at_cz_to_en : item.next_at_en_to_cz;
-  const progress = direction === 'cz_to_en' ? item.progress_cz_to_en : item.progress_en_to_cz;
-  if (nextAt === NULL_DATE) {
-    return progress === 0;
-  }
-  return nextAt < nowIso;
+  return isReviewItemReadyAt(item, nowIso, direction);
 }
 
 export function isReviewItemReadyAt(item: UserItemLocal, nowIso: string, direction: ReviewDirection = 'cz_to_en'): boolean {
