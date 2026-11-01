@@ -7,7 +7,6 @@ import { waitForAuthReady } from '@/features/auth/auth-lifecycle';
 import { useAuthStore } from '@/features/auth/use-auth-store';
 import { loadHome } from '@/routing/home-loader';
 import { reportError } from '@/features/logging/monitoring-handler';
-import { useToastStore } from '@/features/toast/use-toast-store';
 import { TEXTS } from '@/locales/cs';
 import InitialTrainingPractice from '@/pages/InitialTrainingPractice';
 import Grammar from '@/pages/Grammar';
@@ -65,7 +64,6 @@ async function loadProtectedData<T>(
     return await createDescriptor(userId).load();
   } catch (error) {
     reportError(`Failed to load ${routeName} route data`, error);
-    useToastStore.getState().showToast(TEXTS.loadingError, 'error');
     throw error;
   }
 }
@@ -86,7 +84,6 @@ async function loadTopicDetail({ params }: LoaderFunctionArgs) {
   } catch (error) {
     if (error instanceof Response) throw error;
     reportError('Failed to load topic detail route data', error);
-    useToastStore.getState().showToast(TEXTS.loadingError, 'error');
     throw error;
   }
 }
@@ -102,7 +99,6 @@ async function loadPronunciationGroupDetail({ params }: LoaderFunctionArgs) {
   } catch (error) {
     if (error instanceof Response) throw error;
     reportError('Failed to load pronunciation group detail route data', error);
-    useToastStore.getState().showToast(TEXTS.loadingError, 'error');
     throw error;
   }
 }
@@ -118,7 +114,6 @@ async function loadSoundGroupDetail({ params }: LoaderFunctionArgs) {
   } catch (error) {
     if (error instanceof Response) throw error;
     reportError('Failed to load sound group detail route data', error);
-    useToastStore.getState().showToast(TEXTS.loadingError, 'error');
     throw error;
   }
 }
@@ -132,7 +127,6 @@ async function loadInitialTraining() {
   } catch (error) {
     if (error instanceof Response) throw error;
     reportError('Failed to load initial training route data', error);
-    useToastStore.getState().showToast(TEXTS.loadingError, 'error');
     throw error;
   }
 }
