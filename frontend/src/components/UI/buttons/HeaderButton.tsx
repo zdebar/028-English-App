@@ -23,6 +23,8 @@ export default function HeaderButton({ to, ...rest }: HeaderButtonProps): JSX.El
         type="button"
         disabled
         aria-disabled="true"
+        aria-label={rest.title}
+        title={rest.title}
         tabIndex={-1}
         className={`${sharedClasses} text-disabled-light dark:text-disabled-dark cursor-default hover:bg-inherit`}
       >
@@ -34,6 +36,7 @@ export default function HeaderButton({ to, ...rest }: HeaderButtonProps): JSX.El
     <NavigationLink
       to={to}
       title={rest.title ?? ''}
+      aria-label={rest.title}
       className={`${sharedClasses} hover:bg-button-hover hover:text-light focus-visible:outline-none focus-visible:bg-button-hover focus-visible:text-light ${
         isSelected ? 'text-light bg-button-hover' : ''
       }`}

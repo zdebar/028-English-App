@@ -1,5 +1,5 @@
 import config from '@/config/config';
-import { TEXTS } from '@/locales/cs';
+import { ARIA_TEXTS, TEXTS } from '@/locales/cs';
 import DirectionTogggle from '@/features/vocabulary/DirectionToggle';
 import { type DisplayField } from '@/features/vocabulary/vocabulary.utils';
 import { type UserItemLocal } from '@/types/user-item.types';
@@ -87,6 +87,7 @@ export default function VocabularyList({
           <button
             type="button"
             className="hover:dark:bg-button-dark hover:bg-button-light absolute top-1/2 right-1 flex size-8 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full bg-transparent"
+            aria-label={ARIA_TEXTS.clearSearch}
             onClick={() => setSearchTerm('')}
             tabIndex={0}
           >
