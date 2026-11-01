@@ -39,7 +39,7 @@ export default class Levels extends SyncEntityModel implements LevelType {
         UserItem.getByUserId(userId),
         db.user_lessons.where('user_id').equals(userId).toArray(),
         Lessons.getAll(),
-        db.levels.orderBy('sort_order').toArray(),
+        db.levels.toArray(),
       ]);
       const startedLessonIds = new Set(userLessons.map((userLesson) => userLesson.lesson_id));
       return aggregateLevels(items, lessons, levels, localDate, startedLessonIds);
