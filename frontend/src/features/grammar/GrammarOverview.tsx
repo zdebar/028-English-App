@@ -90,7 +90,11 @@ export default function GrammarOverview({
   if (currentItem === null) {
     return (
       <OverviewCard buttonTitle={TEXTS.grammarOverview} loading={loading} onClose={closeRoute}>
-        <DataState loading={loading} hasData={hasData} noDataMessage={TEXTS.noGrammar}>
+        <DataState
+          loading={loading}
+          hasData={hasData}
+          noDataMessage={error ? TEXTS.loadingError : TEXTS.noGrammar}
+        >
           <StackedList>
             {grammarList.map((topic) => {
               const isUnpacked = unpackedTopicId === topic.id;

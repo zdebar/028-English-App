@@ -7,12 +7,8 @@ const mocks = vi.hoisted<{ userId: string | null } & Record<string, any>>(() => 
   userId: 'u1',
   soundGroups: [] as any[],
   navigate: vi.fn(),
-  grammarVisible: false,
-  grammarData: null as any,
   noteVisible: false,
   noteData: null as any,
-  handleGrammar: vi.fn(),
-  closeGrammar: vi.fn(),
   handleNote: vi.fn(),
   closeNote: vi.fn(),
   showToast: vi.fn(),
@@ -152,15 +148,6 @@ vi.mock('@/features/toast/use-toast-store', () => ({
 vi.mock('react-router-dom', () => ({
   useNavigate: () => mocks.navigate,
   useBlocker: () => ({ state: 'unblocked' }),
-}));
-
-vi.mock('@/features/grammar/use-grammar-viewer', () => ({
-  useGrammarViewer: () => ({
-    isGrammarVisible: mocks.grammarVisible,
-    grammarData: mocks.grammarData,
-    openGrammar: mocks.handleGrammar,
-    closeGrammar: mocks.closeGrammar,
-  }),
 }));
 
 vi.mock('@/features/grammar/GrammarDetailCard', () => ({
@@ -352,8 +339,6 @@ describe('PracticeCard', () => {
 
     mocks.userId = 'u1';
     mocks.soundGroups = [];
-    mocks.grammarVisible = false;
-    mocks.grammarData = null;
     mocks.noteVisible = false;
     mocks.noteData = null;
     mocks.practiceDeck.index = 0;

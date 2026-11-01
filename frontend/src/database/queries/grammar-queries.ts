@@ -14,16 +14,6 @@ export type GrammarTopicWithGroups = GroupType & {
   groups: GrammarGroupWithChunks[];
 };
 
-/** Loads a grammar chunk with its user-specific examples. */
-export async function getGrammarChunkDetail(
-  userId: string,
-  groupId: number,
-): Promise<GrammarChunkWithExamples> {
-  const group = await Groups.getById(groupId);
-  if (group?.type !== 'grammar') throw new Error(`Grammar group ${groupId} not found.`);
-  return getGrammarChunkWithExamples(userId, group);
-}
-
 /** Returns a grammar group with the user's ordered examples. */
 export async function getGrammarChunkWithExamples(
   userId: string,
