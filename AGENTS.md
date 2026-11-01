@@ -11,4 +11,5 @@
 4. Use <progress> instead of the \"progressbar\" role to ensure accessibility across all devices.
 5. Utilize Javascript's more advanced options for ex. nullish operator, optional chaining etc.
 6. Promises must be awaited, end with a call to .catch, end with a call to .then with a rejection handler or be explicitly marked as ignored with the `void` operator.
+7. Place file-local helper function declarations after the primary exported component, class, or function in the file.
 

@@ -15,18 +15,6 @@ import UserItem from './user-items';
 const AUDIO_DOWNLOAD_MAX_ATTEMPTS = 2;
 const AUDIO_DOWNLOAD_RETRY_DELAY_MS = 100;
 
-function isValidAudioBlob(audioBlob: unknown): audioBlob is Blob {
-  return audioBlob instanceof Blob && audioBlob.size > 0;
-}
-
-function isValidAudioRecord(audioRecord: AudioRecordLocal | undefined): audioRecord is AudioRecordLocal {
-  return Boolean(audioRecord && isValidAudioBlob(audioRecord.audioBlob));
-}
-
-function waitForAudioRetry(): Promise<void> {
-  return new Promise((resolve) => setTimeout(resolve, AUDIO_DOWNLOAD_RETRY_DELAY_MS));
-}
-
 /**
  * Local audio blob cache backed by IndexedDB and Supabase Storage.
  *
@@ -208,4 +196,16 @@ export default class AudioRecord extends Entity<AppDB> implements AudioRecordLoc
       return this.downloadAudioWithRetry(audioName, attempt + 1);
     }
   }
+}
+
+function isValidAudioBlob(audioBlob: unknown): audioBlob is Blob {
+  return audioBlob instanceof Blob && audioBlob.size > 0;
+}
+
+function isValidAudioRecord(audioRecord: AudioRecordLocal | undefined): audioRecord is AudioRecordLocal {
+  return Boolean(audioRecord && isValidAudioBlob(audioRecord.audioBlob));
+}
+
+function waitForAudioRetry(): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, AUDIO_DOWNLOAD_RETRY_DELAY_MS));
 }
