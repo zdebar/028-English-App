@@ -1,5 +1,6 @@
 import { liveQuery } from 'dexie';
 import { useEffect, useRef, useState } from 'react';
+import { toError } from '@/utils/error.utils';
 import { observeSharedQuery } from './shared-query-store';
 
 type UseLiveQueryDataOptions<T> = Readonly<{
@@ -14,10 +15,6 @@ type UseLiveQueryDataResult<T> = Readonly<{
   loading: boolean;
   error: Error | null;
 }>;
-
-function toError(error: unknown): Error {
-  return error instanceof Error ? error : new Error(String(error));
-}
 
 /** Keeps query data synchronized with every IndexedDB table read by the query. */
 export function useLiveQueryData<T>(

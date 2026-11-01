@@ -1,5 +1,6 @@
 import { useEffect, useEffectEvent } from 'react';
 import { useOverlayStore } from '@/features/overlay/use-overlay-store';
+import { assertFunction, assertNonEmptyArray } from '@/utils/assertions.utils';
 
 type UseKeyOptions = Readonly<{
   onKeyPress: () => void;
@@ -18,12 +19,8 @@ type UseKeyOptions = Readonly<{
  * @throws Error when keys is empty or not an array.
  */
 export function useKey({ onKeyPress, keys, disabledOnOverlayOpen = false }: UseKeyOptions) {
-  if (typeof onKeyPress !== 'function') {
-    throw new TypeError('onKeyPress must be a function.');
-  }
-  if (!Array.isArray(keys) || keys.length === 0) {
-    throw new Error('keys must be a non-empty array.');
-  }
+  assertFunction(onKeyPress, 'onKeyPress');
+  assertNonEmptyArray(keys, 'keys');
 
   const isOverlayOpen = useOverlayStore((state) => state.isOverlayOpen);
   const isDisabled = disabledOnOverlayOpen && isOverlayOpen;

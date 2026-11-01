@@ -12,6 +12,7 @@ import type { ReviewDirection, ReviewKind } from '@/types/practice.types';
 import { useFetch } from '@/hooks/use-fetch';
 import UserItem from '@/database/models/user-items';
 import { reportError } from '@/features/logging/monitoring-handler';
+import { toError } from '@/utils/error.utils';
 import { NBSP } from './use-hint';
 import { usePracticeCardState } from './use-practice-card-state';
 import {
@@ -561,10 +562,6 @@ export function usePracticeDeck(
     audioLoading: cardState.audioLoading,
     isPlaying: cardState.isPlaying,
   };
-}
-
-function toError(error: unknown): Error {
-  return error instanceof Error ? error : new Error(String(error));
 }
 
 function createEmptyReviewDeck(reviewKind: ReviewKind): ReviewDeckData {

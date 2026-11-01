@@ -2,11 +2,8 @@ import PronunciationGroup from '@/database/models/pronunciation-groups';
 import { reportError } from '@/features/logging/monitoring-handler';
 import { useEffect } from 'react';
 import { observeSharedQuery, sharedQueryKey } from '@/hooks/shared-query-store';
+import { toError } from '@/utils/error.utils';
 import { usePronunciationGroupsStore } from './use-pronunciation-groups-store';
-
-function toError(error: unknown): Error {
-  return error instanceof Error ? error : new Error(String(error));
-}
 
 /** Keeps one route-stable pronunciation-group snapshot synchronized with IndexedDB. */
 export function usePronunciationGroupsStoreSync(userId: string | null) {

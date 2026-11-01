@@ -6,6 +6,7 @@ import UserLesson from '@/database/models/user-lessons';
 import Groups from '@/database/models/groups';
 import type { GrammarDetail } from '@/features/grammar/GrammarDetailCard';
 import { reportError } from '@/features/logging/monitoring-handler';
+import { toError } from '@/utils/error.utils';
 import type { LessonType } from '@/types/generic.types';
 import type { GroupType } from '@/types/table.types';
 import type { ResolvedPracticeEntry, UserItemLocal } from '@/types/user-item.types';
@@ -38,10 +39,6 @@ import {
 type TrainingOutcome = 'correct' | 'incorrect' | 'skip';
 
 type PracticeCompletionHandler = () => void;
-
-function toError(error: unknown): Error {
-  return error instanceof Error ? error : new Error(String(error));
-}
 
 function toGrammarDetail(grammar: GroupType | null | undefined): GrammarDetail | null {
   if (!grammar) return null;

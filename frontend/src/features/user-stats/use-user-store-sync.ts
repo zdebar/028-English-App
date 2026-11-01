@@ -3,14 +3,11 @@ import Levels from '@/database/models/levels';
 import { reportError } from '@/features/logging/monitoring-handler';
 import { useEffect, useState } from 'react';
 import { observeSharedQuery, sharedQueryKey } from '@/hooks/shared-query-store';
+import { toError } from '@/utils/error.utils';
 import { useUserStore } from './use-user-store';
 
 function getLocalDate(): string {
   return new Date(Date.now()).toLocaleDateString('en-CA');
-}
-
-function toError(error: unknown): Error {
-  return error instanceof Error ? error : new Error(String(error));
 }
 
 /**
