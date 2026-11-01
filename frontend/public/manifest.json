@@ -23,7 +23,7 @@
     },
     {
       "src": "./screenshots/mobile.webp",
-      "sizes": "280x525",
+      "sizes": "320x640",
       "type": "image/webp"
     }
   ]
