@@ -3,8 +3,8 @@ import { KEYBOARD_LISTENERS } from '@/config/keyboard-listeners.config';
 import { useOverlayStore } from '@/features/overlay/use-overlay-store';
 import { useKey } from '@/hooks/use-key';
 import { TEXTS } from '@/locales/cs';
+import { useRouteClose } from '@/routing/use-route-close';
 import type { ButtonHTMLAttributes, JSX } from 'react';
-import { useNavigate } from 'react-router-dom';
 import StyledButton from './StyledButton';
 
 type CloseButtonProps = Readonly<
@@ -21,11 +21,11 @@ const DEFAULT_CLOSE_TITLE = [
 
 /**
  * Button component for closing dialogs.
- * Returns to the onClick if provided, or navigates (-1) if possible.
+ * Calls the supplied close handler, or uses route navigation when none is provided.
  * Reacts to keyboard listeners for closing as defined in KEYBOARD_LISTENERS.Exit.
  *
  * @param onClick Optional callback function to execute when the button is clicked.
- * @param navigateTo Optional path to navigate to when the button is clicked. Only used if onClick is not provided.
+ * @param navigateTo Optional fallback path when onClick is not provided.
  */
 export default function CloseButton({
   onClick,
@@ -35,16 +35,14 @@ export default function CloseButton({
   'aria-label': ariaLabel,
   ...rest
 }: CloseButtonProps): JSX.Element {
-  const navigate = useNavigate();
+  const closeRoute = useRouteClose(navigateTo);
   const isOverlayOpen = useOverlayStore((state) => state.isOverlayOpen);
   const handleClose = () => {
     if (onClick) {
       onClick();
-    } else if (navigateTo) {
-      void navigate(navigateTo);
-    } else if (globalThis.history.length > 1) {
-      void navigate(-1);
+      return;
     }
+    closeRoute();
   };
   useKey({
     onKeyPress: handleClose,

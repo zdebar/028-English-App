@@ -12,11 +12,13 @@ import './styles/index.css';
 import { useAudioLoader } from './features/audio/use-audio-loader';
 import { useResponsiveLayout } from './components/Layout/use-responsive-layout';
 import { useSideHeaderOrientation } from './components/Layout/use-side-header-orientation';
+import { useInAppRouteHistory } from '@/routing/in-app-route-history';
 
 export default function App() {
   const userId = useAuthStore((state) => state.userId);
   const authLoading = useAuthStore((state) => state.loading);
 
+  useInAppRouteHistory();
   usePracticeAvailabilityStoreSync(userId);
   useAudioLoader(userId);
   useThemeLoader(userId, authLoading);
