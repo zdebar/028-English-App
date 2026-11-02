@@ -3,10 +3,7 @@ import DelayedNotification from '@/components/UI/DelayedNotification';
 import RouteDataError from '@/components/utils/route-data-error';
 import ProtectedLayout from '@/components/utils/protected-layout';
 import { ROUTES } from '@/config/routes.config';
-import { waitForAuthReady } from '@/features/auth/auth-lifecycle';
-import { useAuthStore } from '@/features/auth/use-auth-store';
 import { loadHomeDataPackage } from '@/routing/home-loader';
-import { reportError } from '@/features/logging/logging-handler';
 import { TEXTS } from '@/locales/cs';
 import InitialTrainingPractice from '@/pages/InitialTrainingPractice';
 import Grammar from '@/pages/Grammar';
@@ -25,115 +22,21 @@ import Sounds from '@/pages/Sounds';
 import SoundGroupPage from '@/pages/SoundGroupPage';
 import Notification from '@/components/UI/Notification';
 import {
-  loadGrammarOverviewData,
-  loadInitialTrainingData,
-  loadOverviewAvailabilityData,
-  loadPronunciationOverviewData,
-  loadPronunciationGroupDetailData,
-  loadReviewPracticeData,
-  loadSoundGroupDetailData,
-  loadSoundsOverviewData,
-  loadTopicDetailData,
-  loadTopicsOverviewData,
-  loadVocabularyOverviewData,
-} from '@/routing/route-data';
-import { createHashRouter, redirect, type LoaderFunctionArgs } from 'react-router-dom';
-
-export async function protectedLoader() {
-  await requireUserId();
-  return null;
-}
-
-function InitialLoadingFallback() {
-  return <DelayedNotification className="mt-20" />;
-}
-
-async function requireUserId(): Promise<string> {
-  await waitForAuthReady();
-  const userId = useAuthStore.getState().userId;
-  if (!userId) throw redirect(ROUTES.home);
-  return userId;
-}
-
-async function loadProtectedData<T>(
-  routeName: string,
-  loadData: (userId: string) => Promise<T>,
-): Promise<T> {
-  const userId = await requireUserId();
-  try {
-    return await loadData(userId);
-  } catch (error) {
-    reportError(`Failed to load ${routeName} route data`, error);
-    throw error;
-  }
-}
-
-function parsePositiveId(value: string | undefined): number | null {
-  const id = Number(value);
-  return Number.isSafeInteger(id) && id > 0 ? id : null;
-}
-
-async function loadTopicDetail({ params }: LoaderFunctionArgs) {
-  const topicId = parsePositiveId(params.topicId);
-  if (!topicId) throw redirect(ROUTES.topics);
-  const userId = await requireUserId();
-  try {
-    const data = await loadTopicDetailData(userId, topicId);
-    if (!data.topic) throw redirect(ROUTES.topics);
-    return null;
-  } catch (error) {
-    if (error instanceof Response) throw error;
-    reportError('Failed to load topic detail route data', error);
-    throw error;
-  }
-}
-
-async function loadPronunciationGroupDetail({ params }: LoaderFunctionArgs) {
-  const groupId = parsePositiveId(params.groupId);
-  if (!groupId) throw redirect(ROUTES.pronunciationGroups);
-  const userId = await requireUserId();
-  try {
-    const data = await loadPronunciationGroupDetailData(userId, groupId);
-    if (!data) throw redirect(ROUTES.pronunciationGroups);
-    return null;
-  } catch (error) {
-    if (error instanceof Response) throw error;
-    reportError('Failed to load pronunciation group detail route data', error);
-    throw error;
-  }
-}
-
-async function loadSoundGroupDetail({ params }: LoaderFunctionArgs) {
-  const groupId = parsePositiveId(params.groupId);
-  if (!groupId) throw redirect(ROUTES.sounds);
-  const userId = await requireUserId();
-  try {
-    const data = await loadSoundGroupDetailData(userId, groupId);
-    if (!data) throw redirect(ROUTES.sounds);
-    return null;
-  } catch (error) {
-    if (error instanceof Response) throw error;
-    reportError('Failed to load sound group detail route data', error);
-    throw error;
-  }
-}
-
-async function loadInitialTraining() {
-  const userId = await requireUserId();
-  try {
-    const data = await loadInitialTrainingData(userId);
-    if (data.items.length === 0) throw redirect(ROUTES.home);
-    return null;
-  } catch (error) {
-    if (error instanceof Response) throw error;
-    reportError('Failed to load initial training route data', error);
-    throw error;
-  }
-}
-
-async function loadPronunciationOverview() {
-  return loadProtectedData('pronunciation overview', loadPronunciationOverviewData);
-}
+  loadGrammarOverviewRoute,
+  loadGrammarReviewRoute,
+  loadInitialTrainingRoute,
+  loadOverviewsRoute,
+  loadPronunciationGroupDetailRoute,
+  loadPronunciationOverviewRoute,
+  loadSoundGroupDetailRoute,
+  loadSoundsRoute,
+  loadTopicDetailRoute,
+  loadTopicsRoute,
+  loadVocabularyReviewRoute,
+  loadVocabularyRoute,
+  protectedLoader,
+} from '@/routing/route-loaders';
+import { createHashRouter } from 'react-router-dom';
 
 export const router = createHashRouter([
   {
@@ -152,77 +55,68 @@ export const router = createHashRouter([
         children: [
           {
             path: ROUTES.practice,
-            loader: () =>
-              loadProtectedData('grammar review', (userId) =>
-                loadReviewPracticeData(userId, 'grammar'),
-              ),
+            loader: loadGrammarReviewRoute,
             Component: Practice,
           },
           {
             path: ROUTES.grammarPractice,
-            loader: () =>
-              loadProtectedData('grammar review', (userId) =>
-                loadReviewPracticeData(userId, 'grammar'),
-              ),
+            loader: loadGrammarReviewRoute,
             Component: Practice,
           },
           {
             path: ROUTES.vocabularyPractice,
-            loader: () =>
-              loadProtectedData('vocabulary review', (userId) =>
-                loadReviewPracticeData(userId, 'vocabulary'),
-              ),
+            loader: loadVocabularyReviewRoute,
             Component: Practice,
           },
           {
             path: ROUTES.initialTraining,
-            loader: loadInitialTraining,
+            loader: loadInitialTrainingRoute,
             Component: InitialTrainingPractice,
           },
           {
             path: ROUTES.overviews,
-            loader: () => loadProtectedData('overviews', loadOverviewAvailabilityData),
+            loader: loadOverviewsRoute,
             Component: Overviews,
           },
           { path: ROUTES.profile, Component: Profile },
           {
             path: ROUTES.topics,
-            loader: () => loadProtectedData('topics', loadTopicsOverviewData),
+            loader: loadTopicsRoute,
             Component: Topics,
           },
           {
             path: ROUTES.topicDetail,
-            loader: loadTopicDetail,
+            loader: loadTopicDetailRoute,
             Component: TopicItems,
           },
           {
             path: ROUTES.grammar,
-            loader: () => loadProtectedData('grammar', loadGrammarOverviewData),
+            loader: loadGrammarOverviewRoute,
             Component: Grammar,
           },
           {
             path: ROUTES.vocabulary,
-            loader: () => loadProtectedData('vocabulary', loadVocabularyOverviewData),
+            loader: loadVocabularyRoute,
             Component: Vocabulary,
           },
           {
             path: ROUTES.sounds,
-            loader: () => loadProtectedData('sound groups', loadSoundsOverviewData),
+            loader: loadSoundsRoute,
             Component: Sounds,
           },
           {
             path: ROUTES.soundDetail,
-            loader: loadSoundGroupDetail,
+            loader: loadSoundGroupDetailRoute,
             Component: SoundGroupPage,
           },
           {
             path: ROUTES.pronunciationGroups,
-            loader: loadPronunciationOverview,
+            loader: loadPronunciationOverviewRoute,
             Component: PronunciationOverviewPage,
           },
           {
             path: ROUTES.pronunciationGroup,
-            loader: loadPronunciationGroupDetail,
+            loader: loadPronunciationGroupDetailRoute,
             Component: PronunciationGroupPage,
           },
         ],
@@ -234,3 +128,7 @@ export const router = createHashRouter([
     ],
   },
 ]);
+
+function InitialLoadingFallback() {
+  return <DelayedNotification className="mt-20" />;
+}
