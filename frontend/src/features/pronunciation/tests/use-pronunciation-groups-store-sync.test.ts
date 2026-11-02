@@ -13,7 +13,7 @@ const mocks = vi.hoisted(() => ({
   getOverview: vi.fn(),
 }));
 
-vi.mock('@/database/queries/pronunciation-group-queries', () => ({
+vi.mock('@/database/queries/pronunciation-queries', () => ({
   getPronunciationGroupOverview: (...args: unknown[]) => mocks.getOverview(...args),
 }));
 

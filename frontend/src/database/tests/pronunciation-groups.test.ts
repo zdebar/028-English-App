@@ -64,7 +64,7 @@ vi.mock('@/config/supabase.config', () => ({
 import {
   getPronunciationGroupDetail,
   getPronunciationGroupOverview,
-} from '@/database/queries/pronunciation-group-queries';
+} from '@/database/queries/pronunciation-queries';
 
 function item(overrides: Record<string, unknown>) {
   return {

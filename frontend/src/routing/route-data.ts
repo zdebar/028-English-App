@@ -1,8 +1,8 @@
-import { getPronunciationGroupDetail } from '@/database/queries/pronunciation-group-queries';
+import { getPronunciationGroupDetail } from '@/database/queries/pronunciation-queries';
 import {
   getSoundGroupDetail,
   type SoundGroupDetailType,
-} from '@/database/queries/sound-group-queries';
+} from '@/database/queries/sound-queries';
 import { getTopicById } from '@/database/queries/topic-queries';
 import UserItem from '@/database/models/user-items';
 import {

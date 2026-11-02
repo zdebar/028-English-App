@@ -6,7 +6,7 @@ import { useQueryErrorToast } from '@/features/logging/use-query-error-toast';
 import { getOverviewQuery, overviewQueryKey } from '@/features/overviews/overview-query-store';
 import { useLiveQueryData } from '@/hooks/use-live-query-data';
 import { TEXTS } from '@/locales/cs';
-import type { SoundOverviewGroup } from '@/database/queries/sound-group-queries';
+import type { SoundOverviewGroup } from '@/database/queries/sound-queries';
 import type { SoundCategory } from '@/types/table.types';
 import { useCallback } from 'react';
 import { NavigationButton } from '@/routing/data-navigation';

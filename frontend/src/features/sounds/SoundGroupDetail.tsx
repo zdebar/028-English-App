@@ -5,7 +5,7 @@ import { ROUTES } from '@/config/routes.config';
 import {
   getSoundGroupDetail,
   type SoundGroupDetailType,
-} from '@/database/queries/sound-group-queries';
+} from '@/database/queries/sound-queries';
 import { useAuthStore } from '@/features/auth/use-auth-store';
 import { AudioItemListControls } from '@/features/audio/AudioItemListControls';
 import { useAudioManager } from '@/features/audio/use-audio-manager';

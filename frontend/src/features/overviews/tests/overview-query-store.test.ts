@@ -31,7 +31,7 @@ vi.mock('@/database/models/user-items', () => ({
     getInitiatedVocabulary: (...args: unknown[]) => mocks.getInitiatedVocabulary(...args),
   },
 }));
-vi.mock('@/database/queries/sound-group-queries', () => ({
+vi.mock('@/database/queries/sound-queries', () => ({
   hasAvailableSoundGroups: (...args: unknown[]) => mocks.getInitiatedSounds(...args),
   getAllSoundGroupsForOverview: (...args: unknown[]) => mocks.getAllSoundsForOverview(...args),
 }));

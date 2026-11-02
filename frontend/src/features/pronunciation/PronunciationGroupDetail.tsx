@@ -5,7 +5,7 @@ import BilingualItemButton from '@/components/UI/buttons/BilingualItemButton';
 import AudioItemList from '@/components/UI/AudioItemList';
 import { ListButton } from '@/components/UI/buttons/ListButton';
 import { ROUTES } from '@/config/routes.config';
-import { getPronunciationGroupDetail } from '@/database/queries/pronunciation-group-queries';
+import { getPronunciationGroupDetail } from '@/database/queries/pronunciation-queries';
 import { useAudioManager } from '@/features/audio/use-audio-manager';
 import { getItemAudioSources, isAudioPlayable, playAudioWithToast } from '@/features/audio/audio.utils';
 import { AudioItemListControls } from '@/features/audio/AudioItemListControls';

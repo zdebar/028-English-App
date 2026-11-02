@@ -16,7 +16,7 @@ vi.mock('@/database/models/groups', () => ({
 import {
   getSoundGroupDetail,
   hasAvailableSoundGroups,
-} from '@/database/queries/sound-group-queries';
+} from '@/database/queries/sound-queries';
 
 const sound = {
   id: 3,

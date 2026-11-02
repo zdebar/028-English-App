@@ -34,7 +34,7 @@ vi.mock('@/features/toast/use-toast-store', () => ({
     selector({ showToast: vi.fn() }),
 }));
 
-vi.mock('@/database/queries/pronunciation-group-queries', () => ({
+vi.mock('@/database/queries/pronunciation-queries', () => ({
   getPronunciationGroupOverview: vi.fn(),
   getPronunciationGroupDetail: vi.fn(),
 }));

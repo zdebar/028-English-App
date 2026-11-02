@@ -40,7 +40,7 @@ vi.mock('@/database/models/user-items', () => ({
     hasInitiatedVocabulary: vi.fn(async () => mocks.vocabulary.length > 0),
   },
 }));
-vi.mock('@/database/queries/sound-group-queries', () => ({
+vi.mock('@/database/queries/sound-queries', () => ({
   hasAvailableSoundGroups: vi.fn(async () => mocks.sounds.length > 0),
 }));
 import { useOverviewAvailability } from '../use-overview-availability';

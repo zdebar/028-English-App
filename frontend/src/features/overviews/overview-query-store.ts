@@ -11,7 +11,7 @@ import {
   getAllSoundGroupsForOverview,
   hasAvailableSoundGroups,
   type SoundOverviewGroup,
-} from '@/database/queries/sound-group-queries';
+} from '@/database/queries/sound-queries';
 import type { UserItemLocal } from '@/types/user-item.types';
 import { sharedQueryKey } from '@/database/queries/shared-query-store';
 

@@ -17,12 +17,12 @@ vi.mock('@/database/queries/topic-queries', () => ({
   getInitiatedTopicsByUserId: mocks.topics,
   getTopicById: vi.fn(),
 }));
-vi.mock('@/database/queries/sound-group-queries', () => ({
+vi.mock('@/database/queries/sound-queries', () => ({
   hasAvailableSoundGroups: (...args: unknown[]) => mocks.sounds(...args),
   getAllSoundGroupsForOverview: (...args: unknown[]) => mocks.allSoundsForOverview(...args),
   getSoundGroupDetail: vi.fn(),
 }));
-vi.mock('@/database/queries/pronunciation-group-queries', () => ({
+vi.mock('@/database/queries/pronunciation-queries', () => ({
   getPronunciationGroupDetail: vi.fn(),
 }));
 vi.mock('@/features/practice/review-deck-data', () => ({
