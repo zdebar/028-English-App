@@ -65,6 +65,26 @@
   left: 16px;
 }
 
+.pos-help-above-left,
+.pos-help-above-right {
+  position: absolute;
+  top: -1.5rem;
+}
+
+.pos-help-above-left {
+  left: 0;
+}
+
+.pos-help-above-right {
+  right: 0;
+}
+
+.pos-help-below-left {
+  position: absolute;
+  bottom: -1rem;
+  left: 0;
+}
+
 .app-shell[data-secondary-layout='side'] .bottom-controls-clearance {
   margin-bottom: 0;
 }

@@ -237,7 +237,7 @@ function VocabularyDetails({
       </div>
       {directionSections.map((section) => (
         <section key={section.title} className="relative flex flex-col gap-2">
-          <HelpText className="-top-5 left-0 whitespace-nowrap">
+          <HelpText className="pos-help-above-left whitespace-nowrap">
             {TEXTS.restartProgress}
           </HelpText>
           <DirectionResetButton
@@ -285,7 +285,7 @@ function VocabularyAudioControls({
         disabled={pronunciationSounds.length === 0}
       >
         <PronunciationIcon />
-        <HelpText className="-bottom-4 left-0 flex flex-col items-end landscape:invisible">
+        <HelpText className="pos-help-below-left flex flex-col items-end landscape:invisible">
           {TEXTS.pronunciationGuide}
         </HelpText>
       </SecondaryControlButton>

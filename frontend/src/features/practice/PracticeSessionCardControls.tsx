@@ -112,7 +112,7 @@ export default function PracticeSessionCardControls({
           disabled={display.pronunciationButtonDisabled}
         >
           <PronunciationIcon />
-          <HelpText className="-bottom-4 left-0 flex flex-col items-end landscape:invisible">
+          <HelpText className="pos-help-below-left flex flex-col items-end landscape:invisible">
             {TEXTS.pronunciationGuide}
           </HelpText>
         </SecondaryControlButton>
@@ -152,7 +152,7 @@ export default function PracticeSessionCardControls({
             )
           }
         >
-          <HelpText className="-bottom-4 left-0 flex flex-col items-end landscape:invisible">
+          <HelpText className="pos-help-below-left flex flex-col items-end landscape:invisible">
             {TEXTS.tooltipNotes}
           </HelpText>
         </InfoButton>

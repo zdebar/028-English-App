@@ -118,14 +118,14 @@ function PracticeCardFace({
           <p className="font-light" title={itemProgressHelpText}>
             {itemProgressLabel}
           </p>
-          <HelpText className="-top-6 left-0 whitespace-nowrap">{itemProgressHelpText}</HelpText>
+          <HelpText className="pos-help-above-left whitespace-nowrap">{itemProgressHelpText}</HelpText>
         </div>
         {display.showProgressLabel && (
           <div className="relative min-w-12 pr-2 text-right">
             <p className="font-light" title={progressHelpText}>
               {progressLabel}
             </p>
-            <HelpText className="-top-6 right-0 whitespace-nowrap">{progressHelpText}</HelpText>
+            <HelpText className="pos-help-above-right whitespace-nowrap">{progressHelpText}</HelpText>
           </div>
         )}
       </div>
