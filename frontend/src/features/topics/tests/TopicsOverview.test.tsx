@@ -30,11 +30,12 @@ vi.mock('@/features/auth/use-auth-store', () => ({
 }));
 
 vi.mock('@/database/state/data-store', () => ({
-  useDataManager: (selector: (state: any) => unknown) => selector({ userId: mocks.userId, status: 'ready' }),
-}));
-
-vi.mock('@/database/state/data-selectors', () => ({
-  selectTopicOverview: () => mocks.state.data,
+  useDataPackage: () => ({
+    userId: mocks.userId,
+    status: 'ready',
+    error: null,
+    data: mocks.state.data,
+  }),
 }));
 
 vi.mock('@/locales/cs', () => ({

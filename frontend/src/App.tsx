@@ -6,19 +6,21 @@ import IdentityLinkConflictModal from '@/features/auth/IdentityLinkConflictModal
 import OverlayMask from '@/features/overlay/OverlayMask';
 import { useThemeLoader } from '@/features/theme/use-theme-loader';
 import ToastContainer from '@/features/toast/ToastContainer';
-import { Outlet } from 'react-router-dom';
+import { Outlet, useLocation } from 'react-router-dom';
 import './styles/index.css';
 import { useAudioLoader } from './features/audio/use-audio-loader';
 import { useResponsiveLayout } from './components/Layout/use-responsive-layout';
 import { useSideHeaderOrientation } from './components/Layout/use-side-header-orientation';
 import { useInAppRouteHistory } from '@/routing/in-app-route-history';
 import { useDataManagerLifecycle } from '@/database/state/use-data-manager-lifecycle';
+import { ROUTES } from '@/config/routes.config';
 
 export default function App() {
   const userId = useAuthStore((state) => state.userId);
   const authLoading = useAuthStore((state) => state.loading);
+  const isHomeRoute = useLocation().pathname === ROUTES.home;
 
-  useDataManagerLifecycle(userId);
+  useDataManagerLifecycle(userId, isHomeRoute);
   useInAppRouteHistory();
   useAudioLoader(userId);
   useThemeLoader(userId, authLoading);

@@ -3,13 +3,24 @@ import { useStore } from 'zustand';
 import { useShallow } from 'zustand/react/shallow';
 import config from '@/config/config';
 import { db } from '@/database/models/db';
-import type { DataManagerState, AppDataSnapshot, AppDataChanges } from './data-types';
+import type {
+  AppDataChanges,
+  AppDataSnapshot,
+  DataManagerState,
+  DataPackageRequest,
+  DataPackageValue,
+} from './data-types';
 import { EMPTY_APP_DATA, EMPTY_REVIEW_ARRAYS } from './data-types';
 import {
   buildPreparedInitialLesson,
   selectReviewArrays,
   selectReviewAvailability,
 } from './data-selectors';
+import {
+  buildDataPackage,
+  DATA_PACKAGE_DEPENDENCIES,
+  getDataPackageKey,
+} from './data-package-builders';
 
 type DataChangeMessage = Readonly<{
   source: string;
@@ -26,6 +37,7 @@ const EMPTY_STATE: DataManagerState = {
   localDate: getLocalDate(),
   reviewArrays: EMPTY_REVIEW_ARRAYS,
   nextInitialLesson: null,
+  dataPackages: {},
 };
 
 const channelName = 'english-app-data-changes';
@@ -63,6 +75,7 @@ export function initializeDataManager(userId: string | null): Promise<void> {
     ...clock,
     reviewArrays: EMPTY_REVIEW_ARRAYS,
     nextInitialLesson: null,
+    dataPackages: {},
   });
 
   const promise = loadSnapshot(userId)
@@ -74,6 +87,7 @@ export function initializeDataManager(userId: string | null): Promise<void> {
         status: 'ready',
         error: null,
         ...getDerivedData(snapshot, userId),
+        dataPackages: {},
       });
       applyPendingChanges(userId);
       scheduleClockUpdate();
@@ -89,6 +103,7 @@ export function initializeDataManager(userId: string | null): Promise<void> {
         ...getClock(),
         reviewArrays: EMPTY_REVIEW_ARRAYS,
         nextInitialLesson: null,
+        dataPackages: {},
       });
       throw error;
     })
@@ -103,6 +118,109 @@ export function initializeDataManager(userId: string | null): Promise<void> {
 /** Waits for the active user's initial IndexedDB snapshot to be available. */
 export function ensureDataManagerReady(userId: string): Promise<void> {
   return initializeDataManager(userId);
+}
+
+/** Builds a requested page package once and keeps it subscribed to committed dataset changes. */
+export async function ensureDataPackage<Request extends DataPackageRequest>(
+  userId: string,
+  request: Request,
+): Promise<DataPackageValue<Request>> {
+  const key = getDataPackageKey(request);
+  const state = await getReadyDataManagerState(userId);
+  const cached = state.dataPackages[key];
+  if (cached) return getCachedPackageValue<Request>(cached);
+  return buildAndCacheDataPackage(state, userId, request, key);
+}
+
+async function getReadyDataManagerState(userId: string): Promise<DataManagerState> {
+  await ensureDataManagerReady(userId);
+  const state = dataManagerStore.getState();
+  if (state.userId !== userId || state.status !== 'ready') {
+    throw state.error ?? new Error('Application data is not ready for the active user.');
+  }
+  return state;
+}
+
+function getCachedPackageValue<Request extends DataPackageRequest>(
+  cached: DataManagerState['dataPackages'][string],
+): DataPackageValue<Request> {
+  if (cached.error) throw cached.error;
+  return cached.data as DataPackageValue<Request>;
+}
+
+async function buildAndCacheDataPackage<Request extends DataPackageRequest>(
+  state: DataManagerState,
+  userId: string,
+  request: Request,
+  key: string,
+): Promise<DataPackageValue<Request>> {
+  try {
+    const data = buildDataPackage(state, request);
+    dataManagerStore.setState((current) => {
+      if (current.userId !== userId || current.status !== 'ready') return current;
+      if (current.dataPackages[key]) return current;
+      return {
+        ...current,
+        dataPackages: {
+          ...current.dataPackages,
+          [key]: { request, data, error: null },
+        },
+      };
+    });
+    const latest = dataManagerStore.getState();
+    const latestPackage = latest.userId === userId ? latest.dataPackages[key] : null;
+    if (latestPackage) return getCachedPackageValue<Request>(latestPackage);
+    throw new Error('The active account changed while preparing application data.');
+  } catch (caughtError) {
+    const error = caughtError instanceof Error ? caughtError : new Error(String(caughtError));
+    dataManagerStore.setState((current) => {
+      if (current.userId !== userId || current.status !== 'ready' || current.dataPackages[key]) return current;
+      return {
+        ...current,
+        dataPackages: {
+          ...current.dataPackages,
+          [key]: { request, data: null, error },
+        },
+      };
+    });
+    throw error;
+  }
+}
+
+export type DataPackageResult<Value> = Readonly<{
+  status: 'loading' | 'ready' | 'error';
+  data: Value | undefined;
+  error: Error | null;
+  userId: string | null;
+}>;
+
+/** Subscribes a page to the current user's cached package and its future updates. */
+export function useDataPackage<Request extends DataPackageRequest>(
+  request: Request,
+): DataPackageResult<DataPackageValue<Request>> {
+  const key = getDataPackageKey(request);
+  return useStore(
+    dataManagerStore,
+    useShallow((state): DataPackageResult<DataPackageValue<Request>> => {
+      if (state.status === 'error') {
+        return { status: 'error', data: undefined, error: state.error, userId: state.userId };
+      }
+      if (state.status !== 'ready' || !state.userId) {
+        return { status: 'loading', data: undefined, error: null, userId: state.userId };
+      }
+      const cached = state.dataPackages[key];
+      if (!cached) return { status: 'loading', data: undefined, error: null, userId: state.userId };
+      if (cached.error) {
+        return { status: 'error', data: undefined, error: cached.error, userId: state.userId };
+      }
+      return {
+        status: 'ready',
+        data: cached.data as DataPackageValue<Request>,
+        error: null,
+        userId: state.userId,
+      };
+    }),
+  );
 }
 
 /** Clears user data and invalidates any pending bootstrap for a previous account. */
@@ -170,11 +288,6 @@ function hasAppDataChanges(changes: AppDataChanges): boolean {
   );
 }
 
-/** React selector hook for components that read the central dataset. */
-export function useDataManager<T>(selector: (state: DataManagerState) => T): T {
-  return useStore(dataManagerStore, useShallow(selector));
-}
-
 function ensureChangeChannel(): void {
   if (channel || typeof BroadcastChannel === 'undefined') return;
   channel = new BroadcastChannel(channelName);
@@ -227,10 +340,14 @@ function applyPendingChanges(userId: string): void {
 function applyChanges(changes: AppDataChanges): void {
   dataManagerStore.setState((state) => {
     const snapshot = applyChangesToSnapshot(state, changes, state.userId ?? '');
-    return {
+    const nextState = {
       ...state,
       ...snapshot,
       ...getDerivedData(snapshot, state.userId ?? ''),
+    };
+    return {
+      ...nextState,
+      dataPackages: updateCachedPackages(state.dataPackages, nextState, changes),
     };
   });
   scheduleClockUpdate();
@@ -287,7 +404,13 @@ function scheduleClockUpdate(): void {
   clockTimer = globalThis.setTimeout(() => {
     clockTimer = null;
     const clock = getClock();
-    dataManagerStore.setState(clock);
+    dataManagerStore.setState((current) => {
+      const next = { ...current, ...clock };
+      return {
+        ...clock,
+        dataPackages: updateCachedPackages(current.dataPackages, next, {}, true, current.localDate),
+      };
+    });
     scheduleClockUpdate();
   }, delay);
 }
@@ -303,6 +426,59 @@ function getDerivedData(snapshot: AppDataSnapshot, userId: string) {
     reviewArrays: selectReviewArrays(snapshot, userId),
     nextInitialLesson: buildPreparedInitialLesson(snapshot, userId),
   };
+}
+
+function updateCachedPackages(
+  cachedPackages: DataManagerState['dataPackages'],
+  state: DataManagerState,
+  changes: AppDataChanges,
+  clockChanged = false,
+  previousLocalDate = state.localDate,
+): DataManagerState['dataPackages'] {
+  const changedTables = getChangedTables(changes);
+  const affectedPackages = Object.entries(cachedPackages)
+    .filter(([, cached]) => isDataPackageAffected(cached, state, changedTables, clockChanged, previousLocalDate));
+  if (affectedPackages.length === 0) return cachedPackages;
+
+  const updatedPackages = affectedPackages.map(([key, cached]) => [key, rebuildCachedDataPackage(cached, state)]);
+  return { ...cachedPackages, ...Object.fromEntries(updatedPackages) };
+}
+
+function isDataPackageAffected(
+  cached: DataManagerState['dataPackages'][string],
+  state: DataManagerState,
+  changedTables: ReadonlySet<keyof AppDataSnapshot>,
+  clockChanged: boolean,
+  previousLocalDate: string,
+): boolean {
+  const dependencies = DATA_PACKAGE_DEPENDENCIES[cached.request.kind];
+  if (dependencies.tables.some((table) => changedTables.has(table))) return true;
+  if (!clockChanged) return false;
+  return dependencies.clock === true ||
+    (dependencies.localDate === true && state.localDate !== previousLocalDate);
+}
+
+function rebuildCachedDataPackage(
+  cached: DataManagerState['dataPackages'][string],
+  state: DataManagerState,
+): DataManagerState['dataPackages'][string] {
+  try {
+    return { request: cached.request, data: buildDataPackage(state, cached.request), error: null };
+  } catch (caughtError) {
+    return {
+      request: cached.request,
+      data: null,
+      error: caughtError instanceof Error ? caughtError : new Error(String(caughtError)),
+    };
+  }
+}
+
+function getChangedTables(changes: AppDataChanges): Set<keyof AppDataSnapshot> {
+  return new Set(
+    Object.entries(changes)
+      .filter(([, delta]) => (delta?.upserted?.length ?? 0) > 0 || (delta?.deleted?.length ?? 0) > 0)
+      .map(([table]) => table as keyof AppDataSnapshot),
+  );
 }
 
 function patchRows<Row, Key>(

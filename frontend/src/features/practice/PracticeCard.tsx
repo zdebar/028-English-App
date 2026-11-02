@@ -8,76 +8,50 @@ import { useToastStore } from '../toast/use-toast-store';
 import { useQueryErrorToast } from '@/features/logging/use-query-error-toast';
 import { useCallback, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import type { ReviewDeckData } from '@/database/state/data-types';
+import type { ReviewKind } from '@/types/practice.types';
 import { usePracticeExitBlocker } from './hooks/use-practice-exit-blocker';
 import { formatProgress } from '@/utils/progress.utils';
 import { ROUTES } from '@/config/routes.config';
+import type { UserItemLocal } from '@/types/user-item.types';
 
 type PracticeCardProps = Readonly<{
-  initialData?: ReviewDeckData;
+  reviewKind?: ReviewKind;
 }>;
 
-export default function PracticeCard({ initialData }: PracticeCardProps) {
+export default function PracticeCard({ reviewKind = 'grammar' }: PracticeCardProps) {
   const userId = useAuthStore((state) => state.userId);
   const showToast = useToastStore((state) => state.showToast);
   const navigate = useNavigate();
-  const notifiedDetailFailuresRef = useRef(new Set<string>());
   const handlePracticeComplete = useCallback(() => {
     void navigate(ROUTES.home, { replace: true });
   }, [navigate]);
-  const {
-    currentItem,
-    note,
-    grammar,
-    noteAvailable,
-    grammarAvailable,
-    noteLoadFailed,
-    grammarLoadFailed,
-    ensureDetailLoaded,
-    progressLabel,
-    finishedReview,
-    revealed,
-    handleReveal,
-    czech,
-    english,
-    pronunciation,
-    audioDisabled,
-    plusHint,
-    nextItem,
-    retryPractice,
-    audioError,
-    playAudio,
-    audioLoading,
-    loading,
-    error,
-    finishPractice,
-  } = usePracticeDeck(userId, initialData, handlePracticeComplete);
+  const deck = usePracticeDeck(userId, reviewKind, handlePracticeComplete);
 
-  usePracticeExitBlocker(finishPractice);
-
-  const notifyDetailLoadFailure = useCallback(
-    (detail: PracticeDetail): void => {
-      if (!currentItem) return;
-      const failureKey = `${currentItem.item_id}:${detail}`;
-      if (notifiedDetailFailuresRef.current.has(failureKey)) return;
-      notifiedDetailFailuresRef.current.add(failureKey);
-      showToast(TEXTS.loadingError, 'error');
-    },
-    [currentItem, showToast],
+  usePracticeExitBlocker(deck.finishPractice);
+  const notifyDetailLoadFailure = usePracticeDetailFailureNotifier(
+    deck.currentItem,
+    deck.noteLoadFailed,
+    deck.grammarLoadFailed,
+    showToast,
   );
 
-  useEffect(() => {
-    if (noteLoadFailed) notifyDetailLoadFailure('note');
-    if (grammarLoadFailed) notifyDetailLoadFailure('grammar');
-  }, [grammarLoadFailed, noteLoadFailed, notifyDetailLoadFailure]);
+  useQueryErrorToast(deck.error, 'Failed to fetch practice deck');
 
-  useQueryErrorToast(error, 'Failed to fetch practice deck');
+  return <PracticeCardBody deck={deck} onDetailLoadError={notifyDetailLoadFailure} />;
+}
 
-  if (loading && !currentItem) {
+type PracticeCardBodyProps = Readonly<{
+  deck: ReturnType<typeof usePracticeDeck>;
+  onDetailLoadError: (detail: PracticeDetail) => void;
+}>;
+
+function PracticeCardBody({ deck, onDetailLoadError }: PracticeCardBodyProps) {
+  const { currentItem } = deck;
+  if (deck.loading && !currentItem) {
     return <DelayedNotification />;
   }
 
-  if (finishedReview) return null;
+  if (deck.finishedReview) return null;
 
   if (!currentItem) {
     return <PracticeEmptyState />;
@@ -85,44 +59,67 @@ export default function PracticeCard({ initialData }: PracticeCardProps) {
 
   return (
     <PracticeSessionCard
-      note={note}
-      grammar={grammar}
-      noteAvailable={noteAvailable}
-      grammarAvailable={grammarAvailable}
-      noteLoadFailed={noteLoadFailed}
-      grammarLoadFailed={grammarLoadFailed}
-      itemKey={currentItem ? String(currentItem.item_id) : undefined}
-      ensureDetailLoaded={ensureDetailLoaded}
-      onDetailLoadError={notifyDetailLoadFailure}
+      note={deck.note}
+      grammar={deck.grammar}
+      soundGroups={deck.soundGroups}
+      noteAvailable={deck.noteAvailable}
+      grammarAvailable={deck.grammarAvailable}
+      noteLoadFailed={deck.noteLoadFailed}
+      grammarLoadFailed={deck.grammarLoadFailed}
+      itemKey={String(currentItem.item_id)}
+      ensureDetailLoaded={deck.ensureDetailLoaded}
+      onDetailLoadError={onDetailLoadError}
       itemProgressLabel={formatProgress(
         currentItem.review_direction === 'en_to_cz'
           ? currentItem.progress_en_to_cz
           : currentItem.progress_cz_to_en,
       ) ?? ''}
-      progressLabel={progressLabel}
+      progressLabel={deck.progressLabel}
       progressHelpText={TEXTS.reviewProgress}
       showProgressLabel
       isReviewPractice
       isInitialTrainingPractice={false}
-      revealed={revealed}
-      czech={currentItem.review_direction === 'en_to_cz' ? currentItem.czech : czech}
+      revealed={deck.revealed}
+      czech={currentItem.review_direction === 'en_to_cz' ? currentItem.czech : deck.czech}
       czechDescription={currentItem.czech_description}
-      czechHidden={currentItem.review_direction === 'en_to_cz' && !revealed}
-      english={english}
-      pronunciation={pronunciation}
+      czechHidden={currentItem.review_direction === 'en_to_cz' && !deck.revealed}
+      english={deck.english}
+      pronunciation={deck.pronunciation}
       audio={currentItem.audio}
-      audioDisabled={audioDisabled}
-      handleReveal={handleReveal}
-      plusHint={plusHint}
-      nextRepeat={() => nextItem('repeat')}
-      nextHard={() => nextItem('hard')}
-      nextGood={() => nextItem('good')}
-      nextEasy={() => nextItem('easy')}
-      retryAction={retryPractice}
-      audioError={audioError}
-      playAudio={playAudio}
-      audioLoading={audioLoading}
-      isContentLoading={loading}
+      audioDisabled={deck.audioDisabled}
+      handleReveal={deck.handleReveal}
+      plusHint={deck.plusHint}
+      nextRepeat={() => deck.nextItem('repeat')}
+      nextHard={() => deck.nextItem('hard')}
+      nextGood={() => deck.nextItem('good')}
+      nextEasy={() => deck.nextItem('easy')}
+      retryAction={deck.retryPractice}
+      audioError={deck.audioError}
+      playAudio={deck.playAudio}
+      audioLoading={deck.audioLoading}
+      isContentLoading={deck.loading}
     />
   );
+}
+
+function usePracticeDetailFailureNotifier(
+  currentItem: UserItemLocal | null,
+  noteLoadFailed: boolean,
+  grammarLoadFailed: boolean,
+  showToast: (message: string, type: 'error') => void,
+): (detail: PracticeDetail) => void {
+  const notifiedDetailFailuresRef = useRef(new Set<string>());
+  const notifyDetailLoadFailure = useCallback((detail: PracticeDetail): void => {
+    if (!currentItem) return;
+    const failureKey = `${currentItem.item_id}:${detail}`;
+    if (notifiedDetailFailuresRef.current.has(failureKey)) return;
+    notifiedDetailFailuresRef.current.add(failureKey);
+    showToast(TEXTS.loadingError, 'error');
+  }, [currentItem, showToast]);
+
+  useEffect(() => {
+    if (noteLoadFailed) notifyDetailLoadFailure('note');
+    if (grammarLoadFailed) notifyDetailLoadFailure('grammar');
+  }, [grammarLoadFailed, noteLoadFailed, notifyDetailLoadFailure]);
+  return notifyDetailLoadFailure;
 }

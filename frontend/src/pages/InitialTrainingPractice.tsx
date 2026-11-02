@@ -10,9 +10,8 @@ import { usePracticeExitBlocker } from '@/features/practice/hooks/use-practice-e
 import { TEXTS } from '@/locales/cs';
 import { formatProgress } from '@/utils/progress.utils';
 import { useCallback, useState, type JSX } from 'react';
-import { useLoaderData, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { ROUTES } from '@/config/routes.config';
-import type { InitialTrainingData } from '@/features/practice/initial-training-data';
 
 type InitialTrainingDeck = ReturnType<typeof useInitialTrainingDeck>;
 
@@ -44,6 +43,7 @@ function InitialTrainingContent({
     <PracticeSessionCard
       note={deck.note}
       grammar={deck.practiceGrammar}
+      soundGroups={deck.soundGroups}
       itemProgressLabel={formatProgress(deck.currentItem.progress_cz_to_en) ?? ''}
       progressLabel={deck.progressLabel}
       revealed={deck.revealed}
@@ -70,11 +70,10 @@ export default function InitialTrainingPractice(): JSX.Element {
   const userId = useAuthStore((state) => state.userId);
   const navigate = useNavigate();
   const [introDismissed, setIntroDismissed] = useState(false);
-  const initialData = useLoaderData() as InitialTrainingData;
   const handlePracticeComplete = useCallback(() => {
     void navigate(ROUTES.home, { replace: true });
   }, [navigate]);
-  const deck = useInitialTrainingDeck(userId, initialData, handlePracticeComplete);
+  const deck = useInitialTrainingDeck(userId, handlePracticeComplete);
   usePracticeExitBlocker(deck.finishPractice);
   useQueryErrorToast(deck.error, 'Failed to fetch initial training deck');
 

@@ -92,10 +92,6 @@ vi.mock('@/config/config', () => ({
   },
 }));
 
-vi.mock('@/database/state/data-store', () => ({
-  useDataManager: (selector: (state: any) => unknown) => selector({ groups: mocks.soundGroups }),
-}));
-
 vi.mock('@/locales/cs', () => ({
   TEXTS: {
     syncLoadingText: 'Sync loading',
@@ -216,7 +212,7 @@ vi.mock('@/features/practice/hooks/use-practice-deck', () => ({
       };
     }
 
-    return mocks.practiceDeck;
+    return { ...mocks.practiceDeck, soundGroups: mocks.soundGroups };
   },
 }));
 

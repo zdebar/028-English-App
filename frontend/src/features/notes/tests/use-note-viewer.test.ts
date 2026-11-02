@@ -6,7 +6,6 @@ const mocks = vi.hoisted(() => ({
 }));
 
 vi.mock('@/database/state/data-store', () => ({
-  useDataManager: (selector: (state: any) => unknown) => selector({ notes: mocks.notes }),
 }));
 
 import { useNoteViewer } from '@/features/notes/use-note-viewer';
@@ -18,7 +17,7 @@ describe('useNoteViewer', () => {
   });
 
   it('opens a note from central data and closes it again', () => {
-    const { result } = renderHook(() => useNoteViewer());
+    const { result } = renderHook(() => useNoteViewer(mocks.notes as any));
 
     act(() => {
       result.current.openNote(1);
@@ -35,7 +34,7 @@ describe('useNoteViewer', () => {
   });
 
   it('ignores missing ids and notes that are not in the central dataset', () => {
-    const { result } = renderHook(() => useNoteViewer());
+    const { result } = renderHook(() => useNoteViewer(mocks.notes as any));
 
     act(() => {
       result.current.openNote(null);

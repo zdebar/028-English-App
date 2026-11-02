@@ -5,8 +5,9 @@ import { NavigationButton } from '@/routing/data-navigation';
 import StyledButton from '@/components/UI/buttons/StyledButton';
 import { hasReachedReviewLimit } from './practice-availability';
 import { useAuthStore } from '@/features/auth/use-auth-store';
-import { useDataManager } from '@/database/state/data-store';
-import { selectPracticeAvailability, selectPronunciationOverview } from '@/database/state/data-selectors';
+import { useDataPackage } from '@/database/state/data-store';
+import type { DataPackageResult } from '@/database/state/data-store';
+import type { HomeDataPackage } from '@/database/state/data-types';
 import type { PracticeAvailabilitySnapshot } from './practice-availability';
 
 type ReviewKind = 'grammar' | 'vocabulary';
@@ -93,12 +94,11 @@ const ReviewPracticeButton = memo(function ReviewPracticeButton({
 
 const PronunciationPracticeButton = memo(function PronunciationPracticeButton(): JSX.Element {
   const userId = useAuthStore((state) => state.userId);
-  const dataState = useDataManager((state) => state);
-  const dataReady = dataState.userId === userId && dataState.status === 'ready';
-  const loading = Boolean(userId) && !dataReady && dataState.status !== 'error';
-  const error = dataState.userId === userId && dataState.status === 'error' ? dataState.error : null;
-  const hasActiveGroup = userId !== null && dataReady &&
-    selectPronunciationOverview(dataState, userId).some((group) => group.isActive);
+  const homePackage = useDataPackage({ kind: 'home' });
+  const hasUserPackage = homePackage.userId === userId;
+  const loading = Boolean(userId) && (!hasUserPackage || homePackage.status === 'loading');
+  const error = hasUserPackage && homePackage.status === 'error' ? homePackage.error : null;
+  const hasActiveGroup = hasUserPackage && homePackage.data?.hasActivePronunciationGroups === true;
   const disabled = loading || error !== null || !hasActiveGroup;
 
   return (
@@ -152,12 +152,21 @@ function usePracticeStatus(): Readonly<{
   error: Error | null;
 }> {
   const userId = useAuthStore((state) => state.userId);
-  const state = useDataManager((current) => current);
-  const isReady = state.userId === userId && state.status === 'ready';
+  const homePackage = useDataPackage({ kind: 'home' });
+  return getPracticeStatus(homePackage, userId);
+}
+
+function getPracticeStatus(
+  homePackage: DataPackageResult<HomeDataPackage>,
+  userId: string | null,
+): Readonly<{ availability: PracticeAvailabilitySnapshot | null; loading: boolean; error: Error | null }> {
+  const isCurrentUser = homePackage.userId === userId;
+  const isReady = isCurrentUser && homePackage.status === 'ready';
+  const error = isCurrentUser && homePackage.status === 'error' ? homePackage.error : null;
   return {
-    availability: userId && isReady ? selectPracticeAvailability(state, userId, new Date(state.nowIso)) : null,
-    loading: Boolean(userId) && !isReady && state.status !== 'error',
-    error: state.userId === userId && state.status === 'error' ? state.error : null,
+    availability: userId && isReady ? homePackage.data?.practiceAvailability ?? null : null,
+    loading: Boolean(userId) && !isReady && error === null,
+    error,
   };
 }
 

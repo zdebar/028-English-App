@@ -8,8 +8,7 @@ import { useRouteClose } from '@/routing/use-route-close';
 import { useQueryErrorToast } from '@/features/logging/use-query-error-toast';
 import { useAuthStore } from '@/features/auth/use-auth-store';
 import type { SoundClass } from '@/types/table.types';
-import { useDataManager } from '@/database/state/data-store';
-import { selectPronunciationOverview } from '@/database/state/data-selectors';
+import { useDataPackage } from '@/database/state/data-store';
 
 type ContrastClassPresentation = Readonly<{ key: SoundClass; title: string }>;
 
@@ -23,11 +22,12 @@ const CATEGORY_HEADING_CLASS_NAME =
 
 export default function PronunciationOverview() {
   const userId = useAuthStore((state) => state.userId);
-  const dataState = useDataManager((state) => state);
+  const packageState = useDataPackage({ kind: 'pronunciation-overview' });
   const closeRoute = useRouteClose(ROUTES.home);
-  const data = userId ? selectPronunciationOverview(dataState, userId) : [];
-  const loading = Boolean(userId) && (dataState.userId !== userId || dataState.status === 'loading' || dataState.status === 'idle');
-  const error = dataState.userId === userId && dataState.status === 'error' ? dataState.error : null;
+  const hasUserPackage = packageState.userId === userId;
+  const data = hasUserPackage ? packageState.data ?? [] : [];
+  const loading = Boolean(userId) && (!hasUserPackage || packageState.status === 'loading');
+  const error = hasUserPackage && packageState.status === 'error' ? packageState.error : null;
   const hasData = data.length > 0;
 
   useQueryErrorToast(error, 'Failed to fetch pronunciation overview');

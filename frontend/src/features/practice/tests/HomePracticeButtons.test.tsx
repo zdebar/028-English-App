@@ -4,7 +4,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 const mocks = vi.hoisted(() => ({
   navigationButtonRender: vi.fn(),
   pronunciationGroups: [{ isActive: true }],
-  state: { userId: 'u1', status: 'ready', nowIso: '2026-01-01T00:00:00.000Z' },
+  state: { userId: 'u1', status: 'ready', nowIso: '2026-01-01T00:00:00.000Z', error: null as Error | null },
   availability: {
     grammarReviewReadyAt: null as string | null,
     vocabularyReviewReadyAt: null as string | null,
@@ -32,11 +32,17 @@ vi.mock('@/features/auth/use-auth-store', () => ({
   useAuthStore: (selector: (state: { userId: string }) => unknown) => selector({ userId: 'u1' }),
 }));
 vi.mock('@/database/state/data-store', () => ({
-  useDataManager: (selector: (state: any) => unknown) => selector(mocks.state),
-}));
-vi.mock('@/database/state/data-selectors', () => ({
-  selectPracticeAvailability: () => mocks.availability,
-  selectPronunciationOverview: () => mocks.pronunciationGroups,
+  useDataPackage: () => ({
+    userId: mocks.state.userId,
+    status: mocks.state.status,
+    error: mocks.state.error ?? null,
+    data: {
+      practiceAvailability: mocks.availability,
+      hasActivePronunciationGroups: mocks.pronunciationGroups.some((group) => group.isActive),
+      levels: [],
+      soundGroups: [],
+    },
+  }),
 }));
 vi.mock('@/routing/data-navigation', () => ({
   NavigationButton: ({ children, ...props }: any) => {
@@ -52,7 +58,7 @@ describe('Home practice buttons', () => {
   beforeEach(() => {
     mocks.navigationButtonRender.mockClear();
     mocks.pronunciationGroups = [{ isActive: true }];
-    mocks.state = { userId: 'u1', status: 'ready', nowIso: new Date().toISOString() };
+    mocks.state = { userId: 'u1', status: 'ready', nowIso: new Date().toISOString(), error: null };
     mocks.availability = {
       grammarReviewReadyAt: null,
       vocabularyReviewReadyAt: null,

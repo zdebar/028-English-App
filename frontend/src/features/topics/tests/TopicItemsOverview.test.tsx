@@ -40,15 +40,12 @@ vi.mock('@/features/toast/use-toast-store', () => ({
 }));
 
 vi.mock('@/database/state/data-store', () => ({
-  useDataManager: (selector: (state: any) => unknown) => selector({
+  useDataPackage: (request: { topicId: number }) => ({
     userId: mocks.userId,
     status: mocks.state.topicLoading ? 'loading' : 'ready',
     error: mocks.state.topicError ?? null,
+    data: request.topicId === 2 ? { topic: mocks.state.topic, items: mocks.state.items } : undefined,
   }),
-}));
-
-vi.mock('@/database/state/data-selectors', () => ({
-  selectTopicDetail: () => ({ topic: mocks.state.topic, items: mocks.state.items }),
 }));
 
 vi.mock('@/features/audio/use-audio-manager', () => ({

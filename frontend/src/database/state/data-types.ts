@@ -7,6 +7,86 @@ import type {
 import type { GroupItemType, GroupRelationType, GroupType } from '@/types/table.types';
 import type { PracticeDeckEntry, PracticeDeckItem, ResolvedPracticeEntry, UserItemLocal } from '@/types/user-item.types';
 import type { ReviewDirection, ReviewKind } from '@/types/practice.types';
+import type { PronunciationGroupDetailType, PronunciationGroupOverviewType } from '@/types/pronunciation.types';
+
+export type PracticeAvailabilityData = ReviewAvailability & Readonly<{
+  initialTrainingAvailable: boolean;
+  continuingInitialLessonToday: boolean;
+}>;
+
+export type OverviewAvailabilityData = Readonly<{
+  grammar: boolean;
+  topics: boolean;
+  vocabulary: boolean;
+  sounds: boolean;
+}>;
+
+export type TopicDetailData = Readonly<{
+  topic: GroupType | null;
+  items: UserItemLocal[];
+}>;
+
+export type HomeDataPackage = Readonly<{
+  levels: ReturnType<typeof import('@/database/models/levels').aggregateLevels>;
+  practiceAvailability: PracticeAvailabilityData;
+  hasActivePronunciationGroups: boolean;
+  soundGroups: GroupType[];
+}>;
+
+export type ReviewPracticePackage = Readonly<{
+  availability: PracticeAvailabilityData;
+  initialDeck: ReviewDeckData;
+  decks: Readonly<Record<ReviewDirection, ReviewDeckData>>;
+  soundGroups: GroupType[];
+}>;
+
+export type VocabularyPackage = Readonly<{
+  items: UserItemLocal[];
+  notes: NoteType[];
+  soundGroups: GroupType[];
+}>;
+
+export type InitialTrainingPackage = PreparedInitialLesson & Readonly<{
+  groupNote: string | null;
+  soundGroups: GroupType[];
+}>;
+
+export type DataPackageMap = Readonly<{
+  home: HomeDataPackage;
+  'overview-menu': OverviewAvailabilityData;
+  'grammar-overview': GrammarTopicWithGroups[];
+  'topics-overview': GroupType[];
+  'topic-detail': TopicDetailData;
+  vocabulary: VocabularyPackage;
+  'sounds-overview': SoundOverviewGroup[];
+  'sound-detail': SoundGroupDetail | null;
+  'pronunciation-overview': PronunciationGroupOverviewType[];
+  'pronunciation-detail': PronunciationGroupDetailType | null;
+  'review-practice': ReviewPracticePackage;
+  'initial-training': InitialTrainingPackage;
+}>;
+
+export type DataPackageRequest =
+  | Readonly<{ kind: 'home' }>
+  | Readonly<{ kind: 'overview-menu' }>
+  | Readonly<{ kind: 'grammar-overview' }>
+  | Readonly<{ kind: 'topics-overview' }>
+  | Readonly<{ kind: 'topic-detail'; topicId: number }>
+  | Readonly<{ kind: 'vocabulary' }>
+  | Readonly<{ kind: 'sounds-overview' }>
+  | Readonly<{ kind: 'sound-detail'; groupId: number }>
+  | Readonly<{ kind: 'pronunciation-overview' }>
+  | Readonly<{ kind: 'pronunciation-detail'; groupId: number }>
+  | Readonly<{ kind: 'review-practice'; reviewKind: ReviewKind }>
+  | Readonly<{ kind: 'initial-training' }>;
+
+export type DataPackageValue<Request extends DataPackageRequest> = DataPackageMap[Request['kind']];
+
+export type CachedDataPackage = Readonly<{
+  request: DataPackageRequest;
+  data: unknown;
+  error: Error | null;
+}>;
 
 export type AppDataSnapshot = Readonly<{
   levels: readonly LevelType[];
@@ -50,6 +130,7 @@ export type DataManagerState = AppDataSnapshot & Readonly<{
   localDate: string;
   reviewArrays: ReviewArrays;
   nextInitialLesson: PreparedInitialLesson | null;
+  dataPackages: Readonly<Record<string, CachedDataPackage>>;
 }>;
 
 export type VisibleGroup = GroupType & Readonly<{ examples: UserItemLocal[] }>;

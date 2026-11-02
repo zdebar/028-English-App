@@ -56,10 +56,12 @@ vi.mock('@/database/models/db', () => {
 import {
   applyRemoteDataChanges,
   dataManagerStore,
+  ensureDataPackage,
   initializeDataManager,
   mergeAppDataChanges,
   publishDataChanges,
   resetDataManager,
+  useDataPackage,
 } from '../data-store';
 import { EMPTY_APP_DATA, EMPTY_REVIEW_ARRAYS } from '../data-types';
 
@@ -95,6 +97,67 @@ describe('central data manager', () => {
       user_items: [{ item_id: 1, user_id: 'u1' }],
       user_lessons: [{ user_id: 'u1', lesson_id: 1 }],
     });
+  });
+
+  it('prepares and reuses a package, then updates its subscribers after a committed delta', async () => {
+    mocks.rows.user_items.push({ ...createUserItem(), note_id: 8 });
+    await initializeDataManager('u1');
+
+    const initialPackage = await ensureDataPackage('u1', { kind: 'vocabulary' });
+    const cachedPackage = await ensureDataPackage('u1', { kind: 'vocabulary' });
+    expect(cachedPackage).toBe(initialPackage);
+    expect(initialPackage.notes).toEqual([]);
+
+    const { result, unmount } = renderHook(() => useDataPackage({ kind: 'vocabulary' }));
+    expect(result.current.status).toBe('ready');
+    expect(result.current.data?.notes).toEqual([]);
+
+    const cachedEntry = dataManagerStore.getState().dataPackages.vocabulary;
+    act(() => {
+      publishDataChanges('u1', { levels: { upserted: [{ id: 1 }] as never[] } });
+    });
+    expect(dataManagerStore.getState().dataPackages.vocabulary).toBe(cachedEntry);
+
+    await act(async () => {
+      publishDataChanges('u1', {
+        notes: { upserted: [{ id: 8, name: 'Test note', note: 'Details', sort_order: 1, deleted_at: null }] as never[] },
+      });
+      await Promise.resolve();
+    });
+
+    expect(result.current.data?.notes).toEqual([
+      { id: 8, name: 'Test note', note: 'Details', sort_order: 1, deleted_at: null },
+    ]);
+    expect(result.current.data).not.toBe(initialPackage);
+    unmount();
+  });
+
+  it('rebuilds started-content packages when a lesson is marked as started', async () => {
+    await initializeDataManager('u1');
+    const initialTopics = await ensureDataPackage('u1', { kind: 'topics-overview' });
+    const initialSounds = await ensureDataPackage('u1', { kind: 'sounds-overview' });
+    const initialPronunciation = await ensureDataPackage('u1', { kind: 'pronunciation-overview' });
+
+    publishDataChanges('u1', {
+      user_lessons: {
+        upserted: [{ user_id: 'u1', lesson_id: 1, started_at: '2026-02-01T00:00:00.000Z' }],
+      },
+    });
+
+    expect(dataManagerStore.getState().dataPackages['topics-overview']?.data).not.toBe(initialTopics);
+    expect(dataManagerStore.getState().dataPackages['sounds-overview']?.data).not.toBe(initialSounds);
+    expect(dataManagerStore.getState().dataPackages['pronunciation-overview']?.data).not.toBe(initialPronunciation);
+  });
+
+  it('clears cached packages when the active account changes', async () => {
+    await initializeDataManager('u1');
+    await ensureDataPackage('u1', { kind: 'overview-menu' });
+    expect(Object.keys(dataManagerStore.getState().dataPackages)).toEqual(['overview-menu']);
+
+    await initializeDataManager('u2');
+
+    expect(dataManagerStore.getState().userId).toBe('u2');
+    expect(dataManagerStore.getState().dataPackages).toEqual({});
   });
 
   it('ignores a delayed bootstrap after the active account changes', async () => {
@@ -165,7 +228,9 @@ describe('central data manager', () => {
 
   it('broadcasts deltas and applies matching cross-tab messages', async () => {
     vi.stubGlobal('BroadcastChannel', FakeBroadcastChannel);
+    mocks.rows.user_items.push({ ...createUserItem(), note_id: 9 });
     await initializeDataManager('u1');
+    await ensureDataPackage('u1', { kind: 'vocabulary' });
     const channel = FakeBroadcastChannel.instances[0];
 
     publishDataChanges('u1', { levels: { upserted: [{ id: 2 }] as never[] } });
@@ -174,9 +239,14 @@ describe('central data manager', () => {
     channel?.dispatch({
       source: 'other-tab',
       userId: 'u1',
-      changes: { levels: { upserted: [{ id: 3 }] as never[] } },
+      changes: {
+        levels: { upserted: [{ id: 3 }] as never[] },
+        notes: { upserted: [{ id: 9, name: 'Cross-tab note', note: 'Shared', sort_order: 1, deleted_at: null }] as never[] },
+      },
     });
     expect(dataManagerStore.getState().levels).toEqual([{ id: 2 }, { id: 3 }]);
+    expect((dataManagerStore.getState().dataPackages.vocabulary?.data as { notes: unknown[] }).notes)
+      .toMatchObject([{ name: 'Cross-tab note' }]);
   });
 
   it('keeps a committed write alive through unmount and publishes it after commit', async () => {
@@ -201,12 +271,15 @@ describe('central data manager', () => {
   it('does not publish a write whose IndexedDB transaction fails', async () => {
     const original = createUserItem();
     setReadyUserItems([original]);
+    await ensureDataPackage('u1', { kind: 'vocabulary' });
+    const cachedPackage = dataManagerStore.getState().dataPackages.vocabulary;
     mocks.userItemUpdate.mockRejectedValueOnce(new Error('IndexedDB failed'));
 
     await expect(UserItem.saveInitialTrainingProgress({ ...original, progress_cz_to_en: 4 }))
       .rejects.toThrow('IndexedDB failed');
 
     expect(dataManagerStore.getState().user_items).toEqual([original]);
+    expect(dataManagerStore.getState().dataPackages.vocabulary).toBe(cachedPackage);
   });
 });
 
@@ -246,6 +319,7 @@ function setReadyUserItems(userItems: readonly UserItemLocal[]): void {
     error: null,
     nowIso: '2026-02-01T00:00:00.000Z',
     localDate: '2026-02-01',
+    dataPackages: {},
     user_items: userItems,
     reviewArrays: EMPTY_REVIEW_ARRAYS,
     nextInitialLesson: null,

@@ -1,11 +1,10 @@
 import { useCallback, useState } from 'react';
-import { useDataManager } from '@/database/state/data-store';
+import type { NoteType } from '@/types/generic.types';
 import type { NoteDetail } from './note.types';
 
-export function useNoteViewer() {
+export function useNoteViewer(notes: readonly NoteType[] = []) {
   const [isNoteVisible, setIsNoteVisible] = useState(false);
   const [noteData, setNoteData] = useState<NoteDetail | null>(null);
-  const notes = useDataManager((state) => state.notes);
 
   const openNote = useCallback(
     (noteId: number | null | undefined) => {

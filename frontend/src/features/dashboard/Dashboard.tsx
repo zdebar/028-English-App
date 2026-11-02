@@ -2,10 +2,8 @@ import Notification from '@/components/UI/Notification';
 import HelpText from '@/features/help/HelpText';
 import { ARIA_TEXTS, TEXTS } from '@/locales/cs';
 import { useAuthStore } from '@/features/auth/use-auth-store';
-import { useDataManager } from '@/database/state/data-store';
-import { selectLevelOverview } from '@/database/state/data-selectors';
-import type { DataManagerState } from '@/database/state/data-types';
-import { useMemo } from 'react';
+import { useDataPackage } from '@/database/state/data-store';
+import { aggregateLevels } from '@/database/models/levels';
 
 type DashboardProps = Readonly<{
   className?: string;
@@ -13,12 +11,7 @@ type DashboardProps = Readonly<{
 
 export default function Dashboard({ className = '' }: DashboardProps) {
   const userId = useAuthStore((state) => state.userId);
-  const dataState = useDataManager((state) => state);
-  const levels = useMemo(
-    () => userId ? selectLevelOverview(dataState, userId, dataState.localDate) : [],
-    [dataState, userId],
-  );
-  const { levelsLoading, levelsError } = getDashboardDataStatus(dataState, userId);
+  const { levels, levelsLoading, levelsError } = useDashboardData(userId);
   const visibleLevels = levels.filter((level) => level.lessons.length > 0);
 
   if (levelsLoading) {
@@ -55,7 +48,17 @@ export default function Dashboard({ className = '' }: DashboardProps) {
   );
 }
 
-function DashboardLevel({ level }: Readonly<{ level: ReturnType<typeof selectLevelOverview>[number] }>) {
+function useDashboardData(userId: string | null) {
+  const homePackage = useDataPackage({ kind: 'home' });
+  const isCurrentUser = homePackage.userId === userId;
+  return {
+    levels: isCurrentUser ? homePackage.data?.levels ?? [] : [],
+    levelsLoading: Boolean(userId) && (!isCurrentUser || homePackage.status === 'loading'),
+    levelsError: isCurrentUser && homePackage.status === 'error' ? homePackage.error : null,
+  };
+}
+
+function DashboardLevel({ level }: Readonly<{ level: ReturnType<typeof aggregateLevels>[number] }>) {
   return (
     <div
       className="relative flex h-8 min-w-8 border border-disabled-light border-dashed dark:border-disabled-dark"
@@ -77,7 +80,7 @@ function DashboardLevel({ level }: Readonly<{ level: ReturnType<typeof selectLev
 function DashboardLesson({
   levelName,
   lesson,
-}: Readonly<{ levelName: string; lesson: ReturnType<typeof selectLevelOverview>[number]['lessons'][number] }>) {
+}: Readonly<{ levelName: string; lesson: ReturnType<typeof aggregateLevels>[number]['lessons'][number] }>) {
   const stateLabel = lesson.isStarted ? TEXTS.lessonStarted : TEXTS.lessonNotStarted;
   const label = `${levelName}, ${TEXTS.lessonOrder} ${lesson.sort_order}, ${lesson.name}: ${stateLabel}`;
   const fillClass = lesson.isStarted
@@ -89,17 +92,6 @@ function DashboardLesson({
       <span className="sr-only">{label}</span>
     </li>
   );
-}
-
-function getDashboardDataStatus(
-  dataState: DataManagerState,
-  userId: string | null,
-): Readonly<{ levelsLoading: boolean; levelsError: Error | null }> {
-  const isActiveUser = dataState.userId === userId;
-  return {
-    levelsLoading: Boolean(userId) && (!isActiveUser || dataState.status === 'loading' || dataState.status === 'idle'),
-    levelsError: isActiveUser && dataState.status === 'error' ? dataState.error : null,
-  };
 }
 
 function shouldShowEmptyState(error: Error | null, visibleLevelCount: number): boolean {

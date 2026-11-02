@@ -55,10 +55,12 @@ vi.mock('react-router-dom', () => ({
 }));
 
 vi.mock('@/database/state/data-store', () => ({
-  useDataManager: (selector: (state: unknown) => unknown) => selector({ userId: mocks.userId, status: 'ready' }),
-}));
-vi.mock('@/database/state/data-selectors', () => ({
-  selectGrammarOverview: () => mocks.arrayState.data,
+  useDataPackage: () => ({
+    userId: mocks.userId,
+    status: 'ready',
+    error: null,
+    data: mocks.arrayState.data,
+  }),
 }));
 
 vi.mock('@/database/models/user-items', () => ({

@@ -3,8 +3,8 @@ import type { UserItemLocal } from '@/types/user-item.types';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { compareCzechStrings, filterSortedWords, type DisplayField } from './vocabulary.utils';
 import { useLocalStorageSync } from '@/hooks/use-local-storage-sync';
-import { useDataManager } from '@/database/state/data-store';
-import { selectVocabulary } from '@/database/state/data-selectors';
+import { useDataPackage, type DataPackageResult } from '@/database/state/data-store';
+import type { VocabularyPackage } from '@/database/state/data-types';
 
 const INITIAL_VISIBLE_COUNT = config.vocabulary.itemsPerBatch;
 const SEARCH_KEY = 'vocabulary_search_term';
@@ -16,11 +16,15 @@ const DISPLAY_FIELD_KEY = 'vocabulary_display_field';
  * @returns An object containing vocabulary state and actions.
  */
 export function useVocabulary(userId: string | null) {
-  const state = useDataManager((current) => current);
-  const words = useMemo(() => userId ? selectVocabulary(state, userId) : [], [state, userId]);
-  const loading = Boolean(userId) &&
-    (state.userId !== userId || state.status === 'idle' || state.status === 'loading');
-  const error = state.userId === userId && state.status === 'error' ? state.error : null;
+  const packageState = useDataPackage({ kind: 'vocabulary' });
+  const packageView = getVocabularyPackageView(userId, packageState);
+  const { hasUserPackage, loading, error } = packageView;
+  const words = useMemo(
+    () => hasUserPackage ? packageState.data?.items ?? [] : [],
+    [hasUserPackage, packageState.data],
+  );
+  const notes = packageView.data?.notes ?? [];
+  const soundGroups = packageView.data?.soundGroups ?? [];
 
   const [visibleCount, setVisibleCount] = useState(INITIAL_VISIBLE_COUNT);
   const [searchTerm, setSearchTerm] = useLocalStorageSync<string>(`${SEARCH_KEY}_${userId}`, '');
@@ -75,5 +79,25 @@ export function useVocabulary(userId: string | null) {
     selectedWord,
     setSelectedWord,
     filteredWords,
+    notes,
+    soundGroups,
+  };
+}
+
+function getVocabularyPackageView(
+  userId: string | null,
+  packageState: DataPackageResult<VocabularyPackage>,
+): Readonly<{
+  hasUserPackage: boolean;
+  data: VocabularyPackage | undefined;
+  loading: boolean;
+  error: Error | null;
+}> {
+  const hasUserPackage = packageState.userId === userId;
+  return {
+    hasUserPackage,
+    data: hasUserPackage ? packageState.data : undefined,
+    loading: Boolean(userId) && (!hasUserPackage || packageState.status === 'loading'),
+    error: hasUserPackage && packageState.status === 'error' ? packageState.error : null,
   };
 }

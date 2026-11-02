@@ -1,4 +1,3 @@
-import { useDataManager } from '@/database/state/data-store';
 import { TEXTS } from '@/locales/cs';
 import {
   getSoundsFromPronunciationSegments,
@@ -29,8 +28,7 @@ const DEFAULT_PRACTICE_SESSION_CARD_PROPS = {
 /** Displays one practice card and its related detail panels. */
 export default function PracticeSessionCard(props: PracticeSessionCardProps) {
   const normalizedProps = normalizePracticeSessionCardProps(props);
-  const groups = useDataManager((state) => state.groups);
-  const sounds = groups.filter((group) => group.type === 'sound' && !group.deleted_at);
+  const sounds = normalizedProps.soundGroups ?? [];
   const [visibleDetail, setVisibleDetail] = useState<PracticeDetail | null>(null);
   const [pronunciationSegments, setPronunciationSegments] = useState<readonly PronunciationSegment[]>([]);
   const [selectedSoundIndex, setSelectedSoundIndex] = useState(0);

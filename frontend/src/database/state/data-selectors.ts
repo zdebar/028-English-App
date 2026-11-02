@@ -3,6 +3,7 @@ import { aggregateLevels } from '@/database/models/levels';
 import { isReviewItemCandidate, isReviewItemDue, isReviewItemFuture, isReviewItemReadyAt } from '@/database/practice/review-items';
 import { compareCurriculumPaths, isInitialTrainingSkipped } from '@/database/practice/user-item-practice';
 import { isInitiated } from '@/database/practice/user-item-progress';
+import { compareReviewItems, getReviewItemNextAt } from '@/database/practice/review-item-order';
 import type {
   GrammarChunkWithExamples,
   GrammarGroupWithChunks,
@@ -18,10 +19,9 @@ import type {
 import type { PronunciationGroupDetailType, PronunciationGroupOverviewType } from '@/types/pronunciation.types';
 import type { ReviewDirection, ReviewKind } from '@/types/practice.types';
 import type { GroupItemType, GroupRelationType, GroupType, SoundClass } from '@/types/table.types';
-import type { PracticeDeckEntry, PracticeDeckItem, UserItemLocal } from '@/types/user-item.types';
+import type { PracticeDeckItem, UserItemLocal } from '@/types/user-item.types';
 
 const NULL_DATE = config.database.nullReplacementDate;
-const RESET_SORT_DATE = '0000-01-01T00:00:00.000Z';
 const REVIEW_KINDS: readonly ReviewKind[] = ['grammar', 'vocabulary'];
 const REVIEW_DIRECTIONS: readonly ReviewDirection[] = ['cz_to_en', 'en_to_cz'];
 type AppDataSource = AppDataSnapshot & Partial<Pick<DataManagerState, 'reviewArrays' | 'nextInitialLesson'>>;
@@ -455,21 +455,6 @@ function sortReviewItems(items: readonly PracticeDeckItem[]): PracticeDeckItem[]
   return [...items].sort(compareReviewItems);
 }
 
-export function compareReviewItems(left: PracticeDeckItem, right: PracticeDeckItem): number {
-  const leftNextAt = getDirectionalNextAt(left);
-  const rightNextAt = getDirectionalNextAt(right);
-  const dateComparison = leftNextAt.localeCompare(rightNextAt);
-  if (dateComparison !== 0) return dateComparison;
-  return compareCurriculumPaths(left.curriculum_sort_path, right.curriculum_sort_path) || left.item_id - right.item_id;
-}
-
-function getDirectionalNextAt(item: UserItemLocal): string {
-  const nextAt = item.review_direction === 'en_to_cz'
-    ? item.next_at_en_to_cz ?? item.next_at_cz_to_en
-    : item.next_at_cz_to_en;
-  return nextAt === NULL_DATE ? RESET_SORT_DATE : nextAt;
-}
-
 function getDueCount(items: readonly PracticeDeckItem[], now: string): number {
   return items.filter((item) => isReviewItemReadyAt(item, now, item.review_direction)).length;
 }
@@ -481,12 +466,12 @@ function getReviewReadyAt(items: readonly PracticeDeckItem[], deckSize: number, 
     .filter((item) => isReviewItemFuture(item, now, item.review_direction))
     .sort(compareReviewItems);
   const nextItem = futureItems[deckSize - dueCount - 1];
-  return nextItem ? getDirectionalNextAt(nextItem) : null;
+  return nextItem ? getReviewItemNextAt(nextItem) : null;
 }
 
 function getNextReviewAt(items: readonly PracticeDeckItem[], now: string): string | null {
   const next = items.filter((item) => isReviewItemFuture(item, now, item.review_direction)).sort(compareReviewItems)[0];
-  return next ? getDirectionalNextAt(next) : null;
+  return next ? getReviewItemNextAt(next) : null;
 }
 
 function earlierDate(left: string | null, right: string | null): string | null {
@@ -504,6 +489,6 @@ function countDue(
     second.filter((item) => isReviewItemDue(item, now, item.review_direction)).length;
 }
 
-function toPracticeEntry(item: PracticeDeckItem): PracticeDeckEntry {
+function toPracticeEntry(item: UserItemLocal) {
   return { item, note: null, grammar: null };
 }

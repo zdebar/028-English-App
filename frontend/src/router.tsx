@@ -5,8 +5,7 @@ import ProtectedLayout from '@/components/utils/protected-layout';
 import { ROUTES } from '@/config/routes.config';
 import { waitForAuthReady } from '@/features/auth/auth-lifecycle';
 import { useAuthStore } from '@/features/auth/use-auth-store';
-import { loadInitialTrainingData } from '@/features/practice/initial-training-data';
-import { loadHomePracticeAvailability } from '@/routing/home-loader';
+import { loadHomeDataPackage } from '@/routing/home-loader';
 import { reportError } from '@/features/logging/logging-handler';
 import { TEXTS } from '@/locales/cs';
 import InitialTrainingPractice from '@/pages/InitialTrainingPractice';
@@ -27,7 +26,9 @@ import SoundGroupPage from '@/pages/SoundGroupPage';
 import Notification from '@/components/UI/Notification';
 import {
   loadGrammarOverviewData,
+  loadInitialTrainingData,
   loadOverviewAvailabilityData,
+  loadPronunciationOverviewData,
   loadPronunciationGroupDetailData,
   loadReviewPracticeData,
   loadSoundGroupDetailData,
@@ -79,7 +80,7 @@ async function loadTopicDetail({ params }: LoaderFunctionArgs) {
   try {
     const data = await loadTopicDetailData(userId, topicId);
     if (!data.topic) throw redirect(ROUTES.topics);
-    return data;
+    return null;
   } catch (error) {
     if (error instanceof Response) throw error;
     reportError('Failed to load topic detail route data', error);
@@ -94,7 +95,7 @@ async function loadPronunciationGroupDetail({ params }: LoaderFunctionArgs) {
   try {
     const data = await loadPronunciationGroupDetailData(userId, groupId);
     if (!data) throw redirect(ROUTES.pronunciationGroups);
-    return data;
+    return null;
   } catch (error) {
     if (error instanceof Response) throw error;
     reportError('Failed to load pronunciation group detail route data', error);
@@ -109,7 +110,7 @@ async function loadSoundGroupDetail({ params }: LoaderFunctionArgs) {
   try {
     const data = await loadSoundGroupDetailData(userId, groupId);
     if (!data) throw redirect(ROUTES.sounds);
-    return data;
+    return null;
   } catch (error) {
     if (error instanceof Response) throw error;
     reportError('Failed to load sound group detail route data', error);
@@ -122,12 +123,16 @@ async function loadInitialTraining() {
   try {
     const data = await loadInitialTrainingData(userId);
     if (data.items.length === 0) throw redirect(ROUTES.home);
-    return data;
+    return null;
   } catch (error) {
     if (error instanceof Response) throw error;
     reportError('Failed to load initial training route data', error);
     throw error;
   }
+}
+
+async function loadPronunciationOverview() {
+  return loadProtectedData('pronunciation overview', loadPronunciationOverviewData);
 }
 
 export const router = createHashRouter([
@@ -137,7 +142,7 @@ export const router = createHashRouter([
     HydrateFallback: InitialLoadingFallback,
     errorElement: <RouteDataError />,
     children: [
-      { index: true, loader: loadHomePracticeAvailability, Component: Home },
+      { index: true, loader: loadHomeDataPackage, Component: Home },
       { path: ROUTES.privacyPolicy, Component: PrivacyPolicy },
       { path: ROUTES.guide, Component: Guide },
       {
@@ -212,6 +217,7 @@ export const router = createHashRouter([
           },
           {
             path: ROUTES.pronunciationGroups,
+            loader: loadPronunciationOverview,
             Component: PronunciationOverviewPage,
           },
           {

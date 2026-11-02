@@ -1,11 +1,13 @@
 import type { GrammarChunkWithExamples } from '@/database/state/data-types';
 import type { NoteType } from '@/types/generic.types';
+import type { GroupType } from '@/types/table.types';
 
 export type PracticeDetail = 'grammar' | 'note' | 'pronunciation';
 
 export type PracticeSessionCardProps = Readonly<{
   note: NoteType | null;
   grammar: GrammarChunkWithExamples | null;
+  soundGroups?: readonly GroupType[];
   noteAvailable?: boolean;
   grammarAvailable?: boolean;
   noteLoadFailed?: boolean;

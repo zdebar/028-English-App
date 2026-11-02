@@ -30,13 +30,15 @@ import {
   type PronunciationSegment,
 } from '@/features/pronunciation/pronunciation.utils';
 import type { GroupType } from '@/types/table.types';
+import type { NoteType } from '@/types/generic.types';
 import { useState } from 'react';
-import { useDataManager } from '@/database/state/data-store';
 
 const NOT_AVAILABLE = TEXTS.notAvailable;
 
 type VocabularyDetailCardProps = Readonly<{
   selectedWord: UserItemLocal | null;
+  notes?: readonly NoteType[];
+  soundGroups?: readonly GroupType[];
   onClose: () => void;
   onReset: (direction: ReviewDirection) => Promise<void>;
 }>;
@@ -63,16 +65,16 @@ type VocabularyDirectionSection = Readonly<{
  */
 export default function VocabularyDetailCard({
   selectedWord,
+  notes = [],
+  soundGroups = [],
   onClose,
   onReset,
 }: VocabularyDetailCardProps) {
   const cardValues = getVocabularyCardValues(selectedWord);
   const baseProperties = getBaseProperties(selectedWord);
   const directionSections = getDirectionSections(selectedWord);
-  const groups = useDataManager((state) => state.groups);
-  const sounds = groups.filter((group) => group.type === 'sound' && !group.deleted_at);
   const [pronunciationIndex, setPronunciationIndex] = useState<number | null>(null);
-  const pronunciationSegments = splitPronunciationIntoSegments(cardValues.pronunciation, sounds);
+  const pronunciationSegments = splitPronunciationIntoSegments(cardValues.pronunciation, soundGroups);
   const pronunciationSounds = getUniquePronunciationSounds(
     getSoundsFromPronunciationSegments(pronunciationSegments),
   );
@@ -89,7 +91,7 @@ export default function VocabularyDetailCard({
     isAudioReady,
   );
 
-  const { isNoteVisible, noteData, openNote, closeNote } = useNoteViewer();
+  const { isNoteVisible, noteData, openNote, closeNote } = useNoteViewer(notes);
 
   const noteId = cardValues.noteId;
 

@@ -10,13 +10,17 @@ const mocks = vi.hoisted(() => ({
 }));
 
 vi.mock('@/database/state/data-store', () => ({
-  useDataManager: (selector: (state: any) => unknown) => selector(mocks.state),
-}));
-vi.mock('@/database/state/data-selectors', () => ({
-  selectGrammarOverview: () => mocks.grammar,
-  selectSoundOverview: () => mocks.sounds,
-  selectTopicOverview: () => mocks.topics,
-  selectVocabulary: () => mocks.vocabulary,
+  useDataPackage: () => ({
+    userId: mocks.state.userId,
+    status: mocks.state.status,
+    error: mocks.state.error,
+    data: {
+      grammar: mocks.grammar.length > 0,
+      topics: mocks.topics.length > 0,
+      vocabulary: mocks.vocabulary.length > 0,
+      sounds: mocks.sounds.some((sound) => sound.isActive),
+    },
+  }),
 }));
 
 import { useOverviewAvailability } from '../use-overview-availability';

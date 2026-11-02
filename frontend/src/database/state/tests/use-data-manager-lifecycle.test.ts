@@ -3,11 +3,13 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const mocks = vi.hoisted(() => ({
   initializeDataManager: vi.fn(),
+  ensureDataPackage: vi.fn(),
   reportError: vi.fn(),
 }));
 
 vi.mock('../data-store', () => ({
   initializeDataManager: (...args: unknown[]) => mocks.initializeDataManager(...args),
+  ensureDataPackage: (...args: unknown[]) => mocks.ensureDataPackage(...args),
 }));
 
 vi.mock('@/features/logging/logging-handler', () => ({
@@ -20,6 +22,7 @@ describe('useDataManagerLifecycle', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mocks.initializeDataManager.mockResolvedValue(undefined);
+    mocks.ensureDataPackage.mockResolvedValue(undefined);
   });
 
   it('initializes the manager when the active user changes', async () => {
@@ -51,5 +54,11 @@ describe('useDataManagerLifecycle', () => {
         error,
       );
     });
+  });
+
+  it('prepares the Home package when the account becomes active on the Home route', async () => {
+    renderHook(() => useDataManagerLifecycle('u1', true));
+
+    await waitFor(() => expect(mocks.ensureDataPackage).toHaveBeenCalledWith('u1', { kind: 'home' }));
   });
 });

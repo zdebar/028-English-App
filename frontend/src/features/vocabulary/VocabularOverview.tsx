@@ -30,6 +30,8 @@ export default function VocabularyOverview() {
     selectedWord,
     setSelectedWord,
     filteredWords,
+    notes,
+    soundGroups,
   } = useVocabulary(userId);
 
   useQueryErrorToast(error, 'Failed to fetch vocabulary overview');
@@ -81,6 +83,8 @@ export default function VocabularyOverview() {
   return (
     <VocabularyDetailCard
       selectedWord={selectedWord}
+      notes={notes}
+      soundGroups={soundGroups}
       onClose={() => setSelectedWord(null)}
       onReset={handleResetUserItem}
     />

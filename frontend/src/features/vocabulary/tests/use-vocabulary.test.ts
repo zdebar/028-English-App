@@ -6,11 +6,12 @@ const mocks = vi.hoisted(() => ({
 }));
 
 vi.mock('@/database/state/data-store', () => ({
-  useDataManager: (selector: (state: any) => unknown) => selector({ userId: 'u1', status: 'ready' }),
-}));
-
-vi.mock('@/database/state/data-selectors', () => ({
-  selectVocabulary: () => mocks.words,
+  useDataPackage: () => ({
+    userId: 'u1',
+    status: 'ready',
+    error: null,
+    data: { items: mocks.words, notes: [], soundGroups: [] },
+  }),
 }));
 
 import { useVocabulary } from '../use-vocabulary';

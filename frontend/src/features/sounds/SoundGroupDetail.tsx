@@ -12,20 +12,18 @@ import { TEXTS } from '@/locales/cs';
 import { useEffect, useMemo } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useRouteClose } from '@/routing/use-route-close';
-import { useDataManager } from '@/database/state/data-store';
-import { selectSoundDetail } from '@/database/state/data-selectors';
+import { useDataPackage, type DataPackageResult } from '@/database/state/data-store';
+import type { SoundGroupDetail } from '@/database/state/data-types';
 
 export default function SoundGroupDetail() {
   const userId = useAuthStore((state) => state.userId);
-  const dataState = useDataManager((state) => state);
   const showToast = useToastStore((state) => state.showToast);
   const navigate = useNavigate();
   const { groupId: groupIdText } = useParams<{ groupId: string }>();
   const groupId = parseGroupId(groupIdText);
   const closeRoute = useRouteClose(ROUTES.sounds);
-  const data = userId && groupId ? selectSoundDetail(dataState, userId, groupId) : null;
-  const loading = isDataLoading(userId, dataState.userId, dataState.status);
-  const error = getDataError(userId, dataState.userId, dataState.status, dataState.error);
+  const packageState = useDataPackage({ kind: 'sound-detail', groupId: groupId ?? 0 });
+  const { data, loading, error } = getSoundDetailView(userId, packageState);
   const audios = useMemo(() => getItemAudioSources(data?.items ?? []), [data]);
   const { playAudio, isAudioReady, loading: audioLoading } = useAudioManager(audios);
 
@@ -75,29 +73,24 @@ function parseGroupId(value: string | undefined): number | null {
   return Number.isSafeInteger(groupId) && groupId > 0 ? groupId : null;
 }
 
-function isDataLoading(
-  userId: string | null,
-  dataUserId: string | null,
-  status: 'idle' | 'loading' | 'ready' | 'error',
-): boolean {
-  return Boolean(userId) && (dataUserId !== userId || status === 'idle' || status === 'loading');
-}
-
-function getDataError(
-  userId: string | null,
-  dataUserId: string | null,
-  status: 'idle' | 'loading' | 'ready' | 'error',
-  error: Error | null,
-): Error | null {
-  return dataUserId === userId && status === 'error' ? error : null;
-}
-
 function shouldRedirectForMissingData(
   loading: boolean,
   error: Error | null,
   userId: string | null,
   groupId: number | null,
-  data: ReturnType<typeof selectSoundDetail>,
+  data: ReturnType<typeof useDataPackage<{ kind: 'sound-detail'; groupId: number }>>['data'],
 ): boolean {
   return !loading && !error && Boolean(userId) && Boolean(groupId) && data === null;
+}
+
+function getSoundDetailView(
+  userId: string | null,
+  packageState: DataPackageResult<SoundGroupDetail | null>,
+): Readonly<{ data: SoundGroupDetail | null; loading: boolean; error: Error | null }> {
+  const isCurrentUser = packageState.userId === userId;
+  return {
+    data: isCurrentUser ? packageState.data ?? null : null,
+    loading: Boolean(userId) && (!isCurrentUser || packageState.status === 'loading'),
+    error: isCurrentUser && packageState.status === 'error' ? packageState.error : null,
+  };
 }

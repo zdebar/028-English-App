@@ -17,12 +17,10 @@ import { useNavigate, useParams } from 'react-router-dom';
 import type { PronunciationGroupDetailType } from '@/types/pronunciation.types';
 import { useRouteClose } from '@/routing/use-route-close';
 import type { UserItemLocal } from '@/types/user-item.types';
-import { useDataManager } from '@/database/state/data-store';
-import { selectPronunciationDetail } from '@/database/state/data-selectors';
+import { useDataPackage } from '@/database/state/data-store';
 
 export default function PronunciationGroupDetail() {
   const userId = useAuthStore((state) => state.userId);
-  const dataState = useDataManager((state) => state);
   const showToast = useToastStore((state) => state.showToast);
   const navigate = useNavigate();
   const closeRoute = useRouteClose(ROUTES.pronunciationGroups);
@@ -30,12 +28,11 @@ export default function PronunciationGroupDetail() {
   const validGroupId = parseGroupId(groupIdText);
   const selectionStorageKey =
     `pronunciation_group_selected_words_${userId ?? 'guest'}_${validGroupId ?? 'unknown'}`;
-  const data = userId && validGroupId
-    ? selectPronunciationDetail(dataState, userId, validGroupId)
-    : null;
-  const loading = Boolean(userId) &&
-    (dataState.userId !== userId || dataState.status === 'idle' || dataState.status === 'loading');
-  const error = dataState.userId === userId && dataState.status === 'error' ? dataState.error : null;
+  const packageState = useDataPackage({ kind: 'pronunciation-detail', groupId: validGroupId ?? 0 });
+  const hasUserPackage = packageState.userId === userId;
+  const data = hasUserPackage ? packageState.data ?? null : null;
+  const loading = Boolean(userId) && (!hasUserPackage || packageState.status === 'loading');
+  const error = hasUserPackage && packageState.status === 'error' ? packageState.error : null;
   const audios = useMemo(() => getItemAudioSources(data?.items ?? []), [data]);
   const {
     playAudio,

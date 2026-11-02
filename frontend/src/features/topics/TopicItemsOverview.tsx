@@ -15,30 +15,25 @@ import OverviewCard from '@/components/UI/OverviewCard';
 import { AudioItemListControls } from '@/features/audio/AudioItemListControls';
 import { useRouteClose } from '@/routing/use-route-close';
 import { useQueryErrorToast } from '@/features/logging/use-query-error-toast';
-import { useDataManager } from '@/database/state/data-store';
-import { selectTopicDetail } from '@/database/state/data-selectors';
+import { useDataPackage, type DataPackageResult } from '@/database/state/data-store';
+import type { TopicDetailData } from '@/database/state/data-types';
 
 export default function TopicItemsOverview() {
   const navigate = useNavigate();
   const closeRoute = useRouteClose(ROUTES.topics);
   const userId = useAuthStore((state) => state.userId);
   const showToast = useToastStore((state) => state.showToast);
-  const dataState = useDataManager((state) => state);
   // -- Topic management --
   const { topicId: topicIdText } = useParams<{ topicId: string }>();
-  const parsedTopicId = Number(topicIdText);
-  const topicId = Number.isSafeInteger(parsedTopicId) && parsedTopicId > 0 ? parsedTopicId : null;
+  const topicId = parseTopicId(topicIdText);
 
   useEffect(() => {
     if (topicId) return;
     void navigate(ROUTES.topics);
   }, [navigate, topicId]);
 
-  const topicData = userId && topicId ? selectTopicDetail(dataState, userId, topicId) : { topic: null, items: [] };
-  const topic = topicData.topic;
-  const items = topicData.items;
-  const topicLoading = isDataLoading(userId, dataState.userId, dataState.status);
-  const topicError = getDataError(userId, dataState.userId, dataState.status, dataState.error);
+  const packageState = useDataPackage({ kind: 'topic-detail', topicId: topicId ?? 0 });
+  const { topic, items, loading: topicLoading, error: topicError } = getTopicDetailView(userId, packageState);
   const hasItems = items.length > 0;
 
   useEffect(() => {
@@ -92,19 +87,26 @@ export default function TopicItemsOverview() {
   );
 }
 
-function isDataLoading(
-  userId: string | null,
-  dataUserId: string | null,
-  status: 'idle' | 'loading' | 'ready' | 'error',
-): boolean {
-  return Boolean(userId) && (dataUserId !== userId || status === 'idle' || status === 'loading');
+function parseTopicId(value: string | undefined): number | null {
+  const id = Number(value);
+  return Number.isSafeInteger(id) && id > 0 ? id : null;
 }
 
-function getDataError(
+function getTopicDetailView(
   userId: string | null,
-  dataUserId: string | null,
-  status: 'idle' | 'loading' | 'ready' | 'error',
-  error: Error | null,
-): Error | null {
-  return dataUserId === userId && status === 'error' ? error : null;
+  packageState: DataPackageResult<TopicDetailData>,
+): Readonly<{
+  topic: TopicDetailData['topic'];
+  items: TopicDetailData['items'];
+  loading: boolean;
+  error: Error | null;
+}> {
+  const isCurrentUser = packageState.userId === userId;
+  const data = isCurrentUser ? packageState.data : undefined;
+  return {
+    topic: data?.topic ?? null,
+    items: data?.items ?? [],
+    loading: Boolean(userId) && (!isCurrentUser || packageState.status === 'loading'),
+    error: isCurrentUser && packageState.status === 'error' ? packageState.error : null,
+  };
 }

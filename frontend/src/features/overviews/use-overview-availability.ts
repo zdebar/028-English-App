@@ -1,10 +1,4 @@
-import { useDataManager } from '@/database/state/data-store';
-import {
-  selectGrammarOverview,
-  selectSoundOverview,
-  selectTopicOverview,
-  selectVocabulary,
-} from '@/database/state/data-selectors';
+import { useDataPackage } from '@/database/state/data-store';
 
 export type OverviewAvailability = Readonly<{
   hasData: boolean;
@@ -40,9 +34,9 @@ const INITIAL_AVAILABILITY: OverviewAvailabilityState = {
 
 /** Selects every overview's availability from the central IndexedDB mirror. */
 export function useOverviewAvailability(userId: string | null): OverviewAvailabilityState {
-  const state = useDataManager((current) => current);
+  const result = useDataPackage({ kind: 'overview-menu' });
   if (!userId) return INITIAL_AVAILABILITY;
-  if (state.userId !== userId || state.status === 'loading' || state.status === 'idle') {
+  if (result.userId !== userId || result.status === 'loading') {
     return {
       grammar: LOADING_AVAILABILITY,
       topics: LOADING_AVAILABILITY,
@@ -50,23 +44,21 @@ export function useOverviewAvailability(userId: string | null): OverviewAvailabi
       sounds: LOADING_AVAILABILITY,
     };
   }
-  if (state.status === 'error') {
+  if (result.status === 'error') {
     return {
-      grammar: { ...EMPTY_AVAILABILITY, error: state.error },
-      topics: { ...EMPTY_AVAILABILITY, error: state.error },
-      vocabulary: { ...EMPTY_AVAILABILITY, error: state.error },
-      sounds: { ...EMPTY_AVAILABILITY, error: state.error },
+      grammar: { ...EMPTY_AVAILABILITY, error: result.error },
+      topics: { ...EMPTY_AVAILABILITY, error: result.error },
+      vocabulary: { ...EMPTY_AVAILABILITY, error: result.error },
+      sounds: { ...EMPTY_AVAILABILITY, error: result.error },
     };
   }
 
+  const availability = result.data;
+  if (!availability) return INITIAL_AVAILABILITY;
   return {
-    grammar: { hasData: selectGrammarOverview(state, userId).length > 0, loading: false, error: null },
-    topics: { hasData: selectTopicOverview(state, userId).length > 0, loading: false, error: null },
-    vocabulary: { hasData: selectVocabulary(state, userId).length > 0, loading: false, error: null },
-    sounds: {
-      hasData: selectSoundOverview(state, userId).some((sound) => sound.isActive),
-      loading: false,
-      error: null,
-    },
+    grammar: { hasData: availability.grammar, loading: false, error: null },
+    topics: { hasData: availability.topics, loading: false, error: null },
+    vocabulary: { hasData: availability.vocabulary, loading: false, error: null },
+    sounds: { hasData: availability.sounds, loading: false, error: null },
   };
 }

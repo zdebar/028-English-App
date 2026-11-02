@@ -11,11 +11,7 @@ vi.mock('@/features/auth/use-auth-store', () => ({
 }));
 
 vi.mock('@/database/state/data-store', () => ({
-  useDataManager: (selector: (state: any) => unknown) => selector({ userId: 'u1', status: 'ready' }),
-}));
-
-vi.mock('@/database/state/data-selectors', () => ({
-  selectSoundOverview: () => mocks.sounds,
+  useDataPackage: () => ({ userId: 'u1', status: 'ready', error: null, data: mocks.sounds }),
 }));
 
 vi.mock('@/routing/use-route-close', () => ({
