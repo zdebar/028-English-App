@@ -5,7 +5,7 @@ import {
   getSoundsFromPronunciationSegments,
   getUniquePronunciationSounds,
   type PronunciationSegment,
-} from '@/utils/pronunciation.utils';
+} from '@/features/pronunciation/pronunciation.utils';
 import { useEffect, useRef, useState } from 'react';
 import PracticeSessionDetail from './PracticeSessionDetail';
 import PracticeSessionCardView from './PracticeSessionCardView';

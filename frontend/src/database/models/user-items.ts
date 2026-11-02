@@ -28,7 +28,7 @@ import {
 import type { ReadyPracticeState } from '@/types/generic.types';
 import { syncUserItemsFromRemote } from '@/database/sync/user-items-sync';
 import { assertNonEmptyString } from '@/utils/assertions.utils';
-import { isInitiated } from '@/utils/progress.utils';
+import { isInitiated } from '@/database/practice/user-item-progress';
 
 const NULL_DATE = config.database.nullReplacementDate;
 const SIM_LESSON_COUNT = config.progress.simulationLessonCount;

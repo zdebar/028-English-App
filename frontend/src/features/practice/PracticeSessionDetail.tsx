@@ -4,7 +4,7 @@ import type { GroupType } from '@/types/table.types';
 import type { GrammarChunkWithExamples } from '@/database/queries/grammar-queries';
 import type { NoteType } from '@/types/generic.types';
 import PronunciationSoundDetailCard from './PronunciationSoundDetailCard';
-import type { PronunciationSegment } from '@/utils/pronunciation.utils';
+import type { PronunciationSegment } from '@/features/pronunciation/pronunciation.utils';
 import type { PracticeDetail } from './practice-session-card.types';
 
 type PracticeSessionDetailProps = Readonly<{

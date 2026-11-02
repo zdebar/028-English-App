@@ -2,7 +2,7 @@ import Dexie from 'dexie';
 import { db } from '@/database/models/db';
 import type { GroupType as GroupRow, GroupTypeName } from '@/types/table.types';
 import type { UserItemLocal } from '@/types/user-item.types';
-import { isInitiated } from '@/utils/progress.utils';
+import { isInitiated } from '@/database/practice/user-item-progress';
 import config from '@/config/config';
 import SyncEntityModel from './sync-entity-model';
 

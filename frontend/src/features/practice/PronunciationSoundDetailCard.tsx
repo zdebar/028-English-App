@@ -9,7 +9,7 @@ import PlayButton from '@/features/audio/PlayButton';
 import VolumeSlider from '@/features/audio/VolumeSlider';
 import { useToastStore } from '@/features/toast/use-toast-store';
 import { isAudioPlayable, playAudioWithToast } from '@/features/audio/audio.utils';
-import type { PronunciationSegment } from '@/utils/pronunciation.utils';
+import type { PronunciationSegment } from '@/features/pronunciation/pronunciation.utils';
 
 type PronunciationSoundDetailCardProps = Readonly<{
   sounds: readonly GroupType[];

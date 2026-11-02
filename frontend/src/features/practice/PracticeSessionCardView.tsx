@@ -7,7 +7,7 @@ import {
   getUniquePronunciationSounds,
   splitPronunciationIntoSegments,
   type PronunciationSegment,
-} from '@/utils/pronunciation.utils';
+} from '@/features/pronunciation/pronunciation.utils';
 import type { GroupType } from '@/types/table.types';
 import { useEffect, useState } from 'react';
 import PracticeSessionCardControls from './PracticeSessionCardControls';

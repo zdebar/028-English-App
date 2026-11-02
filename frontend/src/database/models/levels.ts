@@ -10,7 +10,7 @@ import { TableName } from '@/types/table.types';
 import type { UserItemLocal } from '@/types/user-item.types';
 import Dexie from 'dexie';
 import config from '@/config/config';
-import { isInitiated } from '@/utils/progress.utils';
+import { isInitiated } from '@/database/practice/user-item-progress';
 import UserItem from './user-items';
 import Lessons from './lessons';
 import SyncEntityModel from './sync-entity-model';

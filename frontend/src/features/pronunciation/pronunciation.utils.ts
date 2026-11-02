@@ -6,14 +6,6 @@ export type PronunciationSegment =
   | Readonly<{ kind: 'sound'; sound: GroupType }>
   | Readonly<{ kind: 'marker' | 'unknown'; text: string }>;
 
-function normalizeIpa(pronunciation: string): string {
-  let normalized = pronunciation.trim();
-  const hasSlashDelimiters = normalized.startsWith('/') && normalized.endsWith('/');
-  const hasBracketDelimiters = normalized.startsWith('[') && normalized.endsWith(']');
-  if (hasSlashDelimiters || hasBracketDelimiters) normalized = normalized.slice(1, -1);
-  return normalized;
-}
-
 export function splitPronunciationIntoSegments(
   pronunciation: string,
   sounds: readonly GroupType[],
@@ -48,6 +40,14 @@ export function splitPronunciationIntoSegments(
   }
 
   return segments;
+}
+
+function normalizeIpa(pronunciation: string): string {
+  let normalized = pronunciation.trim();
+  const hasSlashDelimiters = normalized.startsWith('/') && normalized.endsWith('/');
+  const hasBracketDelimiters = normalized.startsWith('[') && normalized.endsWith(']');
+  if (hasSlashDelimiters || hasBracketDelimiters) normalized = normalized.slice(1, -1);
+  return normalized;
 }
 
 function isIpaMarker(symbol: string): boolean {

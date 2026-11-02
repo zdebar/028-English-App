@@ -29,7 +29,7 @@ import {
   getUniquePronunciationSounds,
   splitPronunciationIntoSegments,
   type PronunciationSegment,
-} from '@/utils/pronunciation.utils';
+} from '@/features/pronunciation/pronunciation.utils';
 import type { GroupType } from '@/types/table.types';
 import { useCallback, useState } from 'react';
 import { useLiveQueryData } from '@/hooks/use-live-query-data';

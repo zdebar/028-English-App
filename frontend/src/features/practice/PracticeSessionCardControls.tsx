@@ -16,7 +16,7 @@ import { usePointerReleaseLock } from './hooks/use-pointer-release-lock';
 import { TEXTS } from '@/locales/cs';
 import type { GrammarChunkWithExamples } from '@/database/queries/grammar-queries';
 import type { NoteType } from '@/types/generic.types';
-import type { PronunciationSegment } from '@/utils/pronunciation.utils';
+import type { PronunciationSegment } from '@/features/pronunciation/pronunciation.utils';
 import type {
   NormalizedPracticeSessionCardProps,
   PracticeCardDisplayState,

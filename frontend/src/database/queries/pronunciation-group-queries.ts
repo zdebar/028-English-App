@@ -6,7 +6,7 @@ import type {
 } from '@/types/pronunciation.types';
 import type { UserItemLocal } from '@/types/user-item.types';
 import type { GroupType, SoundClass } from '@/types/table.types';
-import { isInitiated } from '@/utils/progress.utils';
+import { isInitiated } from '@/database/practice/user-item-progress';
 
 /** Builds the pronunciation overview, including availability and example counts. */
 export async function getPronunciationGroupOverview(
