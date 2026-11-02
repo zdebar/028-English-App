@@ -6,18 +6,15 @@ import { observeSharedQuery, sharedQueryKey } from '@/hooks/shared-query-store';
 import { toError } from '@/utils/error.utils';
 import { useUserStore } from './use-user-store';
 
-function getLocalDate(): string {
-  return new Date(Date.now()).toLocaleDateString('en-CA');
-}
-
 /**
- * Custom hook to automatically reset user stats on sign-off (userId becomes null).
+ * Synchronizes dashboard level snapshots with IndexedDB and refreshes them when the local date changes.
+ * Clears the snapshot when no user is signed in.
  *
  * @param userId The current user ID (null when signed out)
  */
 export function useUserStoreSync(userId: string | null) {
   const [localDate, setLocalDate] = useState(getLocalDate);
-  const clearItemsStats = useUserStore((state) => state.clearLevels);
+  const clearLevels = useUserStore((state) => state.clearLevels);
 
   useEffect(() => {
     const intervalId = globalThis.setInterval(() => {
@@ -32,7 +29,7 @@ export function useUserStoreSync(userId: string | null) {
 
   useEffect(() => {
     if (userId == null) {
-      clearItemsStats();
+      clearLevels();
       return;
     }
 
@@ -44,27 +41,33 @@ export function useUserStoreSync(userId: string | null) {
     });
 
     const key = sharedQueryKey(userId, `user-stats:${localDate}`)!;
-    const unsubscribe = observeSharedQuery(key, 'user-stats', () => Levels.getOverview(userId, localDate), ({ data: levels, error }) => {
-      if (error) {
-        useUserStore.setState({ levels: [], levelsLoading: false, levelsError: toError(error) });
-        reportError('Error observing levels', error);
-        return;
-      }
-      if (levels) {
-        if (isActive) {
-          const nextLevels = levels ?? [];
-          useUserStore.setState({
-            levels: nextLevels,
-            levelsLoading: false,
-            levelsError: null,
-          });
+    const unsubscribe = observeSharedQuery(
+      key,
+      'user-stats',
+      () => Levels.getOverview(userId, localDate),
+      ({ data: levels, error }) => {
+        if (error) {
+          if (!isActive) return;
+          useUserStore.setState({ levels: [], levelsLoading: false, levelsError: toError(error) });
+          reportError('Error observing levels', error);
+          return;
         }
-      }
-    });
+        if (!isActive || !levels) return;
+        useUserStore.setState({
+          levels,
+          levelsLoading: false,
+          levelsError: null,
+        });
+      },
+    );
 
     return () => {
       isActive = false;
       unsubscribe();
     };
-  }, [userId, localDate, clearItemsStats]);
+  }, [userId, localDate, clearLevels]);
+}
+
+function getLocalDate(): string {
+  return new Date(Date.now()).toLocaleDateString('en-CA');
 }
