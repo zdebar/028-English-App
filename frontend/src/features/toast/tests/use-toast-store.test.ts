@@ -15,7 +15,6 @@ describe('useToastStore', () => {
       message: '',
       type: 'info',
       visible: false,
-      timeoutId: null,
     });
   });
 
@@ -37,28 +36,26 @@ describe('useToastStore', () => {
     expect(stateAfter.message).toBe('Hello');
     expect(stateAfter.type).toBe('success');
     expect(stateAfter.visible).toBe(true);
-    expect(stateAfter.timeoutId).not.toBeNull();
+    expect(vi.getTimerCount()).toBe(1);
 
     // advance time to trigger hide
     vi.advanceTimersByTime(1000);
 
     const stateFinal = useToastStore.getState();
     expect(stateFinal.visible).toBe(false);
-    expect(stateFinal.timeoutId).toBeNull();
   });
 
   it('calling showToast again clears previous timeout', () => {
     const clearSpy = vi.spyOn(globalThis, 'clearTimeout');
 
     useToastStore.getState().showToast('One');
-    const first = useToastStore.getState().timeoutId;
+    expect(vi.getTimerCount()).toBe(1);
 
     useToastStore.getState().showToast('Two');
-    const second = useToastStore.getState().timeoutId;
 
     expect(clearSpy).toHaveBeenCalled();
     expect(useToastStore.getState().message).toBe('Two');
-    expect(second).not.toEqual(first);
+    expect(vi.getTimerCount()).toBe(1);
 
     // triggering the remaining timer should hide the toast
     vi.advanceTimersByTime(1000);
@@ -75,6 +72,6 @@ describe('useToastStore', () => {
 
     expect(clearSpy).toHaveBeenCalled();
     expect(useToastStore.getState().visible).toBe(false);
-    expect(useToastStore.getState().timeoutId).toBeNull();
+    expect(vi.getTimerCount()).toBe(0);
   });
 });

@@ -5,14 +5,22 @@ import type { JSX } from 'react';
 /**
  * ToastContainer component that displays toast notifications from the toast store.
  *
- * @returns The rendered Toast component or null.
+ * @returns Persistent live regions and the visible toast, when one is active.
  */
-export default function ToastContainer(): JSX.Element | null {
+export default function ToastContainer(): JSX.Element {
   const message = useToastStore((state) => state.message);
   const type = useToastStore((state) => state.type);
   const visible = useToastStore((state) => state.visible);
 
-  if (!visible) return null;
-
-  return <Toast type={type}>{message}</Toast>;
+  return (
+    <>
+      <div className="sr-only" role="status" aria-live="polite" aria-atomic="true">
+        {visible && type !== 'error' ? message : ''}
+      </div>
+      <div className="sr-only" role="alert" aria-live="assertive" aria-atomic="true">
+        {visible && type === 'error' ? message : ''}
+      </div>
+      {visible && <Toast type={type} message={message} />}
+    </>
+  );
 }
