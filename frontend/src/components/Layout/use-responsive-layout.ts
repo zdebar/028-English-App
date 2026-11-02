@@ -18,6 +18,8 @@ const DEFAULT_LAYOUT: ResponsiveLayout = {
   secondaryLayout: 'bottom',
 };
 
+// --- Layout thresholds ---
+
 export function resolveResponsiveLayout({
   viewportWidth,
   viewportHeight,
@@ -34,6 +36,32 @@ export function resolveResponsiveLayout({
 
   return { headerLayout, secondaryLayout };
 }
+
+// --- Hook lifecycle ---
+
+export function useResponsiveLayout(): ResponsiveLayout {
+  const [layout, setLayout] = useState<ResponsiveLayout>(DEFAULT_LAYOUT);
+
+  useLayoutEffect(() => {
+    const updateLayout = () => {
+      const nextLayout = measureResponsiveLayout();
+      setLayout((currentLayout) => {
+        const layoutUnchanged =
+          currentLayout.headerLayout === nextLayout.headerLayout &&
+          currentLayout.secondaryLayout === nextLayout.secondaryLayout;
+        return layoutUnchanged ? currentLayout : nextLayout;
+      });
+    };
+
+    updateLayout();
+    window.addEventListener('resize', updateLayout);
+    return () => window.removeEventListener('resize', updateLayout);
+  }, []);
+
+  return layout;
+}
+
+// --- CSS token measurements ---
 
 function readCssLength(probe: HTMLDivElement, variableName: string): number {
   probe.style.height = `var(${variableName})`;
@@ -59,27 +87,4 @@ function measureResponsiveLayout(): ResponsiveLayout {
     headerHeight,
     secondaryControlsHeight,
   });
-}
-
-export function useResponsiveLayout(): ResponsiveLayout {
-  const [layout, setLayout] = useState<ResponsiveLayout>(DEFAULT_LAYOUT);
-
-  useLayoutEffect(() => {
-    const updateLayout = () => {
-      const nextLayout = measureResponsiveLayout();
-      setLayout((currentLayout) => {
-        const headerUnchanged = currentLayout.headerLayout === nextLayout.headerLayout;
-        const secondaryUnchanged =
-          currentLayout.secondaryLayout === nextLayout.secondaryLayout;
-        if (headerUnchanged && secondaryUnchanged) return currentLayout;
-        return nextLayout;
-      });
-    };
-
-    updateLayout();
-    window.addEventListener('resize', updateLayout);
-    return () => window.removeEventListener('resize', updateLayout);
-  }, []);
-
-  return layout;
 }
