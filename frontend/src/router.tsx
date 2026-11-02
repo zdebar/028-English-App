@@ -6,7 +6,7 @@ import { ROUTES } from '@/config/routes.config';
 import { waitForAuthReady } from '@/features/auth/auth-lifecycle';
 import { useAuthStore } from '@/features/auth/use-auth-store';
 import { loadInitialTrainingData } from '@/features/practice/initial-training-data';
-import { loadHome } from '@/routing/home-loader';
+import { loadHomePracticeAvailability } from '@/routing/home-loader';
 import { reportError } from '@/features/logging/logging-handler';
 import { TEXTS } from '@/locales/cs';
 import InitialTrainingPractice from '@/pages/InitialTrainingPractice';
@@ -137,7 +137,7 @@ export const router = createHashRouter([
     HydrateFallback: InitialLoadingFallback,
     errorElement: <RouteDataError />,
     children: [
-      { index: true, loader: loadHome, Component: Home },
+      { index: true, loader: loadHomePracticeAvailability, Component: Home },
       { path: ROUTES.privacyPolicy, Component: PrivacyPolicy },
       { path: ROUTES.guide, Component: Guide },
       {

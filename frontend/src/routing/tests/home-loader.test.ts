@@ -30,10 +30,10 @@ vi.mock('@/features/toast/use-toast-store', () => ({
 }));
 
 import { resetPracticeAvailability } from '@/features/practice/practice-availability-controller';
-import { loadHome } from '@/routing/home-loader';
+import { loadHomePracticeAvailability } from '@/routing/home-loader';
 import { usePracticeAvailabilityStore } from '@/features/practice/use-practice-availability-store';
 
-describe('loadHome', () => {
+describe('loadHomePracticeAvailability', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mocks.userId = 'u1';
@@ -49,7 +49,7 @@ describe('loadHome', () => {
     );
 
     let completed = false;
-    const loading = loadHome().then(() => {
+    const loading = loadHomePracticeAvailability().then(() => {
       completed = true;
     });
 
@@ -83,8 +83,8 @@ describe('loadHome', () => {
 
   it('reuses the snapshot when returning Home', async () => {
     mocks.loadPracticeAvailabilitySnapshot.mockResolvedValue({ grammarReviewReadyAt: null, vocabularyReviewReadyAt: null, grammarReviewDueCount: 0, vocabularyReviewDueCount: 0, nextReviewAt: null, initialTrainingAvailable: true, continuingInitialLessonToday: false });
-    await loadHome();
-    await loadHome();
+    await loadHomePracticeAvailability();
+    await loadHomePracticeAvailability();
     expect(mocks.loadPracticeAvailabilitySnapshot).toHaveBeenCalledOnce();
   });
 
@@ -97,7 +97,7 @@ describe('loadHome', () => {
     });
     mocks.userId = null;
 
-    await expect(loadHome()).resolves.toBeNull();
+    await expect(loadHomePracticeAvailability()).resolves.toBeNull();
 
     expect(usePracticeAvailabilityStore.getState()).toMatchObject({
       availabilityUserId: null,
@@ -112,7 +112,7 @@ describe('loadHome', () => {
     const loadError = new Error('availability failed');
     mocks.loadPracticeAvailabilitySnapshot.mockRejectedValueOnce(loadError);
 
-    await expect(loadHome()).resolves.toBeNull();
+    await expect(loadHomePracticeAvailability()).resolves.toBeNull();
 
     expect(usePracticeAvailabilityStore.getState()).toMatchObject({
       availabilityUserId: 'u1',
