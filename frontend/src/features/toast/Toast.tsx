@@ -26,14 +26,14 @@ export default function Toast({ message, type = 'info' }: ToastProps): JSX.Eleme
 
   return (
     <div
-      className={`z-modal text-dark absolute top-0 right-0 flex items-center gap-3 px-4 py-2 ${typeStyles[type]}`}
+      className={`z-modal text-dark absolute top-0 right-0 flex min-h-input items-center gap-3 px-4 ${typeStyles[type]}`}
     >
       <span aria-hidden="true">{message}</span>
       <button
         type="button"
         aria-label={ARIA_TEXTS.dismissNotification}
         onClick={hideToast}
-        className="size-button hover:bg-button-hover hover:text-light focus-visible:bg-button-hover focus-visible:text-light inline-flex shrink-0 cursor-pointer items-center justify-center rounded-full focus-visible:outline-none"
+        className="h-input w-10 hover:bg-button-hover hover:text-light focus-visible:bg-button-hover focus-visible:text-light inline-flex shrink-0 cursor-pointer items-center justify-center rounded-full focus-visible:outline-none"
       >
         <CloseIcon size={20} />
       </button>
