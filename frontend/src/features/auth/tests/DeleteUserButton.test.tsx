@@ -5,7 +5,6 @@ const mocks = vi.hoisted(() => ({
   userId: 'u1' as string | null,
   handleLogout: vi.fn(),
   showToast: vi.fn(),
-  clearTheme: vi.fn(),
   saveCurrentThemeAsGuest: vi.fn(),
   deleteAllByUserId: vi.fn(),
   deleteUserLessons: vi.fn(),
@@ -33,12 +32,10 @@ vi.mock('@/features/toast/use-toast-store', () => ({
 vi.mock('@/features/theme/use-theme-store', () => ({
   useThemeStore: (
     selector: (state: {
-      clearTheme: typeof mocks.clearTheme;
       saveCurrentThemeAsGuest: typeof mocks.saveCurrentThemeAsGuest;
     }) => unknown,
   ) =>
     selector({
-      clearTheme: mocks.clearTheme,
       saveCurrentThemeAsGuest: mocks.saveCurrentThemeAsGuest,
     }),
 }));
@@ -108,7 +105,6 @@ describe('DeleteUserButton', () => {
     mocks.rpc.mockResolvedValue({ data: true, error: null });
     mocks.deleteAllByUserId.mockResolvedValue(0);
     mocks.deleteSyncRow.mockResolvedValue(true);
-    mocks.clearTheme.mockResolvedValue(undefined);
     mocks.saveCurrentThemeAsGuest.mockReturnValue(undefined);
     mocks.handleLogout.mockResolvedValue(undefined);
     mocks.signOut.mockResolvedValue({ error: null });
