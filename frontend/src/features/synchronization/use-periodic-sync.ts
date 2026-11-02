@@ -7,6 +7,7 @@ import { reportError, reportInfo } from '@/features/logging/logging-handler';
 import { TEXTS } from '@/locales/cs';
 import { useToastStore } from '@/features/toast/use-toast-store';
 import { useSyncStore } from './use-sync-store';
+import { useAuthStore } from '@/features/auth/use-auth-store';
 import {
   clearPracticeCache,
   invalidatePracticeCache,
@@ -14,15 +15,21 @@ import {
 } from '@/features/practice/practice-prefetch';
 import { warmOverviewQueries } from '@/hooks/overview-query-store';
 
+type InFlightSync = Readonly<{
+  userId: string;
+  kind: 'full' | 'session-end';
+  promise: Promise<void>;
+}>;
+
 /**
  * Runs initial, periodic, and unmount data synchronization for a signed-in user.
  *
  * @param userId User id to sync. Null resets sync state and skips scheduling.
- * @returns loading flag from the sync store. Overlapping scheduled syncs reuse the in-flight promise.
+ * @returns Loading flag from the sync store. Same-user overlapping full syncs reuse the in-flight
+ * promise; a sync for a new user waits for the previous user's operation to finish.
  */
 export function usePeriodicSync(userId: string | null): { loading: boolean } {
-  const inFlightSync = useRef<Promise<void> | null>(null);
-  const isUnmounted = useRef(false);
+  const inFlightSync = useRef<InFlightSync | null>(null);
   const intervalId = useRef<ReturnType<typeof setInterval> | null>(null);
   const initialSyncTimeoutId = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -41,10 +48,11 @@ export function usePeriodicSync(userId: string | null): { loading: boolean } {
     }
 
     const activeUserId = userId;
-    isUnmounted.current = false;
+    let isActive = true;
     setSynchronizing(true);
 
     const performSync = async () => {
+      if (!isActive) return;
       setSynchronizing(true);
       try {
         try {
@@ -55,8 +63,12 @@ export function usePeriodicSync(userId: string | null): { loading: boolean } {
           void warmPracticeCache(activeUserId).catch((error) => {
             reportError('Failed to prefetch practice cache', error);
           });
-          void refreshPracticeAvailability(activeUserId);
+          void refreshPracticeAvailability(activeUserId).catch((error) => {
+            reportError('Failed to refresh practice availability after sync', error);
+          });
         }
+        if (!isActive) return;
+
         const audioSummary = await AudioRecord.syncFromRemote();
         if (audioSummary.failed > 0) {
           reportError('Audio archive sync errors', audioSummary.sampleErrors);
@@ -70,36 +82,52 @@ export function usePeriodicSync(userId: string | null): { loading: boolean } {
           reportInfo(`Deleted ${orphanedCount.success} orphaned audio records.`);
         }
 
-        showToast(TEXTS.syncSuccessToast, 'success');
-        setSynchronized(true);
-        setSyncError(false);
+        if (isActive) {
+          showToast(TEXTS.syncSuccessToast, 'success');
+          setSynchronized(true);
+          setSyncError(false);
+        }
       } catch (error) {
-        showToast(TEXTS.syncErrorToast, 'error');
-        setSynchronized(false);
-        setSyncError(true);
+        if (isActive) {
+          showToast(TEXTS.syncErrorToast, 'error');
+          setSynchronized(false);
+          setSyncError(true);
+        }
         reportError('Data synchronization failed', error);
       } finally {
-        if (!isUnmounted.current) {
+        if (isActive) {
           setSynchronizing(false);
         }
       }
     };
 
     const runSync = async () => {
-      // Reuse ongoing sync promise to avoid overlapping synchronization calls.
-      if (inFlightSync.current !== null) {
-        await inFlightSync.current;
-        return;
+      if (!isActive) return;
+
+      while (inFlightSync.current !== null) {
+        const currentSync = inFlightSync.current;
+        await currentSync.promise;
+        if (!isActive) return;
+        if (currentSync.userId === activeUserId && currentSync.kind === 'full') return;
       }
-      inFlightSync.current = (async () => {
-        try {
-          await performSync();
-        } finally {
+
+      if (!isActive) return;
+
+      const syncPromise = performSync();
+      let currentSync: InFlightSync | null = null;
+      const trackedPromise = syncPromise.finally(() => {
+        if (inFlightSync.current === currentSync) {
           inFlightSync.current = null;
         }
-      })();
+      });
+      currentSync = {
+        userId: activeUserId,
+        kind: 'full',
+        promise: trackedPromise,
+      };
+      inFlightSync.current = currentSync;
 
-      await inFlightSync.current;
+      await trackedPromise;
     };
 
     initialSyncTimeoutId.current = globalThis.setTimeout(() => {
@@ -116,7 +144,7 @@ export function usePeriodicSync(userId: string | null): { loading: boolean } {
     }, config.sync.periodicSyncInterval);
 
     return () => {
-      isUnmounted.current = true;
+      isActive = false;
 
       if (initialSyncTimeoutId.current) {
         globalThis.clearTimeout(initialSyncTimeoutId.current);
@@ -129,11 +157,37 @@ export function usePeriodicSync(userId: string | null): { loading: boolean } {
       }
 
       resetSyncState();
-      dataSyncBeforeSessionEnd(activeUserId).catch((error) => {
+
+      // Logout already syncs before clearing auth. On account changes, avoid
+      // syncing the old user's rows with the newly active Supabase session.
+      const currentUserId = useAuthStore.getState().userId;
+      if (currentUserId !== null && currentUserId !== activeUserId) return;
+
+      const previousSync = inFlightSync.current;
+      if (previousSync?.userId === activeUserId && previousSync.kind === 'session-end') return;
+
+      const sessionEndPromise = (async () => {
+        if (previousSync) await previousSync.promise;
+        const latestUserId = useAuthStore.getState().userId;
+        if (latestUserId !== null && latestUserId !== activeUserId) return;
+        await dataSyncBeforeSessionEnd(activeUserId);
+      })().catch((error) => {
         reportError('Session end synchronization failed', error);
       });
+      let sessionEndSync: InFlightSync | null = null;
+      const trackedSessionEndPromise = sessionEndPromise.finally(() => {
+        if (inFlightSync.current === sessionEndSync) {
+          inFlightSync.current = null;
+        }
+      });
+      sessionEndSync = {
+        userId: activeUserId,
+        kind: 'session-end',
+        promise: trackedSessionEndPromise,
+      };
+      inFlightSync.current = sessionEndSync;
     };
-  }, [resetSyncState, setSynchronizing, setSynchronized, showToast, userId]);
+  }, [resetSyncState, setSynchronizing, setSynchronized, setSyncError, showToast, userId]);
 
   return { loading: isSynchronizing };
 }

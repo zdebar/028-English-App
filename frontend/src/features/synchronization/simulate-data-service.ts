@@ -2,7 +2,7 @@ import { refreshPracticeAvailability } from '@/features/practice/practice-availa
 import UserItem from '@/database/models/user-items';
 import { db } from '@/database/models/db';
 import { assertNonEmptyString } from '@/utils/assertions.utils';
-import { invalidateReviewArrays } from '@/features/practice/review-prefetch';
+import { invalidatePracticeCache } from '@/features/practice/practice-prefetch';
 
 /**
  * Atomically creates the anonymous-user progress fixture.
@@ -38,7 +38,7 @@ export async function simulateUserProgress(
     },
   );
 
-  invalidateReviewArrays(userId);
+  invalidatePracticeCache(userId);
   void refreshPracticeAvailability(userId);
   return itemCount;
 }
