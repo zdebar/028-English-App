@@ -27,7 +27,7 @@ vi.mock('@/features/practice/practice-prefetch', () => ({
   clearPracticeCache: (...args: unknown[]) => mocks.clearPracticeCache(...args),
 }));
 
-vi.mock('@/hooks/overview-query-store', () => ({
+vi.mock('@/features/overviews/overview-query-store', () => ({
   warmOverviewQueries: (...args: unknown[]) => mocks.warmOverviewQueries(...args),
 }));
 

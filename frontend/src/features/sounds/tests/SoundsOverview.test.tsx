@@ -14,7 +14,7 @@ vi.mock('@/features/logging/use-query-error-toast', () => ({
   useQueryErrorToast: vi.fn(),
 }));
 
-vi.mock('@/hooks/overview-query-store', () => ({
+vi.mock('@/features/overviews/overview-query-store', () => ({
   getOverviewQuery: () => () => Promise.resolve(mocks.sounds),
   overviewQueryKey: () => 'sounds',
 }));

@@ -1,12 +1,10 @@
-import { reportError } from '@/features/logging/logging-handler';
-import { useToastStore } from '@/features/toast/use-toast-store';
-import { TEXTS } from '@/locales/cs';
 import {
-  getOverviewSharedQuery,
+  getOverviewQuery,
+  overviewQueryKey,
   type OverviewAvailabilityData,
   type OverviewQueryName,
 } from './overview-query-store';
-import { observeSharedQuery } from './shared-query-store';
+import { observeSharedQuery } from '@/database/queries/shared-query-store';
 import { useEffect, useState } from 'react';
 
 export type OverviewAvailability = Readonly<{
@@ -56,7 +54,6 @@ export function useOverviewAvailability(
   userId: string | null,
   initialData?: OverviewAvailabilityData,
 ): OverviewAvailabilityState {
-  const showToast = useToastStore((state) => state.showToast);
   const [databaseState, setDatabaseState] = useState(() =>
     initialData
       ? {
@@ -86,20 +83,17 @@ export function useOverviewAvailability(
 
     const subscriptions = queries.map(([key, queryName]) => {
       const unsubscribe = observeSharedQuery(
-        JSON.stringify([userId, queryName]), queryName,
-        getOverviewSharedQuery(userId, queryName).query,
+        overviewQueryKey(userId, queryName),
+        queryName,
+        getOverviewQuery(userId, queryName),
         ({ data, loading, error }) => {
-        if (!isActive) return;
-        if (loading) return;
-        setDatabaseState((current) => ({
-          ...current,
-          [key]: { hasData: data ?? false, loading: false, error },
-        }));
-        if (error) {
-          reportError(`Failed to observe ${key} overview availability`, error);
-          showToast(TEXTS.loadingError, 'error');
-        }
-      });
+          if (!isActive || loading) return;
+          setDatabaseState((current) => ({
+            ...current,
+            [key]: { hasData: data ?? false, loading: false, error },
+          }));
+        },
+      );
       return unsubscribe;
     });
 
@@ -107,7 +101,7 @@ export function useOverviewAvailability(
       isActive = false;
       subscriptions.forEach((unsubscribe) => unsubscribe());
     };
-  }, [initialData, showToast, userId]);
+  }, [initialData, userId]);
 
   return databaseState;
 }

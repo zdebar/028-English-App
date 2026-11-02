@@ -1,7 +1,7 @@
 import { liveQuery } from 'dexie';
 import { useEffect, useRef, useState } from 'react';
 import { toError } from '@/utils/error.utils';
-import { observeSharedQuery } from './shared-query-store';
+import { observeSharedQuery } from '@/database/queries/shared-query-store';
 
 type UseLiveQueryDataOptions<T> = Readonly<{
   emptyData: T;

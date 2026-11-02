@@ -12,7 +12,7 @@ import { useAudioManager } from '@/features/audio/use-audio-manager';
 import { getItemAudioSources } from '@/features/audio/audio.utils';
 import { useQueryErrorToast } from '@/features/logging/use-query-error-toast';
 import { useToastStore } from '@/features/toast/use-toast-store';
-import { sharedQueryKey } from '@/hooks/shared-query-store';
+import { sharedQueryKey } from '@/database/queries/shared-query-store';
 import { useLiveQueryData } from '@/hooks/use-live-query-data';
 import { TEXTS } from '@/locales/cs';
 import { useCallback, useEffect, useMemo } from 'react';

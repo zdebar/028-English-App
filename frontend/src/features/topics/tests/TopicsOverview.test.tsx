@@ -25,7 +25,7 @@ vi.mock('@/routing/data-navigation', () => ({
   ),
 }));
 
-vi.mock('@/hooks/overview-query-store', () => ({
+vi.mock('@/features/overviews/overview-query-store', () => ({
   getOverviewQuery: (...args: unknown[]) => () => mocks.getInitiatedByUserId(...args),
   overviewQueryKey: (...args: unknown[]) => JSON.stringify(args),
 }));

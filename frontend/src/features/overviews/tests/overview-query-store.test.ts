@@ -1,8 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const mocks = vi.hoisted(() => ({
-  getSharedQuery: vi.fn(),
-  loadSharedQuery: vi.fn(),
   hasInitiatedGrammar: vi.fn(),
   hasInitiatedVocabulary: vi.fn(),
   getInitiatedVocabulary: vi.fn(),
@@ -11,12 +9,9 @@ const mocks = vi.hoisted(() => ({
   getInitiatedByUserId: vi.fn(),
   getInitiatedSounds: vi.fn(),
   getAllSoundsForOverview: vi.fn(),
-  loadNames: [] as string[],
 }));
 
-vi.mock('@/hooks/shared-query-store', () => ({
-  getSharedQuery: (...args: unknown[]) => mocks.getSharedQuery(...args),
-  loadSharedQuery: (...args: unknown[]) => mocks.loadSharedQuery(...args),
+vi.mock('@/database/queries/shared-query-store', () => ({
   sharedQueryKey: (userId: string, name: string) => JSON.stringify([userId, name]),
 }));
 
@@ -50,13 +45,6 @@ import {
 describe('overview query store', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mocks.loadNames = [];
-    mocks.loadSharedQuery.mockImplementation(
-      async (_userId: string, name: string, query: () => Promise<unknown>) => {
-        mocks.loadNames.push(name);
-        return query();
-      },
-    );
     mocks.hasInitiatedGrammar.mockResolvedValue(true);
     mocks.hasInitiatedByUserId.mockResolvedValue(true);
     mocks.hasInitiatedVocabulary.mockResolvedValue(true);
@@ -70,19 +58,14 @@ describe('overview query store', () => {
   it('warms all availability and destination overview queries', async () => {
     await warmOverviewQueries('u1');
 
-    expect(mocks.loadNames).toEqual([
-      'has-grammar',
-      'has-topics',
-      'has-vocabulary',
-      'has-sounds',
-      'grammar',
-      'topics',
-      'vocabulary',
-      'sounds',
-    ]);
     expect(mocks.getInitiatedGrammar).toHaveBeenCalledWith('u1');
     expect(mocks.getInitiatedByUserId).toHaveBeenCalledWith('u1');
     expect(mocks.getInitiatedVocabulary).toHaveBeenCalledWith('u1');
+    expect(mocks.hasInitiatedGrammar).toHaveBeenCalledOnce();
+    expect(mocks.hasInitiatedByUserId).toHaveBeenCalledOnce();
+    expect(mocks.hasInitiatedVocabulary).toHaveBeenCalledOnce();
+    expect(mocks.getInitiatedSounds).toHaveBeenCalledOnce();
+    expect(mocks.getAllSoundsForOverview).toHaveBeenCalledWith('u1');
   });
 
   it('loads availability from the same shared query names', async () => {
@@ -92,7 +75,10 @@ describe('overview query store', () => {
       vocabulary: true,
       sounds: true,
     });
-    expect(mocks.loadNames).toEqual(['has-grammar', 'has-topics', 'has-vocabulary', 'has-sounds']);
+    expect(mocks.hasInitiatedGrammar).toHaveBeenCalledOnce();
+    expect(mocks.hasInitiatedByUserId).toHaveBeenCalledOnce();
+    expect(mocks.hasInitiatedVocabulary).toHaveBeenCalledOnce();
+    expect(mocks.getInitiatedSounds).toHaveBeenCalledOnce();
   });
 
   it('uses the same user-scoped keys as the existing shared-query store', () => {

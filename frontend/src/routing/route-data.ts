@@ -14,8 +14,7 @@ import {
   loadOverviewQuery,
   type OverviewAvailabilityData,
   type OverviewQueryData,
-} from '@/hooks/overview-query-store';
-import { loadSharedQuery } from '@/hooks/shared-query-store';
+} from '@/features/overviews/overview-query-store';
 import type { PronunciationGroupDetailType } from '@/types/pronunciation.types';
 import type { ReviewKind } from '@/types/practice.types';
 import type { GroupType } from '@/types/table.types';
@@ -58,8 +57,8 @@ export async function loadTopicDetailData(
   topicId: number,
 ): Promise<TopicDetailData> {
   const [topic, items] = await Promise.all([
-    loadSharedQuery(userId, `topic:${topicId}`, () => getTopicById(userId, topicId)),
-    loadSharedQuery(userId, `topic-items:${topicId}`, () => UserItem.getInitiatedByTopicId(userId, topicId)),
+    getTopicById(userId, topicId),
+    UserItem.getInitiatedByTopicId(userId, topicId),
   ]);
   return { topic, items };
 }
@@ -80,16 +79,12 @@ export function loadSoundGroupDetailData(
   userId: string,
   groupId: number,
 ): Promise<SoundGroupDetailData | null> {
-  return loadSharedQuery(userId, `sound:${groupId}`, () => getSoundGroupDetail(userId, groupId));
+  return getSoundGroupDetail(userId, groupId);
 }
 
 export function loadPronunciationGroupDetailData(
   userId: string,
   groupId: number,
 ): Promise<PronunciationGroupDetailType | null> {
-  return loadSharedQuery(
-    userId,
-    `pronunciation:${groupId}`,
-    () => getPronunciationGroupDetail(userId, groupId),
-  );
+  return getPronunciationGroupDetail(userId, groupId);
 }

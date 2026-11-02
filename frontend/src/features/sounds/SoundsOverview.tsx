@@ -3,7 +3,7 @@ import StackedList from '@/components/UI/StackedList';
 import { ROUTES } from '@/config/routes.config';
 import { useAuthStore } from '@/features/auth/use-auth-store';
 import { useQueryErrorToast } from '@/features/logging/use-query-error-toast';
-import { getOverviewQuery, overviewQueryKey } from '@/hooks/overview-query-store';
+import { getOverviewQuery, overviewQueryKey } from '@/features/overviews/overview-query-store';
 import { useLiveQueryData } from '@/hooks/use-live-query-data';
 import { TEXTS } from '@/locales/cs';
 import type { SoundOverviewGroup } from '@/database/queries/sound-group-queries';

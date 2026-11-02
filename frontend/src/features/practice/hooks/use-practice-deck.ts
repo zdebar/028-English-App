@@ -9,7 +9,7 @@ import {
 } from 'react';
 import type { PracticeDeckEntry, PracticeOutcome, UserItemLocal } from '@/types/user-item.types';
 import type { ReviewDirection, ReviewKind } from '@/types/practice.types';
-import { useFetch } from '@/hooks/use-fetch';
+import { useAsyncData } from '@/hooks/use-async-data';
 import UserItem from '@/database/models/user-items';
 import { reportError } from '@/features/logging/logging-handler';
 import { toError } from '@/utils/error.utils';
@@ -142,9 +142,10 @@ export function usePracticeDeck(
     () => (userId ? loadReviewDeckData(userId, reviewKind) : Promise.resolve(createEmptyReviewDeck(reviewKind))),
     [reviewKind, userId],
   );
-  const { data: fetchedResult, loading, error } = useFetch<ReviewDeckData>(fetchPracticeDeck, {
-    initialData: initialReviewDeck,
-  });
+  const { data: fetchedResult, loading, error } = useAsyncData<ReviewDeckData | null>(
+    fetchPracticeDeck,
+    { emptyData: null, initialData: initialReviewDeck },
+  );
   const { currentEntry, currentItem } = useMemo(
     () => {
       const queueEntry = getCurrentReviewEntry(reviewQueueRef.current);

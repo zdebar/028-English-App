@@ -19,9 +19,10 @@ derived views current after transactions that touch their source tables.
 
 ## IndexedDB Observers
 
-`frontend/src/hooks/shared-query-store.ts` shares a Dexie `liveQuery` subscription
-between consumers of the same user-scoped query. `useLiveQueryData` uses that
-store for overview pages and subscribes directly when no shared key is supplied.
+`frontend/src/database/queries/shared-query-store.ts` shares a Dexie `liveQuery`
+subscription between consumers of the same user-scoped query. The overview
+feature owns its queries in `frontend/src/features/overviews`. `useLiveQueryData`
+uses the shared store when given a key and subscribes directly otherwise.
 The observer reruns when a table read by its query changes; it does not need a
 custom dashboard event.
 

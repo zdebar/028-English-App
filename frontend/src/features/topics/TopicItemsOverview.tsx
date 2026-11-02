@@ -1,5 +1,5 @@
 import { runProgressReset } from '@/features/practice/run-progress-reset';
-import { sharedQueryKey } from '@/hooks/shared-query-store';
+import { sharedQueryKey } from '@/database/queries/shared-query-store';
 import { ROUTES } from '@/config/routes.config';
 import UserItem from '@/database/models/user-items';
 import { useAuthStore } from '@/features/auth/use-auth-store';

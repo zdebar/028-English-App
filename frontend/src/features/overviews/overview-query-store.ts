@@ -1,4 +1,7 @@
-import { getInitiatedGrammarTopics, type GrammarTopicWithGroups } from '@/database/queries/grammar-queries';
+import {
+  getInitiatedGrammarTopics,
+  type GrammarTopicWithGroups,
+} from '@/database/queries/grammar-queries';
 import {
   getInitiatedTopicsByUserId,
   hasInitiatedTopicsByUserId,
@@ -10,7 +13,7 @@ import {
   type SoundOverviewGroup,
 } from '@/database/queries/sound-group-queries';
 import type { UserItemLocal } from '@/types/user-item.types';
-import { getSharedQuery, loadSharedQuery, sharedQueryKey } from './shared-query-store';
+import { sharedQueryKey } from '@/database/queries/shared-query-store';
 
 export type OverviewQueryName =
   | 'has-grammar'
@@ -77,22 +80,15 @@ export function getOverviewQuery<T extends OverviewQueryName>(
   };
 }
 
-export function getOverviewSharedQuery<T extends OverviewQueryName>(
-  userId: string,
-  name: T,
-) {
-  return getSharedQuery(overviewQueryKey(userId, name), getOverviewQuery(userId, name));
-}
-
 export function overviewQueryKey(userId: string, name: OverviewQueryName): string {
   return sharedQueryKey(userId, name)!;
 }
 
-export async function loadOverviewQuery<T extends OverviewQueryName>(
+export function loadOverviewQuery<T extends OverviewQueryName>(
   userId: string,
   name: T,
 ): Promise<OverviewQueryData[T]> {
-  return loadSharedQuery(userId, name, getOverviewQuery(userId, name));
+  return getOverviewQuery(userId, name)();
 }
 
 export async function loadOverviewAvailability(

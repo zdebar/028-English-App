@@ -1,6 +1,6 @@
 import { getPronunciationGroupOverview } from '@/database/queries/pronunciation-group-queries';
 import { useEffect } from 'react';
-import { observeSharedQuery, sharedQueryKey } from '@/hooks/shared-query-store';
+import { observeSharedQuery, sharedQueryKey } from '@/database/queries/shared-query-store';
 import { toError } from '@/utils/error.utils';
 import { usePronunciationGroupsStore } from './use-pronunciation-groups-store';
 

@@ -28,8 +28,8 @@ behavior and point to the code that owns it.
 | Change review or initial training | [practice-flows.md](practice-flows.md) | `frontend/src/features/practice` |
 | Debug synchronization | [data-and-sync.md](data-and-sync.md) | `frontend/src/database/sync/data-sync.ts` |
 | Change database entities or query indexes | [domain-models.md](domain-models.md) | `frontend/src/database/models/app-db.ts` |
-| Debug reactive query refresh | [state-and-events.md](state-and-events.md) | `frontend/src/hooks/shared-query-store.ts` |
-| Change overview pages | [features.md](features.md) | `frontend/src/features/{topics,grammar,vocabulary,sounds,pronunciation}` |
+| Debug reactive query refresh | [state-and-events.md](state-and-events.md) | `frontend/src/database/queries/shared-query-store.ts` |
+| Change overview pages | [features.md](features.md) | `frontend/src/features/{overviews,topics,grammar,vocabulary,sounds,pronunciation}` |
 | Change audio behavior | [features.md](features.md) | `frontend/src/features/audio` |
 | Change theme, PWA, toast, help, or overlay behavior | [features.md](features.md) | `frontend/src/features/{theme,pwa,toast,help,overlay}` |
 | Check how IPA is generated | [espeak-ipa-en-us.md](espeak-ipa-en-us.md) | `scripts/utils/pronunciation.py` |

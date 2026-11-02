@@ -13,7 +13,7 @@ import {
   invalidatePracticeCache,
   warmPracticeCache,
 } from '@/features/practice/practice-prefetch';
-import { warmOverviewQueries } from '@/hooks/overview-query-store';
+import { warmOverviewQueries } from '@/features/overviews/overview-query-store';
 
 type InFlightSync = Readonly<{
   userId: string;

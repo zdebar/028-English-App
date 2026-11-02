@@ -1,20 +1,19 @@
 import { renderHook, act, waitFor } from '@testing-library/react';
 import { describe, it, expect, vi } from 'vitest';
-import { useFetch } from '../use-fetch';
+import { useAsyncData } from '../use-async-data';
 
 const mockData = { foo: 'bar' };
 
-describe('useFetch', () => {
+describe('useAsyncData', () => {
   it('fetches data successfully', async () => {
     const fetchFunction = vi.fn().mockResolvedValue(mockData);
 
-    const { result } = renderHook(() => useFetch(fetchFunction));
+    const { result } = renderHook(() => useAsyncData<typeof mockData | null>(fetchFunction, { emptyData: null }));
 
     await waitFor(() => {
       expect(result.current.data).toEqual(mockData);
     });
 
-    expect(result.current.hasData).toBe(true);
     expect(result.current.loading).toBe(false);
     expect(result.current.error).toBeNull();
   });
@@ -23,28 +22,26 @@ describe('useFetch', () => {
     const error = new Error('fail');
     const fetchFunction = vi.fn().mockRejectedValue(error);
 
-    const { result } = renderHook(() => useFetch(fetchFunction));
+    const { result } = renderHook(() => useAsyncData<typeof mockData | null>(fetchFunction, { emptyData: null }));
 
     await waitFor(() => {
       expect(result.current.loading).toBe(false);
     });
 
     expect(result.current.data).toBeNull();
-    expect(result.current.hasData).toBe(false);
     expect(result.current.error).toBe(error);
   });
 
-  it('keeps hasData false when fetch returns null', async () => {
+  it('keeps the data null when fetch returns null', async () => {
     const fetchFunction = vi.fn().mockResolvedValue(null);
 
-    const { result } = renderHook(() => useFetch(fetchFunction));
+    const { result } = renderHook(() => useAsyncData<null>(fetchFunction, { emptyData: null }));
 
     await waitFor(() => {
       expect(result.current.loading).toBe(false);
     });
 
     expect(result.current.data).toBeNull();
-    expect(result.current.hasData).toBe(false);
   });
 
   it('reload triggers fetch again', async () => {
@@ -54,15 +51,13 @@ describe('useFetch', () => {
       return Promise.resolve({ value: callCount });
     });
 
-    const { result } = renderHook(() => useFetch(fetchFunction));
+    const { result } = renderHook(() => useAsyncData<{ value: number } | null>(fetchFunction, { emptyData: null }));
 
     await waitFor(() => {
       expect(result.current.data).toEqual({ value: 1 });
     });
 
-    act(() => {
-      result.current.reload();
-    });
+    await act(async () => result.current.reload());
 
     await waitFor(() => {
       expect(result.current.data).toEqual({ value: 2 });
@@ -73,7 +68,7 @@ describe('useFetch', () => {
     const fetchFunction = vi.fn().mockResolvedValue({ value: 2 });
     const initialData = { value: 1 };
     const { result } = renderHook(() =>
-      useFetch(fetchFunction, { initialData }),
+      useAsyncData(fetchFunction, { emptyData: null, initialData }),
     );
 
     expect(result.current.data).toEqual({ value: 1 });
@@ -97,14 +92,14 @@ describe('useFetch', () => {
           }),
       );
 
-    const { result } = renderHook(() => useFetch(fetchFunction));
+    const { result } = renderHook(() => useAsyncData<{ value: number } | null>(fetchFunction, { emptyData: null }));
 
     await waitFor(() => {
       expect(result.current.error).toBeTruthy();
     });
 
     act(() => {
-      result.current.reload();
+      void result.current.reload();
     });
 
     await waitFor(() => {
@@ -141,7 +136,7 @@ describe('useFetch', () => {
           }),
       );
 
-    const { result } = renderHook(() => useFetch(fetchFunction));
+    const { result } = renderHook(() => useAsyncData<{ value: number } | null>(fetchFunction, { emptyData: null }));
     await waitFor(() => expect(fetchFunction).toHaveBeenCalledTimes(1));
 
     act(() => {
@@ -168,7 +163,7 @@ describe('useFetch', () => {
     const fetchFunction = vi.fn().mockResolvedValue('fetched');
     const { result, rerender } = renderHook(
       ({ initialData }: { initialData: string }) =>
-        useFetch(fetchFunction, { initialData }),
+        useAsyncData(fetchFunction, { emptyData: '', initialData }),
       { initialProps: { initialData: 'initial' } },
     );
 

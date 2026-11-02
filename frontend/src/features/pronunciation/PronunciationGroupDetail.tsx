@@ -1,4 +1,4 @@
-import { sharedQueryKey } from '@/hooks/shared-query-store';
+import { sharedQueryKey } from '@/database/queries/shared-query-store';
 import { DataState } from '@/components/UI/DataState';
 import OverviewCard from '@/components/UI/OverviewCard';
 import BilingualItemButton from '@/components/UI/buttons/BilingualItemButton';

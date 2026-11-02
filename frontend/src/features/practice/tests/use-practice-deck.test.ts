@@ -32,12 +32,12 @@ vi.mock('../practice-availability-controller', () => ({
     mocks.refreshPracticeReviewAvailability(...args),
 }));
 
-vi.mock('@/hooks/use-fetch', () => ({
-  useFetch: (
+vi.mock('@/hooks/use-async-data', () => ({
+  useAsyncData: (
     _fetchFunction: unknown,
-    options: { initialData?: ReviewDeckData } = {},
+    options: { emptyData: ReviewDeckData | null; initialData?: ReviewDeckData | null },
   ) => {
-    const [data, setData] = React.useState(options.initialData ?? mocks.fetchData);
+    const [data, setData] = React.useState(options.initialData ?? mocks.fetchData ?? options.emptyData);
     return {
       data,
       loading: false,

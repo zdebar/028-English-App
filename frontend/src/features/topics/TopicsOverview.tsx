@@ -1,4 +1,4 @@
-import { getOverviewQuery, overviewQueryKey } from '@/hooks/overview-query-store';
+import { getOverviewQuery, overviewQueryKey } from '@/features/overviews/overview-query-store';
 import { TEXTS } from '@/locales/cs';
 import type { GroupType } from '@/types/table.types';
 import { ROUTES } from '@/config/routes.config';

@@ -12,8 +12,6 @@ const mocks = vi.hoisted(() => ({
     error: (error: unknown) => void;
     unsubscribe: ReturnType<typeof vi.fn>;
   }>,
-  reportError: vi.fn(),
-  showToast: vi.fn(),
 }));
 
 vi.mock('dexie', () => ({
@@ -45,19 +43,8 @@ vi.mock('@/database/models/user-items', () => ({
 vi.mock('@/database/queries/sound-group-queries', () => ({
   hasAvailableSoundGroups: vi.fn(async () => mocks.sounds.length > 0),
 }));
-vi.mock('@/features/toast/use-toast-store', () => ({
-  useToastStore: (selector: (state: { showToast: typeof mocks.showToast }) => unknown) =>
-    selector({ showToast: mocks.showToast }),
-}));
-vi.mock('@/features/logging/logging-handler', () => ({
-  reportError: (...args: unknown[]) => mocks.reportError(...args),
-}));
-vi.mock('@/locales/cs', () => ({
-  TEXTS: { loadingError: 'Loading error' },
-}));
-
 import { useOverviewAvailability } from '../use-overview-availability';
-import { clearSharedQueriesExcept } from '../shared-query-store';
+import { clearSharedQueriesExcept } from '@/database/queries/shared-query-store';
 
 describe('useOverviewAvailability', () => {
   beforeEach(() => {
@@ -98,17 +85,13 @@ describe('useOverviewAvailability', () => {
     unsubscribeFunctions.forEach((unsubscribe) => expect(unsubscribe).toHaveBeenCalledOnce());
   });
 
-  it('keeps a failed overview disabled and reports the loading error', async () => {
+  it('keeps a failed overview disabled and exposes its error', async () => {
     mocks.grammarError = new Error('grammar failure');
     const { result } = renderHook(() => useOverviewAvailability('u1'));
 
     await waitFor(() => expect(result.current.grammar.error).toBe(mocks.grammarError));
     expect(result.current.grammar.hasData).toBe(false);
-    expect(mocks.reportError).toHaveBeenCalledWith(
-      'Failed to observe grammar overview availability',
-      mocks.grammarError,
-    );
-    expect(mocks.showToast).toHaveBeenCalledWith('Loading error', 'error');
+    expect(result.current.grammar.loading).toBe(false);
   });
 
   it('does not subscribe when there is no active user', () => {

@@ -1,5 +1,5 @@
 import { runProgressReset } from '@/features/practice/run-progress-reset';
-import { getOverviewQuery, overviewQueryKey } from '@/hooks/overview-query-store';
+import { getOverviewQuery, overviewQueryKey } from '@/features/overviews/overview-query-store';
 import OverviewCard from '@/components/UI/OverviewCard';
 import StackedList from '@/components/UI/StackedList';
 import { useAuthStore } from '@/features/auth/use-auth-store';

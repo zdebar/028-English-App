@@ -1,4 +1,4 @@
-import { getOverviewQuery, overviewQueryKey } from '@/hooks/overview-query-store';
+import { getOverviewQuery, overviewQueryKey } from '@/features/overviews/overview-query-store';
 import config from '@/config/config';
 import type { UserItemLocal } from '@/types/user-item.types';
 import { useCallback, useEffect, useMemo, useState } from 'react';

@@ -7,9 +7,6 @@ const mocks = vi.hoisted(() => ({
   allSoundsForOverview: vi.fn(),
   loadReviewDeckData: vi.fn(),
 }));
-vi.mock('@/hooks/shared-query-store', () => ({
-  loadSharedQuery: (_userId: string, _name: string, query: () => Promise<unknown>) => query(),
-}));
 vi.mock('@/database/models/user-items', () => ({ default: {
   hasInitiatedGrammar: mocks.hasGrammar,
   hasInitiatedVocabulary: mocks.hasVocabulary,

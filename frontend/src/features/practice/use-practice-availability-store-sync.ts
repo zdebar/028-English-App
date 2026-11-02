@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { clearSharedQueriesExcept } from '@/hooks/shared-query-store';
+import { clearSharedQueriesExcept } from '@/database/queries/shared-query-store';
 import {
   ensurePracticeAvailability,
   refreshPracticeAvailability,

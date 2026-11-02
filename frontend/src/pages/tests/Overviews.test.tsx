@@ -23,8 +23,12 @@ vi.mock('@/features/auth/use-auth-store', () => ({
   useAuthStore: (selector: (state: { userId: string }) => unknown) => selector({ userId: 'u1' }),
 }));
 
-vi.mock('@/hooks/use-overview-availability', () => ({
+vi.mock('@/features/overviews/use-overview-availability', () => ({
   useOverviewAvailability: () => mocks.availability,
+}));
+
+vi.mock('@/features/logging/use-query-error-toast', () => ({
+  useQueryErrorToast: vi.fn(),
 }));
 
 vi.mock('@/locales/cs', () => ({
@@ -50,7 +54,7 @@ vi.mock('@/locales/cs', () => ({
 
 import Overviews from '@/pages/Overviews';
 
-const overviewKeys = ['grammar', 'topics', 'vocabulary'];
+const overviewKeys = ['grammar', 'topics', 'vocabulary', 'sounds'];
 
 describe('Overviews', () => {
   beforeEach(() => {
