@@ -1,13 +1,14 @@
 const BUILD_HASH = '__APP_BUILD_HASH__';
 const SCOPE_URL = new URL(globalThis.registration.scope);
 const CACHE_PREFIX = `english-app:${encodeURIComponent(SCOPE_URL.href)}:`;
-const APP_SHELL_CACHE = `${CACHE_PREFIX}shell:${BUILD_HASH}`;
+const PRECACHE_CACHE = `${CACHE_PREFIX}precache:${BUILD_HASH}`;
 const STATIC_CACHE = `${CACHE_PREFIX}static:${BUILD_HASH}`;
 const SHELL_URL = new URL('index.html', SCOPE_URL).href;
+const UPDATE_MARKER_URL = new URL('__service-worker-update-state__', SCOPE_URL).href;
 const PRECACHE_URLS = (globalThis.__WB_MANIFEST || []).map((entry) =>
   new URL(entry.url, SCOPE_URL).href,
 );
-const STATIC_DESTINATIONS = new Set(['style', 'script', 'worker', 'font', 'image']);
+const STATIC_DESTINATIONS = new Set(['style', 'script', 'worker', 'font', 'image', 'manifest']);
 
 function isInScope(url) {
   return url.origin === SCOPE_URL.origin && url.pathname.startsWith(SCOPE_URL.pathname);
@@ -23,8 +24,10 @@ function shouldHandleRequest(request) {
 }
 
 async function install() {
-  const cache = await caches.open(APP_SHELL_CACHE);
+  const cache = await caches.open(PRECACHE_CACHE);
   await cache.addAll([...new Set([SHELL_URL, ...PRECACHE_URLS])]);
+  const installType = globalThis.registration.active ? 'update' : 'first-install';
+  await cache.put(UPDATE_MARKER_URL, new Response(installType));
   await globalThis.skipWaiting();
 }
 
@@ -33,17 +36,31 @@ globalThis.addEventListener('install', (event) => {
 });
 
 async function activate() {
+  const precache = await caches.open(PRECACHE_CACHE);
+  const installType = await (await precache.match(UPDATE_MARKER_URL))?.text();
   const names = await caches.keys();
   const obsolete = names.filter(
-    (name) => name.startsWith(CACHE_PREFIX) && ![APP_SHELL_CACHE, STATIC_CACHE].includes(name),
+    (name) => name.startsWith(CACHE_PREFIX) && ![PRECACHE_CACHE, STATIC_CACHE].includes(name),
   );
-  await Promise.all(obsolete.map((name) => caches.delete(name)));
+  const cleanupResults = await Promise.allSettled(obsolete.map((name) => caches.delete(name)));
+  cleanupResults.forEach((result) => {
+    if (result.status === 'rejected') console.warn('Failed to remove obsolete cache:', result.reason);
+  });
+
   await globalThis.clients.claim();
-  const clients = await globalThis.clients.matchAll({ type: 'window' });
-  for (const client of clients) {
-    if (isInScope(new URL(client.url))) {
-      client.postMessage({ type: 'refresh', version: BUILD_HASH });
+  if (installType === 'update') {
+    const clients = await globalThis.clients.matchAll({ type: 'window' });
+    for (const client of clients) {
+      if (isInScope(new URL(client.url))) {
+        client.postMessage({ type: 'refresh', version: BUILD_HASH });
+      }
     }
+  }
+
+  try {
+    await precache.delete(UPDATE_MARKER_URL);
+  } catch (error) {
+    console.warn('Failed to remove service worker install marker:', error);
   }
 }
 
@@ -72,11 +89,11 @@ async function navigate(request, writes) {
     const response = await fetch(request);
     const isHtml = response.headers.get('Content-Type')?.includes('text/html');
     if (response.ok && isHtml) {
-      writes.push(storeResponse(APP_SHELL_CACHE, SHELL_URL, response.clone()));
+      writes.push(storeResponse(PRECACHE_CACHE, SHELL_URL, response.clone()));
     }
     return response;
   } catch {
-    const cache = await caches.open(APP_SHELL_CACHE);
+    const cache = await caches.open(PRECACHE_CACHE);
     return (await cache.match(SHELL_URL)) || offlineResponse();
   }
 }
@@ -85,7 +102,7 @@ async function staticResource(request, writes) {
   const runtime = await caches.open(STATIC_CACHE);
   const cached = await runtime.match(request);
   if (cached) return cached;
-  const precache = await caches.open(APP_SHELL_CACHE);
+  const precache = await caches.open(PRECACHE_CACHE);
   const precached = await precache.match(request);
   if (precached) return precached;
   try {

@@ -7,7 +7,7 @@ const source = readFileSync(new URL('../public/service-worker.js', import.meta.u
 const scope = 'https://example.com/028-English-App/';
 const prefix = `english-app:${encodeURIComponent(scope)}:`;
 
-function setup(existing = new Map(), version = 'one') {
+function setup(existing = new Map(), version = 'one', hasActiveWorker = false) {
   const handlers = {};
   const fetch = vi.fn().mockRejectedValue(new Error('offline'));
   const skipWaiting = vi.fn();
@@ -25,6 +25,7 @@ function setup(existing = new Map(), version = 'one') {
         },
         match: async (key) => entries.get(key.url || key)?.clone(),
         put: async (key, response) => entries.set(key.url || key, response),
+        delete: async (key) => entries.delete(key.url || key),
       };
     },
   };
@@ -35,12 +36,12 @@ function setup(existing = new Map(), version = 'one') {
     caches,
     fetch,
     skipWaiting,
-    registration: { scope },
+    registration: { scope, active: hasActiveWorker ? {} : null },
     clients: {
       claim: vi.fn(),
       matchAll: async () => [ownClient, otherClient],
     },
-    __WB_MANIFEST: [{ url: 'assets/app.js' }],
+    __WB_MANIFEST: [{ url: 'assets/app.js' }, { url: 'manifest.json' }],
     addEventListener: (type, handler) => {
       handlers[type] = handler;
     },
@@ -80,12 +81,15 @@ describe('service worker', () => {
     );
     await first.lifecycle('install');
     expect(first.skipWaiting).toHaveBeenCalledOnce();
+    await first.lifecycle('activate');
+    expect(first.ownClient.postMessage).not.toHaveBeenCalled();
     const restarted = setup(first.existing);
     expect(await (await restarted.request('./')).text()).toBe('cached');
     expect(await (await restarted.request('levels')).text()).toBe('cached');
     expect(await (await restarted.request('assets/app.js', 'cors', 'script')).text()).toBe(
       'cached',
     );
+    expect(await (await restarted.request('manifest.json', 'cors', 'manifest')).text()).toBe('cached');
     expect([...first.existing.keys()].every((key) => key.endsWith(':one'))).toBe(true);
   });
 
@@ -97,14 +101,16 @@ describe('service worker', () => {
 
   it('removes only obsolete scoped caches and notifies only scoped clients', async () => {
     const existing = new Map([
-      [prefix + 'shell:old', new Map()],
-      [prefix + 'shell:one', new Map()],
+      [prefix + 'precache:old', new Map()],
+      [prefix + 'precache:one', new Map()],
       ['app-shell-legacy', new Map()],
       ['english-app:other:static:old', new Map()],
     ]);
-    const worker = setup(existing);
+    const worker = setup(existing, 'one', true);
+    worker.fetch.mockResolvedValue(new Response('cached'));
+    await worker.lifecycle('install');
     await worker.lifecycle('activate');
-    expect(worker.caches.delete.mock.calls).toEqual([[prefix + 'shell:old']]);
+    expect(worker.caches.delete.mock.calls).toEqual([[prefix + 'precache:old']]);
     expect(worker.ownClient.postMessage).toHaveBeenCalledOnce();
     expect(worker.otherClient.postMessage).not.toHaveBeenCalled();
   });
@@ -126,7 +132,7 @@ describe('service worker', () => {
 
   it('does not replace shell with HTTP errors or non-HTML responses', async () => {
     const worker = setup(
-      new Map([[prefix + 'shell:one', new Map([[scope + 'index.html', new Response('shell')]])]]),
+      new Map([[prefix + 'precache:one', new Map([[scope + 'index.html', new Response('shell')]])]]),
     );
     worker.fetch.mockResolvedValueOnce(new Response('error', { status: 404 }));
     expect((await worker.request('missing')).status).toBe(404);

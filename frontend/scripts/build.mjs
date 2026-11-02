@@ -1,9 +1,13 @@
 import { spawnSync } from 'node:child_process';
 import { resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+const frontendRoot = fileURLToPath(new URL('..', import.meta.url));
 
 function run(script, args = []) {
-  const scriptPath = resolve(process.cwd(), script);
+  const scriptPath = resolve(frontendRoot, script);
   const result = spawnSync(process.execPath, [scriptPath, ...args], {
+    cwd: frontendRoot,
     stdio: 'inherit',
     shell: false,
   });
