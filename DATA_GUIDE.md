@@ -4,7 +4,7 @@ Tento dokument popisuje strukturu jazykových dat a postup jejich importu do dat
 
 ## Zásady
 
-Všechny datové tabulky obsahuje columm deleted_at. Pokud chcete smazat datový řádek, nastavte delete_at na aktuální čas. Během synchronizace dojde k vymazání i ve IndexedDB frontendu.
+Odstranění záznamu sdíleného katalogu se označuje aktuálním časem ve sloupci `deleted_at`. Při synchronizaci se takový záznam odstraní také z IndexedDB frontendu. Tento postup se nevztahuje na uživatelské účty: účet a navázaná uživatelská data se odstraňují okamžitým hard-delete.
 
 ## Přehled tabulek
 
