@@ -19,8 +19,8 @@ export default function TopicsOverview({
   const userId = useAuthStore((state) => state.userId);
 
   // Topics management
-  const fetchTopics = useCallback(async (): Promise<GroupType[]> => {
-    if (!userId) return [];
+  const fetchTopics = useCallback((): Promise<GroupType[]> => {
+    if (!userId) return Promise.resolve([]);
     return getOverviewQuery(userId, 'topics')();
   }, [userId]);
 

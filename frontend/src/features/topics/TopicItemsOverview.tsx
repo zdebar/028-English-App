@@ -16,14 +16,14 @@ import { DataState } from '@/components/UI/DataState';
 import AudioItemList from '@/components/UI/AudioItemList';
 import HelpButton from '../help/HelpButton';
 import OverviewCard from '@/components/UI/OverviewCard';
-import VolumeSlider from '../audio/VolumeSlider';
+import { AudioItemListControls } from '@/features/audio/AudioItemListControls';
 import { useLiveQueryData } from '@/hooks/use-live-query-data';
 import { useRouteClose } from '@/routing/use-route-close';
 import { useQueryErrorToast } from '@/features/logging/use-query-error-toast';
 
 export default function TopicItemsOverview({
   initialTopic,
-  initialItems = [],
+  initialItems,
 }: Readonly<{ initialTopic?: GroupType | null; initialItems?: UserItemLocal[] }>) {
   const navigate = useNavigate();
   const closeRoute = useRouteClose(ROUTES.topics);
@@ -41,8 +41,8 @@ export default function TopicItemsOverview({
     void navigate(ROUTES.topics);
   }, [navigate, topicId]);
 
-  const fetchTopic = useCallback(async (): Promise<GroupType | null> => {
-    if (!userId || !topicId) return null;
+  const fetchTopic = useCallback((): Promise<GroupType | null> => {
+    if (!userId || !topicId) return Promise.resolve(null);
     return getTopicById(userId, topicId);
   }, [topicId, userId]);
 
@@ -57,8 +57,8 @@ export default function TopicItemsOverview({
   });
 
   // -- Items management --
-  const fetchTopicItems = useCallback(async () => {
-    if (!userId || !topicId) return [];
+  const fetchTopicItems = useCallback((): Promise<UserItemLocal[]> => {
+    if (!userId || !topicId) return Promise.resolve([]);
     return UserItem.getInitiatedByTopicId(userId, topicId);
   }, [topicId, userId]);
 
@@ -115,10 +115,8 @@ export default function TopicItemsOverview({
           showToast={showToast}
         />
       </DataState>
-      <div className="pos-bottom-left-control">
-        <VolumeSlider />
-      </div>
-      {items && items.length > 0 && (
+      <AudioItemListControls items={items} />
+      {items.length > 0 && (
         <div className="pos-bottom-right-control">
           <HelpButton />
         </div>

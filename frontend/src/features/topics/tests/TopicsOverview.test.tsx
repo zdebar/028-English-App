@@ -25,8 +25,9 @@ vi.mock('@/routing/data-navigation', () => ({
   ),
 }));
 
-vi.mock('@/database/queries/topic-queries', () => ({
-  getInitiatedTopicsByUserId: (...args: unknown[]) => mocks.getInitiatedByUserId(...args),
+vi.mock('@/hooks/overview-query-store', () => ({
+  getOverviewQuery: (...args: unknown[]) => () => mocks.getInitiatedByUserId(...args),
+  overviewQueryKey: (...args: unknown[]) => JSON.stringify(args),
 }));
 
 vi.mock('@/features/auth/use-auth-store', () => ({
