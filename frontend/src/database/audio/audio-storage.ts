@@ -17,6 +17,7 @@ export async function downloadStorageObject(bucketName: string, objectPath: stri
   if (error || !data) {
     throw new SupabaseError(
       `Error fetching file ${objectPath} from bucket ${bucketName}: ${error?.message ?? 'No data returned'}`,
+      error ?? undefined,
     );
   }
 
@@ -36,6 +37,7 @@ export async function fetchZipArchiveMetadata(bucketName: string): Promise<Map<s
   if (error || !data) {
     throw new SupabaseError(
       `Error fetching metadata from bucket ${bucketName}: ${error?.message ?? 'No data returned'}`,
+      error ?? undefined,
     );
   }
 

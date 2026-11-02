@@ -6,7 +6,11 @@ import {
   downloadStorageObject,
   fetchZipArchiveMetadata,
 } from '@/database/audio/audio-storage';
-import { withSettledSummary, type SyncSummary } from '@/features/logging/logging.utils';
+import {
+  summarizeSettledResults,
+  withSettledSummary,
+  type SyncSummary,
+} from '@/features/logging/logging.utils';
 import { ZipExtractionError } from '@/types/error.types';
 import type { AudioRecordLocal } from '@/types/audio.types';
 import { Entity } from 'dexie';
@@ -14,6 +18,10 @@ import UserItem from './user-items';
 
 const AUDIO_DOWNLOAD_MAX_ATTEMPTS = 2;
 const AUDIO_DOWNLOAD_RETRY_DELAY_MS = 100;
+
+export type AudioArchiveSyncSummary = SyncSummary & Readonly<{
+  failedArchives: readonly Readonly<{ archiveName: string; error: unknown }>[];
+}>;
 
 /**
  * Local audio blob cache backed by IndexedDB and Supabase Storage.
@@ -55,21 +63,26 @@ export default class AudioRecord extends Entity<AppDB> implements AudioRecordLoc
    * is not newer than local audio metadata.
    * @throws SupabaseError when bucket metadata cannot be listed.
    */
-  static async syncFromRemote(): Promise<SyncSummary> {
+  static async syncFromRemote(archiveNames?: readonly string[]): Promise<AudioArchiveSyncSummary> {
     const bucketMetadata = await fetchZipArchiveMetadata(config.audio.archiveBucketName);
 
     if (!bucketMetadata || bucketMetadata.size === 0) {
-      return { total: 0, success: 0, failed: 0 };
+      return { total: 0, success: 0, failed: 0, failedArchives: [] };
     }
 
-    return withSettledSummary(
-      Array.from(bucketMetadata.entries(), ([archiveName, remoteUpdatedAt]) =>
-        this.syncArchiveFromRemote(archiveName, remoteUpdatedAt),
-      ),
-      'Audio archive sync',
-      3,
-      false,
-    );
+    const selectedArchives = Array.from(bucketMetadata.entries())
+      .filter(([archiveName]) => archiveNames === undefined || archiveNames.includes(archiveName));
+    const results = await Promise.allSettled(selectedArchives.map(([archiveName, remoteUpdatedAt]) =>
+      this.syncArchiveFromRemote(archiveName, remoteUpdatedAt),
+    ));
+    const summary = summarizeSettledResults(results, 'Audio archive sync', 3, false, false);
+    const failedArchives = results.flatMap((result, index) => {
+      const archive = selectedArchives[index];
+      if (!archive || result.status !== 'rejected') return [];
+      return [{ archiveName: archive[0], error: result.reason }];
+    });
+
+    return { ...summary, failedArchives };
   }
 
   /**
@@ -94,7 +107,7 @@ export default class AudioRecord extends Entity<AppDB> implements AudioRecordLoc
     }
 
     const tasks = orphaned.map((filename) => db.audio_records.delete(filename));
-    return withSettledSummary(tasks, 'Remove orphaned audio', 3, false);
+    return withSettledSummary(tasks, 'Remove orphaned audio', 3, false, false);
   }
 
   /**

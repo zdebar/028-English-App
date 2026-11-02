@@ -1,9 +1,14 @@
 import { act, renderHook } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { useSyncStore } from '@/features/synchronization/use-sync-store';
+import {
+  isRetryableSyncError,
+  startSyncManager,
+  stopSyncManager,
+} from '@/features/synchronization/sync-manager';
 
 const mocks = vi.hoisted(() => ({
-  dataSync: vi.fn(),
+  syncDataTables: vi.fn(),
   dataSyncBeforeSessionEnd: vi.fn(),
   syncFromRemote: vi.fn(),
   removeOrphaned: vi.fn(),
@@ -15,13 +20,14 @@ const mocks = vi.hoisted(() => ({
 vi.mock('@/config/config', () => ({
   default: {
     sync: {
-      periodicSyncInterval: 60_000,
+      periodicSyncInterval: 60 * 60_000,
     },
   },
 }));
 
 vi.mock('@/database/sync/data-sync', () => ({
-  dataSync: (...args: unknown[]) => mocks.dataSync(...args),
+  DATA_SYNC_TABLES: ['Groups', 'GroupItems', 'GroupRelations', 'Levels', 'Lessons', 'Notes', 'UserItems', 'UserLessons'],
+  syncDataTables: (...args: unknown[]) => mocks.syncDataTables(...args),
   dataSyncBeforeSessionEnd: (...args: unknown[]) => mocks.dataSyncBeforeSessionEnd(...args),
 }));
 
@@ -32,10 +38,14 @@ vi.mock('@/database/models/audio-records', () => ({
   },
 }));
 
-vi.mock('@/features/toast/use-toast-store', () => ({
-  useToastStore: (selector: (state: { showToast: typeof mocks.showToast }) => unknown) =>
-    selector({ showToast: mocks.showToast }),
-}));
+vi.mock('@/features/toast/use-toast-store', () => {
+  const store = Object.assign(
+    (selector: (state: { showToast: typeof mocks.showToast }) => unknown) =>
+      selector({ showToast: mocks.showToast }),
+    { getState: () => ({ showToast: mocks.showToast }) },
+  );
+  return { useToastStore: store };
+});
 
 vi.mock('@/features/logging/logging-handler', () => ({
   reportError: (...args: unknown[]) => mocks.reportError(...args),
@@ -51,6 +61,8 @@ vi.mock('@/locales/cs', () => ({
 
 import { usePeriodicSync } from '@/features/synchronization/use-periodic-sync';
 
+const syncTables = ['Groups', 'GroupItems', 'GroupRelations', 'Levels', 'Lessons', 'Notes', 'UserItems', 'UserLessons'];
+
 describe('usePeriodicSync', () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -61,13 +73,20 @@ describe('usePeriodicSync', () => {
       isSyncError: false,
     });
 
-    mocks.dataSync.mockResolvedValue(undefined);
-    mocks.syncFromRemote.mockResolvedValue({ total: 2, success: 2, failed: 0 });
+    mocks.syncDataTables.mockImplementation(async (_userId: string, selectedTables = syncTables) =>
+      selectedTables.map((table: string) => ({
+        table,
+        result: { status: 'fulfilled', value: { count: 0, changes: {} } },
+      })),
+    );
+    mocks.syncFromRemote.mockResolvedValue({ total: 2, success: 2, failed: 0, failedArchives: [] });
     mocks.dataSyncBeforeSessionEnd.mockResolvedValue(undefined);
     mocks.removeOrphaned.mockResolvedValue(0);
   });
 
   afterEach(() => {
+    stopSyncManager('u1');
+    stopSyncManager('u2');
     try {
       vi.runOnlyPendingTimers();
     } catch {
@@ -76,17 +95,56 @@ describe('usePeriodicSync', () => {
     vi.useRealTimers();
   });
 
+  it('retries transient server and network errors but not permanent client or auth errors', () => {
+    expect(isRetryableSyncError({ status: 429 })).toBe(true);
+    expect(isRetryableSyncError({ statusCode: '503' })).toBe(true);
+    expect(isRetryableSyncError(new TypeError('Failed to fetch'))).toBe(true);
+    expect(isRetryableSyncError({ code: 'PGRST303', status: 500 })).toBe(false);
+    expect(isRetryableSyncError({ status: 401 })).toBe(false);
+    expect(isRetryableSyncError({ status: 403 })).toBe(false);
+    expect(isRetryableSyncError({ status: 400, message: 'Network request failed' })).toBe(false);
+    expect(isRetryableSyncError({
+      message: 'Network request failed',
+      cause: { status: 400 },
+    })).toBe(false);
+  });
+
+  it('cancels a long Retry-After wait when the active account changes', async () => {
+    const rateLimitError = { status: 429, retryAfterMs: 60_000 };
+    mocks.syncDataTables.mockImplementation(async (userId: string, selectedTables = syncTables) =>
+      selectedTables.map((table: string) => ({
+        table,
+        result: userId === 'u1' && table === 'Notes'
+          ? { status: 'rejected', reason: rateLimitError }
+          : { status: 'fulfilled', value: { count: 0, changes: {} } },
+      })),
+    );
+
+    startSyncManager('u1');
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(3000);
+    });
+    expect(mocks.syncDataTables).toHaveBeenCalledTimes(1);
+
+    startSyncManager('u2');
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(3000);
+    });
+
+    expect(mocks.syncDataTables.mock.calls.map(([userId]) => userId)).toEqual(['u1', 'u2']);
+  });
+
   it('runs deferred sync and shows success toast when sync succeeds', async () => {
     const { unmount } = renderHook(() => usePeriodicSync('u1'));
 
     expect(useSyncStore.getState().isSynchronizing).toBe(true);
-    expect(mocks.dataSync).not.toHaveBeenCalled();
+    expect(mocks.syncDataTables).not.toHaveBeenCalled();
 
     await act(async () => {
       await vi.advanceTimersByTimeAsync(3000);
     });
 
-    expect(mocks.dataSync).toHaveBeenCalledWith('u1');
+    expect(mocks.syncDataTables).toHaveBeenCalledWith('u1', syncTables);
     expect(mocks.syncFromRemote).toHaveBeenCalledOnce();
     expect(mocks.showToast).toHaveBeenCalledWith('Sync success', 'success');
     expect(mocks.removeOrphaned).toHaveBeenCalled();
@@ -98,19 +156,32 @@ describe('usePeriodicSync', () => {
   });
 
   it('shows error toast and logs when sync fails', async () => {
-    mocks.dataSync.mockRejectedValue(new Error('sync error'));
+    const syncError = new TypeError('Failed to fetch');
+    mocks.syncDataTables.mockImplementation(async (_userId: string, selectedTables = syncTables) =>
+      selectedTables.map((table: string) => ({
+        table,
+        result: table === 'Notes'
+          ? { status: 'rejected', reason: syncError }
+          : { status: 'fulfilled', value: { count: 0, changes: {} } },
+      })),
+    );
 
     const { unmount } = renderHook(() => usePeriodicSync('u1'));
 
     await act(async () => {
-      await vi.advanceTimersByTimeAsync(3000);
+      await vi.advanceTimersByTimeAsync(7000);
     });
 
     expect(mocks.showToast).toHaveBeenCalledWith('Sync error', 'error');
     expect(mocks.reportError).toHaveBeenCalledWith(
-      'Data synchronization failed',
-      expect.any(Error),
+      'Synchronization task failed: Notes',
+      syncError,
     );
+    expect(mocks.syncDataTables).toHaveBeenCalledTimes(3);
+    expect(mocks.syncDataTables.mock.calls.slice(1).map((call) => call[1])).toEqual([
+      ['Notes'],
+      ['Notes'],
+    ]);
     expect(useSyncStore.getState().isSynchronized).toBe(false);
     expect(useSyncStore.getState().isSynchronizing).toBe(false);
     expect(useSyncStore.getState().isSyncError).toBe(true);
@@ -118,22 +189,43 @@ describe('usePeriodicSync', () => {
     unmount();
   });
 
-  it('reports partial audio sync failures while finishing data synchronization', async () => {
-    const error = new Error('archive failed');
-    mocks.syncFromRemote.mockResolvedValue({
-      total: 2,
-      success: 1,
-      failed: 1,
-      sampleErrors: [error],
+  it('retries only a failed audio archive and clears the error after recovery', async () => {
+    const error = new TypeError('Failed to fetch archive');
+    mocks.syncFromRemote.mockImplementation(async () => {
+      if (mocks.syncFromRemote.mock.calls.length > 3) {
+        return { total: 1, success: 1, failed: 0, failedArchives: [] };
+      }
+      return {
+        total: 2,
+        success: 1,
+        failed: 1,
+        sampleErrors: [error],
+        errors: [error],
+        failedArchives: [{ archiveName: 'pack.zip', error }],
+      };
     });
 
     const { unmount } = renderHook(() => usePeriodicSync('u1'));
 
     await act(async () => {
-      await vi.advanceTimersByTimeAsync(3000);
+      await vi.advanceTimersByTimeAsync(7000);
     });
-    expect(mocks.reportError).toHaveBeenCalledWith('Audio archive sync errors', [error]);
+    expect(mocks.syncFromRemote.mock.calls.map((call) => call[0])).toEqual([
+      undefined,
+      ['pack.zip'],
+      ['pack.zip'],
+    ]);
+    expect(mocks.reportError).toHaveBeenCalledWith('Synchronization task failed: audio-archive:pack.zip', error);
+    expect(useSyncStore.getState().isSynchronized).toBe(false);
+    expect(useSyncStore.getState().isSyncError).toBe(true);
+    expect(useSyncStore.getState().failedTasks).toEqual(['audio-archive:pack.zip']);
+
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(60_000);
+    });
+    expect(mocks.syncFromRemote).toHaveBeenLastCalledWith(['pack.zip']);
     expect(useSyncStore.getState().isSynchronized).toBe(true);
+    expect(useSyncStore.getState().isSyncError).toBe(false);
 
     unmount();
   });

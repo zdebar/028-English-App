@@ -15,6 +15,24 @@ import { settleSyncWithAuthRecovery } from './auth-recovery';
 import type { AppDataSyncResult } from '@/database/state/data-types';
 import { mergeAppDataChanges, publishDataChanges } from '@/database/state/data-store';
 
+export const DATA_SYNC_TABLES = [
+  'Groups',
+  'GroupItems',
+  'GroupRelations',
+  'Levels',
+  'Lessons',
+  'Notes',
+  'UserItems',
+  'UserLessons',
+] as const;
+
+export type DataSyncTable = (typeof DATA_SYNC_TABLES)[number];
+
+export type DataSyncTaskResult = Readonly<{
+  table: DataSyncTable;
+  result: PromiseSettledResult<AppDataSyncResult>;
+}>;
+
 /**
  * Synchronizes shared and user-specific tables with Supabase.
  *
@@ -22,47 +40,35 @@ import { mergeAppDataChanges, publishDataChanges } from '@/database/state/data-s
  * @throws Error when userId is empty or any table sync task fails.
  */
 export async function dataSync(userId: string): Promise<void> {
+  const outcomes = await syncDataTables(userId);
+  const results = outcomes.map(({ result }) => result);
+  const summary = summarizeSettledResults(results, 'Data sync', 3, false);
+  if (summary.failed > 0) throw new Error('Data synchronization error');
+}
+
+/** Runs selected table sync tasks and returns each outcome for centralized retry handling. */
+export async function syncDataTables(
+  userId: string,
+  tables: readonly DataSyncTable[] = DATA_SYNC_TABLES,
+): Promise<DataSyncTaskResult[]> {
   assertNonEmptyString(userId, 'userId');
+  if (tables.length === 0) return [];
 
   initDbMappings();
-  // Sync shared reference data and user-owned progress in parallel.
-  const syncTasks = [
-    { tableName: 'Groups', sync: () => Groups.syncFromRemote() },
-    { tableName: 'GroupItems', sync: () => GroupItem.syncFromRemote() },
-    { tableName: 'GroupRelations', sync: () => GroupRelation.syncFromRemote() },
-    { tableName: 'Levels', sync: () => Levels.syncFromRemote() },
-    { tableName: 'Lessons', sync: () => Lessons.syncFromRemote() },
-    { tableName: 'Notes', sync: () => Notes.syncFromRemote() },
-    { tableName: 'UserItems', sync: () => UserItem.syncFromRemote(userId) },
-    { tableName: 'UserLessons', sync: () => UserLesson.syncFromRemote(userId) },
-  ];
-
+  const syncTasks = getSyncTasks(userId);
+  const selectedTasks = syncTasks.filter((task) => tables.includes(task.table));
   const results = await settleSyncWithAuthRecovery(
     userId,
-    syncTasks.map(({ sync }) => sync),
+    selectedTasks.map(({ sync }) => sync),
   );
 
   publishSuccessfulChanges(userId, results);
+  reportCompletedTableSyncs(selectedTasks, results);
 
-  // Report per-table completion counts when available.
-  results.forEach((result, index) => {
-    const task = syncTasks[index];
-    if (!task || result.status !== 'fulfilled' || !isSyncResult(result.value)) {
-      return;
-    }
-
-    try {
-      reportInfo(`Completed ${result.value.count} ${task.tableName} pull from remote.`);
-    } catch {
-      // Swallow logging errors so they do not affect synchronization.
-    }
-  });
-
-  const summary = summarizeSettledResults(results, 'Data sync', 3, false);
-
-  if (summary.failed > 0) {
-    throw new Error('Data synchronization error');
-  }
+  return selectedTasks.map((task, index) => ({
+    table: task.table,
+    result: results[index] ?? { status: 'rejected', reason: new Error(`Missing result for ${task.table}.`) },
+  }));
 }
 
 /**
@@ -78,16 +84,39 @@ export async function dataSyncBeforeSessionEnd(userId: string): Promise<void> {
     return;
   }
 
-  const results = await settleSyncWithAuthRecovery(userId, [
-    () => UserItem.syncFromRemote(userId),
-    () => UserLesson.syncFromRemote(userId),
-  ]);
-
-  publishSuccessfulChanges(userId, results);
-
-  if (results.some((r) => r.status === 'rejected')) {
+  const outcomes = await syncDataTables(userId, ['UserItems', 'UserLessons']);
+  if (outcomes.some(({ result }) => result.status === 'rejected')) {
     throw new Error('Session end synchronization failed');
   }
+}
+
+function getSyncTasks(userId: string) {
+  return [
+    { table: 'Groups', sync: () => Groups.syncFromRemote() },
+    { table: 'GroupItems', sync: () => GroupItem.syncFromRemote() },
+    { table: 'GroupRelations', sync: () => GroupRelation.syncFromRemote() },
+    { table: 'Levels', sync: () => Levels.syncFromRemote() },
+    { table: 'Lessons', sync: () => Lessons.syncFromRemote() },
+    { table: 'Notes', sync: () => Notes.syncFromRemote() },
+    { table: 'UserItems', sync: () => UserItem.syncFromRemote(userId) },
+    { table: 'UserLessons', sync: () => UserLesson.syncFromRemote(userId) },
+  ] satisfies Array<{ table: DataSyncTable; sync: () => Promise<AppDataSyncResult> }>;
+}
+
+function reportCompletedTableSyncs(
+  tasks: ReturnType<typeof getSyncTasks>,
+  results: readonly PromiseSettledResult<AppDataSyncResult>[],
+): void {
+  results.forEach((result, index) => {
+    const task = tasks[index];
+    if (!task || result.status !== 'fulfilled') return;
+
+    try {
+      reportInfo(`Completed ${result.value.count} ${task.table} pull from remote.`);
+    } catch {
+      // Swallow logging errors so they do not affect synchronization.
+    }
+  });
 }
 
 function publishSuccessfulChanges(
@@ -102,12 +131,12 @@ function publishSuccessfulChanges(
   if (changes.length > 0) publishDataChanges(userId, mergeAppDataChanges(changes));
 }
 
+function isSyncResult(value: unknown): value is AppDataSyncResult {
+  return typeof value === 'object' && value !== null && 'count' in value && 'changes' in value;
+}
+
 function hasChanges(changes: AppDataSyncResult['changes']): boolean {
   return Object.values(changes).some((tableChanges) =>
     (tableChanges?.upserted?.length ?? 0) > 0 || (tableChanges?.deleted?.length ?? 0) > 0,
   );
-}
-
-function isSyncResult(value: unknown): value is AppDataSyncResult {
-  return typeof value === 'object' && value !== null && 'count' in value && 'changes' in value;
 }

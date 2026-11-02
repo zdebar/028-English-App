@@ -50,11 +50,13 @@ it('does not refresh for unrelated failures', async () => {
   expect(mocks.refreshSession).not.toHaveBeenCalled();
 });
 
-it('propagates refresh failure without retrying writes', async () => {
+it('returns the refresh error for failed JWT tasks without retrying writes', async () => {
   const error = new Error('Refresh failed');
   mocks.refreshSession.mockResolvedValue({ data: { session: null }, error });
   const task = vi.fn().mockRejectedValue(jwtError);
-  await expect(settleSyncWithAuthRecovery('u1', [task])).rejects.toBe(error);
+  await expect(settleSyncWithAuthRecovery('u1', [task])).resolves.toEqual([
+    { status: 'rejected', reason: error },
+  ]);
   expect(task).toHaveBeenCalledTimes(1);
 });
 

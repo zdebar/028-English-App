@@ -14,6 +14,7 @@ const mocks = vi.hoisted(() => ({
   metadataMarkAsFetched: vi.fn(),
   reportError: vi.fn(),
   withSettledSummary: vi.fn(),
+  summarizeSettledResults: vi.fn(),
   jszipLoadAsync: vi.fn(),
 }));
 
@@ -74,6 +75,7 @@ vi.mock('@/features/logging/logging-handler', () => ({
 
 vi.mock('@/features/logging/logging.utils', () => ({
   withSettledSummary: (...args: unknown[]) => mocks.withSettledSummary(...args),
+  summarizeSettledResults: (...args: unknown[]) => mocks.summarizeSettledResults(...args),
 }));
 
 vi.mock('jszip', () => ({
@@ -92,6 +94,16 @@ describe('AudioRecord', () => {
         total: results.length,
         success: results.length - failed,
         failed,
+      };
+    });
+    mocks.summarizeSettledResults.mockImplementation((results: PromiseSettledResult<unknown>[]) => {
+      const rejected = results.filter((result) => result.status === 'rejected') as PromiseRejectedResult[];
+      const errors = rejected.map((result) => result.reason);
+      return {
+        total: results.length,
+        success: results.length - rejected.length,
+        failed: rejected.length,
+        ...(errors.length > 0 && { errors, sampleErrors: errors.slice(0, 3) }),
       };
     });
     mocks.dbTransaction.mockImplementation(async (...args: unknown[]) => {
@@ -186,7 +198,7 @@ describe('AudioRecord', () => {
       const result = await AudioRecord.syncFromRemote();
 
       expect(mocks.downloadStorageObject).not.toHaveBeenCalled();
-      expect(result).toEqual({ total: 0, success: 0, failed: 0 });
+      expect(result).toEqual({ total: 0, success: 0, failed: 0, failedArchives: [] });
     });
 
     it('downloads, extracts, replaces same-name files, and marks archive as fetched', async () => {
