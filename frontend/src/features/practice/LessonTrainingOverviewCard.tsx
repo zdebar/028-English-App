@@ -21,10 +21,6 @@ type LessonTrainingOverviewCardProps = Readonly<{
   onContinue: () => void;
 }>;
 
-function Note({ note }: Readonly<{ note: string }>): JSX.Element {
-  return <SanitizedNote className="m-4" html={note} />;
-}
-
 /** Introduces the selected lesson and its optional grammar before initial training begins. */
 export default function LessonTrainingOverviewCard({
   lesson,
@@ -58,4 +54,8 @@ export default function LessonTrainingOverviewCard({
       </StyledButton>
     </OverviewCard>
   );
+}
+
+function Note({ note }: Readonly<{ note: string }>): JSX.Element {
+  return <SanitizedNote className="m-4" html={note} />;
 }

@@ -34,46 +34,6 @@ type PracticePrefetchState = {
 
 const states = new Map<string, PracticePrefetchState>();
 
-function createState(): PracticePrefetchState {
-  return {
-    nextInitialLesson: null,
-    dirty: true,
-    version: 0,
-    pending: null,
-  };
-}
-
-function getState(userId: string): PracticePrefetchState {
-  let state = states.get(userId);
-  if (!state) {
-    state = createState();
-    states.set(userId, state);
-  }
-  return state;
-}
-
-async function loadPreparedInitialLesson(
-  userId: string,
-): Promise<PreparedInitialLesson | null> {
-  const selection = await UserItem.getNextInitialTrainingSelection(userId);
-  if (!selection || selection.items.length === 0) return null;
-
-  const lesson = await Lessons.getById(selection.lessonId);
-  if (!lesson) return null;
-
-  const [entries, grammarContext] = await Promise.all([
-    resolvePracticeEntries(userId, selection.items),
-    resolvePracticeGrammarContext(userId, lesson.group_id),
-  ]);
-  return {
-    lesson,
-    items: selection.items,
-    entries,
-    grammar: grammarContext.grammar,
-    grammarGroup: grammarContext.grammarGroup,
-  };
-}
-
 /** Loads review arrays and prepares the next initial lesson until explicit invalidation. */
 export async function warmPracticeCache(userId: string): Promise<void> {
   const state = getState(userId);
@@ -125,4 +85,44 @@ export function clearPracticeCache(userId: string | null): void {
   clearReviewArrays(userId);
   if (userId) states.delete(userId);
   else states.clear();
+}
+
+function createState(): PracticePrefetchState {
+  return {
+    nextInitialLesson: null,
+    dirty: true,
+    version: 0,
+    pending: null,
+  };
+}
+
+function getState(userId: string): PracticePrefetchState {
+  let state = states.get(userId);
+  if (!state) {
+    state = createState();
+    states.set(userId, state);
+  }
+  return state;
+}
+
+async function loadPreparedInitialLesson(
+  userId: string,
+): Promise<PreparedInitialLesson | null> {
+  const selection = await UserItem.getNextInitialTrainingSelection(userId);
+  if (!selection || selection.items.length === 0) return null;
+
+  const lesson = await Lessons.getById(selection.lessonId);
+  if (!lesson) return null;
+
+  const [entries, grammarContext] = await Promise.all([
+    resolvePracticeEntries(userId, selection.items),
+    resolvePracticeGrammarContext(userId, lesson.group_id),
+  ]);
+  return {
+    lesson,
+    items: selection.items,
+    entries,
+    grammar: grammarContext.grammar,
+    grammarGroup: grammarContext.grammarGroup,
+  };
 }

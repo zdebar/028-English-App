@@ -1,6 +1,8 @@
 import UserLesson from '@/database/models/user-lessons';
 import UserItem from '@/database/models/user-items';
 import config from '@/config/config';
+import { reportError } from '@/features/logging/logging-handler';
+import { toError } from '@/utils/error.utils';
 import { loadReviewAvailabilityFromArrays } from './review-prefetch';
 import { getPrefetchedNextInitialLesson } from './practice-prefetch';
 
@@ -39,7 +41,11 @@ export async function loadPracticeAvailabilitySnapshot(
 async function loadReviewAvailability(userId: string) {
   try {
     return await loadReviewAvailabilityFromArrays(userId);
-  } catch {
+  } catch (error) {
+    reportError(
+      'Failed to load review availability from cache; using database fallback',
+      toError(error),
+    );
     return UserItem.getReadyReviewState(userId);
   }
 }

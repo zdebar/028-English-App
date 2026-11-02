@@ -28,31 +28,12 @@ import {
   syncReviewItemToCache,
   type ReviewAvailability,
 } from '../review-prefetch';
-import {
-  loadReviewEntryDetails,
-  type ReviewEntryDetails,
-} from '@/database/practice/practice-content';
 import { loadReviewDeckData, type ReviewDeckData } from '@/features/practice/review-deck-data';
-import type { PracticeDetail } from '../PracticeSessionCard';
-
-type SecondaryContentRequest = Readonly<{
-  userId: string;
-  itemKey: string;
-  promise: Promise<ReviewEntryDetails>;
-}>;
+import { useReviewEntryDetails } from './use-review-entry-details';
 
 type ReviewRetryAction = 'save';
 
 type PracticeCompletionHandler = () => void;
-
-function getAvailableDueCount(
-  availability: ReviewAvailability | null,
-  reviewKind: ReviewKind,
-): number | null {
-  if (!availability) return null;
-  if (reviewKind === 'grammar') return availability.grammarReviewDueCount;
-  return availability.vocabularyReviewDueCount;
-}
 
 type MutableRef<T> = { current: T };
 type StateSetter<T> = (value: T | ((current: T) => T)) => void;
@@ -74,6 +55,297 @@ type ContinueAnsweredQueueOptions = {
   resetQuestionState: () => void;
   completePractice: () => Promise<void>;
 };
+
+type StartDirectionDeckOptions = {
+  deck: ReviewDeckData;
+  queueRef: MutableRef<ReviewQueue | null>;
+  dataRef: MutableRef<ReviewDeckData | null>;
+  directionRef: MutableRef<ReviewDirection>;
+  update: (queue: ReviewQueue) => void;
+  setFinishedReview: (finished: boolean) => void;
+  setRetryAction: (action: ReviewRetryAction | null) => void;
+  setQueueVersion: (update: (version: number) => number) => void;
+  resetQuestionState: () => void;
+};
+
+/** Uses the prefetched review queue and persists each answer before advancing. */
+export function usePracticeDeck(
+  userId: string | null,
+  initialData?: ReviewDeckData,
+  onComplete?: PracticeCompletionHandler,
+) {
+  const [saveError, setSaveError] = useState<Error | null>(null);
+  const saveReviewItem = useCallback(
+    async (item: UserItemLocal): Promise<boolean> => {
+      if (!userId) return false;
+
+      try {
+        if (item.review_direction === 'en_to_cz') {
+          await UserItem.savePracticeDeck([item], 'en_to_cz');
+        } else {
+          await UserItem.savePracticeDeck([item]);
+        }
+      } catch (caughtError: unknown) {
+        const normalizedError = toError(caughtError);
+        setSaveError(normalizedError);
+        reportError('Failed to save review progress', normalizedError);
+        return false;
+      }
+
+      try {
+        await syncReviewItemToCache(userId, item);
+      } catch (caughtError: unknown) {
+        invalidateReviewArrays(userId);
+        void rebuildReviewArrays(userId).catch((rebuildError: unknown) => {
+          reportError('Failed to rebuild review arrays', rebuildError);
+        });
+        reportError('Failed to update review cache', caughtError);
+      }
+
+      setSaveError(null);
+      return true;
+    },
+    [userId],
+  );
+
+  const [queueVersion, setQueueVersion] = useState(0);
+  const initialReviewDeck = initialData;
+  const reviewKind = getReviewKind(initialData);
+  const activeDirectionRef = useRef<ReviewDirection>(initialData?.reviewDirection ?? 'cz_to_en');
+  const reviewQueueRef = useRef<ReviewQueue | null>(null);
+  const queueDataRef = useRef<ReviewDeckData | null>(null);
+  const processedDeckDataRef = useRef<ReviewDeckData | null>(initialData ?? null);
+  const pendingAnswerRef = useRef<UserItemLocal | null>(null);
+  const initialQueue = initializeReviewQueue(
+    initialReviewDeck,
+    reviewKind,
+    reviewQueueRef,
+    queueDataRef,
+  );
+  const { finishPractice } = usePracticeAvailabilityBoundary(userId);
+  const completionHandledRef = useRef(false);
+  const completePractice = useCallback(async () => {
+    if (completionHandledRef.current) return;
+    completionHandledRef.current = true;
+    await finishPractice();
+    onComplete?.();
+  }, [finishPractice, onComplete]);
+  const [revealed, setRevealed] = useState(false);
+  const [finishedReview, setFinishedReview] = useState(() => isReviewQueueFinished(initialQueue));
+  const [retryAction, setRetryAction] = useState<ReviewRetryAction | null>(null);
+  const [completedCount, setCompletedCount] = useState(getInitialCompletedCount(initialQueue));
+  const [totalCount, setTotalCount] = useState(getAvailableReviewCount(initialReviewDeck, initialQueue));
+  const completedOffsetRef = useRef(0);
+  const isTransitioningRef = useRef(false);
+
+  const fetchPracticeDeck = useCallback(
+    () => (userId ? loadReviewDeckData(userId, reviewKind) : Promise.resolve(createEmptyReviewDeck(reviewKind))),
+    [reviewKind, userId],
+  );
+  const { data: fetchedResult, loading, error } = useFetch<ReviewDeckData>(fetchPracticeDeck, {
+    initialData: initialReviewDeck,
+  });
+  const { currentEntry, currentItem } = useMemo(
+    () => {
+      const queueEntry = getCurrentReviewEntry(reviewQueueRef.current);
+      const entry = finishedReview ? null : queueEntry;
+      return { currentEntry: entry, currentItem: entry?.item ?? null };
+    },
+    [finishedReview, queueVersion],
+  );
+  const reviewEntryDetails = useReviewEntryDetails(userId, currentEntry);
+  const cardState = usePracticeCardState({
+    currentItem,
+    revealed,
+    isCompletion: finishedReview,
+    setRevealed,
+  });
+  const resetQuestionState = cardState.resetQuestionState;
+
+  const previousUserIdRef = useRef(userId);
+  useEffect(() => {
+    resetReviewDeckOnUserChange(previousUserIdRef, userId, () => {
+      pendingAnswerRef.current = null;
+      reviewQueueRef.current = null;
+      queueDataRef.current = null;
+      setQueueVersion(0);
+      setCompletedCount(0);
+      setTotalCount(null);
+      completedOffsetRef.current = 0;
+      setFinishedReview(false);
+    });
+
+    return getReviewDeckCleanup(userId, reviewQueueRef, queueDataRef);
+  }, [userId]);
+
+  useEffect(() => {
+    if (!shouldProcessFetchedDeck(loading, fetchedResult, processedDeckDataRef.current)) return;
+
+    const queue = createReviewQueue(getReviewQueueEntries(fetchedResult), reviewKind);
+    processedDeckDataRef.current = fetchedResult;
+    queueDataRef.current = fetchedResult;
+    reviewQueueRef.current = queue;
+    setCompletedCount(completedOffsetRef.current + queue.completedCount);
+    setTotalCount(getAvailableReviewCount(fetchedResult, queue));
+    setFinishedReview(getCurrentReviewEntry(queue) === null);
+    setRetryAction(null);
+    resetQuestionState();
+    setQueueVersion((version) => version + 1);
+  }, [fetchedResult, loading, resetQuestionState, reviewKind]);
+
+  useEffect(() => {
+    if (!finishedReview || !reviewQueueRef.current) return;
+    void completePractice();
+  }, [completePractice, finishedReview, queueVersion]);
+
+  const persistAndAdvance = useCallback(
+    async (updatedItem: UserItemLocal): Promise<void> => {
+      const queue = reviewQueueRef.current;
+      if (!queue) return;
+
+      const didSave = await saveReviewItem(updatedItem);
+      if (!didSave) {
+        pendingAnswerRef.current = updatedItem;
+        setRetryAction('save');
+        return;
+      }
+
+      const answerResult = answerCurrentReviewItem(queue, updatedItem);
+      if (!answerResult) return;
+
+      const reviewAvailability = userId
+        ? await refreshPracticeReviewAvailability(userId)
+        : null;
+      const availableDueCount = getAvailableDueCount(reviewAvailability, reviewKind);
+
+      pendingAnswerRef.current = null;
+      setRetryAction(null);
+
+      await continueAnsweredQueue({
+        answerResult,
+        queue,
+        userId,
+        activeDirectionRef,
+        reviewQueueRef,
+        queueDataRef,
+        completedOffsetRef,
+        setCompletedCount,
+        setTotalCount,
+        availableDueCount,
+        setFinishedReview,
+        setRetryAction,
+        setQueueVersion,
+        resetQuestionState,
+        completePractice,
+      });
+    },
+    [completePractice, resetQuestionState, reviewKind, saveReviewItem, userId],
+  );
+
+  const nextItem = useCallback(
+    async (outcome: PracticeOutcome) => {
+      if (isTransitioningRef.current) return;
+      isTransitioningRef.current = true;
+
+      try {
+        if (!currentItem || !userId || !reviewQueueRef.current) return;
+
+        const updatedItem = UserItem.applyPracticeProgress(
+          currentItem,
+          outcome,
+          new Date(Date.now()).toISOString(),
+          { direction: currentItem.review_direction },
+        );
+        await persistAndAdvance(updatedItem);
+      } finally {
+        isTransitioningRef.current = false;
+      }
+    },
+    [
+      currentItem,
+      persistAndAdvance,
+      userId,
+    ],
+  );
+  const retryPractice = useCallback(async () => {
+    const pendingItem = pendingAnswerRef.current;
+    if (!retryAction || !pendingItem || isTransitioningRef.current) return;
+    isTransitioningRef.current = true;
+
+    try {
+      await persistAndAdvance(pendingItem);
+    } finally {
+      isTransitioningRef.current = false;
+    }
+  }, [persistAndAdvance, retryAction]);
+
+  return {
+    currentItem,
+    note: reviewEntryDetails.note,
+    grammar: reviewEntryDetails.grammar,
+    noteAvailable: reviewEntryDetails.noteAvailable,
+    grammarAvailable: reviewEntryDetails.grammarAvailable,
+    noteLoadFailed: reviewEntryDetails.noteLoadFailed,
+    grammarLoadFailed: reviewEntryDetails.grammarLoadFailed,
+    ensureDetailLoaded: reviewEntryDetails.ensureDetailLoaded,
+    progressLabel: getReviewProgressLabel(completedCount, totalCount),
+    finishedReview,
+    revealed,
+    setRevealed,
+    czech: cardState.czech,
+    english: cardState.english,
+    pronunciation: getReviewPronunciation(currentItem, revealed),
+    audio: currentItem?.audio ?? null,
+    audioDisabled: cardState.audioDisabled,
+    handleReveal: cardState.handleReveal,
+    plusHint: cardState.plusHint,
+    nextItem,
+    retryPractice: retryAction ? retryPractice : undefined,
+    loading,
+    error: error ?? saveError,
+    finishPractice,
+    audioError: cardState.audioError,
+    playAudio: cardState.playAudio,
+    audioLoading: cardState.audioLoading,
+    isPlaying: cardState.isPlaying,
+  };
+}
+
+function createEmptyReviewDeck(reviewKind: ReviewKind): ReviewDeckData {
+  return {
+    entries: [],
+    availabilityCheckedAt: new Date().toISOString(),
+    abandoned: true,
+    reviewKind,
+    reviewDirection: 'cz_to_en',
+  };
+}
+
+function getReviewKind(initialData: ReviewDeckData | null | undefined): ReviewKind {
+  return initialData?.reviewKind ?? 'grammar';
+}
+
+function getReviewProgressLabel(completedCount: number, totalCount: number | null): string {
+  if (totalCount === null) return String(completedCount);
+  return `${completedCount} / ${totalCount}`;
+}
+
+function getReviewPronunciation(
+  currentItem: PracticeDeckEntry['item'] | null,
+  revealed: boolean,
+): string {
+  if (!revealed) return NBSP;
+  return currentItem?.pronunciation || NBSP;
+}
+
+function getAvailableDueCount(
+  availability: ReviewAvailability | null,
+  reviewKind: ReviewKind,
+): number | null {
+  if (!availability) return null;
+  if (reviewKind === 'grammar') return availability.grammarReviewDueCount;
+  return availability.vocabularyReviewDueCount;
+}
 
 async function continueAnsweredQueue({
   answerResult,
@@ -141,18 +413,6 @@ async function loadNextDirectionDeck(
   if (enToCzDeck.entries.length > 0) return enToCzDeck;
   return null;
 }
-
-type StartDirectionDeckOptions = {
-  deck: ReviewDeckData;
-  queueRef: MutableRef<ReviewQueue | null>;
-  dataRef: MutableRef<ReviewDeckData | null>;
-  directionRef: MutableRef<ReviewDirection>;
-  update: (queue: ReviewQueue) => void;
-  setFinishedReview: (finished: boolean) => void;
-  setRetryAction: (action: ReviewRetryAction | null) => void;
-  setQueueVersion: (update: (version: number) => number) => void;
-  resetQuestionState: () => void;
-};
 
 function startDirectionDeck({
   deck,
@@ -243,411 +503,4 @@ function getReviewDeckCleanup(
     queueRef.current = null;
     dataRef.current = null;
   };
-}
-
-/** Uses the prefetched review queue and persists each answer before advancing. */
-export function usePracticeDeck(
-  userId: string | null,
-  initialData?: ReviewDeckData,
-  onComplete?: PracticeCompletionHandler,
-) {
-  const [saveError, setSaveError] = useState<Error | null>(null);
-  const saveReviewItem = useCallback(
-    async (item: UserItemLocal): Promise<boolean> => {
-      if (!userId) return false;
-
-      try {
-        if (item.review_direction === 'en_to_cz') {
-          await UserItem.savePracticeDeck([item], 'en_to_cz');
-        } else {
-          await UserItem.savePracticeDeck([item]);
-        }
-      } catch (caughtError: unknown) {
-        const normalizedError = toError(caughtError);
-        setSaveError(normalizedError);
-        reportError('Failed to save review progress', normalizedError);
-        return false;
-      }
-
-      try {
-        await syncReviewItemToCache(userId, item);
-      } catch (caughtError: unknown) {
-        invalidateReviewArrays(userId);
-        void rebuildReviewArrays(userId).catch((rebuildError: unknown) => {
-          reportError('Failed to rebuild review arrays', rebuildError);
-        });
-        reportError('Failed to update review cache', caughtError);
-      }
-
-      setSaveError(null);
-      return true;
-    },
-    [userId],
-  );
-
-  const [queueVersion, setQueueVersion] = useState(0);
-  const initialReviewDeck = initialData;
-  const reviewKind = getReviewKind(initialData);
-  const activeDirectionRef = useRef<ReviewDirection>(initialData?.reviewDirection ?? 'cz_to_en');
-  const reviewQueueRef = useRef<ReviewQueue | null>(null);
-  const queueDataRef = useRef<ReviewDeckData | null>(null);
-  const processedDeckDataRef = useRef<ReviewDeckData | null>(initialData ?? null);
-  const pendingAnswerRef = useRef<UserItemLocal | null>(null);
-  const initialQueue = initializeReviewQueue(
-    initialReviewDeck,
-    reviewKind,
-    reviewQueueRef,
-    queueDataRef,
-  );
-  const { finishPractice } = usePracticeAvailabilityBoundary(userId);
-  const completionHandledRef = useRef(false);
-  const completePractice = useCallback(async () => {
-    if (completionHandledRef.current) return;
-    completionHandledRef.current = true;
-    await finishPractice();
-    onComplete?.();
-  }, [finishPractice, onComplete]);
-  const [revealed, setRevealed] = useState(false);
-  const [finishedReview, setFinishedReview] = useState(() => isReviewQueueFinished(initialQueue));
-  const [retryAction, setRetryAction] = useState<ReviewRetryAction | null>(null);
-  const [completedCount, setCompletedCount] = useState(getInitialCompletedCount(initialQueue));
-  const [totalCount, setTotalCount] = useState(getAvailableReviewCount(initialReviewDeck, initialQueue));
-  const completedOffsetRef = useRef(0);
-  const isTransitioningRef = useRef(false);
-  const [secondaryContent, setSecondaryContent] = useState<SecondaryContent | null>(null);
-  const secondaryContentRequestIdRef = useRef(0);
-  const secondaryContentRequestRef = useRef<SecondaryContentRequest | null>(null);
-
-  const getSecondaryContentPromise = useCallback(
-    (requestedUserId: string, item: PracticeDeckEntry['item']): Promise<ReviewEntryDetails> => {
-      const itemKey = getReviewItemKey(item);
-      const existingRequest = secondaryContentRequestRef.current;
-      if (existingRequest?.userId === requestedUserId && existingRequest.itemKey === itemKey) {
-        return existingRequest.promise;
-      }
-
-      const promise = loadReviewEntryDetails(requestedUserId, item);
-      secondaryContentRequestRef.current = { userId: requestedUserId, itemKey, promise };
-      return promise;
-    },
-    [],
-  );
-
-  const fetchPracticeDeck = useCallback(
-    () => (userId ? loadReviewDeckData(userId, reviewKind) : Promise.resolve(createEmptyReviewDeck(reviewKind))),
-    [reviewKind, userId],
-  );
-  const { data: fetchedResult, loading, error } = useFetch<ReviewDeckData>(fetchPracticeDeck, {
-    initialData: initialReviewDeck,
-  });
-  const { currentEntry, currentItem } = useMemo(
-    () => {
-      const queueEntry = getCurrentReviewEntry(reviewQueueRef.current);
-      const entry = finishedReview ? null : queueEntry;
-      return { currentEntry: entry, currentItem: entry?.item ?? null };
-    },
-    [finishedReview, queueVersion],
-  );
-  const cardState = usePracticeCardState({
-    currentItem,
-    revealed,
-    isCompletion: finishedReview,
-    setRevealed,
-  });
-  const resetQuestionState = cardState.resetQuestionState;
-
-  const previousUserIdRef = useRef(userId);
-  useEffect(() => {
-    resetReviewDeckOnUserChange(previousUserIdRef, userId, () => {
-      pendingAnswerRef.current = null;
-      reviewQueueRef.current = null;
-      queueDataRef.current = null;
-      setQueueVersion(0);
-      setCompletedCount(0);
-      setTotalCount(null);
-      completedOffsetRef.current = 0;
-      setFinishedReview(false);
-    });
-
-    return getReviewDeckCleanup(userId, reviewQueueRef, queueDataRef);
-  }, [userId]);
-
-  useEffect(() => {
-    if (!shouldProcessFetchedDeck(loading, fetchedResult, processedDeckDataRef.current)) return;
-
-    const queue = createReviewQueue(getReviewQueueEntries(fetchedResult), reviewKind);
-    processedDeckDataRef.current = fetchedResult;
-    queueDataRef.current = fetchedResult;
-    reviewQueueRef.current = queue;
-    setCompletedCount(completedOffsetRef.current + queue.completedCount);
-    setTotalCount(getAvailableReviewCount(fetchedResult, queue));
-    setFinishedReview(getCurrentReviewEntry(queue) === null);
-    setRetryAction(null);
-    resetQuestionState();
-    setQueueVersion((version) => version + 1);
-  }, [fetchedResult, loading, resetQuestionState, reviewKind]);
-
-  useEffect(() => {
-    if (!finishedReview || !reviewQueueRef.current) return;
-    void completePractice();
-  }, [completePractice, finishedReview, queueVersion]);
-
-  useEffect(() => {
-    if (!userId || !currentItem) {
-      setSecondaryContent(null);
-      return undefined;
-    }
-
-    const requestId = ++secondaryContentRequestIdRef.current;
-    let isActive = true;
-    const itemKey = getReviewItemKey(currentItem);
-    const detailPromise = getSecondaryContentPromise(userId, currentItem);
-
-    void detailPromise
-      .then((details) => {
-        if (!isActive || requestId !== secondaryContentRequestIdRef.current) return;
-        setSecondaryContent({ itemKey, ...details });
-      })
-      .catch((caughtError: unknown) => {
-        if (!isActive || requestId !== secondaryContentRequestIdRef.current) return;
-        reportError('Failed to load practice card details', toError(caughtError));
-        setSecondaryContent({
-          itemKey,
-          note: null,
-          grammar: null,
-          noteLoadFailed: hasPositiveReference(currentItem.note_id),
-          grammarLoadFailed: currentItem.is_vocabulary === 0,
-        });
-      });
-
-    return () => {
-      isActive = false;
-      if (requestId === secondaryContentRequestIdRef.current) {
-        secondaryContentRequestIdRef.current += 1;
-      }
-      if (secondaryContentRequestRef.current?.promise === detailPromise) {
-        secondaryContentRequestRef.current = null;
-      }
-    };
-  }, [currentItem, getSecondaryContentPromise, userId]);
-
-  const ensureDetailLoaded = useCallback(
-    async (detail: PracticeDetail): Promise<boolean> => {
-      if (!userId || !currentItem) return false;
-
-      const itemKey = getReviewItemKey(currentItem);
-      if (secondaryContent?.itemKey === itemKey) {
-        return !getDetailLoadFailed(secondaryContent, detail);
-      }
-
-      try {
-        const details = await getSecondaryContentPromise(userId, currentItem);
-        return !getDetailLoadFailed(details, detail);
-      } catch {
-        return false;
-      }
-    },
-    [currentItem, getSecondaryContentPromise, secondaryContent, userId],
-  );
-
-  const persistAndAdvance = useCallback(
-    async (updatedItem: UserItemLocal): Promise<void> => {
-      const queue = reviewQueueRef.current;
-      if (!queue) return;
-
-      const didSave = await saveReviewItem(updatedItem);
-      if (!didSave) {
-        pendingAnswerRef.current = updatedItem;
-        setRetryAction('save');
-        return;
-      }
-
-      const answerResult = answerCurrentReviewItem(queue, updatedItem);
-      if (!answerResult) return;
-
-      const reviewAvailability = userId
-        ? await refreshPracticeReviewAvailability(userId)
-        : null;
-      const availableDueCount = getAvailableDueCount(reviewAvailability, reviewKind);
-
-      pendingAnswerRef.current = null;
-      setRetryAction(null);
-
-      await continueAnsweredQueue({
-        answerResult,
-        queue,
-        userId,
-        activeDirectionRef,
-        reviewQueueRef,
-        queueDataRef,
-        completedOffsetRef,
-        setCompletedCount,
-        setTotalCount,
-        availableDueCount,
-        setFinishedReview,
-        setRetryAction,
-        setQueueVersion,
-        resetQuestionState,
-        completePractice,
-      });
-    },
-    [completePractice, resetQuestionState, reviewKind, saveReviewItem, userId],
-  );
-
-  const nextItem = useCallback(
-    async (outcome: PracticeOutcome) => {
-      if (isTransitioningRef.current) return;
-      isTransitioningRef.current = true;
-
-      try {
-        if (!currentItem || !userId || !reviewQueueRef.current) return;
-
-        const updatedItem = UserItem.applyPracticeProgress(
-          currentItem,
-          outcome,
-          new Date(Date.now()).toISOString(),
-          { direction: currentItem.review_direction },
-        );
-        await persistAndAdvance(updatedItem);
-      } finally {
-        isTransitioningRef.current = false;
-      }
-    },
-    [
-      currentItem,
-      persistAndAdvance,
-      userId,
-    ],
-  );
-  const retryPractice = useCallback(async () => {
-    const pendingItem = pendingAnswerRef.current;
-    if (!retryAction || !pendingItem || isTransitioningRef.current) return;
-    isTransitioningRef.current = true;
-
-    try {
-      await persistAndAdvance(pendingItem);
-    } finally {
-      isTransitioningRef.current = false;
-    }
-  }, [persistAndAdvance, retryAction]);
-
-  return {
-    currentItem,
-    note: getSecondaryNote(currentEntry, secondaryContent),
-    grammar: getSecondaryGrammar(currentEntry, secondaryContent),
-    noteAvailable: hasPositiveReference(currentItem?.note_id),
-    grammarAvailable: currentItem?.is_vocabulary === 0,
-    noteLoadFailed: getSecondaryNoteLoadFailed(currentEntry, secondaryContent),
-    grammarLoadFailed: getSecondaryGrammarLoadFailed(currentEntry, secondaryContent),
-    ensureDetailLoaded,
-    progressLabel: getReviewProgressLabel(completedCount, totalCount),
-    finishedReview,
-    revealed,
-    setRevealed,
-    czech: cardState.czech,
-    english: cardState.english,
-    pronunciation: getReviewPronunciation(currentItem, revealed),
-    audio: currentItem?.audio ?? null,
-    audioDisabled: cardState.audioDisabled,
-    handleReveal: cardState.handleReveal,
-    plusHint: cardState.plusHint,
-    nextItem,
-    retryPractice: retryAction ? retryPractice : undefined,
-    loading,
-    error: error ?? saveError,
-    finishPractice,
-    audioError: cardState.audioError,
-    playAudio: cardState.playAudio,
-    audioLoading: cardState.audioLoading,
-    isPlaying: cardState.isPlaying,
-  };
-}
-
-function createEmptyReviewDeck(reviewKind: ReviewKind): ReviewDeckData {
-  return {
-    entries: [],
-    availabilityCheckedAt: new Date().toISOString(),
-    abandoned: true,
-    reviewKind,
-    reviewDirection: 'cz_to_en',
-  };
-}
-
-function getReviewKind(initialData: ReviewDeckData | null | undefined): ReviewKind {
-  return initialData?.reviewKind ?? 'grammar';
-}
-
-function getReviewProgressLabel(completedCount: number, totalCount: number | null): string {
-  if (totalCount === null) return String(completedCount);
-  return `${completedCount} / ${totalCount}`;
-}
-
-type SecondaryContent = Readonly<{
-  itemKey: string;
-  note: PracticeDeckEntry['note'];
-  grammar: PracticeDeckEntry['grammar'];
-  noteLoadFailed: boolean;
-  grammarLoadFailed: boolean;
-}>;
-
-function hasPositiveReference(value: number | null | undefined): boolean {
-  return typeof value === 'number' && value > 0;
-}
-
-function getReviewItemKey(item: PracticeDeckEntry['item']): string {
-  return String(item.item_id);
-}
-
-function getDetailLoadFailed(
-  details: Pick<SecondaryContent, 'noteLoadFailed' | 'grammarLoadFailed'>,
-  detail: PracticeDetail,
-): boolean {
-  if (detail === 'note') return details.noteLoadFailed;
-  return details.grammarLoadFailed;
-}
-
-function getSecondaryNote(
-  entry: PracticeDeckEntry | null,
-  secondaryContent: SecondaryContent | null,
-): PracticeDeckEntry['note'] | null {
-  if (!entry) return null;
-  if (secondaryContent?.itemKey === getReviewItemKey(entry.item)) {
-    return secondaryContent.note;
-  }
-  return entry.note ?? null;
-}
-
-function getSecondaryGrammar(
-  entry: PracticeDeckEntry | null,
-  secondaryContent: SecondaryContent | null,
-): PracticeDeckEntry['grammar'] | null {
-  if (!entry) return null;
-  if (secondaryContent?.itemKey === getReviewItemKey(entry.item)) {
-    return secondaryContent.grammar;
-  }
-  return entry.grammar ?? null;
-}
-
-function getSecondaryNoteLoadFailed(
-  entry: PracticeDeckEntry | null,
-  secondaryContent: SecondaryContent | null,
-): boolean {
-  if (!entry || secondaryContent?.itemKey !== getReviewItemKey(entry.item)) return false;
-  return secondaryContent.noteLoadFailed ?? false;
-}
-
-function getSecondaryGrammarLoadFailed(
-  entry: PracticeDeckEntry | null,
-  secondaryContent: SecondaryContent | null,
-): boolean {
-  if (!entry || secondaryContent?.itemKey !== getReviewItemKey(entry.item)) return false;
-  return secondaryContent.grammarLoadFailed ?? false;
-}
-
-function getReviewPronunciation(
-  currentItem: PracticeDeckEntry['item'] | null,
-  revealed: boolean,
-): string {
-  if (!revealed) return NBSP;
-  return currentItem?.pronunciation || NBSP;
 }

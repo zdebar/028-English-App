@@ -1,8 +1,10 @@
 import { db } from '@/database/models/db';
 import UserItem from '@/database/models/user-items';
 import { isReviewItemDue } from '@/database/practice/review-items';
+import { reportError } from '@/features/logging/logging-handler';
 import type { ReviewDirection, ReviewKind } from '@/types/practice.types';
 import type { PracticeDeckEntry, UserItemLocal } from '@/types/user-item.types';
+import { toError } from '@/utils/error.utils';
 import { getPrefetchedReviewItems } from './review-prefetch';
 
 export type ReviewDeckData = Readonly<{
@@ -32,7 +34,11 @@ export async function loadReviewDeckData(
       getPrefetchedReviewItems(userId, reviewKind, selectedDirection),
       getPrefetchedReviewItems(userId, reviewKind, getOtherReviewDirection(selectedDirection)),
     ]);
-  } catch {
+  } catch (error) {
+    reportError(
+      'Failed to load the prefetched review deck; using database fallback',
+      toError(error),
+    );
     const [czToEnItems, enToCzItems] = await db.transaction('r', db.user_items, () => Promise.all([
       UserItem.getReviewDeck(userId, reviewKind, now, 'cz_to_en'),
       UserItem.getReviewDeck(userId, reviewKind, now, 'en_to_cz'),

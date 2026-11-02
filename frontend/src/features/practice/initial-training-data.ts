@@ -6,12 +6,10 @@ import {
   type PreparedInitialLesson,
 } from './practice-prefetch';
 import { usePracticeAvailabilityStore } from './use-practice-availability-store';
+import { reportError } from '@/features/logging/logging-handler';
+import { toError } from '@/utils/error.utils';
 
 export type InitialTrainingData = PreparedInitialLesson;
-
-function emptyInitialTrainingData(): InitialTrainingData {
-  return { lesson: null, items: [], entries: [], grammar: null, grammarGroup: null };
-}
 
 export async function loadInitialTrainingData(userId: string): Promise<InitialTrainingData> {
   const prepared = await getPrefetchedNextInitialLesson(userId);
@@ -36,7 +34,15 @@ async function shouldBlockInitialTraining(userId: string): Promise<boolean> {
   try {
     const reviewAvailability = await loadReviewAvailabilityFromArrays(userId);
     return hasReachedReviewLimit(reviewAvailability);
-  } catch {
+  } catch (error) {
+    reportError(
+      'Failed to check review availability before initial training; allowing training to continue',
+      toError(error),
+    );
     return false;
   }
+}
+
+function emptyInitialTrainingData(): InitialTrainingData {
+  return { lesson: null, items: [], entries: [], grammar: null, grammarGroup: null };
 }

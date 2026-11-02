@@ -35,19 +35,6 @@ type ReviewPrefetchState = {
 
 const states = new Map<string, ReviewPrefetchState>();
 
-function createState(): ReviewPrefetchState {
-  return { arrays: null, dirty: true, version: 0, pending: null };
-}
-
-function getState(userId: string): ReviewPrefetchState {
-  let state = states.get(userId);
-  if (!state) {
-    state = createState();
-    states.set(userId, state);
-  }
-  return state;
-}
-
 /** Loads both review directions once and shares the in-flight work. */
 export function warmReviewArrays(userId: string): Promise<void> {
   const state = getState(userId);
@@ -246,4 +233,17 @@ function getReviewNextAt(item: PracticeDeckItem | null): string | null {
   if (!item) return null;
   if (item.review_direction === 'en_to_cz') return item.next_at_en_to_cz ?? item.next_at_cz_to_en;
   return item.next_at_cz_to_en;
+}
+
+function createState(): ReviewPrefetchState {
+  return { arrays: null, dirty: true, version: 0, pending: null };
+}
+
+function getState(userId: string): ReviewPrefetchState {
+  let state = states.get(userId);
+  if (!state) {
+    state = createState();
+    states.set(userId, state);
+  }
+  return state;
 }
