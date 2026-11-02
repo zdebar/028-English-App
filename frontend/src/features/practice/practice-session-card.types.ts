@@ -1,4 +1,4 @@
-import type { GrammarChunkWithExamples } from '@/database/queries/grammar-queries';
+import type { GrammarChunkWithExamples } from '@/database/state/data-types';
 import type { NoteType } from '@/types/generic.types';
 
 export type PracticeDetail = 'grammar' | 'note' | 'pronunciation';

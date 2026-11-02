@@ -12,6 +12,8 @@ import { summarizeSettledResults } from '@/features/logging/logging.utils';
 import { reportInfo } from '@/features/logging/logging-handler';
 import { assertNonEmptyString } from '@/utils/assertions.utils';
 import { settleSyncWithAuthRecovery } from './auth-recovery';
+import type { AppDataSyncResult } from '@/database/state/data-types';
+import { mergeAppDataChanges, publishDataChanges } from '@/database/state/data-store';
 
 /**
  * Synchronizes shared and user-specific tables with Supabase.
@@ -40,15 +42,17 @@ export async function dataSync(userId: string): Promise<void> {
     syncTasks.map(({ sync }) => sync),
   );
 
-  // Report per-table completion counts when available (most syncFromRemote return number of items).
+  publishSuccessfulChanges(userId, results);
+
+  // Report per-table completion counts when available.
   results.forEach((result, index) => {
     const task = syncTasks[index];
-    if (!task || result.status !== 'fulfilled' || typeof result.value !== 'number') {
+    if (!task || result.status !== 'fulfilled' || !isSyncResult(result.value)) {
       return;
     }
 
     try {
-      reportInfo(`Completed ${result.value} ${task.tableName} pull from remote.`);
+      reportInfo(`Completed ${result.value.count} ${task.tableName} pull from remote.`);
     } catch {
       // Swallow logging errors so they do not affect synchronization.
     }
@@ -79,7 +83,31 @@ export async function dataSyncBeforeSessionEnd(userId: string): Promise<void> {
     () => UserLesson.syncFromRemote(userId),
   ]);
 
+  publishSuccessfulChanges(userId, results);
+
   if (results.some((r) => r.status === 'rejected')) {
     throw new Error('Session end synchronization failed');
   }
+}
+
+function publishSuccessfulChanges(
+  userId: string,
+  results: readonly PromiseSettledResult<unknown>[],
+): void {
+  const changes = results.flatMap((result) =>
+    result.status === 'fulfilled' && isSyncResult(result.value) && hasChanges(result.value.changes)
+      ? [result.value.changes]
+      : [],
+  );
+  if (changes.length > 0) publishDataChanges(userId, mergeAppDataChanges(changes));
+}
+
+function hasChanges(changes: AppDataSyncResult['changes']): boolean {
+  return Object.values(changes).some((tableChanges) =>
+    (tableChanges?.upserted?.length ?? 0) > 0 || (tableChanges?.deleted?.length ?? 0) > 0,
+  );
+}
+
+function isSyncResult(value: unknown): value is AppDataSyncResult {
+  return typeof value === 'object' && value !== null && 'count' in value && 'changes' in value;
 }

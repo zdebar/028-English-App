@@ -1,38 +1,23 @@
-import { getOverviewQuery, overviewQueryKey } from '@/features/overviews/overview-query-store';
 import { TEXTS } from '@/locales/cs';
-import type { GroupType } from '@/types/table.types';
 import { ROUTES } from '@/config/routes.config';
 import { useAuthStore } from '../auth/use-auth-store';
-import { useCallback } from 'react';
 import { DataState } from '@/components/UI/DataState';
 import StackedList from '@/components/UI/StackedList';
 import OverviewCard from '@/components/UI/OverviewCard';
 import { NavigationButton } from '@/routing/data-navigation';
-import { useLiveQueryData } from '@/hooks/use-live-query-data';
 import { useRouteClose } from '@/routing/use-route-close';
 import { useQueryErrorToast } from '@/features/logging/use-query-error-toast';
+import { useDataManager } from '@/database/state/data-store';
+import { selectTopicOverview } from '@/database/state/data-selectors';
 
-export default function TopicsOverview({
-  initialTopics,
-}: Readonly<{ initialTopics?: GroupType[] }>) {
+export default function TopicsOverview() {
   const closeRoute = useRouteClose(ROUTES.overviews);
   const userId = useAuthStore((state) => state.userId);
-
-  // Topics management
-  const fetchTopics = useCallback((): Promise<GroupType[]> => {
-    if (!userId) return Promise.resolve([]);
-    return getOverviewQuery(userId, 'topics')();
-  }, [userId]);
-
-  const {
-    data: topics,
-    loading: topicsLoading,
-    error: topicsError,
-  } = useLiveQueryData<GroupType[]>(fetchTopics, {
-    emptyData: [],
-    initialData: initialTopics,
-    sharedKey: userId ? overviewQueryKey(userId, 'topics') : undefined,
-  });
+  const dataState = useDataManager((state) => state);
+  const topics = userId ? selectTopicOverview(dataState, userId) : [];
+  const topicsLoading = Boolean(userId) &&
+    (dataState.userId !== userId || dataState.status === 'idle' || dataState.status === 'loading');
+  const topicsError = dataState.userId === userId && dataState.status === 'error' ? dataState.error : null;
   const hasTopics = topics.length > 0;
 
   useQueryErrorToast(topicsError, 'Failed to fetch topics overview');

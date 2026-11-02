@@ -1,5 +1,4 @@
 import { usePracticeAvailabilityBoundary } from './use-practice-availability-boundary';
-import { refreshPracticeReviewAvailability } from '../practice-availability-controller';
 import {
   useCallback,
   useEffect,
@@ -9,7 +8,9 @@ import {
 } from 'react';
 import type { PracticeDeckEntry, PracticeOutcome, UserItemLocal } from '@/types/user-item.types';
 import type { ReviewDirection, ReviewKind } from '@/types/practice.types';
-import { useAsyncData } from '@/hooks/use-async-data';
+import { dataManagerStore, useDataManager } from '@/database/state/data-store';
+import { selectReviewAvailability, selectReviewDeck } from '@/database/state/data-selectors';
+import type { DataManagerState, ReviewAvailability, ReviewDeckData } from '@/database/state/data-types';
 import UserItem from '@/database/models/user-items';
 import { reportError } from '@/features/logging/logging-handler';
 import { toError } from '@/utils/error.utils';
@@ -22,13 +23,6 @@ import {
   type ReviewQueue,
   type ReviewQueueAnswerResult,
 } from '../review-queue';
-import {
-  invalidateReviewArrays,
-  rebuildReviewArrays,
-  syncReviewItemToCache,
-  type ReviewAvailability,
-} from '../review-prefetch';
-import { loadReviewDeckData, type ReviewDeckData } from '@/features/practice/review-deck-data';
 import { useReviewEntryDetails } from './use-review-entry-details';
 
 type ReviewRetryAction = 'save';
@@ -76,41 +70,14 @@ export function usePracticeDeck(
 ) {
   const [saveError, setSaveError] = useState<Error | null>(null);
   const saveReviewItem = useCallback(
-    async (item: UserItemLocal): Promise<boolean> => {
-      if (!userId) return false;
-
-      try {
-        if (item.review_direction === 'en_to_cz') {
-          await UserItem.savePracticeDeck([item], 'en_to_cz');
-        } else {
-          await UserItem.savePracticeDeck([item]);
-        }
-      } catch (caughtError: unknown) {
-        const normalizedError = toError(caughtError);
-        setSaveError(normalizedError);
-        reportError('Failed to save review progress', normalizedError);
-        return false;
-      }
-
-      try {
-        await syncReviewItemToCache(userId, item);
-      } catch (caughtError: unknown) {
-        invalidateReviewArrays(userId);
-        void rebuildReviewArrays(userId).catch((rebuildError: unknown) => {
-          reportError('Failed to rebuild review arrays', rebuildError);
-        });
-        reportError('Failed to update review cache', caughtError);
-      }
-
-      setSaveError(null);
-      return true;
-    },
+    (item: UserItemLocal) => saveReviewItemForUser(userId, item, setSaveError),
     [userId],
   );
 
   const [queueVersion, setQueueVersion] = useState(0);
   const initialReviewDeck = initialData;
   const reviewKind = getReviewKind(initialData);
+  const dataState = useDataManager((state) => state);
   const activeDirectionRef = useRef<ReviewDirection>(initialData?.reviewDirection ?? 'cz_to_en');
   const reviewQueueRef = useRef<ReviewQueue | null>(null);
   const queueDataRef = useRef<ReviewDeckData | null>(null);
@@ -125,10 +92,7 @@ export function usePracticeDeck(
   const { finishPractice } = usePracticeAvailabilityBoundary(userId);
   const completionHandledRef = useRef(false);
   const completePractice = useCallback(async () => {
-    if (completionHandledRef.current) return;
-    completionHandledRef.current = true;
-    await finishPractice();
-    onComplete?.();
+    await completePracticeOnce(completionHandledRef, finishPractice, onComplete);
   }, [finishPractice, onComplete]);
   const [revealed, setRevealed] = useState(false);
   const [finishedReview, setFinishedReview] = useState(() => isReviewQueueFinished(initialQueue));
@@ -138,20 +102,12 @@ export function usePracticeDeck(
   const completedOffsetRef = useRef(0);
   const isTransitioningRef = useRef(false);
 
-  const fetchPracticeDeck = useCallback(
-    () => (userId ? loadReviewDeckData(userId, reviewKind) : Promise.resolve(createEmptyReviewDeck(reviewKind))),
-    [reviewKind, userId],
-  );
-  const { data: fetchedResult, loading, error } = useAsyncData<ReviewDeckData | null>(
-    fetchPracticeDeck,
-    { emptyData: null, initialData: initialReviewDeck },
-  );
+  const { dataReady, loading, error } = getReviewDataStatus(dataState, userId);
+  const fetchedResult = useMemo(() => {
+    return getFetchedReviewDeck(dataState, userId, dataReady, reviewKind, initialReviewDeck);
+  }, [dataReady, dataState.user_items, initialReviewDeck, reviewKind, userId]);
   const { currentEntry, currentItem } = useMemo(
-    () => {
-      const queueEntry = getCurrentReviewEntry(reviewQueueRef.current);
-      const entry = finishedReview ? null : queueEntry;
-      return { currentEntry: entry, currentItem: entry?.item ?? null };
-    },
+    () => getVisibleReviewEntry(finishedReview, reviewQueueRef.current),
     [finishedReview, queueVersion],
   );
   const reviewEntryDetails = useReviewEntryDetails(userId, currentEntry);
@@ -169,6 +125,7 @@ export function usePracticeDeck(
       pendingAnswerRef.current = null;
       reviewQueueRef.current = null;
       queueDataRef.current = null;
+      processedDeckDataRef.current = null;
       setQueueVersion(0);
       setCompletedCount(0);
       setTotalCount(null);
@@ -181,6 +138,13 @@ export function usePracticeDeck(
 
   useEffect(() => {
     if (!shouldProcessFetchedDeck(loading, fetchedResult, processedDeckDataRef.current)) return;
+
+    // A practice session owns its queue for its whole lifetime. Central data changes
+    // affect future sessions, while this session advances through its in-memory deck.
+    if (queueDataRef.current !== null) {
+      processedDeckDataRef.current = fetchedResult;
+      return;
+    }
 
     const queue = createReviewQueue(getReviewQueueEntries(fetchedResult), reviewKind);
     processedDeckDataRef.current = fetchedResult;
@@ -214,8 +178,9 @@ export function usePracticeDeck(
       const answerResult = answerCurrentReviewItem(queue, updatedItem);
       if (!answerResult) return;
 
-      const reviewAvailability = userId
-        ? await refreshPracticeReviewAvailability(userId)
+      const currentState = dataManagerStore.getState();
+      const reviewAvailability = userId && currentState.userId === userId && currentState.status === 'ready'
+        ? selectReviewAvailability(currentState, userId, currentState.nowIso)
         : null;
       const availableDueCount = getAvailableDueCount(reviewAvailability, reviewKind);
 
@@ -301,7 +266,7 @@ export function usePracticeDeck(
     handleReveal: cardState.handleReveal,
     plusHint: cardState.plusHint,
     nextItem,
-    retryPractice: retryAction ? retryPractice : undefined,
+    retryPractice: getRetryHandler(retryAction, retryPractice),
     loading,
     error: error ?? saveError,
     finishPractice,
@@ -312,14 +277,82 @@ export function usePracticeDeck(
   };
 }
 
-function createEmptyReviewDeck(reviewKind: ReviewKind): ReviewDeckData {
+type ReviewDataStatus = Readonly<{
+  dataReady: boolean;
+  loading: boolean;
+  error: Error | null;
+}>;
+
+type SaveErrorSetter = (error: Error | null) => void;
+
+function getReviewDataStatus(state: DataManagerState, userId: string | null): ReviewDataStatus {
+  const dataReady = Boolean(userId) && state.userId === userId && state.status === 'ready';
   return {
-    entries: [],
-    availabilityCheckedAt: new Date().toISOString(),
-    abandoned: true,
-    reviewKind,
-    reviewDirection: 'cz_to_en',
+    dataReady,
+    loading: Boolean(userId) && !dataReady && state.status !== 'error',
+    error: userId && state.userId === userId && state.status === 'error' ? state.error : null,
   };
+}
+
+function getFetchedReviewDeck(
+  state: DataManagerState,
+  userId: string | null,
+  dataReady: boolean,
+  reviewKind: ReviewKind,
+  initialDeck: ReviewDeckData | undefined,
+): ReviewDeckData | null {
+  if (!userId || !dataReady) return initialDeck ?? null;
+  return selectReviewDeck(state, userId, reviewKind);
+}
+
+function getVisibleReviewEntry(
+  finished: boolean,
+  queue: ReviewQueue | null,
+): Readonly<{ currentEntry: PracticeDeckEntry | null; currentItem: PracticeDeckEntry['item'] | null }> {
+  const currentEntry = finished ? null : getCurrentReviewEntry(queue);
+  return { currentEntry, currentItem: currentEntry?.item ?? null };
+}
+
+async function saveReviewItemForUser(
+  userId: string | null,
+  item: UserItemLocal,
+  setSaveError: SaveErrorSetter,
+): Promise<boolean> {
+  if (!userId) return false;
+
+  try {
+    if (item.review_direction === 'en_to_cz') {
+      await UserItem.savePracticeDeck([item], 'en_to_cz');
+    } else {
+      await UserItem.savePracticeDeck([item]);
+    }
+  } catch (caughtError: unknown) {
+    const normalizedError = toError(caughtError);
+    setSaveError(normalizedError);
+    reportError('Failed to save review progress', normalizedError);
+    return false;
+  }
+
+  setSaveError(null);
+  return true;
+}
+
+async function completePracticeOnce(
+  handledRef: MutableRef<boolean>,
+  finishPractice: () => Promise<void>,
+  onComplete: PracticeCompletionHandler | undefined,
+): Promise<void> {
+  if (handledRef.current) return;
+  handledRef.current = true;
+  await finishPractice();
+  onComplete?.();
+}
+
+function getRetryHandler(
+  retryAction: ReviewRetryAction | null,
+  retryPractice: () => Promise<void>,
+): (() => Promise<void>) | undefined {
+  return retryAction ? retryPractice : undefined;
 }
 
 function getReviewKind(initialData: ReviewDeckData | null | undefined): ReviewKind {
@@ -375,7 +408,12 @@ async function continueAnsweredQueue({
     return;
   }
 
-  const nextDeck = await loadNextDirectionDeck(userId ?? '', queue.reviewKind, activeDirectionRef.current);
+      const nextDeck = loadNextDirectionDeck(
+        dataManagerStore.getState(),
+        userId ?? '',
+        queue.reviewKind,
+        activeDirectionRef.current,
+      );
   if (!nextDeck) {
     await completePractice();
     return;
@@ -397,20 +435,21 @@ async function continueAnsweredQueue({
   });
 }
 
-async function loadNextDirectionDeck(
+function loadNextDirectionDeck(
+  state: DataManagerState,
   userId: string,
   reviewKind: ReviewKind,
   currentDirection: ReviewDirection,
-): Promise<ReviewDeckData | null> {
+): ReviewDeckData | null {
   if (currentDirection === 'cz_to_en') {
-    const enToCzDeck = await loadReviewDeckData(userId, reviewKind, 'en_to_cz');
+    const enToCzDeck = selectReviewDeck(state, userId, reviewKind, 'en_to_cz', state.nowIso);
     return enToCzDeck.entries.length > 0 ? enToCzDeck : null;
   }
 
-  const czToEnDeck = await loadReviewDeckData(userId, reviewKind, 'cz_to_en');
+  const czToEnDeck = selectReviewDeck(state, userId, reviewKind, 'cz_to_en', state.nowIso);
   if (czToEnDeck.entries.length > 0) return czToEnDeck;
 
-  const enToCzDeck = await loadReviewDeckData(userId, reviewKind, 'en_to_cz');
+  const enToCzDeck = selectReviewDeck(state, userId, reviewKind, 'en_to_cz', state.nowIso);
   if (enToCzDeck.entries.length > 0) return enToCzDeck;
   return null;
 }

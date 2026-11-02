@@ -1,102 +1,75 @@
-import { act, renderHook, waitFor } from '@testing-library/react';
+import { renderHook } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const mocks = vi.hoisted(() => ({
-  grammar: false,
+  state: { userId: 'u1' as string | null, status: 'ready' as string, error: null as Error | null },
+  grammar: [] as unknown[],
   topics: [] as unknown[],
   vocabulary: [] as unknown[],
-  sounds: [] as unknown[],
-  grammarError: null as Error | null,
-  observers: [] as Array<{
-    next: (value: boolean) => void;
-    error: (error: unknown) => void;
-    unsubscribe: ReturnType<typeof vi.fn>;
-  }>,
+  sounds: [] as Array<{ isActive: boolean }>,
 }));
 
-vi.mock('dexie', () => ({
-  liveQuery: (query: () => Promise<boolean>) => ({
-    subscribe: (observer: { next: (value: boolean) => void; error: (error: unknown) => void }) => {
-      const unsubscribe = vi.fn();
-      mocks.observers.push({ ...observer, unsubscribe });
-      void query().then(observer.next, observer.error);
-      return { unsubscribe };
-    },
-  }),
+vi.mock('@/database/state/data-store', () => ({
+  useDataManager: (selector: (state: any) => unknown) => selector(mocks.state),
+}));
+vi.mock('@/database/state/data-selectors', () => ({
+  selectGrammarOverview: () => mocks.grammar,
+  selectSoundOverview: () => mocks.sounds,
+  selectTopicOverview: () => mocks.topics,
+  selectVocabulary: () => mocks.vocabulary,
 }));
 
-vi.mock('@/database/queries/topic-queries', () => ({
-  hasInitiatedTopicsByUserId: vi.fn(async () => mocks.topics.length > 0),
-}));
-vi.mock('@/database/queries/grammar-queries', () => ({
-  getInitiatedGrammarTopics: vi.fn(async () => []),
-}));
-vi.mock('@/database/models/user-items', () => ({
-  default: {
-    hasInitiatedGrammar: vi.fn(async () => {
-      if (mocks.grammarError) throw mocks.grammarError;
-      return mocks.grammar;
-    }),
-    hasInitiatedVocabulary: vi.fn(async () => mocks.vocabulary.length > 0),
-  },
-}));
-vi.mock('@/database/queries/sound-queries', () => ({
-  hasAvailableSoundGroups: vi.fn(async () => mocks.sounds.length > 0),
-}));
 import { useOverviewAvailability } from '../use-overview-availability';
-import { clearSharedQueriesExcept } from '@/database/queries/shared-query-store';
 
 describe('useOverviewAvailability', () => {
   beforeEach(() => {
-    clearSharedQueriesExcept(null);
-    vi.clearAllMocks();
-    mocks.grammar = false;
+    mocks.state = { userId: 'u1', status: 'ready', error: null };
+    mocks.grammar = [];
     mocks.topics = [];
     mocks.vocabulary = [];
     mocks.sounds = [];
-    mocks.grammarError = null;
-    mocks.observers = [];
   });
 
-  it('resolves all overview states independently', async () => {
-    mocks.grammar = true;
-    mocks.topics = [{}];
+  it('selects all overview availability from the shared snapshot', () => {
+    mocks.grammar = [{ id: 1 }];
+    mocks.topics = [{ id: 2 }];
+    mocks.vocabulary = [{ item_id: 3 }];
+    mocks.sounds = [{ isActive: false }, { isActive: true }];
 
     const { result } = renderHook(() => useOverviewAvailability('u1'));
 
-    await waitFor(() => expect(result.current.vocabulary.loading).toBe(false));
-    expect(result.current.grammar.hasData).toBe(true);
-    expect(result.current.topics.hasData).toBe(true);
-    expect(result.current.vocabulary.hasData).toBe(false);
-    expect(result.current.sounds.hasData).toBe(false);
+    expect(result.current).toEqual({
+      grammar: { hasData: true, loading: false, error: null },
+      topics: { hasData: true, loading: false, error: null },
+      vocabulary: { hasData: true, loading: false, error: null },
+      sounds: { hasData: true, loading: false, error: null },
+    });
   });
 
-  it('releases its live queries after the page unmounts', async () => {
-    const { result, unmount } = renderHook(() => useOverviewAvailability('u1'));
-    await waitFor(() => expect(mocks.observers).toHaveLength(4));
+  it('reports loading while the active account snapshot is being loaded', () => {
+    mocks.state.status = 'loading';
 
-    act(() => mocks.observers[0].next(true));
-    expect(result.current.grammar.hasData).toBe(true);
-
-    const unsubscribeFunctions = mocks.observers.map((observer) => observer.unsubscribe);
-    unmount();
-    unsubscribeFunctions.forEach((unsubscribe) => expect(unsubscribe).toHaveBeenCalledOnce());
-    clearSharedQueriesExcept(null);
-    unsubscribeFunctions.forEach((unsubscribe) => expect(unsubscribe).toHaveBeenCalledOnce());
-  });
-
-  it('keeps a failed overview disabled and exposes its error', async () => {
-    mocks.grammarError = new Error('grammar failure');
     const { result } = renderHook(() => useOverviewAvailability('u1'));
 
-    await waitFor(() => expect(result.current.grammar.error).toBe(mocks.grammarError));
-    expect(result.current.grammar.hasData).toBe(false);
-    expect(result.current.grammar.loading).toBe(false);
+    expect(result.current.grammar.loading).toBe(true);
+    expect(result.current.topics.loading).toBe(true);
   });
 
-  it('does not subscribe when there is no active user', () => {
-    renderHook(() => useOverviewAvailability(null));
+  it('exposes a bootstrap error for each overview', () => {
+    const error = new Error('data bootstrap failed');
+    mocks.state.error = error;
+    mocks.state.status = 'error';
 
-    expect(mocks.observers).toHaveLength(0);
+    const { result } = renderHook(() => useOverviewAvailability('u1'));
+
+    expect(result.current.grammar).toEqual({ hasData: false, loading: false, error });
+    expect(result.current.sounds).toEqual({ hasData: false, loading: false, error });
+  });
+
+  it('returns the empty state when signed out without subscribing to database changes', () => {
+    const { result } = renderHook(() => useOverviewAvailability(null));
+
+    expect(result.current.grammar).toEqual({ hasData: false, loading: false, error: null });
+    expect(result.current.topics).toEqual({ hasData: false, loading: false, error: null });
   });
 });

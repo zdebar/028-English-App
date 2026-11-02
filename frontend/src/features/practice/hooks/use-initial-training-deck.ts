@@ -1,9 +1,8 @@
 import { usePracticeAvailabilityBoundary } from './use-practice-availability-boundary';
-import { refreshPracticeReviewAvailability } from '../practice-availability-controller';
-import Lessons from '@/database/models/lessons';
 import UserItem from '@/database/models/user-items';
 import UserLesson from '@/database/models/user-lessons';
-import Groups from '@/database/models/groups';
+import { dataManagerStore, ensureDataManagerReady } from '@/database/state/data-store';
+import { selectPreparedInitialLesson } from '@/database/state/data-selectors';
 import type { GrammarDetail } from '@/features/grammar/GrammarDetailCard';
 import { reportError } from '@/features/logging/logging-handler';
 import { toError } from '@/utils/error.utils';
@@ -22,19 +21,6 @@ import {
 import { NBSP } from './use-hint';
 import { usePracticeCardState } from './use-practice-card-state';
 import type { InitialTrainingData } from '../initial-training-data';
-import {
-  resolvePracticeEntries,
-  resolvePracticeGrammarContext,
-} from '@/database/practice/practice-content';
-import {
-  invalidateReviewArrays,
-  rebuildReviewArrays,
-  syncReviewItemToCache,
-} from '../review-prefetch';
-import {
-  getPrefetchedNextInitialLesson,
-  invalidateNextInitialLesson,
-} from '../practice-prefetch';
 
 type TrainingOutcome = 'correct' | 'incorrect' | 'skip';
 
@@ -49,6 +35,8 @@ type InitialTrainingLoadResult = Readonly<{
   groupNote: string | null;
   queue: InitialTrainingQueue;
 }>;
+
+type EligibleInitialTrainingData = InitialTrainingData & Readonly<{ lesson: LessonType }>;
 
 type InitialTrainingQueue = Readonly<{
   currentItemIds: number[];
@@ -309,86 +297,62 @@ function getTrainingPronunciation(currentItem: UserItemLocal | null, revealed: b
   return currentItem?.pronunciation || NBSP;
 }
 
-async function resolveTrainingSelection(
-  userId: string,
-  initialData: InitialTrainingData | undefined,
-) {
-  if (initialData) {
-    return { lessonId: initialData.lesson?.id ?? null, items: initialData.items };
-  }
-  const preparedLesson = await getPrefetchedNextInitialLesson(userId);
-  if (!preparedLesson) return null;
-  return { lessonId: preparedLesson.lesson?.id ?? null, items: preparedLesson.items };
-}
-
-function resolveTrainingLesson(
-  initialData: InitialTrainingData | undefined,
-  selection: Awaited<ReturnType<typeof resolveTrainingSelection>>,
-): Promise<LessonType | null> {
-  if (initialData?.lesson) return Promise.resolve(initialData.lesson);
-  if (selection?.lessonId == null) return Promise.resolve(null);
-  return Lessons.getById(selection.lessonId);
-}
-
-function resolveTrainingGrammarContext(
-  userId: string,
-  initialData: InitialTrainingData | undefined,
-  lesson: LessonType | null,
-): ReturnType<typeof resolvePracticeGrammarContext> {
-  if (initialData) {
-    return Promise.resolve({ grammar: initialData.grammar, grammarGroup: initialData.grammarGroup });
-  }
-  return resolvePracticeGrammarContext(userId, lesson?.group_id);
-}
-
 async function loadInitialTrainingData(
   userId: string,
   initialData: InitialTrainingData | undefined,
 ): Promise<InitialTrainingLoadResult | null> {
-  const selection = await resolveTrainingSelection(userId, initialData);
-  const lesson = await resolveTrainingLesson(initialData, selection);
-  const items = getTrainingItems(selection);
-  if (items.length === 0 || !lesson) return null;
+  await ensureDataManagerReady(userId);
+  const state = dataManagerStore.getState();
+  const prepared = getEligibleInitialTrainingData(state, userId, initialData);
+  if (!prepared) return null;
 
-  const entries = await resolveTrainingEntries(userId, initialData, items);
-  const grammarContext = await resolveTrainingGrammarContext(userId, initialData, lesson);
-  const lessonGroup = lesson.group_id == null ? null : await Groups.getById(lesson.group_id);
   const didStart = await UserLesson.startIfEligible(
     userId,
-    lesson.id,
-    items.map((item) => item.item_id),
+    prepared.lesson.id,
+    prepared.items.map((item) => item.item_id),
   );
   if (!didStart) return null;
-  invalidateNextInitialLesson(userId);
+
+  return {
+    ...createInitialTrainingLoadResult(state.groups, prepared),
+  };
+}
+
+function getEligibleInitialTrainingData(
+  state: ReturnType<typeof dataManagerStore.getState>,
+  userId: string,
+  initialData: InitialTrainingData | undefined,
+): EligibleInitialTrainingData | null {
+  if (state.userId !== userId || state.status !== 'ready') {
+    throw state.error ?? new Error('Application data is not ready for initial training.');
+  }
+  const prepared = initialData?.lesson ? initialData : selectPreparedInitialLesson(state, userId);
+  if (!prepared?.lesson || prepared.items.length === 0) return null;
+  return { ...prepared, lesson: prepared.lesson };
+}
+
+function createInitialTrainingLoadResult(
+  groups: ReturnType<typeof dataManagerStore.getState>['groups'],
+  prepared: EligibleInitialTrainingData,
+): InitialTrainingLoadResult {
+  const lesson = prepared.lesson;
+  const lessonGroup = lesson.group_id == null
+    ? null
+    : groups.find((group) => group.id === lesson.group_id) ?? null;
 
   return {
     lesson,
-    items,
-    entries,
-    grammar: grammarContext.grammar,
-    grammarGroup: grammarContext.grammarGroup,
+    items: prepared.items,
+    entries: prepared.entries,
+    grammar: prepared.grammar,
+    grammarGroup: prepared.grammarGroup,
     groupNote: lessonGroup?.note ?? null,
     queue: {
-      currentItemIds: items.map((item) => item.item_id),
+      currentItemIds: prepared.items.map((item) => item.item_id),
       retryItemIds: [],
       completedCount: 0,
     },
   };
-}
-
-function getTrainingItems(
-  selection: Awaited<ReturnType<typeof resolveTrainingSelection>>,
-): UserItemLocal[] {
-  return selection?.items ?? [];
-}
-
-function resolveTrainingEntries(
-  userId: string,
-  initialData: InitialTrainingData | undefined,
-  items: UserItemLocal[],
-): Promise<Array<ResolvedPracticeEntry<UserItemLocal>>> {
-  if (initialData?.entries) return Promise.resolve(initialData.entries);
-  return resolvePracticeEntries(userId, items);
 }
 
 function startInitialTrainingLoad(
@@ -465,18 +429,6 @@ function updateTrainingItem(items: UserItemLocal[], updatedItem: UserItemLocal):
   return items.map((item) => (item.item_id === updatedItem.item_id ? updatedItem : item));
 }
 
-async function syncPersistedItemToReviewCache(item: UserItemLocal): Promise<void> {
-  try {
-    await syncReviewItemToCache(item.user_id, item);
-  } catch (caughtError) {
-    invalidateReviewArrays(item.user_id);
-    void rebuildReviewArrays(item.user_id).catch((rebuildError: unknown) => {
-      reportError('Failed to rebuild review arrays', rebuildError);
-    });
-    reportError('Failed to update review cache', caughtError);
-  }
-}
-
 async function advanceInitialTraining(options: AdvanceInitialTrainingOptions): Promise<void> {
   const {
     outcome,
@@ -509,9 +461,6 @@ async function advanceInitialTraining(options: AdvanceInitialTrainingOptions): P
       outcome,
     );
     await UserItem.saveInitialTrainingProgress(updatedItem);
-    await syncPersistedItemToReviewCache(updatedItem);
-    await refreshPracticeReviewAvailability(updatedItem.user_id);
-    invalidateNextInitialLesson(updatedItem.user_id);
 
     if (!nextQueue) {
       setHasProgress(true);

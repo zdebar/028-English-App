@@ -1,7 +1,7 @@
 import GrammarDetailCard from '@/features/grammar/GrammarDetailCard';
 import NoteDetailCard from '@/features/notes/NoteDetailCard';
 import type { GroupType } from '@/types/table.types';
-import type { GrammarChunkWithExamples } from '@/database/queries/grammar-queries';
+import type { GrammarChunkWithExamples } from '@/database/state/data-types';
 import type { NoteType } from '@/types/generic.types';
 import PronunciationSoundDetailCard from './PronunciationSoundDetailCard';
 import type { PronunciationSegment } from '@/features/pronunciation/pronunciation.utils';

@@ -1,7 +1,7 @@
 import { isReviewItemCandidate, isReviewItemDue } from '@/database/practice/review-items';
 import type { ReviewKind } from '@/types/practice.types';
 import type { PracticeDeckEntry, UserItemLocal } from '@/types/user-item.types';
-import { compareReviewItems } from './review-prefetch';
+import { compareReviewItems } from '@/database/state/data-selectors';
 
 export type ReviewQueue = {
   items: PracticeDeckEntry[];

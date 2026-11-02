@@ -5,12 +5,12 @@ const mocks = vi.hoisted(() => ({
   words: [] as Array<{ item_id: number; english: string; czech: string }>,
 }));
 
-vi.mock('@/hooks/use-live-query-data', () => ({
-  useLiveQueryData: () => ({ data: mocks.words, loading: false, error: null }),
+vi.mock('@/database/state/data-store', () => ({
+  useDataManager: (selector: (state: any) => unknown) => selector({ userId: 'u1', status: 'ready' }),
 }));
 
-vi.mock('@/database/models/user-items', () => ({
-  default: { getInitiatedVocabulary: vi.fn() },
+vi.mock('@/database/state/data-selectors', () => ({
+  selectVocabulary: () => mocks.words,
 }));
 
 import { useVocabulary } from '../use-vocabulary';

@@ -1,46 +1,31 @@
-import UserLesson from '@/database/models/user-lessons';
-import { hasReachedReviewLimit } from './practice-availability';
-import { loadReviewAvailabilityFromArrays } from './review-prefetch';
+import { ensureDataManagerReady, dataManagerStore } from '@/database/state/data-store';
 import {
-  getPrefetchedNextInitialLesson,
-  type PreparedInitialLesson,
-} from './practice-prefetch';
-import { usePracticeAvailabilityStore } from './use-practice-availability-store';
-import { reportError } from '@/features/logging/logging-handler';
-import { toError } from '@/utils/error.utils';
+  selectHasStartedLessonToday,
+  selectPreparedInitialLesson,
+  selectReviewAvailability,
+} from '@/database/state/data-selectors';
+import type { PreparedInitialLesson } from '@/database/state/data-types';
+import { hasReachedReviewLimit } from './practice-availability';
 
 export type InitialTrainingData = PreparedInitialLesson;
 
+/** Resolves initial-training content and eligibility from the central dataset. */
 export async function loadInitialTrainingData(userId: string): Promise<InitialTrainingData> {
-  const prepared = await getPrefetchedNextInitialLesson(userId);
+  await ensureDataManagerReady(userId);
+  const state = dataManagerStore.getState();
+  if (state.userId !== userId || state.status !== 'ready') {
+    throw state.error ?? new Error('Application data is not ready for initial training.');
+  }
+
+  const prepared = selectPreparedInitialLesson(state, userId);
   if (!prepared?.lesson) return emptyInitialTrainingData();
 
-  const continuingLesson = await UserLesson.hasStartedToday(userId, prepared.lesson.id);
-  if (!continuingLesson && await shouldBlockInitialTraining(userId)) {
+  const now = new Date(state.nowIso);
+  const continuingLesson = selectHasStartedLessonToday(state, userId, prepared.lesson.id, now);
+  if (!continuingLesson && hasReachedReviewLimit(selectReviewAvailability(state, userId, state.nowIso))) {
     return emptyInitialTrainingData();
   }
   return prepared;
-}
-
-async function shouldBlockInitialTraining(userId: string): Promise<boolean> {
-  const cachedAvailability = usePracticeAvailabilityStore.getState();
-  const hasUsableCache =
-    cachedAvailability.availabilityUserId === userId &&
-    !cachedAvailability.practiceLoading &&
-    cachedAvailability.practiceError === null;
-
-  if (hasUsableCache) return hasReachedReviewLimit(cachedAvailability);
-
-  try {
-    const reviewAvailability = await loadReviewAvailabilityFromArrays(userId);
-    return hasReachedReviewLimit(reviewAvailability);
-  } catch (error) {
-    reportError(
-      'Failed to check review availability before initial training; allowing training to continue',
-      toError(error),
-    );
-    return false;
-  }
 }
 
 function emptyInitialTrainingData(): InitialTrainingData {

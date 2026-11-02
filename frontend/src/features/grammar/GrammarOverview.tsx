@@ -1,5 +1,4 @@
 import { runProgressReset } from '@/features/practice/run-progress-reset';
-import { getOverviewQuery, overviewQueryKey } from '@/features/overviews/overview-query-store';
 import OverviewCard from '@/components/UI/OverviewCard';
 import StackedList from '@/components/UI/StackedList';
 import { useAuthStore } from '@/features/auth/use-auth-store';
@@ -7,42 +6,29 @@ import { TEXTS } from '@/locales/cs';
 import type { JSX } from 'react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { ListButton } from '@/components/UI/buttons/ListButton';
-import type {
-  GrammarGroupWithChunks,
-  GrammarTopicWithGroups,
-} from '@/database/queries/grammar-queries';
+import type { GrammarGroupWithChunks } from '@/database/state/data-types';
 import UserItem from '@/database/models/user-items';
 import { useQueryErrorToast } from '@/features/logging/use-query-error-toast';
 import { DataState } from '@/components/UI/DataState';
 import GrammarDetailCard from './GrammarDetailCard';
 import { ROUTES } from '@/config/routes.config';
-import { useLiveQueryData } from '@/hooks/use-live-query-data';
 import { useRouteClose } from '@/routing/use-route-close';
 import type { ReviewDirection } from '@/types/practice.types';
+import { useDataManager } from '@/database/state/data-store';
+import { selectGrammarOverview } from '@/database/state/data-selectors';
 
 type GrammarSelection = Readonly<Pick<GrammarGroupWithChunks, 'id'>>;
 
-export default function GrammarOverview({
-  initialGrammar,
-}: Readonly<{ initialGrammar?: GrammarTopicWithGroups[] }>): JSX.Element {
+export default function GrammarOverview(): JSX.Element {
   const userId = useAuthStore((state) => state.userId);
+  const dataState = useDataManager((state) => state);
   const closeRoute = useRouteClose(ROUTES.overviews);
   const [selection, setSelection] = useState<GrammarSelection | null>(null);
   const [unpackedTopicId, setUnpackedTopicId] = useState<number | null>(null);
-
-  const fetchGrammar = useCallback(async () => {
-    if (!userId) {
-      return [];
-    }
-
-    return getOverviewQuery(userId, 'grammar')();
-  }, [userId]);
-
-  const { data: grammarList, loading, error } = useLiveQueryData(fetchGrammar, {
-    emptyData: [],
-    initialData: initialGrammar,
-    sharedKey: userId ? overviewQueryKey(userId, 'grammar') : undefined,
-  });
+  const grammarList = userId ? selectGrammarOverview(dataState, userId) : [];
+  const loading = Boolean(userId) &&
+    (dataState.userId !== userId || dataState.status === 'idle' || dataState.status === 'loading');
+  const error = dataState.userId === userId && dataState.status === 'error' ? dataState.error : null;
   const hasData = grammarList.length > 0;
   const currentItem = useMemo(() => {
     if (!selection) return null;

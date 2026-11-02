@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useRef } from 'react';
-import { beginPracticeAvailabilityBoundary } from '../practice-availability-controller';
 
 type PracticeWrite = <T>(operation: Promise<T>) => Promise<T>;
 type PracticeFlush = () => Promise<void>;
@@ -9,7 +8,7 @@ export type PracticeAvailabilityBoundary = Readonly<{
   finishPractice: () => Promise<void>;
 }>;
 
-/** Keeps per-answer persistence independent from Home's availability snapshot. */
+/** Tracks in-flight practice operations so route exit waits for their persistence. */
 export function usePracticeAvailabilityBoundary(
   userId: string | null,
   flushPractice?: PracticeFlush,
@@ -19,15 +18,13 @@ export function usePracticeAvailabilityBoundary(
 
   useEffect(() => {
     if (!userId) return undefined;
-    const endPractice = beginPracticeAvailabilityBoundary(userId);
     const writes = pending.current;
     let finishPromise: Promise<void> | null = null;
     const finishPractice = (): Promise<void> => {
       if (finishPromise) return finishPromise;
       finishPromise = Promise.allSettled(writes)
         .then(() => flushPractice?.())
-        .catch(() => undefined)
-        .then(endPractice);
+        .catch(() => undefined);
       return finishPromise;
     };
     finishRef.current = finishPractice;

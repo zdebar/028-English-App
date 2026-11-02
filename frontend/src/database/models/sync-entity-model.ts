@@ -6,6 +6,7 @@ import { getSyncTimestamps, splitDeleted } from '@/database/sync/sync-helpers';
 import { SupabaseError } from '@/types/error.types';
 import type { TableName } from '@/types/table.types';
 import Dexie, { Entity } from 'dexie';
+import type { AppDataChanges, AppDataSyncResult } from '@/database/state/data-types';
 
 type SyncRow = { id: number; deleted_at: string | null };
 
@@ -31,11 +32,11 @@ export default abstract class SyncEntityModel extends Entity<AppDB> {
   /**
    * Synchronizes a shared lookup table from Supabase into IndexedDB using its stored timestamp.
    *
-   * @returns Number of remote rows returned by the query, including tombstones.
+   * @returns Remote row count and the committed local changes.
    * @throws SupabaseError when the remote select fails.
    * @throws Error when metadata validation fails.
    */
-  static async syncFromRemote<T extends SyncRow>(this: SyncEntityModelStatic<T>): Promise<number> {
+  static async syncFromRemote<T extends SyncRow>(this: SyncEntityModelStatic<T>): Promise<AppDataSyncResult> {
     const { lastSyncedAt, newSyncedAt } = await getSyncTimestamps(this.syncTableName);
     const { data, error } = await supabaseInstance
       .from(this.syncTableName)
@@ -61,6 +62,14 @@ export default abstract class SyncEntityModel extends Entity<AppDB> {
       await SyncMetadata.markAsSynced(this.syncTableName, newSyncedAt);
     });
 
-    return remoteItems.length;
+    return {
+      count: remoteItems.length,
+      changes: {
+        [this.syncTableName]: {
+          upserted: toUpsert,
+          deleted: toDelete.map((item) => item.id),
+        },
+      } as AppDataChanges,
+    };
   }
 }

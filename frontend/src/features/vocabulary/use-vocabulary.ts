@@ -1,10 +1,10 @@
-import { getOverviewQuery, overviewQueryKey } from '@/features/overviews/overview-query-store';
 import config from '@/config/config';
 import type { UserItemLocal } from '@/types/user-item.types';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { compareCzechStrings, filterSortedWords, type DisplayField } from './vocabulary.utils';
 import { useLocalStorageSync } from '@/hooks/use-local-storage-sync';
-import { useLiveQueryData } from '@/hooks/use-live-query-data';
+import { useDataManager } from '@/database/state/data-store';
+import { selectVocabulary } from '@/database/state/data-selectors';
 
 const INITIAL_VISIBLE_COUNT = config.vocabulary.itemsPerBatch;
 const SEARCH_KEY = 'vocabulary_search_term';
@@ -15,17 +15,12 @@ const DISPLAY_FIELD_KEY = 'vocabulary_display_field';
  * @param userId - The ID of the user for whom to fetch vocabulary items.
  * @returns An object containing vocabulary state and actions.
  */
-export function useVocabulary(userId: string | null, initialWords?: UserItemLocal[]) {
-  const fetchVocabulary = useCallback((): Promise<UserItemLocal[]> => {
-    if (!userId) return Promise.resolve([]);
-    return getOverviewQuery(userId, 'vocabulary')();
-  }, [userId]);
-
-  const { data: words, loading, error } = useLiveQueryData(fetchVocabulary, {
-    emptyData: [],
-    initialData: initialWords,
-    sharedKey: userId ? overviewQueryKey(userId, 'vocabulary') : undefined,
-  });
+export function useVocabulary(userId: string | null) {
+  const state = useDataManager((current) => current);
+  const words = useMemo(() => userId ? selectVocabulary(state, userId) : [], [state, userId]);
+  const loading = Boolean(userId) &&
+    (state.userId !== userId || state.status === 'idle' || state.status === 'loading');
+  const error = state.userId === userId && state.status === 'error' ? state.error : null;
 
   const [visibleCount, setVisibleCount] = useState(INITIAL_VISIBLE_COUNT);
   const [searchTerm, setSearchTerm] = useLocalStorageSync<string>(`${SEARCH_KEY}_${userId}`, '');

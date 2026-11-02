@@ -4,31 +4,12 @@ import { useSyncStore } from '@/features/synchronization/use-sync-store';
 
 const mocks = vi.hoisted(() => ({
   dataSync: vi.fn(),
-  refreshAvailability: vi.fn().mockResolvedValue(undefined),
   dataSyncBeforeSessionEnd: vi.fn(),
   syncFromRemote: vi.fn(),
   removeOrphaned: vi.fn(),
   showToast: vi.fn(),
   reportError: vi.fn(),
   reportInfo: vi.fn(),
-  warmPracticeCache: vi.fn().mockResolvedValue(undefined),
-  warmOverviewQueries: vi.fn().mockResolvedValue(undefined),
-  invalidatePracticeCache: vi.fn(),
-  clearPracticeCache: vi.fn(),
-}));
-
-vi.mock('@/features/practice/practice-availability-controller', () => ({
-  refreshPracticeAvailability: (...args: unknown[]) => mocks.refreshAvailability(...args),
-}));
-
-vi.mock('@/features/practice/practice-prefetch', () => ({
-  warmPracticeCache: (...args: unknown[]) => mocks.warmPracticeCache(...args),
-  invalidatePracticeCache: (...args: unknown[]) => mocks.invalidatePracticeCache(...args),
-  clearPracticeCache: (...args: unknown[]) => mocks.clearPracticeCache(...args),
-}));
-
-vi.mock('@/features/overviews/overview-query-store', () => ({
-  warmOverviewQueries: (...args: unknown[]) => mocks.warmOverviewQueries(...args),
 }));
 
 vi.mock('@/config/config', () => ({
@@ -99,18 +80,14 @@ describe('usePeriodicSync', () => {
     const { unmount } = renderHook(() => usePeriodicSync('u1'));
 
     expect(useSyncStore.getState().isSynchronizing).toBe(true);
-    expect(mocks.warmPracticeCache).toHaveBeenCalledWith('u1');
-    expect(mocks.warmOverviewQueries).toHaveBeenCalledWith('u1');
+    expect(mocks.dataSync).not.toHaveBeenCalled();
 
     await act(async () => {
       await vi.advanceTimersByTimeAsync(3000);
     });
 
     expect(mocks.dataSync).toHaveBeenCalledWith('u1');
-    expect(mocks.warmPracticeCache).toHaveBeenCalledTimes(2);
-    expect(mocks.invalidatePracticeCache).toHaveBeenCalledWith('u1');
-    expect(mocks.refreshAvailability).toHaveBeenCalledWith('u1');
-    expect(mocks.syncFromRemote).toHaveBeenCalled();
+    expect(mocks.syncFromRemote).toHaveBeenCalledOnce();
     expect(mocks.showToast).toHaveBeenCalledWith('Sync success', 'success');
     expect(mocks.removeOrphaned).toHaveBeenCalled();
     expect(useSyncStore.getState().isSynchronized).toBe(true);
@@ -125,15 +102,10 @@ describe('usePeriodicSync', () => {
 
     const { unmount } = renderHook(() => usePeriodicSync('u1'));
 
-    expect(mocks.warmPracticeCache).toHaveBeenCalledWith('u1');
-
     await act(async () => {
       await vi.advanceTimersByTimeAsync(3000);
     });
 
-    expect(mocks.refreshAvailability).toHaveBeenCalledWith('u1');
-    expect(mocks.warmPracticeCache).toHaveBeenCalledTimes(2);
-    expect(mocks.invalidatePracticeCache).toHaveBeenCalledWith('u1');
     expect(mocks.showToast).toHaveBeenCalledWith('Sync error', 'error');
     expect(mocks.reportError).toHaveBeenCalledWith(
       'Data synchronization failed',
@@ -146,17 +118,22 @@ describe('usePeriodicSync', () => {
     unmount();
   });
 
-  it('reports overview prefetch failures without blocking startup', async () => {
-    const error = new Error('overview prefetch failed');
-    mocks.warmOverviewQueries.mockRejectedValue(error);
+  it('reports partial audio sync failures while finishing data synchronization', async () => {
+    const error = new Error('archive failed');
+    mocks.syncFromRemote.mockResolvedValue({
+      total: 2,
+      success: 1,
+      failed: 1,
+      sampleErrors: [error],
+    });
 
     const { unmount } = renderHook(() => usePeriodicSync('u1'));
 
     await act(async () => {
-      await Promise.resolve();
+      await vi.advanceTimersByTimeAsync(3000);
     });
-    expect(mocks.reportError).toHaveBeenCalledWith('Failed to prefetch overview queries', error);
-    expect(useSyncStore.getState().isSynchronizing).toBe(true);
+    expect(mocks.reportError).toHaveBeenCalledWith('Audio archive sync errors', [error]);
+    expect(useSyncStore.getState().isSynchronized).toBe(true);
 
     unmount();
   });

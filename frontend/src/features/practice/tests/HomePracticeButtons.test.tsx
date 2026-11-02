@@ -1,11 +1,19 @@
-import { act, render, screen } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const mocks = vi.hoisted(() => ({
   navigationButtonRender: vi.fn(),
   pronunciationGroups: [{ isActive: true }],
-  pronunciationLoading: false,
-  pronunciationError: null as Error | null,
+  state: { userId: 'u1', status: 'ready', nowIso: '2026-01-01T00:00:00.000Z' },
+  availability: {
+    grammarReviewReadyAt: null as string | null,
+    vocabularyReviewReadyAt: null as string | null,
+    grammarReviewDueCount: 0,
+    vocabularyReviewDueCount: 0,
+    nextReviewAt: null as string | null,
+    initialTrainingAvailable: true,
+    continuingInitialLessonToday: false,
+  },
 }));
 
 vi.mock('@/locales/cs', () => ({
@@ -23,22 +31,12 @@ vi.mock('@/locales/cs', () => ({
 vi.mock('@/features/auth/use-auth-store', () => ({
   useAuthStore: (selector: (state: { userId: string }) => unknown) => selector({ userId: 'u1' }),
 }));
-vi.mock('@/features/pronunciation/use-pronunciation-groups-store', () => ({
-  usePronunciationGroupsStore: (
-    selector: (state: {
-      groups: typeof mocks.pronunciationGroups;
-      loading: boolean;
-      error: Error | null;
-    }) => unknown,
-  ) =>
-    selector({
-      groups: mocks.pronunciationGroups,
-      loading: mocks.pronunciationLoading,
-      error: mocks.pronunciationError,
-    }),
+vi.mock('@/database/state/data-store', () => ({
+  useDataManager: (selector: (state: any) => unknown) => selector(mocks.state),
 }));
-vi.mock('@/features/pronunciation/use-pronunciation-groups-store-sync', () => ({
-  usePronunciationGroupsStoreSync: vi.fn(),
+vi.mock('@/database/state/data-selectors', () => ({
+  selectPracticeAvailability: () => mocks.availability,
+  selectPronunciationOverview: () => mocks.pronunciationGroups,
 }));
 vi.mock('@/routing/data-navigation', () => ({
   NavigationButton: ({ children, ...props }: any) => {
@@ -48,16 +46,14 @@ vi.mock('@/routing/data-navigation', () => ({
 }));
 
 import PracticeButtons from '@/features/practice/PracticeButton';
-import { usePracticeAvailabilityStore } from '@/features/practice/use-practice-availability-store';
 import config from '@/config/config';
 
 describe('Home practice buttons', () => {
   beforeEach(() => {
     mocks.navigationButtonRender.mockClear();
     mocks.pronunciationGroups = [{ isActive: true }];
-    mocks.pronunciationLoading = false;
-    mocks.pronunciationError = null;
-    usePracticeAvailabilityStore.setState({
+    mocks.state = { userId: 'u1', status: 'ready', nowIso: new Date().toISOString() };
+    mocks.availability = {
       grammarReviewReadyAt: null,
       vocabularyReviewReadyAt: null,
       grammarReviewDueCount: 0,
@@ -65,39 +61,26 @@ describe('Home practice buttons', () => {
       nextReviewAt: null,
       initialTrainingAvailable: true,
       continuingInitialLessonToday: false,
-      practiceLoading: false,
-      practiceError: null,
-    });
+    };
   });
 
   it('keeps review disabled when no item is due, even with a stored date', () => {
     const readyAt = new Date().toISOString();
-    usePracticeAvailabilityStore.setState({ grammarReviewReadyAt: readyAt });
-    const snapshot = usePracticeAvailabilityStore.getState();
+    mocks.availability.grammarReviewReadyAt = readyAt;
     render(<PracticeButtons />);
     expect(button('Grammar review').disabled).toBe(true);
     expect(screen.queryByText('2')).toBeNull();
-    expect(usePracticeAvailabilityStore.getState()).toBe(snapshot);
   });
 
-  it('updates only the matching badge for an ordinary review count change', () => {
-    usePracticeAvailabilityStore.setState({ grammarReviewDueCount: 1 });
+  it('shows the current due count in the matching badge', () => {
+    mocks.availability.grammarReviewDueCount = 2;
     render(<PracticeButtons />);
-    mocks.navigationButtonRender.mockClear();
-
-    act(() => {
-      usePracticeAvailabilityStore.setState({ grammarReviewDueCount: 2 });
-    });
-
     expect(screen.getByText('2')).toBeTruthy();
-    expect(mocks.navigationButtonRender).not.toHaveBeenCalled();
   });
 
   it('enables both reviews when each has one due item', () => {
-    usePracticeAvailabilityStore.setState({
-      grammarReviewDueCount: 1,
-      vocabularyReviewDueCount: 1,
-    });
+    mocks.availability.grammarReviewDueCount = 1;
+    mocks.availability.vocabularyReviewDueCount = 1;
     render(<PracticeButtons />);
     expect(button('Grammar review').disabled).toBe(false);
     expect(button('Vocabulary review').disabled).toBe(false);
@@ -105,10 +88,8 @@ describe('Home practice buttons', () => {
   });
 
   it('enables vocabulary review when grammar is not ready', () => {
-    usePracticeAvailabilityStore.setState({
-      grammarReviewReadyAt: new Date(Date.now() + 86_400_000).toISOString(),
-      vocabularyReviewDueCount: 1,
-    });
+    mocks.availability.grammarReviewReadyAt = new Date(Date.now() + 86_400_000).toISOString();
+    mocks.availability.vocabularyReviewDueCount = 1;
     render(<PracticeButtons />);
 
     expect(button('Grammar review').disabled).toBe(true);
@@ -117,11 +98,8 @@ describe('Home practice buttons', () => {
   });
 
   it('locks new at the review limit', () => {
-    usePracticeAvailabilityStore.setState({
-      grammarReviewReadyAt: null,
-      grammarReviewDueCount: config.practice.grammarReviewLimitSize,
-      vocabularyReviewDueCount: 3,
-    });
+    mocks.availability.grammarReviewDueCount = config.practice.grammarReviewLimitSize;
+    mocks.availability.vocabularyReviewDueCount = 3;
 
     render(<PracticeButtons />);
 
@@ -132,11 +110,8 @@ describe('Home practice buttons', () => {
 
   it('keeps review available when a review count exceeds its limit', () => {
     const grammarReviewCount = config.practice.grammarReviewLimitSize + 1;
-    usePracticeAvailabilityStore.setState({
-      grammarReviewReadyAt: null,
-      grammarReviewDueCount: grammarReviewCount,
-      vocabularyReviewDueCount: 3,
-    });
+    mocks.availability.grammarReviewDueCount = grammarReviewCount;
+    mocks.availability.vocabularyReviewDueCount = 3;
 
     render(<PracticeButtons />);
 
@@ -148,22 +123,14 @@ describe('Home practice buttons', () => {
   });
 
   it('enables new below the review boundary', () => {
-    usePracticeAvailabilityStore.setState({
-      grammarReviewReadyAt: null,
-      vocabularyReviewReadyAt: null,
-    });
     render(<PracticeButtons />);
     expect(button('Grammar review').disabled).toBe(true);
     expect(button('Vocabulary review').disabled).toBe(true);
     expect(button('New').disabled).toBe(false);
   });
 
-  it('disables both actions while availability is recalculated', () => {
-    usePracticeAvailabilityStore.setState({
-      grammarReviewReadyAt: new Date().toISOString(),
-      vocabularyReviewReadyAt: new Date().toISOString(),
-      practiceLoading: true,
-    });
+  it('disables practice actions while the central data snapshot is loading', () => {
+    mocks.state.status = 'loading';
     render(<PracticeButtons />);
     expect(button('Grammar review').disabled).toBe(true);
     expect(button('Vocabulary review').disabled).toBe(true);
@@ -186,7 +153,7 @@ describe('Home practice buttons', () => {
   });
 
   it('keeps new visible but disabled when no unstarted lesson exists', () => {
-    usePracticeAvailabilityStore.setState({ initialTrainingAvailable: false });
+    mocks.availability.initialTrainingAvailable = false;
     render(<PracticeButtons />);
     const newButton = button('New');
     expect(newButton.disabled).toBe(true);

@@ -1,20 +1,20 @@
-import { getPronunciationGroupDetail } from '@/database/queries/pronunciation-queries';
+import { ensureDataManagerReady, dataManagerStore } from '@/database/state/data-store';
 import {
-  getSoundGroupDetail,
-  type SoundGroupDetailType,
-} from '@/database/queries/sound-queries';
-import { getTopicById } from '@/database/queries/topic-queries';
-import UserItem from '@/database/models/user-items';
-import {
-  loadReviewDeckData,
-  type ReviewDeckData,
-} from '@/features/practice/review-deck-data';
-import {
-  loadOverviewAvailability,
-  loadOverviewQuery,
-  type OverviewAvailabilityData,
-  type OverviewQueryData,
-} from '@/features/overviews/overview-query-store';
+  selectGrammarOverview,
+  selectPronunciationDetail,
+  selectReviewDeck,
+  selectSoundDetail,
+  selectSoundOverview,
+  selectTopicOverview,
+  selectTopicDetail,
+  selectVocabulary,
+} from '@/database/state/data-selectors';
+import type {
+  GrammarTopicWithGroups,
+  ReviewDeckData,
+  SoundGroupDetail,
+  SoundOverviewGroup,
+} from '@/database/state/data-types';
 import type { PronunciationGroupDetailType } from '@/types/pronunciation.types';
 import type { ReviewKind } from '@/types/practice.types';
 import type { GroupType } from '@/types/table.types';
@@ -25,66 +25,75 @@ export type TopicDetailData = Readonly<{
   items: UserItemLocal[];
 }>;
 
-export type SoundGroupDetailData = SoundGroupDetailType;
+export type SoundGroupDetailData = SoundGroupDetail;
+export type OverviewAvailabilityData = Readonly<{
+  grammar: boolean;
+  topics: boolean;
+  vocabulary: boolean;
+  sounds: boolean;
+}>;
 
-export function loadOverviewAvailabilityData(
-  userId: string,
-): Promise<OverviewAvailabilityData> {
-  return loadOverviewAvailability(userId);
+export async function loadOverviewAvailabilityData(userId: string): Promise<OverviewAvailabilityData> {
+  const state = await getUserData(userId);
+  return {
+    grammar: selectGrammarOverview(state, userId).length > 0,
+    topics: selectTopicOverview(state, userId).length > 0,
+    vocabulary: selectVocabulary(state, userId).length > 0,
+    sounds: selectSoundOverview(state, userId).some((sound) => sound.isActive),
+  };
 }
 
-export function loadReviewPracticeData(
-  userId: string,
-  reviewKind: ReviewKind,
-): Promise<ReviewDeckData> {
-  return loadReviewDeckData(userId, reviewKind);
+export async function loadReviewPracticeData(userId: string, reviewKind: ReviewKind): Promise<ReviewDeckData> {
+  const state = await getUserData(userId);
+  return selectReviewDeck(state, userId, reviewKind);
 }
 
-export function loadGrammarOverviewData(
-  userId: string,
-): Promise<OverviewQueryData['grammar']> {
-  return loadOverviewQuery(userId, 'grammar');
+export async function loadGrammarOverviewData(userId: string): Promise<GrammarTopicWithGroups[]> {
+  const state = await getUserData(userId);
+  return selectGrammarOverview(state, userId);
 }
 
-export function loadTopicsOverviewData(
-  userId: string,
-): Promise<OverviewQueryData['topics']> {
-  return loadOverviewQuery(userId, 'topics');
+export async function loadTopicsOverviewData(userId: string): Promise<GroupType[]> {
+  const state = await getUserData(userId);
+  return selectTopicOverview(state, userId);
 }
 
-export async function loadTopicDetailData(
-  userId: string,
-  topicId: number,
-): Promise<TopicDetailData> {
-  const [topic, items] = await Promise.all([
-    getTopicById(userId, topicId),
-    UserItem.getInitiatedByTopicId(userId, topicId),
-  ]);
-  return { topic, items };
+export async function loadTopicDetailData(userId: string, topicId: number): Promise<TopicDetailData> {
+  const state = await getUserData(userId);
+  return selectTopicDetail(state, userId, topicId);
 }
 
-export function loadVocabularyOverviewData(
-  userId: string,
-): Promise<OverviewQueryData['vocabulary']> {
-  return loadOverviewQuery(userId, 'vocabulary');
+export async function loadVocabularyOverviewData(userId: string): Promise<UserItemLocal[]> {
+  const state = await getUserData(userId);
+  return selectVocabulary(state, userId);
 }
 
-export function loadSoundsOverviewData(
-  userId: string,
-): Promise<OverviewQueryData['sounds']> {
-  return loadOverviewQuery(userId, 'sounds');
+export async function loadSoundsOverviewData(userId: string): Promise<SoundOverviewGroup[]> {
+  const state = await getUserData(userId);
+  return selectSoundOverview(state, userId);
 }
 
-export function loadSoundGroupDetailData(
+export async function loadSoundGroupDetailData(
   userId: string,
   groupId: number,
 ): Promise<SoundGroupDetailData | null> {
-  return getSoundGroupDetail(userId, groupId);
+  const state = await getUserData(userId);
+  return selectSoundDetail(state, userId, groupId);
 }
 
-export function loadPronunciationGroupDetailData(
+export async function loadPronunciationGroupDetailData(
   userId: string,
   groupId: number,
 ): Promise<PronunciationGroupDetailType | null> {
-  return getPronunciationGroupDetail(userId, groupId);
+  const state = await getUserData(userId);
+  return selectPronunciationDetail(state, userId, groupId);
+}
+
+async function getUserData(userId: string) {
+  await ensureDataManagerReady(userId);
+  const state = dataManagerStore.getState();
+  if (state.userId !== userId || state.status !== 'ready') {
+    throw state.error ?? new Error('Application data is not ready for the active user.');
+  }
+  return state;
 }

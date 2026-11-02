@@ -29,6 +29,8 @@ import type { ReadyPracticeState } from '@/types/generic.types';
 import { syncUserItemsFromRemote } from '@/database/sync/user-items-sync';
 import { assertNonEmptyString } from '@/utils/assertions.utils';
 import { isInitiated } from '@/database/practice/user-item-progress';
+import type { AppDataSyncResult } from '@/database/state/data-types';
+import { publishDataChanges } from '@/database/state/data-store';
 
 const NULL_DATE = config.database.nullReplacementDate;
 const SIM_LESSON_COUNT = config.progress.simulationLessonCount;
@@ -106,11 +108,12 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
   static async savePracticeDeck(items: PracticeDeckItem[], direction: ReviewDirection = 'cz_to_en'): Promise<void> {
     if (items.length === 0) return;
 
-    await db.transaction('rw', db.user_items, async () => {
+    const updatedItems = await db.transaction('rw', db.user_items, async () => {
       const updates: Array<{
         key: [string, number];
         changes: Partial<UserItemLocal>;
       }> = [];
+      const updatedItems: UserItemLocal[] = [];
       const currentItems = await Promise.all(
         items.map((item) => db.user_items.get([item.user_id, item.item_id])),
       );
@@ -121,30 +124,34 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
         const currentMasteredAt = direction === 'cz_to_en' ? currentItem.mastered_at_cz_to_en : currentItem.mastered_at_en_to_cz;
         if (currentMasteredAt !== NULL_DATE) continue;
 
+        const changes = direction === 'cz_to_en'
+          ? {
+              progress_cz_to_en: item.progress_cz_to_en,
+              started_at: item.started_at,
+              updated_at: item.updated_at,
+              next_at_cz_to_en: item.next_at_cz_to_en,
+              mastered_at_cz_to_en: item.mastered_at_cz_to_en,
+            }
+          : {
+              progress_en_to_cz: item.progress_en_to_cz,
+              started_at: item.started_at,
+              updated_at: item.updated_at,
+              next_at_en_to_cz: item.next_at_en_to_cz,
+              mastered_at_en_to_cz: item.mastered_at_en_to_cz,
+            };
         updates.push({
           key: [item.user_id, item.item_id],
-          changes: direction === 'cz_to_en'
-            ? {
-                progress_cz_to_en: item.progress_cz_to_en,
-                started_at: item.started_at,
-                updated_at: item.updated_at,
-                next_at_cz_to_en: item.next_at_cz_to_en,
-                mastered_at_cz_to_en: item.mastered_at_cz_to_en,
-              }
-            : {
-                progress_en_to_cz: item.progress_en_to_cz,
-                started_at: item.started_at,
-                updated_at: item.updated_at,
-                next_at_en_to_cz: item.next_at_en_to_cz,
-                mastered_at_en_to_cz: item.mastered_at_en_to_cz,
-              },
+          changes,
         });
+        updatedItems.push({ ...currentItem, ...changes });
       }
 
       if (updates.length > 0) {
         await db.user_items.bulkUpdate(updates);
       }
+      return updatedItems;
     });
+    publishUserItemUpdates(updatedItems);
   }
 
   /**
@@ -357,7 +364,14 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
    * @param userId User id whose local item rows should be deleted.
    */
   static async deleteByUserId(userId: string): Promise<void> {
-    await db.user_items.where('user_id').equals(userId).delete();
+    const deletedItemIds = await db.transaction('rw', db.user_items, async () => {
+      const items = await db.user_items.where('user_id').equals(userId).toArray();
+      await db.user_items.bulkDelete(items.map((item) => [userId, item.item_id]));
+      return items.map((item) => item.item_id);
+    });
+    if (deletedItemIds.length > 0) {
+      publishDataChanges(userId, { user_items: { deleted: deletedItemIds } });
+    }
   }
 
   /** Returns vocabulary rows from the first configured lessons in curriculum order. */
@@ -402,7 +416,10 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
   }
 
   /** Replaces progress on simulation candidates with one deterministic fixture. */
-  static async simulateData(items: UserItemLocal[], dateTime: string): Promise<number> {
+  static async simulateData(
+    items: UserItemLocal[],
+    dateTime: string,
+  ): Promise<Readonly<{ count: number; items: UserItemLocal[] }>> {
     const simulatedItems = items.map((item) => {
       return {
         ...item,
@@ -415,11 +432,11 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
     });
 
     await db.user_items.bulkPut(simulatedItems);
-    return simulatedItems.length;
+    return { count: simulatedItems.length, items: simulatedItems };
   }
 
   /** Pushes local progress and merges remote item updates. */
-  static syncFromRemote(userId: string): Promise<number> {
+  static syncFromRemote(userId: string): Promise<AppDataSyncResult> {
     return syncUserItemsFromRemote(userId);
   }
 
@@ -478,6 +495,7 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
       });
       if (updatedCount !== 1) throw new Error('The trained item no longer exists locally.');
     });
+    publishUserItemUpdates([item]);
   }
 }
 
@@ -539,15 +557,24 @@ async function getGroupAndDescendantIds(groupId: number): Promise<number[]> {
 async function resetItems(items: UserItemLocal[], dateTime: string, direction: ReviewDirection = 'cz_to_en'): Promise<number> {
   if (items.length === 0) return 0;
 
-  return await db.transaction('rw', db.user_items, async () => {
+  const updatedItems = await db.transaction('rw', db.user_items, async () => {
     const updatedItems = items.map((item) => {
       const updatedItem = { ...item };
       resetUserItem(updatedItem, dateTime, direction);
       return updatedItem;
     });
     await db.user_items.bulkPut(updatedItems);
-    return updatedItems.length;
+    return updatedItems;
   });
+  publishUserItemUpdates(updatedItems);
+  return updatedItems.length;
+}
+
+function publishUserItemUpdates(items: readonly UserItemLocal[]): void {
+  if (items.length === 0) return;
+  const userId = items[0]?.user_id;
+  if (!userId) return;
+  publishDataChanges(userId, { user_items: { upserted: items } });
 }
 
 /** Resets one item's progress in the selected review direction. */

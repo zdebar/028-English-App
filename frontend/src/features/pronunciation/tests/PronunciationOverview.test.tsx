@@ -34,28 +34,13 @@ vi.mock('@/features/toast/use-toast-store', () => ({
     selector({ showToast: vi.fn() }),
 }));
 
-vi.mock('@/database/queries/pronunciation-queries', () => ({
-  getPronunciationGroupOverview: vi.fn(),
-  getPronunciationGroupDetail: vi.fn(),
+vi.mock('@/database/state/data-store', () => ({
+  useDataManager: (selector: (state: any) => unknown) => selector({ userId: 'u1', status: 'ready' }),
 }));
 
-vi.mock('../use-pronunciation-groups-store', () => ({
-  usePronunciationGroupsStore: (
-    selector: (state: { groups: any[]; loading: boolean; error: Error | null }) => unknown,
-  ) =>
-    selector({
-      groups: mocks.overviewData,
-      loading: mocks.overviewLoading,
-      error: mocks.overviewError,
-    }),
-}));
-
-vi.mock('@/hooks/use-live-query-data', () => ({
-  useLiveQueryData: () => ({
-    data: mocks.detailData,
-    loading: false,
-    error: null,
-  }),
+vi.mock('@/database/state/data-selectors', () => ({
+  selectPronunciationOverview: () => mocks.overviewData,
+  selectPronunciationDetail: () => mocks.detailData,
 }));
 
 vi.mock('@/features/audio/use-audio-manager', () => ({
@@ -83,10 +68,6 @@ vi.mock('@/components/UI/OverviewCard', () => ({
   ),
 }));
 
-vi.mock('../use-pronunciation-groups-store-sync', () => ({
-  usePronunciationGroupsStoreSync: vi.fn(),
-}));
-
 vi.mock('@/components/UI/DataState', () => ({
   DataState: ({ hasData, noDataMessage, children }: any) =>
     hasData ? children : <p>{noDataMessage}</p>,
@@ -108,6 +89,7 @@ vi.mock('@/locales/cs', () => ({
     selectPronunciationWord: 'Select word',
     clickToRevealRandomWord: 'Reveal word',
     playNextRandomWordTooltip: 'Play next random word',
+    pronunciationTitle: (value: string) => value,
   },
 }));
 
@@ -192,7 +174,7 @@ describe('Pronunciation overview screens', () => {
     fireEvent.click(screen.getByTestId('close'));
     expect(mocks.navigate).toHaveBeenCalledWith('/pronunciation', { replace: true });
 
-    fireEvent.click(screen.getByTitle('mæn'));
+    fireEvent.click(screen.getByTitle(/mæn/));
     await waitFor(() => expect(mocks.playAudio).toHaveBeenCalledWith('man.opus'));
 
   });

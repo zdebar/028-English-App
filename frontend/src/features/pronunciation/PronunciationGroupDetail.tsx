@@ -1,30 +1,28 @@
-import { sharedQueryKey } from '@/database/queries/shared-query-store';
 import { DataState } from '@/components/UI/DataState';
 import OverviewCard from '@/components/UI/OverviewCard';
 import BilingualItemButton from '@/components/UI/buttons/BilingualItemButton';
 import AudioItemList from '@/components/UI/AudioItemList';
 import { ListButton } from '@/components/UI/buttons/ListButton';
 import { ROUTES } from '@/config/routes.config';
-import { getPronunciationGroupDetail } from '@/database/queries/pronunciation-queries';
 import { useAudioManager } from '@/features/audio/use-audio-manager';
 import { getItemAudioSources, isAudioPlayable, playAudioWithToast } from '@/features/audio/audio.utils';
 import { AudioItemListControls } from '@/features/audio/AudioItemListControls';
 import { useQueryErrorToast } from '@/features/logging/use-query-error-toast';
 import { useAuthStore } from '@/features/auth/use-auth-store';
 import { useToastStore } from '@/features/toast/use-toast-store';
-import { useLiveQueryData } from '@/hooks/use-live-query-data';
 import { useLocalStorageSync } from '@/hooks/use-local-storage-sync';
 import { TEXTS } from '@/locales/cs';
-import { useCallback, useEffect, useMemo, useRef, useState, type JSX } from 'react';
+import { useEffect, useMemo, useRef, useState, type JSX } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import type { PronunciationGroupDetailType } from '@/types/pronunciation.types';
 import { useRouteClose } from '@/routing/use-route-close';
 import type { UserItemLocal } from '@/types/user-item.types';
+import { useDataManager } from '@/database/state/data-store';
+import { selectPronunciationDetail } from '@/database/state/data-selectors';
 
-export default function PronunciationGroupDetail({
-  initialData,
-}: Readonly<{ initialData?: PronunciationGroupDetailType | null }>) {
+export default function PronunciationGroupDetail() {
   const userId = useAuthStore((state) => state.userId);
+  const dataState = useDataManager((state) => state);
   const showToast = useToastStore((state) => state.showToast);
   const navigate = useNavigate();
   const closeRoute = useRouteClose(ROUTES.pronunciationGroups);
@@ -32,15 +30,12 @@ export default function PronunciationGroupDetail({
   const validGroupId = parseGroupId(groupIdText);
   const selectionStorageKey =
     `pronunciation_group_selected_words_${userId ?? 'guest'}_${validGroupId ?? 'unknown'}`;
-  const fetchDetail = useCallback(
-    () => fetchGroupDetail(userId, validGroupId),
-    [userId, validGroupId],
-  );
-  const { data, loading, error } = useLiveQueryData(fetchDetail, {
-    emptyData: null,
-    initialData,
-    sharedKey: sharedQueryKey(userId, `pronunciation:${validGroupId}`),
-  });
+  const data = userId && validGroupId
+    ? selectPronunciationDetail(dataState, userId, validGroupId)
+    : null;
+  const loading = Boolean(userId) &&
+    (dataState.userId !== userId || dataState.status === 'idle' || dataState.status === 'loading');
+  const error = dataState.userId === userId && dataState.status === 'error' ? dataState.error : null;
   const audios = useMemo(() => getItemAudioSources(data?.items ?? []), [data]);
   const {
     playAudio,
@@ -71,11 +66,6 @@ function parseGroupId(value: string | undefined): number | null {
   const groupId = Number(value);
   if (!Number.isSafeInteger(groupId) || groupId <= 0) return null;
   return groupId;
-}
-
-function fetchGroupDetail(userId: string | null, groupId: number | null) {
-  if (!userId || !groupId) return Promise.resolve(null);
-  return getPronunciationGroupDetail(userId, groupId);
 }
 
 function PronunciationGroupNote({ note }: Readonly<{ note: string | null | undefined }>) {

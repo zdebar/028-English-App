@@ -1,4 +1,3 @@
-import { refreshPracticeAvailability } from '@/features/practice/practice-availability-controller';
 import { useEffect, useRef } from 'react';
 import config from '@/config/config';
 import AudioRecord from '@/database/models/audio-records';
@@ -8,12 +7,6 @@ import { TEXTS } from '@/locales/cs';
 import { useToastStore } from '@/features/toast/use-toast-store';
 import { useSyncStore } from './use-sync-store';
 import { useAuthStore } from '@/features/auth/use-auth-store';
-import {
-  clearPracticeCache,
-  invalidatePracticeCache,
-  warmPracticeCache,
-} from '@/features/practice/practice-prefetch';
-import { warmOverviewQueries } from '@/features/overviews/overview-query-store';
 
 type InFlightSync = Readonly<{
   userId: string;
@@ -43,7 +36,6 @@ export function usePeriodicSync(userId: string | null): { loading: boolean } {
   useEffect(() => {
     if (!userId) {
       resetSyncState();
-      clearPracticeCache(null);
       return;
     }
 
@@ -55,18 +47,7 @@ export function usePeriodicSync(userId: string | null): { loading: boolean } {
       if (!isActive) return;
       setSynchronizing(true);
       try {
-        try {
-          await dataSync(activeUserId);
-        } finally {
-          // A partially failed sync may still have committed updated item data.
-          invalidatePracticeCache(activeUserId);
-          void warmPracticeCache(activeUserId).catch((error) => {
-            reportError('Failed to prefetch practice cache', error);
-          });
-          void refreshPracticeAvailability(activeUserId).catch((error) => {
-            reportError('Failed to refresh practice availability after sync', error);
-          });
-        }
+        await dataSync(activeUserId);
         if (!isActive) return;
 
         const audioSummary = await AudioRecord.syncFromRemote();
@@ -133,12 +114,6 @@ export function usePeriodicSync(userId: string | null): { loading: boolean } {
     initialSyncTimeoutId.current = globalThis.setTimeout(() => {
       void runSync();
     }, 3000);
-    void warmPracticeCache(activeUserId).catch((error) => {
-      reportError('Failed to prefetch practice cache', error);
-    });
-    void warmOverviewQueries(activeUserId).catch((error) => {
-      reportError('Failed to prefetch overview queries', error);
-    });
     intervalId.current = setInterval(() => {
       void runSync();
     }, config.sync.periodicSyncInterval);

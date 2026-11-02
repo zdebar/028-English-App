@@ -92,13 +92,8 @@ vi.mock('@/config/config', () => ({
   },
 }));
 
-vi.mock('dexie-react-hooks', () => ({
-  useLiveQuery: (_query: unknown, _dependencies: unknown, fallback: unknown) =>
-    mocks.soundGroups ?? fallback,
-}));
-
-vi.mock('@/hooks/use-live-query-data', () => ({
-  useLiveQueryData: () => ({ data: mocks.soundGroups, loading: false, error: null }),
+vi.mock('@/database/state/data-store', () => ({
+  useDataManager: (selector: (state: any) => unknown) => selector({ groups: mocks.soundGroups }),
 }));
 
 vi.mock('@/locales/cs', () => ({
@@ -147,6 +142,7 @@ vi.mock('@/features/toast/use-toast-store', () => ({
 
 vi.mock('react-router-dom', () => ({
   useNavigate: () => mocks.navigate,
+  useLocation: () => ({ key: 'default' }),
   useBlocker: () => ({ state: 'unblocked' }),
 }));
 

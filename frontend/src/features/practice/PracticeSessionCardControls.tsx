@@ -14,7 +14,7 @@ import RepeatButton from './buttons/RepeatButton';
 import ReviewRatingButton from './buttons/ReviewRatingButton';
 import { usePointerReleaseLock } from './hooks/use-pointer-release-lock';
 import { TEXTS } from '@/locales/cs';
-import type { GrammarChunkWithExamples } from '@/database/queries/grammar-queries';
+import type { GrammarChunkWithExamples } from '@/database/state/data-types';
 import type { NoteType } from '@/types/generic.types';
 import type { PronunciationSegment } from '@/features/pronunciation/pronunciation.utils';
 import type {

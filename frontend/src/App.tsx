@@ -1,4 +1,3 @@
-import { usePracticeAvailabilityStoreSync } from '@/features/practice/use-practice-availability-store-sync';
 import Footer from '@/components/Layout/Footer';
 import Header from '@/components/Layout/Header';
 import { usePeriodicSync } from '@/features/synchronization/use-periodic-sync';
@@ -13,13 +12,14 @@ import { useAudioLoader } from './features/audio/use-audio-loader';
 import { useResponsiveLayout } from './components/Layout/use-responsive-layout';
 import { useSideHeaderOrientation } from './components/Layout/use-side-header-orientation';
 import { useInAppRouteHistory } from '@/routing/in-app-route-history';
+import { useDataManagerLifecycle } from '@/database/state/use-data-manager-lifecycle';
 
 export default function App() {
   const userId = useAuthStore((state) => state.userId);
   const authLoading = useAuthStore((state) => state.loading);
 
+  useDataManagerLifecycle(userId);
   useInAppRouteHistory();
-  usePracticeAvailabilityStoreSync(userId);
   useAudioLoader(userId);
   useThemeLoader(userId, authLoading);
   usePeriodicSync(userId);

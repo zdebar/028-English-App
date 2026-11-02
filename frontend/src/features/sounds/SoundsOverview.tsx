@@ -2,15 +2,13 @@ import OverviewCard from '@/components/UI/OverviewCard';
 import StackedList from '@/components/UI/StackedList';
 import { ROUTES } from '@/config/routes.config';
 import { useAuthStore } from '@/features/auth/use-auth-store';
-import { useQueryErrorToast } from '@/features/logging/use-query-error-toast';
-import { getOverviewQuery, overviewQueryKey } from '@/features/overviews/overview-query-store';
-import { useLiveQueryData } from '@/hooks/use-live-query-data';
 import { TEXTS } from '@/locales/cs';
-import type { SoundOverviewGroup } from '@/database/queries/sound-queries';
 import type { SoundCategory } from '@/types/table.types';
-import { useCallback } from 'react';
 import { NavigationButton } from '@/routing/data-navigation';
 import { useRouteClose } from '@/routing/use-route-close';
+import { useDataManager } from '@/database/state/data-store';
+import { selectSoundOverview } from '@/database/state/data-selectors';
+import type { SoundOverviewGroup } from '@/database/state/data-types';
 
 type SoundCategoryPresentation = Readonly<{ key: SoundCategory; title: string }>;
 
@@ -26,22 +24,11 @@ const SOUND_CATEGORY_PRESENTATION: readonly SoundCategoryPresentation[] = [
 const SOUND_CATEGORY_HEADING_CLASS_NAME =
   'h-input border-disabled-light text-light dark:border-disabled-dark dark:text-dark flex w-full items-center justify-start border border-dashed px-4 text-left';
 
-export default function SoundsOverview({
-  initialSounds,
-}: Readonly<{ initialSounds?: SoundOverviewGroup[] }>) {
+export default function SoundsOverview() {
   const userId = useAuthStore((state) => state.userId);
+  const dataState = useDataManager((state) => state);
   const closeRoute = useRouteClose(ROUTES.overviews);
-  const fetchSounds = useCallback((): Promise<SoundOverviewGroup[]> => {
-    if (!userId) return Promise.resolve([]);
-    return getOverviewQuery(userId, 'sounds')();
-  }, [userId]);
-  const { data: sounds, error } = useLiveQueryData<SoundOverviewGroup[]>(fetchSounds, {
-    emptyData: [],
-    initialData: initialSounds,
-    sharedKey: userId ? overviewQueryKey(userId, 'sounds') : undefined,
-  });
-
-  useQueryErrorToast(error, 'Failed to fetch sound overview');
+  const sounds = userId ? selectSoundOverview(dataState, userId) : [];
 
   return (
     <OverviewCard

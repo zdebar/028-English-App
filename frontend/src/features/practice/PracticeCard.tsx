@@ -8,7 +8,7 @@ import { useToastStore } from '../toast/use-toast-store';
 import { useQueryErrorToast } from '@/features/logging/use-query-error-toast';
 import { useCallback, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import type { ReviewDeckData } from './review-deck-data';
+import type { ReviewDeckData } from '@/database/state/data-types';
 import { usePracticeExitBlocker } from './hooks/use-practice-exit-blocker';
 import { formatProgress } from '@/utils/progress.utils';
 import { ROUTES } from '@/config/routes.config';

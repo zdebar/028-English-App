@@ -10,17 +10,12 @@ vi.mock('@/features/auth/use-auth-store', () => ({
     selector({ userId: 'u1' }),
 }));
 
-vi.mock('@/features/logging/use-query-error-toast', () => ({
-  useQueryErrorToast: vi.fn(),
+vi.mock('@/database/state/data-store', () => ({
+  useDataManager: (selector: (state: any) => unknown) => selector({ userId: 'u1', status: 'ready' }),
 }));
 
-vi.mock('@/features/overviews/overview-query-store', () => ({
-  getOverviewQuery: () => () => Promise.resolve(mocks.sounds),
-  overviewQueryKey: () => 'sounds',
-}));
-
-vi.mock('@/hooks/use-live-query-data', () => ({
-  useLiveQueryData: () => ({ data: mocks.sounds, error: null }),
+vi.mock('@/database/state/data-selectors', () => ({
+  selectSoundOverview: () => mocks.sounds,
 }));
 
 vi.mock('@/routing/use-route-close', () => ({

@@ -54,8 +54,11 @@ vi.mock('react-router-dom', () => ({
   useLocation: () => ({ key: 'default' }),
 }));
 
-vi.mock('@/database/queries/grammar-queries', () => ({
-  getInitiatedGrammarTopics: vi.fn(),
+vi.mock('@/database/state/data-store', () => ({
+  useDataManager: (selector: (state: unknown) => unknown) => selector({ userId: mocks.userId, status: 'ready' }),
+}));
+vi.mock('@/database/state/data-selectors', () => ({
+  selectGrammarOverview: () => mocks.arrayState.data,
 }));
 
 vi.mock('@/database/models/user-items', () => ({
@@ -75,14 +78,6 @@ vi.mock('@/features/toast/use-toast-store', () => ({
 vi.mock('@/features/logging/logging-handler', () => ({
   reportInfo: (...args: unknown[]) => mocks.reportInfo(...args),
   reportError: (...args: unknown[]) => mocks.reportError(...args),
-}));
-
-vi.mock('@/hooks/use-live-query-data', () => ({
-  useLiveQueryData: () => ({
-    data: mocks.arrayState.data,
-    loading: false,
-    error: null,
-  }),
 }));
 
 vi.mock('dompurify', () => ({

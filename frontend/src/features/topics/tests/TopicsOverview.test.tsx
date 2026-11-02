@@ -3,7 +3,6 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const mocks = vi.hoisted(() => ({
   navigate: vi.fn(),
-  getInitiatedByUserId: vi.fn(),
   userId: 'u1' as string | null,
   state: {
     data: [] as Array<{ id: number; name: string }>,
@@ -25,25 +24,17 @@ vi.mock('@/routing/data-navigation', () => ({
   ),
 }));
 
-vi.mock('@/features/overviews/overview-query-store', () => ({
-  getOverviewQuery: (...args: unknown[]) => () => mocks.getInitiatedByUserId(...args),
-  overviewQueryKey: (...args: unknown[]) => JSON.stringify(args),
-}));
-
 vi.mock('@/features/auth/use-auth-store', () => ({
   useAuthStore: (selector: (state: { userId: string | null }) => unknown) =>
     selector({ userId: mocks.userId }),
 }));
 
-vi.mock('@/hooks/use-live-query-data', () => ({
-  useLiveQueryData: (fetcher: () => Promise<unknown[]>) => {
-    void fetcher();
-    return {
-      data: mocks.state.data,
-      error: mocks.state.error,
-      loading: mocks.state.loading,
-    };
-  },
+vi.mock('@/database/state/data-store', () => ({
+  useDataManager: (selector: (state: any) => unknown) => selector({ userId: mocks.userId, status: 'ready' }),
+}));
+
+vi.mock('@/database/state/data-selectors', () => ({
+  selectTopicOverview: () => mocks.state.data,
 }));
 
 vi.mock('@/locales/cs', () => ({
@@ -76,7 +67,6 @@ describe('TopicsOverview', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mocks.userId = 'u1';
-    mocks.getInitiatedByUserId.mockResolvedValue([]);
     mocks.state.data = [];
     mocks.state.error = null;
     mocks.state.loading = false;

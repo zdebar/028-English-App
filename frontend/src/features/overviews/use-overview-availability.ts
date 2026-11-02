@@ -1,11 +1,10 @@
+import { useDataManager } from '@/database/state/data-store';
 import {
-  getOverviewQuery,
-  overviewQueryKey,
-  type OverviewAvailabilityData,
-  type OverviewQueryName,
-} from './overview-query-store';
-import { observeSharedQuery } from '@/database/queries/shared-query-store';
-import { useEffect, useState } from 'react';
+  selectGrammarOverview,
+  selectSoundOverview,
+  selectTopicOverview,
+  selectVocabulary,
+} from '@/database/state/data-selectors';
 
 export type OverviewAvailability = Readonly<{
   hasData: boolean;
@@ -20,9 +19,6 @@ export type OverviewAvailabilityState = Readonly<{
   sounds: OverviewAvailability;
 }>;
 
-type DatabaseOverviewKey = keyof OverviewAvailabilityState;
-type OverviewAvailabilityQueryName = Extract<OverviewQueryName, `has-${string}`>;
-
 const EMPTY_AVAILABILITY: OverviewAvailability = {
   hasData: false,
   loading: false,
@@ -35,73 +31,42 @@ const LOADING_AVAILABILITY: OverviewAvailability = {
   error: null,
 };
 
-const INITIAL_DATABASE_STATE: OverviewAvailabilityState = {
+const INITIAL_AVAILABILITY: OverviewAvailabilityState = {
   grammar: EMPTY_AVAILABILITY,
   topics: EMPTY_AVAILABILITY,
   vocabulary: EMPTY_AVAILABILITY,
   sounds: EMPTY_AVAILABILITY,
 };
 
-const LOADING_DATABASE_STATE: OverviewAvailabilityState = {
-  grammar: LOADING_AVAILABILITY,
-  topics: LOADING_AVAILABILITY,
-  vocabulary: LOADING_AVAILABILITY,
-  sounds: LOADING_AVAILABILITY,
-};
-
-/** Observes whether each overview currently has at least one displayable item. */
-export function useOverviewAvailability(
-  userId: string | null,
-  initialData?: OverviewAvailabilityData,
-): OverviewAvailabilityState {
-  const [databaseState, setDatabaseState] = useState(() =>
-    initialData
-      ? {
-          grammar: { hasData: initialData.grammar, loading: false, error: null },
-          topics: { hasData: initialData.topics, loading: false, error: null },
-          vocabulary: { hasData: initialData.vocabulary, loading: false, error: null },
-          sounds: { hasData: initialData.sounds, loading: false, error: null },
-        }
-      : INITIAL_DATABASE_STATE,
-  );
-
-  useEffect(() => {
-    if (!userId) {
-      setDatabaseState(INITIAL_DATABASE_STATE);
-      return;
-    }
-
-    let isActive = true;
-    if (!initialData) setDatabaseState(LOADING_DATABASE_STATE);
-
-    const queries: ReadonlyArray<readonly [DatabaseOverviewKey, OverviewAvailabilityQueryName]> = [
-      ['grammar', 'has-grammar'],
-      ['topics', 'has-topics'],
-      ['vocabulary', 'has-vocabulary'],
-      ['sounds', 'has-sounds'],
-    ];
-
-    const subscriptions = queries.map(([key, queryName]) => {
-      const unsubscribe = observeSharedQuery(
-        overviewQueryKey(userId, queryName),
-        queryName,
-        getOverviewQuery(userId, queryName),
-        ({ data, loading, error }) => {
-          if (!isActive || loading) return;
-          setDatabaseState((current) => ({
-            ...current,
-            [key]: { hasData: data ?? false, loading: false, error },
-          }));
-        },
-      );
-      return unsubscribe;
-    });
-
-    return () => {
-      isActive = false;
-      subscriptions.forEach((unsubscribe) => unsubscribe());
+/** Selects every overview's availability from the central IndexedDB mirror. */
+export function useOverviewAvailability(userId: string | null): OverviewAvailabilityState {
+  const state = useDataManager((current) => current);
+  if (!userId) return INITIAL_AVAILABILITY;
+  if (state.userId !== userId || state.status === 'loading' || state.status === 'idle') {
+    return {
+      grammar: LOADING_AVAILABILITY,
+      topics: LOADING_AVAILABILITY,
+      vocabulary: LOADING_AVAILABILITY,
+      sounds: LOADING_AVAILABILITY,
     };
-  }, [initialData, userId]);
+  }
+  if (state.status === 'error') {
+    return {
+      grammar: { ...EMPTY_AVAILABILITY, error: state.error },
+      topics: { ...EMPTY_AVAILABILITY, error: state.error },
+      vocabulary: { ...EMPTY_AVAILABILITY, error: state.error },
+      sounds: { ...EMPTY_AVAILABILITY, error: state.error },
+    };
+  }
 
-  return databaseState;
+  return {
+    grammar: { hasData: selectGrammarOverview(state, userId).length > 0, loading: false, error: null },
+    topics: { hasData: selectTopicOverview(state, userId).length > 0, loading: false, error: null },
+    vocabulary: { hasData: selectVocabulary(state, userId).length > 0, loading: false, error: null },
+    sounds: {
+      hasData: selectSoundOverview(state, userId).some((sound) => sound.isActive),
+      loading: false,
+      error: null,
+    },
+  };
 }

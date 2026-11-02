@@ -7,6 +7,7 @@ import { reportInfo } from '@/features/logging/logging-handler';
 import { SupabaseError } from '@/types/error.types';
 import { TableName } from '@/types/table.types';
 import type { UserItemLocal } from '@/types/user-item.types';
+import type { AppDataSyncResult } from '@/database/state/data-types';
 
 type UserItemAPI = Omit<
   UserItemLocal,
@@ -48,7 +49,7 @@ type UserItemExport = Pick<
 const NULL_DATE = config.database.nullReplacementDate;
 
 /** Pushes local changes, merges the remote response, and saves its sync cursor. */
-export async function syncUserItemsFromRemote(userId: string): Promise<number> {
+export async function syncUserItemsFromRemote(userId: string): Promise<AppDataSyncResult> {
   const { lastSyncedAt, newSyncedAt } = await getSyncTimestamps(TableName.UserItems, userId);
   const localSnapshot = await getUserItems(userId);
   const localItems = localSnapshot
@@ -59,6 +60,8 @@ export async function syncUserItemsFromRemote(userId: string): Promise<number> {
   reportInfo(`Completed ${localItems.length} UserItems push to remote`);
   const { toUpsert, toDelete } = splitDeleted(updatedItems);
   let preservedConcurrentChanges = false;
+  let rowsToUpsert: UserItemLocal[] = [];
+  let deletedItemIds: number[] = [];
 
   await db.transaction('rw', db.user_items, db.metadata, async () => {
     const currentItems = await getUserItems(userId);
@@ -74,10 +77,11 @@ export async function syncUserItemsFromRemote(userId: string): Promise<number> {
       const keysToDelete = toDelete
         .filter((item) => !concurrentKeys.has(getUserItemKey(item)))
         .map((item) => [item.user_id, item.item_id] as [string, number]);
+      deletedItemIds = keysToDelete.map(([, itemId]) => itemId);
       if (keysToDelete.length > 0) await db.user_items.bulkDelete(keysToDelete);
     }
 
-    const rowsToUpsert = toUpsert.filter((item) => !concurrentKeys.has(getUserItemKey(item)));
+    rowsToUpsert = toUpsert.filter((item) => !concurrentKeys.has(getUserItemKey(item)));
     if (rowsToUpsert.length > 0) await db.user_items.bulkPut(rowsToUpsert);
     if (!preservedConcurrentChanges) {
       await SyncMetadata.markAsSynced(TableName.UserItems, newSyncedAt, userId);
@@ -87,7 +91,10 @@ export async function syncUserItemsFromRemote(userId: string): Promise<number> {
   if (preservedConcurrentChanges) {
     reportInfo('Preserved local UserItems changes made during synchronization.');
   }
-  return updatedItems.length;
+  return {
+    count: updatedItems.length,
+    changes: { user_items: { upserted: rowsToUpsert, deleted: deletedItemIds } },
+  };
 }
 
 function getUserItems(userId: string): Promise<UserItemLocal[]> {

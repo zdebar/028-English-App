@@ -16,6 +16,7 @@ const mocks = vi.hoisted(() => ({
     itemsLoading: false,
     topic: { id: 2, name: 'Topic 2' } as any,
     topicLoading: false,
+    topicError: null as Error | null,
   },
 }));
 
@@ -38,19 +39,16 @@ vi.mock('@/features/toast/use-toast-store', () => ({
   ),
 }));
 
-vi.mock('@/hooks/use-live-query-data', () => ({
-  useLiveQueryData: (_query: unknown, options: { emptyData: unknown }) =>
-    Array.isArray(options.emptyData)
-      ? {
-          data: mocks.state.items,
-          loading: mocks.state.itemsLoading,
-          error: null,
-        }
-      : {
-          data: mocks.state.topic,
-          loading: mocks.state.topicLoading,
-          error: null,
-        },
+vi.mock('@/database/state/data-store', () => ({
+  useDataManager: (selector: (state: any) => unknown) => selector({
+    userId: mocks.userId,
+    status: mocks.state.topicLoading ? 'loading' : 'ready',
+    error: mocks.state.topicError ?? null,
+  }),
+}));
+
+vi.mock('@/database/state/data-selectors', () => ({
+  selectTopicDetail: () => ({ topic: mocks.state.topic, items: mocks.state.items }),
 }));
 
 vi.mock('@/features/audio/use-audio-manager', () => ({
@@ -66,10 +64,6 @@ vi.mock('@/database/models/user-items', () => ({
     getInitiatedByTopicId: vi.fn(),
     resetItemsByTopicId: vi.fn(),
   },
-}));
-
-vi.mock('@/database/queries/topic-queries', () => ({
-  getTopicById: vi.fn(),
 }));
 
 vi.mock('@/features/logging/logging-handler', () => ({

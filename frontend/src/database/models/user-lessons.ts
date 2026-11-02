@@ -8,6 +8,8 @@ import { TableName } from '@/types/table.types';
 import { Entity } from 'dexie';
 import type AppDB from './app-db';
 import config from '@/config/config';
+import type { AppDataSyncResult } from '@/database/state/data-types';
+import { publishDataChanges } from '@/database/state/data-store';
 
 export default class UserLesson extends Entity<AppDB> implements UserLessonType {
   user_id!: string;
@@ -34,7 +36,17 @@ export default class UserLesson extends Entity<AppDB> implements UserLessonType 
     itemIds: number[],
     startedAt: string = new Date().toISOString(),
   ): Promise<boolean> {
-    return db.transaction('rw', db.user_lessons, db.user_items, async () => {
+    return this.startIfEligibleInternal(userId, lessonId, itemIds, startedAt);
+  }
+
+  /** Checks and persists a lesson start while publishing only after transaction commit. */
+  private static async startIfEligibleInternal(
+    userId: string,
+    lessonId: number,
+    itemIds: number[],
+    startedAt: string,
+  ): Promise<boolean> {
+    const result = await db.transaction('rw', db.user_lessons, db.user_items, async () => {
       const items = await db.user_items
         .where('[user_id+item_id]')
         .anyOf(itemIds.map((itemId) => [userId, itemId]))
@@ -50,15 +62,20 @@ export default class UserLesson extends Entity<AppDB> implements UserLessonType 
             !item.is_cz_to_en_enabled,
         )
       ) {
-        return false;
+        return { started: false, row: null };
       }
 
       const startedToday = await this.hasStartedToday(userId, lessonId, new Date(startedAt));
-      if (startedToday) return true;
+      if (startedToday) return { started: true, row: null };
 
+      const row = { user_id: userId, lesson_id: lessonId, started_at: startedAt };
       await this.recordStart(userId, lessonId, startedAt);
-      return true;
+      return { started: true, row };
     });
+    if (result.row) {
+      publishDataChanges(userId, { user_lessons: { upserted: [result.row] } });
+    }
+    return result.started;
   }
 
   /** Checks whether the user has a lesson start in the local calendar day of `now`. */
@@ -74,9 +91,9 @@ export default class UserLesson extends Entity<AppDB> implements UserLessonType 
 
   /**
    * Synchronizes lesson starts newer than the stored date checkpoint.
-   * @returns Number of remote lesson-start rows fetched.
+   * @returns Remote lesson-start count and committed local changes.
    */
-  static async syncFromRemote(userId: string): Promise<number> {
+  static async syncFromRemote(userId: string): Promise<AppDataSyncResult> {
     const { lastSyncedAt, newSyncedAt } = await getSyncTimestamps(TableName.UserLessons, userId);
     const [remoteResult, localSnapshot] = await Promise.all([
       supabaseInstance
@@ -122,12 +139,24 @@ export default class UserLesson extends Entity<AppDB> implements UserLessonType 
         await SyncMetadata.markAsSynced(TableName.UserLessons, newSyncedAt, userId);
       }
     });
-    return remoteRows.length;
+    return {
+      count: remoteRows.length,
+      changes: { user_lessons: { upserted: remoteRows } },
+    };
   }
 
   /** Removes all local lesson-start records for a user. */
   static async removeByUserId(userId: string): Promise<void> {
-    await db.user_lessons.where('user_id').equals(userId).delete();
+    const rows = await db.transaction('rw', db.user_lessons, async () => {
+      const existing = await db.user_lessons.where('user_id').equals(userId).toArray();
+      await db.user_lessons.bulkDelete(existing.map((row) => [row.user_id, row.lesson_id, row.started_at]));
+      return existing;
+    });
+    if (rows.length > 0) {
+      publishDataChanges(userId, {
+        user_lessons: { deleted: rows.map(getUserLessonKey) },
+      });
+    }
   }
 }
 

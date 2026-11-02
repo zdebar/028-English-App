@@ -1,37 +1,17 @@
 import { MenuButtonText } from '@/components/UI/MenuButtonText';
 import { ROUTES } from '@/config/routes.config';
 import { useAuthStore } from '@/features/auth/use-auth-store';
-import { useQueryErrorToast } from '@/features/logging/use-query-error-toast';
 import {
   type OverviewAvailability,
   useOverviewAvailability,
 } from '@/features/overviews/use-overview-availability';
 import { TEXTS } from '@/locales/cs';
 import type { JSX } from 'react';
-import { useLoaderData } from 'react-router-dom';
-import type { OverviewAvailabilityData } from '@/features/overviews/overview-query-store';
 import { NavigationButton } from '@/routing/data-navigation';
 
 export default function Overviews(): JSX.Element {
   const userId = useAuthStore((state) => state.userId);
-  const initialAvailability = useLoaderData() as OverviewAvailabilityData;
-  const availability = useOverviewAvailability(userId, initialAvailability);
-  useQueryErrorToast(
-    availability.grammar.error,
-    'Failed to observe grammar overview availability',
-  );
-  useQueryErrorToast(
-    availability.topics.error,
-    'Failed to observe topics overview availability',
-  );
-  useQueryErrorToast(
-    availability.vocabulary.error,
-    'Failed to observe vocabulary overview availability',
-  );
-  useQueryErrorToast(
-    availability.sounds.error,
-    'Failed to observe sounds overview availability',
-  );
+  const availability = useOverviewAvailability(userId);
   const grammarButton = getOverviewButtonState(
     availability.grammar,
     TEXTS.grammarOverviewTooltip,

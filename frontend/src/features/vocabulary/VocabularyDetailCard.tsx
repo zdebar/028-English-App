@@ -22,7 +22,6 @@ import { getEnabledReviewDirections } from '@/features/practice/review-direction
 import type { ReviewDirection } from '@/types/practice.types';
 import SecondaryControlButton from '@/components/UI/buttons/SecondaryControlButton';
 import PronunciationIcon from '@/components/UI/icons/PronunciationIcon';
-import Groups from '@/database/models/groups';
 import PronunciationSoundDetailCard from '@/features/practice/PronunciationSoundDetailCard';
 import {
   getSoundsFromPronunciationSegments,
@@ -31,8 +30,8 @@ import {
   type PronunciationSegment,
 } from '@/features/pronunciation/pronunciation.utils';
 import type { GroupType } from '@/types/table.types';
-import { useCallback, useState } from 'react';
-import { useLiveQueryData } from '@/hooks/use-live-query-data';
+import { useState } from 'react';
+import { useDataManager } from '@/database/state/data-store';
 
 const NOT_AVAILABLE = TEXTS.notAvailable;
 
@@ -70,11 +69,8 @@ export default function VocabularyDetailCard({
   const cardValues = getVocabularyCardValues(selectedWord);
   const baseProperties = getBaseProperties(selectedWord);
   const directionSections = getDirectionSections(selectedWord);
-  const fetchSounds = useCallback(() => Groups.getSounds(), []);
-  const { data: sounds } = useLiveQueryData(fetchSounds, {
-    emptyData: [],
-    sharedKey: JSON.stringify(['global', 'sounds-catalog']),
-  });
+  const groups = useDataManager((state) => state.groups);
+  const sounds = groups.filter((group) => group.type === 'sound' && !group.deleted_at);
   const [pronunciationIndex, setPronunciationIndex] = useState<number | null>(null);
   const pronunciationSegments = splitPronunciationIntoSegments(cardValues.pronunciation, sounds);
   const pronunciationSounds = getUniquePronunciationSounds(

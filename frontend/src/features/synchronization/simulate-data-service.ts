@@ -1,8 +1,7 @@
-import { refreshPracticeAvailability } from '@/features/practice/practice-availability-controller';
 import UserItem from '@/database/models/user-items';
 import { db } from '@/database/models/db';
 import { assertNonEmptyString } from '@/utils/assertions.utils';
-import { invalidatePracticeCache } from '@/features/practice/practice-prefetch';
+import { publishDataChanges } from '@/database/state/data-store';
 
 /**
  * Atomically creates the anonymous-user progress fixture.
@@ -17,7 +16,7 @@ export async function simulateUserProgress(
 ): Promise<number> {
   assertNonEmptyString(userId, 'userId');
 
-  const itemCount = await db.transaction(
+  const result = await db.transaction(
     'rw',
     db.user_items,
     db.user_lessons,
@@ -25,20 +24,21 @@ export async function simulateUserProgress(
     db.levels,
     async () => {
       const items = await UserItem.getSimulationCandidates(userId);
-      const itemCount = await UserItem.simulateData(items, dateTime);
+      const simulation = await UserItem.simulateData(items, dateTime);
       const startedLessonIds = [...new Set(items.map((item) => item.lesson_id))];
-      await db.user_lessons.bulkPut(
-        startedLessonIds.map((lessonId) => ({
+      const startedLessons = startedLessonIds.map((lessonId) => ({
           user_id: userId,
           lesson_id: lessonId,
           started_at: dateTime,
-        })),
-      );
-      return itemCount;
+        }));
+      await db.user_lessons.bulkPut(startedLessons);
+      return { ...simulation, startedLessons };
     },
   );
 
-  invalidatePracticeCache(userId);
-  void refreshPracticeAvailability(userId);
-  return itemCount;
+  publishDataChanges(userId, {
+    user_items: { upserted: result.items },
+    user_lessons: { upserted: result.startedLessons },
+  });
+  return result.count;
 }

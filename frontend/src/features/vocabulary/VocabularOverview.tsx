@@ -6,7 +6,6 @@ import { useCallback } from 'react';
 import VocabularyDetailCard from './VocabularyDetailCard';
 import VocabularyList from './VocabularyList';
 import { ROUTES } from '@/config/routes.config';
-import type { UserItemLocal } from '@/types/user-item.types';
 import { useRouteClose } from '@/routing/use-route-close';
 import { useQueryErrorToast } from '@/features/logging/use-query-error-toast';
 
@@ -15,9 +14,7 @@ import { useQueryErrorToast } from '@/features/logging/use-query-error-toast';
  *
  * @returns The vocabulary overview UI with list and detail card functionality.
  */
-export default function VocabularyOverview({
-  initialWords,
-}: Readonly<{ initialWords?: UserItemLocal[] }>) {
+export default function VocabularyOverview() {
   const userId = useAuthStore((state) => state.userId);
   const closeRoute = useRouteClose(ROUTES.overviews);
 
@@ -33,7 +30,7 @@ export default function VocabularyOverview({
     selectedWord,
     setSelectedWord,
     filteredWords,
-  } = useVocabulary(userId, initialWords);
+  } = useVocabulary(userId);
 
   useQueryErrorToast(error, 'Failed to fetch vocabulary overview');
 

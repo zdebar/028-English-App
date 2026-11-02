@@ -5,12 +5,13 @@ import type { UserItemLocal } from '@/types/user-item.types';
 
 const playAudioMock = vi.fn();
 const stopAudioMock = vi.fn();
-const audioStateMock = vi.hoisted(() => ({ loading: false, error: false }));
+const audioStateMock = vi.hoisted(() => ({ loading: false, error: false, isAudioReady: vi.fn(() => true) }));
 
 vi.mock('@/features/audio/use-audio-manager', () => ({
   useAudioManager: () => ({
     playAudio: playAudioMock,
     stopAudio: stopAudioMock,
+    isAudioReady: audioStateMock.isAudioReady,
     audioError: audioStateMock.error,
     loading: audioStateMock.loading,
     isPlaying: false,
@@ -38,6 +39,7 @@ describe('usePracticeCardState', () => {
     playAudioMock.mockResolvedValue(true);
     audioStateMock.loading = false;
     audioStateMock.error = false;
+    audioStateMock.isAudioReady.mockReturnValue(true);
   });
 
   it('reveals the English answer and plays Czech-to-English audio', () => {

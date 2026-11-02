@@ -1,5 +1,4 @@
 import { runProgressReset } from '@/features/practice/run-progress-reset';
-import { sharedQueryKey } from '@/database/queries/shared-query-store';
 import { ROUTES } from '@/config/routes.config';
 import UserItem from '@/database/models/user-items';
 import { useAuthStore } from '@/features/auth/use-auth-store';
@@ -7,70 +6,39 @@ import { useToastStore } from '@/features/toast/use-toast-store';
 import { useAudioManager } from '@/features/audio/use-audio-manager';
 import { getItemAudioSources } from '@/features/audio/audio.utils';
 import { TEXTS } from '@/locales/cs';
-import type { UserItemLocal } from '@/types/user-item.types';
 import { useCallback, useEffect, useMemo } from 'react';
-import { getTopicById } from '@/database/queries/topic-queries';
 import { useNavigate, useParams } from 'react-router-dom';
-import type { GroupType } from '@/types/table.types';
 import { DataState } from '@/components/UI/DataState';
 import AudioItemList from '@/components/UI/AudioItemList';
 import HelpButton from '../help/HelpButton';
 import OverviewCard from '@/components/UI/OverviewCard';
 import { AudioItemListControls } from '@/features/audio/AudioItemListControls';
-import { useLiveQueryData } from '@/hooks/use-live-query-data';
 import { useRouteClose } from '@/routing/use-route-close';
 import { useQueryErrorToast } from '@/features/logging/use-query-error-toast';
+import { useDataManager } from '@/database/state/data-store';
+import { selectTopicDetail } from '@/database/state/data-selectors';
 
-export default function TopicItemsOverview({
-  initialTopic,
-  initialItems,
-}: Readonly<{ initialTopic?: GroupType | null; initialItems?: UserItemLocal[] }>) {
+export default function TopicItemsOverview() {
   const navigate = useNavigate();
   const closeRoute = useRouteClose(ROUTES.topics);
   const userId = useAuthStore((state) => state.userId);
   const showToast = useToastStore((state) => state.showToast);
+  const dataState = useDataManager((state) => state);
   // -- Topic management --
   const { topicId: topicIdText } = useParams<{ topicId: string }>();
   const parsedTopicId = Number(topicIdText);
-  const topicId =
-    initialTopic?.id ??
-    (Number.isSafeInteger(parsedTopicId) && parsedTopicId > 0 ? parsedTopicId : null);
+  const topicId = Number.isSafeInteger(parsedTopicId) && parsedTopicId > 0 ? parsedTopicId : null;
 
   useEffect(() => {
     if (topicId) return;
     void navigate(ROUTES.topics);
   }, [navigate, topicId]);
 
-  const fetchTopic = useCallback((): Promise<GroupType | null> => {
-    if (!userId || !topicId) return Promise.resolve(null);
-    return getTopicById(userId, topicId);
-  }, [topicId, userId]);
-
-  const {
-    data: topic,
-    loading: topicLoading,
-    error: topicError,
-  } = useLiveQueryData<GroupType | null>(fetchTopic, {
-    emptyData: null,
-    initialData: initialTopic,
-    sharedKey: sharedQueryKey(userId, `topic:${topicId}`),
-  });
-
-  // -- Items management --
-  const fetchTopicItems = useCallback((): Promise<UserItemLocal[]> => {
-    if (!userId || !topicId) return Promise.resolve([]);
-    return UserItem.getInitiatedByTopicId(userId, topicId);
-  }, [topicId, userId]);
-
-  const {
-    data: items,
-    loading: itemsLoading,
-    error: itemsError,
-  } = useLiveQueryData<UserItemLocal[]>(fetchTopicItems, {
-    emptyData: [],
-    initialData: initialItems,
-    sharedKey: sharedQueryKey(userId, `topic-items:${topicId}`),
-  });
+  const topicData = userId && topicId ? selectTopicDetail(dataState, userId, topicId) : { topic: null, items: [] };
+  const topic = topicData.topic;
+  const items = topicData.items;
+  const topicLoading = isDataLoading(userId, dataState.userId, dataState.status);
+  const topicError = getDataError(userId, dataState.userId, dataState.status, dataState.error);
   const hasItems = items.length > 0;
 
   useEffect(() => {
@@ -78,8 +46,7 @@ export default function TopicItemsOverview({
     void navigate(ROUTES.topics, { replace: true });
   }, [navigate, topic, topicId, topicLoading, userId]);
 
-  useQueryErrorToast(topicError, 'Failed to fetch topic details');
-  useQueryErrorToast(itemsError, 'Failed to fetch topic items');
+  useQueryErrorToast(topicError, 'Failed to load topic data');
 
   const itemAudios = useMemo(() => getItemAudioSources(items), [items]);
 
@@ -106,7 +73,7 @@ export default function TopicItemsOverview({
       onClose={closeRoute}
       className="bottom-controls-clearance"
     >
-      <DataState loading={itemsLoading} hasData={hasItems} noDataMessage={TEXTS.noTopicItems}>
+      <DataState loading={topicLoading} hasData={hasItems} noDataMessage={TEXTS.noTopicItems}>
         <AudioItemList
           items={items}
           audioLoading={audioLoading}
@@ -123,4 +90,21 @@ export default function TopicItemsOverview({
       )}
     </OverviewCard>
   );
+}
+
+function isDataLoading(
+  userId: string | null,
+  dataUserId: string | null,
+  status: 'idle' | 'loading' | 'ready' | 'error',
+): boolean {
+  return Boolean(userId) && (dataUserId !== userId || status === 'idle' || status === 'loading');
+}
+
+function getDataError(
+  userId: string | null,
+  dataUserId: string | null,
+  status: 'idle' | 'loading' | 'ready' | 'error',
+  error: Error | null,
+): Error | null {
+  return dataUserId === userId && status === 'error' ? error : null;
 }
