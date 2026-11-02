@@ -19,7 +19,6 @@ DECLARE
   v_mastered_at_cz_to_en TIMESTAMPTZ;
   v_mastered_at_en_to_cz TIMESTAMPTZ;
   v_row_count INT := 0;
-  v_main_error_count INT := 0;
   -- constants to avoid duplicated literals
   v_empty_json CONSTANT JSONB := '[]'::JSONB;
   v_item_id_re CONSTANT TEXT := '^[0-9]+$';
@@ -32,7 +31,7 @@ DECLARE
   v_key_next_at_cz_to_en CONSTANT TEXT := 'next_at_cz_to_en';
   v_key_mastered_at_cz_to_en CONSTANT TEXT := 'mastered_at_cz_to_en';
   v_total_count INT := 0;
-  v_matched_count INT := 0;
+  v_upserted_count INT := 0;
   v_skipped_count INT := 0;
 BEGIN
   IF p_user_items IS NULL OR p_user_items = v_empty_json THEN
@@ -41,92 +40,83 @@ BEGIN
 
   v_auth_user_id := public.require_auth_user_id();
 
+  -- Propagate unexpected row errors so the client does not advance its sync cursor past them.
   FOR v_entry IN SELECT * FROM jsonb_array_elements(p_user_items) LOOP
     v_total_count := v_total_count + 1;
-    BEGIN
-      v_user_id := (v_entry->>v_key_user_id)::UUID;
-      PERFORM public.assert_payload_user_id_matches_auth(v_user_id, v_auth_user_id);
+    v_user_id := (v_entry->>v_key_user_id)::UUID;
+    PERFORM public.assert_payload_user_id_matches_auth(v_user_id, v_auth_user_id);
 
-      IF NOT (v_entry->>v_key_item_id) ~ v_item_id_re THEN
-        v_skipped_count := v_skipped_count + 1;
-        CONTINUE;
-      END IF;
+    IF NOT (v_entry->>v_key_item_id) ~ v_item_id_re THEN
+      v_skipped_count := v_skipped_count + 1;
+      CONTINUE;
+    END IF;
 
-      v_item_id := (v_entry->>v_key_item_id)::INT;
+    v_item_id := (v_entry->>v_key_item_id)::INT;
 
-      PERFORM 1
-      FROM public.items i
-      WHERE i.id = v_item_id;
+    PERFORM 1
+    FROM public.items i
+    WHERE i.id = v_item_id;
 
-      -- Skip entries for items that no longer exist (avoid FK errors).
-      IF NOT FOUND THEN
-        v_skipped_count := v_skipped_count + 1;
-        CONTINUE;
-      END IF;
+    -- Skip entries for items that no longer exist (avoid FK errors).
+    IF NOT FOUND THEN
+      v_skipped_count := v_skipped_count + 1;
+      CONTINUE;
+    END IF;
 
-      v_progress_cz_to_en := GREATEST((v_entry->>v_key_progress_cz_to_en)::INT, 0);
-      v_progress_en_to_cz := GREATEST((v_entry->>'progress_en_to_cz')::INT, 0);
-      v_started_at := NULLIF(v_entry->>v_key_started_at, v_null_text)::TIMESTAMPTZ;
-      v_updated_at := (v_entry->>v_key_updated_at)::TIMESTAMPTZ;
-      v_next_at_cz_to_en := NULLIF(v_entry->>v_key_next_at_cz_to_en, v_null_text)::TIMESTAMPTZ;
-      v_next_at_en_to_cz := NULLIF(v_entry->>'next_at_en_to_cz', v_null_text)::TIMESTAMPTZ;
-      v_mastered_at_cz_to_en := NULLIF(v_entry->>v_key_mastered_at_cz_to_en, v_null_text)::TIMESTAMPTZ;
-      v_mastered_at_en_to_cz := NULLIF(v_entry->>'mastered_at_en_to_cz', v_null_text)::TIMESTAMPTZ;
+    v_progress_cz_to_en := GREATEST((v_entry->>v_key_progress_cz_to_en)::INT, 0);
+    v_progress_en_to_cz := GREATEST((v_entry->>'progress_en_to_cz')::INT, 0);
+    v_started_at := NULLIF(v_entry->>v_key_started_at, v_null_text)::TIMESTAMPTZ;
+    v_updated_at := (v_entry->>v_key_updated_at)::TIMESTAMPTZ;
+    v_next_at_cz_to_en := NULLIF(v_entry->>v_key_next_at_cz_to_en, v_null_text)::TIMESTAMPTZ;
+    v_next_at_en_to_cz := NULLIF(v_entry->>'next_at_en_to_cz', v_null_text)::TIMESTAMPTZ;
+    v_mastered_at_cz_to_en := NULLIF(v_entry->>v_key_mastered_at_cz_to_en, v_null_text)::TIMESTAMPTZ;
+    v_mastered_at_en_to_cz := NULLIF(v_entry->>'mastered_at_en_to_cz', v_null_text)::TIMESTAMPTZ;
 
-      INSERT INTO public.user_items (
-        user_id,
-        item_id,
-        progress_cz_to_en,
-        progress_en_to_cz,
-        started_at,
-        updated_at,
-        next_at_cz_to_en,
-        next_at_en_to_cz,
-        mastered_at_cz_to_en,
-        mastered_at_en_to_cz
-      )
-      VALUES (
-        v_user_id,
-        v_item_id,
-        v_progress_cz_to_en,
-        v_progress_en_to_cz,
-        v_started_at,
-        v_updated_at,
-        v_next_at_cz_to_en,
-        v_next_at_en_to_cz,
-        v_mastered_at_cz_to_en,
-        v_mastered_at_en_to_cz
-      )
-      ON CONFLICT (user_id, item_id)
-      DO UPDATE SET
-        progress_cz_to_en = EXCLUDED.progress_cz_to_en,
-        progress_en_to_cz = EXCLUDED.progress_en_to_cz,
-        started_at = EXCLUDED.started_at,
-        updated_at = EXCLUDED.updated_at,
-        next_at_cz_to_en = EXCLUDED.next_at_cz_to_en,
-        next_at_en_to_cz = EXCLUDED.next_at_en_to_cz,
-        mastered_at_cz_to_en = EXCLUDED.mastered_at_cz_to_en,
-        mastered_at_en_to_cz = EXCLUDED.mastered_at_en_to_cz
-      WHERE COALESCE(EXCLUDED.updated_at, public.rpc_min_timestamptz())
-        > COALESCE(public.user_items.updated_at, public.rpc_min_timestamptz());
+    INSERT INTO public.user_items (
+      user_id,
+      item_id,
+      progress_cz_to_en,
+      progress_en_to_cz,
+      started_at,
+      updated_at,
+      next_at_cz_to_en,
+      next_at_en_to_cz,
+      mastered_at_cz_to_en,
+      mastered_at_en_to_cz
+    )
+    VALUES (
+      v_user_id,
+      v_item_id,
+      v_progress_cz_to_en,
+      v_progress_en_to_cz,
+      v_started_at,
+      v_updated_at,
+      v_next_at_cz_to_en,
+      v_next_at_en_to_cz,
+      v_mastered_at_cz_to_en,
+      v_mastered_at_en_to_cz
+    )
+    ON CONFLICT (user_id, item_id)
+    DO UPDATE SET
+      progress_cz_to_en = EXCLUDED.progress_cz_to_en,
+      progress_en_to_cz = EXCLUDED.progress_en_to_cz,
+      started_at = EXCLUDED.started_at,
+      updated_at = EXCLUDED.updated_at,
+      next_at_cz_to_en = EXCLUDED.next_at_cz_to_en,
+      next_at_en_to_cz = EXCLUDED.next_at_en_to_cz,
+      mastered_at_cz_to_en = EXCLUDED.mastered_at_cz_to_en,
+      mastered_at_en_to_cz = EXCLUDED.mastered_at_en_to_cz
+    WHERE COALESCE(EXCLUDED.updated_at, public.rpc_min_timestamptz())
+      > COALESCE(public.user_items.updated_at, public.rpc_min_timestamptz());
 
-      GET DIAGNOSTICS v_row_count = ROW_COUNT;
-      v_matched_count := v_matched_count + COALESCE(v_row_count, 0);
-    EXCEPTION
-      WHEN insufficient_privilege THEN
-        RAISE;
-      WHEN others THEN
-        v_skipped_count := v_skipped_count + 1;
-        v_main_error_count := v_main_error_count + 1;
-        CONTINUE;
-    END;
+    GET DIAGNOSTICS v_row_count = ROW_COUNT;
+    v_upserted_count := v_upserted_count + COALESCE(v_row_count, 0);
   END LOOP;
 
-  RAISE LOG 'user_items: incoming=% upserted=% skipped=% errors=%',
+  RAISE LOG 'user_items: incoming=% upserted=% skipped=%',
     v_total_count,
-    v_matched_count,
-    v_skipped_count,
-    v_main_error_count;
+    v_upserted_count,
+    v_skipped_count;
 
 END;
 $$;

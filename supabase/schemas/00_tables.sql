@@ -173,6 +173,7 @@ CREATE INDEX IF NOT EXISTS idx_lessons_level_id ON public.lessons (level_id);
 CREATE INDEX IF NOT EXISTS idx_items_note_id ON public.items (note_id);
 CREATE INDEX IF NOT EXISTS idx_groups_type_sort_order ON public.groups (type, sort_order);
 CREATE INDEX IF NOT EXISTS idx_group_items_item_id ON public.group_items (item_id);
+CREATE INDEX IF NOT EXISTS idx_group_items_updated_at ON public.group_items (updated_at);
 CREATE INDEX IF NOT EXISTS idx_group_items_group_sort_order ON public.group_items (group_id, sort_order);
 CREATE INDEX IF NOT EXISTS idx_group_relations_child_id ON public.group_relations (child_group_id);
 
