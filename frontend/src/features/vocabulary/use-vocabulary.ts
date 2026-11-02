@@ -16,8 +16,8 @@ const DISPLAY_FIELD_KEY = 'vocabulary_display_field';
  * @returns An object containing vocabulary state and actions.
  */
 export function useVocabulary(userId: string | null, initialWords?: UserItemLocal[]) {
-  const fetchVocabulary = useCallback(async () => {
-    if (!userId) return [];
+  const fetchVocabulary = useCallback((): Promise<UserItemLocal[]> => {
+    if (!userId) return Promise.resolve([]);
     return getOverviewQuery(userId, 'vocabulary')();
   }, [userId]);
 

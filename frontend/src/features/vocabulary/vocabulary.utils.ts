@@ -80,29 +80,6 @@ const CZECH_SORT_INDEX = new Map<string, number>(
   CZECH_SORT_ORDER.map((letter, index) => [letter, index]),
 );
 
-function tokenizeCzech(value: string): string[] {
-  const normalizedValue = value.toLowerCase();
-  const tokens: string[] = [];
-
-  for (let i = 0; i < normalizedValue.length; i++) {
-    const current = normalizedValue[i];
-    const next = normalizedValue[i + 1];
-    if (current === 'c' && next === 'h') {
-      tokens.push('ch');
-      i++;
-      continue;
-    }
-
-    tokens.push(current);
-  }
-
-  return tokens;
-}
-
-function getCzechTokenWeight(token: string): number {
-  return CZECH_SORT_INDEX.get(token) ?? Number.MAX_SAFE_INTEGER;
-}
-
 export function compareCzechStrings(leftValue: string, rightValue: string): number {
   const leftTokens = tokenizeCzech(leftValue);
   const rightTokens = tokenizeCzech(rightValue);
@@ -160,4 +137,27 @@ export function filterSortedWords(
   }
 
   return result;
+}
+
+function tokenizeCzech(value: string): string[] {
+  const normalizedValue = value.toLowerCase();
+  const tokens: string[] = [];
+
+  for (let i = 0; i < normalizedValue.length; i++) {
+    const current = normalizedValue[i];
+    const next = normalizedValue[i + 1];
+    if (current === 'c' && next === 'h') {
+      tokens.push('ch');
+      i++;
+      continue;
+    }
+
+    tokens.push(current);
+  }
+
+  return tokens;
+}
+
+function getCzechTokenWeight(token: string): number {
+  return CZECH_SORT_INDEX.get(token) ?? Number.MAX_SAFE_INTEGER;
 }

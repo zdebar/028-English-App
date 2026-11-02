@@ -1,19 +1,13 @@
 import config from '@/config/config';
 import { ARIA_TEXTS, TEXTS } from '@/locales/cs';
-import DirectionTogggle from '@/features/vocabulary/DirectionToggle';
-import { type DisplayField } from '@/features/vocabulary/vocabulary.utils';
-import { type UserItemLocal } from '@/types/user-item.types';
+import DirectionToggle from '@/features/vocabulary/DirectionToggle';
+import type { DisplayField } from '@/features/vocabulary/vocabulary.utils';
+import type { UserItemLocal } from '@/types/user-item.types';
 import CancelIcon from '@/components/UI/icons/CancelIcon';
 import { CardHeader } from '@/components/UI/CardHeader';
 import BilingualItemButton from '@/components/UI/buttons/BilingualItemButton';
 import { DataState } from '@/components/UI/DataState';
 import Card from '@/components/UI/Card';
-
-
-const DIRECTION_OPTIONS: { value: DisplayField; label: string }[] = [
-  { value: 'czech', label: TEXTS.vocabularyCzechOption },
-  { value: 'english', label: TEXTS.vocabularyEnglishOption },
-];
 
 type VocabularyListProps = Readonly<{
   filteredWords: UserItemLocal[];
@@ -39,12 +33,9 @@ type VocabularyListProps = Readonly<{
  * @param setDisplayField - Function to change the displayed field.
  * @param setVisibleCount - Function to update the number of visible items.
  * @param onSelect - Callback when a word is selected.
- * @param error - Error message to display.
  * @param onClose - Callback to close the list view.
  * @returns The vocabulary list UI.
  */
-
-
 export default function VocabularyList({
   filteredWords,
   loading,
@@ -64,14 +55,16 @@ export default function VocabularyList({
   return (
     <Card>
       <CardHeader onClose={onClose}>
-        <DirectionTogggle
+        <DirectionToggle
           value={displayField}
-          options={DIRECTION_OPTIONS}
           onChange={setDisplayField}
           className="h-button flex grow items-center border border-dashed"
         />
       </CardHeader>
       <div className="relative w-full py-1">
+        <label htmlFor="vocabulary-search" className="sr-only">
+          {TEXTS.enterPrompt}
+        </label>
         <input
           id="vocabulary-search"
           name="vocabulary-search"
@@ -89,7 +82,6 @@ export default function VocabularyList({
             className="hover:dark:bg-button-dark hover:bg-button-light absolute top-1/2 right-1 flex size-8 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full bg-transparent"
             aria-label={ARIA_TEXTS.clearSearch}
             onClick={() => setSearchTerm('')}
-            tabIndex={0}
           >
             <CancelIcon size={16} />
           </button>
