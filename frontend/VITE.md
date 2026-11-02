@@ -1,82 +1,21 @@
-# React + TypeScript + Vite
+# Vite configuration
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+The frontend uses the Vite configuration in **vite.config.ts**. This file describes project-specific settings; for install and run commands, see the repository [README](../README.md).
 
-Currently, two official plugins are available:
+## Plugins and compiler
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- **@vitejs/plugin-react** provides React integration and Fast Refresh.
+- **babel-plugin-react-compiler** is enabled through the React plugin.
+- **@tailwindcss/vite** processes Tailwind CSS 4.
 
-## React Compiler
+The React Compiler is enabled; the default Vite template instructions about enabling it do not apply here.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Aliases and base path
 
-## Expanding the ESLint configuration
+The **@** import alias points to **frontend/src**. Set **VITE_BASE_PATH** to change Vite's public base path; it defaults to **/**. The base path is also used to scope PWA service-worker registration and caches.
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+## Build behavior
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+The build defines separate vendor chunks for React/router, Supabase, and Dexie. HTML module-preload hints are disabled to avoid conflicts with service-worker cached module responses in Chrome.
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
-
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
-
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
-
-## Logging
-
-Application logging helpers live in `src/features/logging/logging-handler.ts`:
-
-- `reportError(message, error, context?)` writes normalized errors to the browser console.
-- `reportInfo(message, context?)` writes in development, or in other builds when `VITE_VERBOSE_INFO_LOGS=true`.
-
-Informational log contexts omit the `userId` field. Avoid placing user IDs in log messages.
+The project build wrapper runs the TypeScript build, Vite production build, then service-worker generation. Vitest is configured here with the jsdom environment and globals.

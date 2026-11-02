@@ -1,121 +1,49 @@
-# Průvodce tvorbou dat
+# Průvodce datovým modelem a přípravou obsahu
 
-Tento dokument popisuje strukturu jazykových dat a postup jejich importu do databáze.
+Tento dokument popisuje aktuální databázový model. Datové tabulky jsou definované v **supabase/schemas/00_tables.sql**; lokální IndexedDB schéma je v **frontend/src/database/models/app-db.ts**.
 
-## Zásady
+## Základní principy
 
-Odstranění záznamu sdíleného katalogu se označuje aktuálním časem ve sloupci `deleted_at`. Při synchronizaci se takový záznam odstraní také z IndexedDB frontendu. Tento postup se nevztahuje na uživatelské účty: účet a navázaná uživatelská data se odstraňují okamžitým hard-delete.
+- Lekce a jejich položky tvoří výukový plán: **levels → lessons → items**.
+- Témata, gramatika, zvukové skupiny a výslovnostní kontrasty používají společný model **groups**, **group_items** a **group_relations**.
+- Synchronizace je průběžná podle časových značek jednotlivých tabulek. Plný sync režim se nepoužívá.
+- **deleted_at** je tombstone pro sdílený obsah. Uživatelské záznamy se nemažou soft-delete způsobem; při odstranění účtu se smažou.
+- Příprava CSV a audia v **scripts/** sama obsah do Supabase neimportuje.
 
-## Přehled tabulek
+## Tabulky sdíleného obsahu
 
-Jednotlivé tabulky jsou řazeny dle pořadí importu:
+| Tabulka | Účel |
+| --- | --- |
+| levels | Seřazené úrovně kurzu. |
+| lessons | Lekce přiřazené k úrovni; volitelné group_id propojuje lekci s gramatickým kontextem. |
+| items | Česko-anglické položky lekcí, jejich pořadí, výslovnost, audio a volitelná poznámka. |
+| notes | HTML poznámky přiřazované přes items.note_id. |
+| groups | Skupiny typu topic, grammar, sound nebo pronunciation. |
+| group_items | Seřazené příklady propojené se skupinou. |
+| group_relations | Hierarchie, gramatický detail nebo kontrast výslovnosti. |
 
-`lessons` - každá lekce vysvětluje pouze jeden drobný gramatický jev
-`grammar_groups` - větší skupiny gramatiky, sdružují grammar_chunks, v Přehledu gramatiky se zobrazují celé grammar_groups
-`grammar_chunks` - malé sousto gramatiky,
-`blocks` - výjimečné explicitní skupiny pro úvodní trénink
-`topics` - pojmenované skupiny pro přehled témat; položky na ně odkazují přes `items.topic_id`
-`notes` - doplňující poznámky k položkám; např. vysvětlení použití daného slovíčka v angličtině
-`items` - jednotlivé položky učení; slovíčka, věty
-`grammar_chunks_examples` - typické položky pro dané grammar_chunks, např. všechny osoby slovesa be
-`pronunciation_groups` - sdružuje položky s podobnou výslovnosti, např. bad, bed
-`pronunciation_groups_items` - spojovací tabulka
+Platné vztahy jsou omezené databázovou validací: grammar → grammar používá hierarchy/detail, topic → topic používá hierarchy a pronunciation → sound používá contrast. Zvukové skupiny mají sound_class a sound_category.
 
-Tabulky, které nevyžadují jazyková data:
+## Uživatelská data
 
-`levels` - CEFR kategorie, A1 až C2
-`user` - seznam uživatelů
-`user_items` - spojovací tabulka, zaznamenává pokrok procvičování položek
-`user_items_history` - zaznamenává historii procvičování položek, jen u user s explicitně povolenou funkcí
-`user_scores` - zaznamenává počet procvičování v jednotlivé dny, čistě počet opakováí
+| Tabulka | Účel |
+| --- | --- |
+| users | Lokální záznam účtu navázaný na Supabase Auth. |
+| user_items | Postup a plán opakování uživatele pro položky. |
+| user_lessons | Historie zahájení lekcí podle času. |
 
+Postup v user_items je oddělený pro směr čeština → angličtina a angličtina → čeština. Reset postupu aktualizuje uživatelský záznam; odstranění účtu maže jeho uživatelská data.
 
-## Tabulky
+## IndexedDB
 
-### `lessons`
+Frontend používá místní tabulky levels, lessons, notes, groups, group_items, group_relations, user_items, user_lessons, audio_records, audio_metadata a metadata.
 
-- `name` - unikátní název lekce
-- `note` - nepovinná poznámka
-- `sort_order` - unikátní vrámci levels, vyžadovaný
+Není zde samostatná tabulka items: model UserItem obsahuje potřebná data položky spolu s uživatelským postupem. Tabulka metadata uchovává sync kurzory. Audio Bloby a metadata audio archivů zůstávají mimo centrální správu aplikačních dat.
 
-### `grammar_groups`
+## Příprava CSV
 
-- `name` a `sort_order` - povinné a globálně unikátní
-- `note` - nepovinné, úvod k celé skupině
+Příkazy pro přípravu položek a zvuku jsou popsané v [scripts/README.md](scripts/README.md). Skripty pracují s mezisoubory v **scripts/data/prepare/**, zpracují CSV a připraví audio. Neprovádějí import do databáze.
 
-### `grammar_chunks`
+Při úpravě obsahu zachovej aktuální pole položky, jejich vazbu na lekci a pořadí. Zařazení do témat, gramatických skupin, zvuků a výslovnostních skupin patří do skupinového modelu; nepoužívej historické sloupce block_id, topic_id ani grammar_chunk_id.
 
-- `name` je povinný a unikátní v rámci `grammar_group_id`
-- `sort_order` je povinný, začíná od 1 a je unikátní v rámci `grammar_group_id`
-- `note` - nepovinné, obsahuje vysvětlení
-- `grammar_group_id` - povinné, připojuje chunk ke skupině zobrazované v Přehledu gramatiky
-- Přehled gramatiky zobrazí skupinu po zahájení alespoň jednoho jejího chunku a uvnitř skupiny ukáže pouze zahájené chunky.
-
-### `blocks`
-
-- `name` - povinný, globálně unikátní.
-- `lesson_id` - povinné i u prázdného bloku. Položky bloku musí patřit do stejné lekce.
-- `grammar_chunk_id`  - připojuje gramatiku vysvětlovanou v úvodním tréninku bloku. Samotný obsah tabulky gramatických příkladů tím definován není. not null pro gramatické bloky
-- Blok se používá pouze pro explicitní úvodní skupinu. Jeho položky musí tvořit souvislý úsek v pořadí lekce.
-- Prázdný blok je platný, ale aplikace jej ignoruje.
-
-### `topics`
-
-- `name` a `sort_order` jsou povinné a globálně unikátní.
-- Topic je nezávislý na výukových blocích. Jedno téma proto může obsahovat položky z více bloků.
-- Téma se zobrazí až po zahájení alespoň jedné položky s odpovídajícím `items.topic_id`; detail ukazuje pouze zahájené položky.
-
-### `notes`
-
-Znovupoužitelný doplňující obsah odkazovaný z `items.note_id`.
-
-- `name` - povinný a globálně unikátní
-- `note` - povinný, obsahuje poznámk
-- `sort_order` - nepovinný; neprázdná hodnota začíná od 1 a je globálně unikátní.
-- Jednu poznámku lze připojit k více položkám. Nevytvářejte duplicitní poznámky jen kvůli jinému itemu.
-
-### `items`
-
-Jednotlivé dvojice čeština–angličtina. Jedna položka je zdrojem pro procvičování, témata, gramatické příklady i výslovnostní skupiny.
-
-- `czech`, `english`, `lesson_id`, `is_vocabulary` a `sort_order` jsou povinné.
-- `sort_order` - celé číslo od 1, unikátní v rámci `lesson_id`. Pořadí v procvičování vzniká z pořadí levelu, lekce a položky.
-- `pronunciation` - nepovinné, výslovnost anglického textu
-- `audio` - obsahuje přesný název odpovídajícího `.opus` souboru. Soubor musí být součástí audio distribuce; při změně nahrávky je vhodné změnit i název kvůli cache klientů. Běžně název souboru má obsahovat datetimestamp např. goodbye_20260802T132147Z.opus
-- `block_id` - nepovinný; používá se pouze pro explicitní úvodní blok
-- `topic_id` - nepovinný; jedna položka může patřit nejvýše do jednoho tématu, nezávisle na svém výukovém bloku
-- `grammar_chunk_id` - nepovinný, pouze pro zobrazení kontextové grammatiky, neurčuje zobrazení položky v grammatickém přehledu
-- `note_id` - nepovinný, připojuje doplňující poznámku k položce
-- `is_vocabulary = true` - rozlišuje slovíčka od gramatických vět, slovíčka se objeví v přehledu slovíček
-
-- Zdrojová CSV lze připravovat přes `scripts/prepare_words.py` ; podrobný postup je v `scripts/README.md`.
-
-### `grammar_chunk_examples`
-
-Explicitní, seřazený výběr položek zobrazovaných pod gramatickým chunkem.
-
-- Primární klíč je `(grammar_chunk_id, item_id)`: stejnou položku lze v jednom chunku uvést jen jednou, ale může být příkladem více chunků.
-- `sort_order` začíná od 1 a je unikátní v rámci `grammar_chunk_id`.
-- Zařazujte pouze základní příklady, které dohromady dávají dostatečný kontext pravidla. Není nutné ani žádoucí automaticky zahrnout všechny položky s odpovídajícím `items.grammar_chunk_id`.
-- Příklad musí mít správné `czech`, `english`, `pronunciation` a `audio`, protože řádek je v přehledu přehratelný.
-- Příklady se v gramatickém přehledu i na kartě nápovědy zobrazují všechny; nejde o uživatelský stav ani o seznam odvozený z `started_at`.
-
-### `pronunciation_groups`
-
-Pojmenovaná skupina pro porovnání nebo procvičení výslovnosti.
-
-- `name` a `sort_order` jsou povinné a globálně unikátní; pořadí začíná od 1.
-- `note` vysvětluje společný zvuk nebo kontrast skupiny.
-- Skupina má být pedagogicky soudržná. Počet členů není uložen zde, ale vzniká přes vazební tabulku.
-
-### `pronunciation_group_items`
-
-Explicitní uspořádání položek ve výslovnostní skupině.
-
-- Primární klíč je `(pronunciation_group_id, item_id)`.
-- `contrast_set` je číslo kontrastní podskupiny v rámci jedné skupiny. Stejné číslo přiřaďte položkám, které musí být započaté společně, například `mat`–`met`.
-- `contrast_set = NULL` znamená dosud nezařazenou katalogovou položku. Taková položka skupinu neodemkne a v přehledu ani detailu se nezobrazí.
-- Skupina se odemkne po kompletním započetí alespoň jedné podskupiny; aplikace následně zobrazuje pouze položky z kompletních podskupin.
-- `sort_order` začíná od 1 a je unikátní v rámci skupiny.
-- Zařazujte položky s anglickou výslovností a funkčním audiem; bez audia nelze řádek smysluplně přehrát.
-- Pořadí volte tak, aby vedle sebe byly nejlépe porovnatelné kontrasty, ne automaticky podle ID položek.
+Seed SQL pro lokální reset je v **supabase/seeds/** a jeho pořadí určuje **supabase/config.toml**. Staré názvy tabulek mohou zůstat v historických migracích, Dexie upgradu nebo jednorázovém legacy importu; nepatří do nových datových změn.

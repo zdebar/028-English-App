@@ -19,6 +19,7 @@ import { useRouteClose } from '@/routing/use-route-close';
 import type { UserItemLocal } from '@/types/user-item.types';
 import { useDataPackage } from '@/database/state/data-store';
 
+// -- Pronunciation detail route --
 export default function PronunciationGroupDetail() {
   const userId = useAuthStore((state) => state.userId);
   const showToast = useToastStore((state) => state.showToast);
@@ -59,6 +60,7 @@ export default function PronunciationGroupDetail() {
   );
 }
 
+// -- Route and group presentation helpers --
 function parseGroupId(value: string | undefined): number | null {
   const groupId = Number(value);
   if (!Number.isSafeInteger(groupId) || groupId <= 0) return null;
@@ -89,6 +91,7 @@ function RelatedPronunciationSounds({
   );
 }
 
+// -- Random-word practice controls --
 type RandomWordPhase = 'initial' | 'reveal' | 'revealed';
 const RANDOM_WORD_REVEAL_TIMEOUT_MS = 5000;
 const EMPTY_SELECTED_ITEM_IDS: number[] = [];

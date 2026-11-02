@@ -15,8 +15,8 @@ The standard is simple:
 Apply this guide to:
 
 - `frontend/src/**`
-- `backend/functions/**`
-- `backend/shared/**`
+- `supabase/schemas/**`
+- `supabase/migrations/**`
 - `scripts/**`
 
 Do not perform style-only rewrites in generated files, imported data, archived assets, or historical SQL/data files unless the task explicitly calls for cleanup.
@@ -46,7 +46,7 @@ Good signs:
 
 Bad signs:
 
-- one function validates input, fetches data, transforms it, updates UI state, logs analytics, and handles navigation
+- one function validates input, fetches data, transforms it, updates UI state, writes operational logs, and handles navigation
 - one component owns rendering, data loading, retry logic, persistence, and domain rules
 
 ### 3. Prefer explicitness over magic
@@ -141,9 +141,9 @@ The frontend is a strict TypeScript React application with a local-first archite
 - hooks coordinate reusable interaction logic
 - stores manage shared client state
 - database models and sync utilities own persistence behavior
-- monitoring helpers own application logging
+- logging helpers own application logging
 
-Do not move database writes, sync orchestration, or monitoring policy into presentational components.
+Do not move database writes, sync orchestration, or logging policy into presentational components.
 
 ### Components
 
@@ -191,6 +191,8 @@ The Dexie model layer is part of the architecture, not an implementation detail.
 
 Treat null-replacement values and sync timestamps as part of the persistence contract. Do not casually change their meaning.
 
+The central data manager in frontend/src/database/state owns the in-memory snapshot and typed page packages. IndexedDB remains the durable source. Publish row changes only after the IndexedDB transaction commits; keep sync cursors and audio blobs outside the manager.
+
 ## TypeScript Standards
 
 The frontend runs in strict mode. Write code that works with that constraint, not around it.
@@ -224,11 +226,11 @@ Recommended pattern:
 
 ### Logging
 
-Use the existing monitoring boundary.
+Use the existing application logging boundary.
 
-- use `reportError` for failures worth monitoring
+- use `reportError` for failures worth logging
 - use `reportInfo` for operational diagnostics and significant lifecycle events
-- avoid raw `console.*` calls in app code outside the monitoring layer
+- avoid raw `console.*` calls in app code outside the logging layer
 - log enough context to debug, but do not log sensitive payloads carelessly
 
 Do not add logging that only duplicates what the code already says unless it provides operational value.
@@ -308,7 +310,7 @@ Before merging, check these questions:
 - is each function doing one coherent job
 - are side effects obvious
 - is data access still in the data layer
-- is logging routed through the monitoring helpers
+- is application logging routed through the logging helpers
 - are errors handled at the correct boundary
 - did the change avoid unnecessary churn
 - does changed behavior have adequate tests

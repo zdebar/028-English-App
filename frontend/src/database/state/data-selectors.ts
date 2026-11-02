@@ -26,6 +26,7 @@ const REVIEW_KINDS: readonly ReviewKind[] = ['grammar', 'vocabulary'];
 const REVIEW_DIRECTIONS: readonly ReviewDirection[] = ['cz_to_en', 'en_to_cz'];
 type AppDataSource = AppDataSnapshot & Partial<Pick<DataManagerState, 'reviewArrays' | 'nextInitialLesson'>>;
 
+// -- Overview selectors --
 export function selectStartedGroups(
   data: AppDataSnapshot,
   userId: string,
@@ -248,6 +249,7 @@ export function selectLevelOverview(data: AppDataSnapshot, userId: string, today
   );
 }
 
+// -- Practice availability and deck selectors --
 export function selectReviewArrays(data: AppDataSnapshot, userId: string): Readonly<Record<ReviewKind, readonly PracticeDeckItem[]>> {
   const userItems = data.user_items.filter((item) => item.user_id === userId);
   const arrays: Record<ReviewKind, PracticeDeckItem[]> = { grammar: [], vocabulary: [] };
@@ -372,6 +374,7 @@ export function selectPracticeGrammarContext(
   return resolveGrammarContext(data, groupId, userId);
 }
 
+// -- Shared relationship, context, and ordering helpers --
 function getAllGroupsWithStartedExamples(data: AppDataSnapshot, userId: string, type: GroupType['type']) {
   const examplesById = new Map(selectStartedGroups(data, userId, type).map((group) => [group.id, group.examples]));
   return data.groups

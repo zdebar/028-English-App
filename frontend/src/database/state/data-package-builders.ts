@@ -35,6 +35,7 @@ export type DataPackageDependencies = Readonly<{
   localDate?: boolean;
 }>;
 
+// -- Package dependencies and dispatch --
 const USER_TABLES = ['user_items', 'user_lessons'] as const;
 const ITEM_TABLES = ['user_items', 'user_lessons', 'lessons', 'groups', 'group_items'] as const;
 const GRAMMAR_TABLES = ['user_items', 'user_lessons', 'lessons', 'groups', 'group_items', 'group_relations'] as const;
@@ -98,6 +99,7 @@ const DATA_PACKAGE_BUILDERS = {
   'initial-training': buildInitialTrainingRequest,
 } satisfies DataPackageBuilderMap;
 
+// -- Package identity and construction --
 export function getDataPackageKey(request: DataPackageRequest): string {
   switch (request.kind) {
     case 'topic-detail':
@@ -124,6 +126,7 @@ export function buildDataPackage<Request extends DataPackageRequest>(
   return builder(state, request);
 }
 
+// -- Home and overview packages --
 function buildHomePackage(state: DataManagerState) {
   const userId = requireUserId(state);
   return {
@@ -192,6 +195,7 @@ function buildPronunciationDetailPackage(
   return selectPronunciationDetail(state, requireUserId(state), request.groupId);
 }
 
+// -- Practice packages --
 function buildReviewPracticeRequest(
   state: DataManagerState,
   request: Extract<DataPackageRequest, { kind: 'review-practice' }>,

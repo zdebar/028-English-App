@@ -72,6 +72,8 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
   is_en_to_cz_enabled!: boolean;
   lesson_id!: number;
 
+  // -- Review selection and answer persistence --
+
   /**
    * Returns all due CZ-to-EN review items.
    * @param now Fixed current time shared with availability counts.
@@ -153,6 +155,8 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
     });
     publishUserItemUpdates(updatedItems);
   }
+
+  // -- User-item lookups and eligibility --
 
   /**
    * Reads every local user item row.
@@ -291,6 +295,8 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
     };
   }
 
+  // -- Progress resets and account cleanup --
+
   /**
    * Resets one user item while preserving its started state.
    *
@@ -374,6 +380,8 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
     }
   }
 
+  // -- Simulation fixture --
+
   /** Returns vocabulary rows from the first configured lessons in curriculum order. */
   static async getSimulationCandidates(userId: string): Promise<UserItemLocal[]> {
     assertNonEmptyString(userId, 'userId');
@@ -434,6 +442,8 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
     await db.user_items.bulkPut(simulatedItems);
     return { count: simulatedItems.length, items: simulatedItems };
   }
+
+  // -- Remote sync and practice mutations --
 
   /** Pushes local progress and merges remote item updates. */
   static syncFromRemote(userId: string): Promise<AppDataSyncResult> {

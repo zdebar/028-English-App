@@ -46,6 +46,7 @@ let hasShownFailureToast = false;
 const failuresByTask = new Map<SyncTaskId, TaskErrors>();
 const reportedFailureKeys = new Set<string>();
 
+// -- Account-scoped sync lifecycle --
 /** Starts the shared synchronization lifecycle for one authenticated user. */
 export function startSyncManager(userId: string | null): void {
   if (activeUserId === userId) return;
@@ -97,6 +98,7 @@ export function waitForSyncManagerIdle(): Promise<void> | null {
   return inFlightSync?.promise ?? null;
 }
 
+// -- Failure classification and sync requests --
 /** Returns whether a failed sync task should receive automatic retry attempts. */
 export function isRetryableSyncError(error: unknown): boolean {
   const visited = new Set<unknown>();
@@ -116,6 +118,7 @@ export function isRetryableSyncError(error: unknown): boolean {
   return hasTransientNetworkError || error instanceof SyncOfflineError;
 }
 
+// -- Sync execution --
 function requestSync(userId: string, ...requestedTasks: readonly SyncTaskId[]): Promise<void> {
   if (activeUserId !== userId || requestedTasks.length === 0) return Promise.resolve();
   if (inFlightSync) {
@@ -260,6 +263,7 @@ async function runOrphanedAudioTask(
   }
 }
 
+// -- Sync status and retry scheduling --
 function applyTaskOutcomes(userId: string, outcomes: SyncTaskOutcomes): void {
   if (!isActiveUser(userId)) return;
 
@@ -332,6 +336,7 @@ function scheduleRetry(userId: string): void {
   retryAttempt = Math.min(retryAttempt + 1, SCHEDULED_RETRY_DELAYS_MS.length - 1);
 }
 
+// -- Retry timing and error parsing --
 function getRetryableTaskIds(): SyncTaskId[] {
   return [...failuresByTask.entries()]
     .filter(([, errors]) => errors.some(isRetryableSyncError))
@@ -418,6 +423,7 @@ function hasRetryableNetworkError(error: Record<string, unknown>): boolean {
     (!hasCause && /failed to fetch/i.test(message));
 }
 
+// -- Task identifiers and lifecycle cleanup --
 function isDataSyncTable(task: SyncTaskId): task is DataSyncTable {
   return DATA_SYNC_TABLES.includes(task as DataSyncTable);
 }

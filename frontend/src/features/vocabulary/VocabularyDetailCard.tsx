@@ -63,6 +63,7 @@ type VocabularyDirectionSection = Readonly<{
  * @param onReset - Callback to reset the user's progress for the word.
  * @returns The vocabulary detail card UI.
  */
+// -- Vocabulary detail card --
 export default function VocabularyDetailCard({
   selectedWord,
   notes = [],
@@ -135,6 +136,7 @@ export default function VocabularyDetailCard({
   );
 }
 
+// -- Vocabulary fields and review-direction helpers --
 function getBaseProperties(selectedWord: UserItemLocal | null): readonly VocabularyProperty[] {
   return [
     { label: lowercaseInitial(TEXTS.czech), value: selectedWord?.czech },
@@ -199,6 +201,7 @@ async function playVocabularyAudio(
   await playAudioWithToast(selectedWord?.audio, playAudio, showToast);
 }
 
+// -- Card subcomponents --
 function VocabularyPropertyList({
   properties,
   labelClassName,
@@ -391,6 +394,7 @@ function VocabularyDetailContent({
   );
 }
 
+// -- Display formatting --
 function lowercaseInitial(value: string): string {
   return value.charAt(0).toLocaleLowerCase('cs-CZ') + value.slice(1);
 }

@@ -52,6 +52,7 @@ type PracticeControlsProps = Pick<
     showHintControl: boolean;
   }>;
 
+// -- Public practice controls --
 export default function PracticeSessionCardControls({
   props,
   display,
@@ -162,6 +163,7 @@ export default function PracticeSessionCardControls({
   );
 }
 
+// -- Mode-specific control groups --
 function PracticeControls({
   completeCurrent,
   completeDisabled = false,
@@ -278,6 +280,7 @@ function DefaultPracticeControls({
   );
 }
 
+// -- Detail-opening actions --
 async function openGrammarDetail(
   grammar: GrammarChunkWithExamples | null,
   disabled: boolean,

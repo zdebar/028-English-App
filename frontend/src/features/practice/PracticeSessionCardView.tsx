@@ -25,6 +25,7 @@ type PracticeSessionCardViewProps = Readonly<{
   onOpenPronunciation: (segments: readonly PronunciationSegment[]) => void;
 }>;
 
+// -- Public practice card view --
 export default function PracticeSessionCardView({
   props,
   sounds,
@@ -54,6 +55,7 @@ export default function PracticeSessionCardView({
   );
 }
 
+// -- Card faces and content --
 function PracticeCardFace({
   props,
   display,
@@ -235,6 +237,7 @@ function DirectionTopBar({
   );
 }
 
+// -- Display and control-state selectors --
 function getPracticeCardDisplayState(
   props: NormalizedPracticeSessionCardProps,
   hasPronunciationSounds: boolean,

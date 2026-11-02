@@ -21,6 +21,7 @@ import { NBSP } from './use-hint';
 import { usePracticeCardState } from './use-practice-card-state';
 import type { InitialTrainingData } from '../initial-training-data';
 
+// -- Training queue and view types --
 type TrainingOutcome = 'correct' | 'incorrect' | 'skip';
 
 type PracticeCompletionHandler = () => void;
@@ -92,6 +93,7 @@ type AdvanceInitialTrainingOptions = Readonly<{
   resetQuestionState: () => void;
 }>;
 
+// -- Public training hook --
 export function useInitialTrainingDeck(
   userId: string | null,
   onComplete?: PracticeCompletionHandler,
@@ -244,6 +246,7 @@ export function useInitialTrainingDeck(
   };
 }
 
+// -- Package synchronization and completion --
 function synchronizeInitialTrainingPackage({
   userId,
   packageState,
@@ -336,6 +339,7 @@ function toGrammarDetail(grammar: GroupType | null | undefined): GrammarDetail |
   return { ...grammar, kind: 'chunk' };
 }
 
+// -- Initial view state and derived display data --
 function getInitialTrainingState(initialData: InitialTrainingData | undefined) {
   return {
     lesson: initialData?.lesson ?? null,
@@ -395,6 +399,7 @@ function getTrainingPronunciation(currentItem: UserItemLocal | null, revealed: b
   return currentItem?.pronunciation || NBSP;
 }
 
+// -- Local load fallback and queue construction --
 async function loadInitialTrainingData(
   userId: string,
   initialData: InitialTrainingData,

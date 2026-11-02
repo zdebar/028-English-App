@@ -50,6 +50,7 @@ let clockTimer: ReturnType<typeof setTimeout> | null = null;
 
 export const dataManagerStore = createStore<DataManagerState>(() => EMPTY_STATE);
 
+// -- Account lifecycle and local snapshot --
 /** Loads the active user's local dataset once and starts cross-tab change delivery. */
 export function initializeDataManager(userId: string | null): Promise<void> {
   ensureChangeChannel();
@@ -120,6 +121,7 @@ export function ensureDataManagerReady(userId: string): Promise<void> {
   return initializeDataManager(userId);
 }
 
+// -- Typed page-package cache --
 /** Builds a requested page package once and keeps it subscribed to committed dataset changes. */
 export async function ensureDataPackage<Request extends DataPackageRequest>(
   userId: string,
@@ -223,6 +225,7 @@ export function useDataPackage<Request extends DataPackageRequest>(
   );
 }
 
+// -- Committed changes and cross-tab delivery --
 /** Clears user data and invalidates any pending bootstrap for a previous account. */
 export function resetDataManager(): void {
   loadVersion += 1;
@@ -298,6 +301,7 @@ function ensureChangeChannel(): void {
   });
 }
 
+// -- Snapshot bootstrap and derived updates --
 async function loadSnapshot(userId: string): Promise<AppDataSnapshot> {
   const [levels, lessons, notes, groups, groupItems, groupRelations, userItems, userLessons] =
     await Promise.all([
@@ -384,6 +388,7 @@ function applyChangesToSnapshot(
   };
 }
 
+// -- Time-sensitive package refresh --
 function scheduleClockUpdate(): void {
   clearClockTimer();
   const state = dataManagerStore.getState();
@@ -421,6 +426,7 @@ function clearClockTimer(): void {
   clockTimer = null;
 }
 
+// -- Derived state and cached-package invalidation --
 function getDerivedData(snapshot: AppDataSnapshot, userId: string) {
   return {
     reviewArrays: selectReviewArrays(snapshot, userId),
@@ -481,6 +487,7 @@ function getChangedTables(changes: AppDataChanges): Set<keyof AppDataSnapshot> {
   );
 }
 
+// -- Immutable row-change helpers --
 function patchRows<Row, Key>(
   rows: readonly Row[],
   changes: { upserted?: readonly Row[]; deleted?: readonly Key[] } | undefined,

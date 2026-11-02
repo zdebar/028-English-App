@@ -24,6 +24,7 @@ import {
 } from '../review-queue';
 import { useReviewEntryDetails } from './use-review-entry-details';
 
+// -- Review-session action types --
 type ReviewRetryAction = 'save';
 
 type PracticeCompletionHandler = () => void;
@@ -114,6 +115,7 @@ type RetryPendingReviewItemOptions = Readonly<{
   persistAndAdvance: (item: UserItemLocal) => Promise<void>;
 }>;
 
+// -- Public review hook --
 /** Uses the prefetched review queue and persists each answer before advancing. */
 export function usePracticeDeck(
   userId: string | null,
@@ -292,6 +294,7 @@ export function usePracticeDeck(
   };
 }
 
+// -- Package and presentation helpers --
 type ReviewDataStatus = Readonly<{
   dataReady: boolean;
   loading: boolean;
@@ -356,6 +359,7 @@ function getPracticeError(dataError: Error | null, saveError: Error | null): Err
   return dataError ?? saveError;
 }
 
+// -- Queue initialization and package updates --
 function applyFetchedReviewDeck({
   loading,
   fetchedResult,
@@ -401,6 +405,7 @@ function completeFinishedReview(
   if (finishedReview && queue) void completePractice();
 }
 
+// -- Answer persistence and retry flow --
 async function persistAndAdvanceReviewItem({
   updatedItem,
   userId,
@@ -576,6 +581,7 @@ function getAvailableDueCount(
   return availability.vocabularyReviewDueCount;
 }
 
+// -- Queue transitions and direction changes --
 async function continueAnsweredQueue({
   answerResult,
   queue,

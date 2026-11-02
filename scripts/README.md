@@ -1,122 +1,38 @@
-# Vocabulary data workflow
+# Content preparation scripts
 
-This folder holds the CSV files used to prepare vocabulary lessons and to
-maintain the word lists. Run the scripts from the repository root:
+The Python scripts under **scripts/** prepare vocabulary CSVs and audio files. They do not import rows into Supabase. Run commands from the repository root.
 
-```powershell
-python scripts/prepare_words.py
-python scripts/trim_audio.py
-python scripts/mark_words.py
-```
+## Vocabulary workflow
 
-## Normal workflow
+1. Put source CSV files in **scripts/data/prepare/**. Filenames start with the lesson number, such as **05_plurals.csv**. The preparation scripts create the folder if it does not exist.
+2. Run **python scripts/prepare_words.py** to normalize the selected columns, fill missing vocabulary flags, derive lesson and sort order from the filename, generate eSpeak IPA, and prepare missing US-English audio.
+3. Review the timestamped CSV output and the audio files in **scripts/data/prepare/audio/**.
+4. Optionally run **python scripts/prepare_audio_from_IPA.py** to regenerate audio using the CSV pronunciation field.
+5. Optionally run **python scripts/trim_audio.py**. It reads audio from **scripts/data/prepare/audio/** and writes trimmed copies to **scripts/data/prepare/audio_trim/** without replacing the originals.
+6. Only after choosing which words should be marked as used, run **python scripts/mark_words.py**.
 
-1. Add or edit a lesson source CSV in `prepare/`. Give it a leading lesson
-   number, for example `05_plurals.csv`.
-2. Run `python scripts/prepare_words.py`.
-3. Optionally adjust the constants in `scripts/trim_audio.py`, then run
-   `python scripts/trim_audio.py` to write trimmed copies to `prepare/audio_trim/`.
-   The original files in `prepare/audio/` are preserved.
-4. Review the newly created timestamped CSV and the trimmed audio files in
-   `prepare/audio_trim/`. Use the timestamped CSV as the prepared result.
-5. Only when the lesson's words should count as used, run
-   `python scripts/mark_words.py`.
+The preparation scripts ignore CSV files with a trailing date/timestamp when choosing their inputs. They write a timestamped result beside each source CSV.
 
-`mark_words.py` is **not** run by `prepare_words.py`. They are independent
-commands. However, marking reads its source words directly from every CSV in
-`scripts/data/prepare/`, so the preparation folder is the hand-off between the
-two scripts.
+## CSV fields
 
-## Folders and files
+The scripts read these fields when present: id, czech, czech_description, english, pronunciation, audio, sort_order, note_id, and is_vocabulary. Missing supported columns are added. The leading digits in the filename determine lesson_id; sort_order is regenerated starting at lesson_id × 1000. The vocabulary flag defaults to true when missing.
 
-| Path                                                     | Purpose                                                                                                                          |
-| -------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
-| `prepare/`                                               | Input lesson CSVs and their dated prepared outputs. This is the only data folder used by `prepare_words.py` and `mark_words.py`. |
-| `prepare/audio/`                                         | Generated Google Cloud Text-to-Speech audio in Ogg Opus format.                                                                  |
-| `tracker/already_used.csv`                               | Permanent record of Czech/English pairs already selected. Maintained by `mark_words.py`.                                         |
-| `tracker/10k_words.csv`, `1k_words.csv`, `200_words.csv` | Candidate word lists. `mark_words.py` removes words selected in `prepare/` from these files.                                     |
-| `backup/`                                                | Copies of the candidate word lists; no current Python script reads this folder.                                                  |
-| `ready/`                                                 | Prepared lesson CSV collection; no current Python script reads this folder.                                                      |
-| `temp/`                                                  | Working copies of candidate lists and helper files; no current Python script reads this folder.                                  |
-| `before/`                                                | Empty staging folder at present; no current Python script reads this folder.                                                     |
+These are preparation-file fields, not a complete database import format. Topic, grammar, sound, and pronunciation memberships are represented by groups and their link tables in Supabase. The scripts do not create those relations.
 
-## Lesson CSV format
+## Word tracker
 
-At minimum, source files need `czech` and `english` columns. Optional fields
-such as `grammar_chunk_id`, `block_id`, and `note_id` are preserved. A typical source
-file starts like this:
+**python scripts/mark_words.py** reads every CSV in the prepare folder, including timestamped outputs. It appends selected Czech-English pairs to **scripts/data/tracker/already_used.csv** and filters matching words from **scripts/data/tracker/all_vocabulary.csv**. It may rewrite these tracker files, so inspect the target list and keep a backup before running it.
 
-```csv
-czech,english,grammar_chunk_id,block_id,note_id
-já,I,,1,
-ty,you,,1,
-```
+Matching ignores surrounding whitespace and letter case. When a source CSV has a Czech column, rows match by Czech-English pair; otherwise matching uses English text.
 
-`prepare_words.py` normalizes the file to this column set (when applicable):
+Other files under **scripts/data/backup/** and **scripts/data/temp/** are working or backup data. They are not read by the preparation or marking commands.
 
-```text
-id, czech, english, pronunciation, audio, sort_order, grammar_chunk_id,
-lesson_id, block_id, note_id
-```
+## Requirements and related tools
 
-It does not create `id` when the source file has no `id` column. It assigns:
+Word preparation uses Python packages for CSV handling and Google Cloud Text-to-Speech, eSpeak NG for IPA, and FFmpeg for audio tools. Google Cloud credentials are read from the environment through the project configuration.
 
-- `lesson_id` from the leading number in the filename (`05_plurals.csv` → `5`);
-- `sort_order` starting at `lesson_id * 1000` (`5000`, `5001`, ...);
-- IPA pronunciation through locally installed eSpeak NG (`en-us`);
-- an `.opus` audio filename and, when missing, the matching Google Cloud TTS
-  audio file using US English by default (`en-US-Neural2-F`).
+- **scripts/convert_grammar.py** converts grammar-note HTML in a CSV to the app's grammar-pair markup.
+- **scripts/utils/** contains shared preparation, pronunciation, translation, conversion, and audio helpers.
+- **scripts/tests/** contains Python tests for selected script utilities.
 
-The generated output is saved beside the input using one UTC timestamp for the
-whole run, such as `05_plurals_20260715T132045Z.csv`.
-
-## Requirements for preparation
-
-- Python dependencies used by the scripts, including `pandas`, `eng-to-ipa`,
-  `google-cloud-texttospeech`, `python-dotenv`, FFmpeg, and eSpeak NG.
-- eSpeak NG installed at `C:/Program Files/eSpeak NG/espeak-ng.exe`.
-- `GOOGLE_APPLICATION_CREDENTIALS` configured in `.env` for Google Cloud TTS.
-- Optional voice tuning in `.env`: `GCP_TTS_VOICE_NAME`,
-  `GCP_TTS_IPA_VOICE_NAME`, `GCP_TTS_SPEAKING_RATE`, and `GCP_TTS_PITCH`.
-
-Audio filenames are stable by default: `Good morning!` becomes
-`good_morning.opus`. Set `include_audio_timestamp=True` when calling either
-folder preparation function to append the UTC timestamp, for example
-`good_morning_20260715T132045Z.opus`. Output CSV filenames remain timestamped
-to keep each preparation run separate.
-
-## What marking does
-
-`mark_words.py` first reads **all** CSV files in `prepare/`, then:
-
-1. Adds new selected pairs to `tracker/already_used.csv`.
-2. Reports source rows already present in that tracker.
-3. Removes matching words from the three candidate lists in `tracker/`.
-
-Matching ignores leading/trailing whitespace and letter case. When the source
-row contains both `czech` and `english`, both values must match. A source row
-without Czech text matches by English text alone.
-
-This operation rewrites the tracker candidate CSVs and appends to
-`already_used.csv`; make a backup or commit before running it if you may need
-to undo the selection.
-
-## Generated output files
-
-Both preparation scripts ignore CSVs ending in either the legacy `_YYYYMMDD`
-suffix or the current `_YYYYMMDDTHHMMSSZ` suffix, so generated outputs are not
-processed again on later runs. Move the prepared CSV you intend to use into the
-appropriate hand-off location as usual. Note that `mark_words.py` still reads
-every CSV in `prepare/`, including generated outputs.
-
-## Related scripts
-
-- `scripts/prepare_audio_from_IPA.py` follows the same folder/timestamp convention,
-  but generates TTS from the IPA value in the `pronunciation` column using the
-  US English Neural2 voice. IPA may be written as `lɪv` or `/lɪv/`; surrounding
-  slashes are removed before creating the SSML phoneme. The script replaces
-  same-named audio files so an existing English-based recording cannot prevent
-  IPA-guided synthesis.
-- `scripts/convert_grammar.py` converts `note`/`NOTE` HTML in a grammar CSV to
-  `dl.grammar-pairs` HTML. It is unrelated to the vocabulary preparation and
-  marking workflow.
+For the current database model and import boundaries, see [../DATA_GUIDE.md](../DATA_GUIDE.md).

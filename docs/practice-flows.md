@@ -1,59 +1,27 @@
-# Practice Flows
+# Practice flows
 
-The app has three Home practice actions: grammar review, vocabulary review, and
-initial training. Review routes share `PracticeCard`; initial training uses a
-lesson-specific introduction and the shared practice card UI.
+Practice has three learner actions: grammar review, vocabulary review, and initial training. Pronunciation practice is reached from its own Home button and overview route.
 
-## Grammar And Vocabulary Review
+## Grammar and vocabulary review
 
-Routes: `/practice/grammar` and `/practice/vocabulary`. `/practice` is the
-grammar-review route alias. `router.tsx` loads the initial review deck from local
-IndexedDB before rendering `Practice`.
+Routes are **/practice**, **/practice/grammar**, and **/practice/vocabulary**. The first two open grammar review. Their route loaders ensure a review package before navigation; the page subscribes to that same package through **useDataPackage**.
 
-A review candidate must be active, already started, unmastered in the selected
-direction, enabled for that direction, and match the selected item type. The
-selected direction is Czech-to-English when it has due items; if it has none, the
-loader can fall back to English-to-Czech. Items are ordered by their next review
-time, then curriculum order.
+Candidates must be active, initiated, not mastered in the chosen direction, enabled in that direction, and due. When a review package is first built, Czech-to-English is selected if it has due items; otherwise it can fall back to English-to-Czech. Items are ordered by schedule and curriculum position.
 
-Each answer updates that direction's progress and schedule and is saved to
-IndexedDB before the queue advances. Failed writes stay on the current item and
-can be retried. After a successful write, the in-memory review arrays are updated.
-If an answered item is still due, it can re-enter the queue. Leaving practice
-keeps answers already saved; the remaining queue is not persisted as a session.
+The package includes review entries, fallback decks, availability, sound groups, and each entry's note and grammar context. When an answer is submitted, the local write completes before the queue advances. If it fails, the current item remains available to retry. Successful writes update the data manager.
 
-The card loads note and grammar detail separately from the selected review items.
-Failure to load optional detail does not prevent answering the card.
+The current queue remains local to the active practice session. Updated package data does not reorder it; the new package is used by the next session. A still-due answered item may re-enter the queue according to the active queue rules.
 
-## Initial Training
+## Initial training
 
-Route: `/practice/initial-training`, opened by the Home “New” button.
+Route: **/practice/initial-training**. The loader prepares the next eligible lesson before navigation. It includes its items, grammar context, note, and sound groups.
 
-The first eligible unstarted item is selected in curriculum order. Training then
-includes all eligible unstarted items from that item's lesson. A lesson cannot be
-started while either review category has reached its configured review limit. A
-lesson already started that day can be continued. The route rechecks eligibility
-and records the lesson start in `user_lessons` before showing training.
+The route selects unstarted items from the next eligible lesson in curriculum order. The lesson start is recorded in user_lessons. A new lesson is unavailable when either grammar or vocabulary has reached its configured review threshold; a lesson already started today can be continued.
 
-The introduction shows the lesson and its items before the first prompt. A correct
-answer advances to the next item. An incorrect answer adds that item to the retry
-queue. Skipping completes the current item and marks it mastered. Each answer is
-saved immediately to the local `user_items` record; initial progress is mirrored
-to both review directions.
+Each answer is saved immediately to the local user_items row. Correct answers advance; incorrect answers enter the in-memory retry queue; skipping marks the item complete. Training progress is reflected in the review directions.
 
-There is no persisted training-session table. If the page is reloaded, the route
-selects the remaining eligible unstarted items from the next lesson selection.
-Completed answers remain saved, while the in-memory retry order is lost.
+There is no persisted practice-session table. Reloading reconstructs the next eligible lesson from saved progress; the in-memory retry order is lost.
 
-## Grammar And Supporting Details
+## Grammar context
 
-Grammar groups, their hierarchy, and their examples use the unified `groups`,
-`group_relations`, and `group_items` data. `lessons.group_id` links a lesson to its
-grammar detail. The frontend's grammar hierarchy types and queries are grouped
-in `frontend/src/database/queries/grammar-queries.ts`; they are separate from
-IndexedDB model classes and do not represent separate current database tables.
-
-Practice cards can display the lesson's grammar detail and linked note. Grammar
-overviews arrange initiated grammar groups by hierarchy and detail relations,
-then show the linked examples that are available from started lessons. An initial
-training skip counts as initiated for overview visibility.
+Grammar structures and examples come from groups, group_relations, and group_items. lessons.group_id connects a lesson to its grammar context. These fields are assembled by data-package builders rather than loaded separately by the page.
