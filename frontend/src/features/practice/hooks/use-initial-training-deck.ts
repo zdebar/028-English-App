@@ -72,6 +72,7 @@ type InitialTrainingSyncOptions = Readonly<{
   userId: string | null;
   packageState: DataPackageResult<InitialTrainingData>;
   initialData: InitialTrainingData | undefined;
+  isCurrentRequest: () => boolean;
   startedForUserRef: { current: string | null };
   previousUserRef: { current: string | null };
   completionHandledRef: { current: boolean };
@@ -124,11 +125,25 @@ export function useInitialTrainingDeck(
   const completionHandledRef = useRef(false);
   const startedForUserRef = useRef<string | null>(null);
   const previousUserRef = useRef(userId);
+  const activeUserIdRef = useRef(userId);
+  const mountedRef = useRef(false);
+
+  useEffect(() => {
+    activeUserIdRef.current = userId;
+  }, [userId]);
+
+  useEffect(() => {
+    mountedRef.current = true;
+    return () => {
+      mountedRef.current = false;
+    };
+  }, []);
 
   useEffect(() => synchronizeInitialTrainingPackage({
     userId,
     packageState,
     initialData,
+    isCurrentRequest: () => mountedRef.current && activeUserIdRef.current === userId,
     startedForUserRef,
     previousUserRef,
     completionHandledRef,
@@ -149,7 +164,7 @@ export function useInitialTrainingDeck(
       setLoading,
       setError,
     },
-  }), [initialData, packageState.error, packageState.status, packageState.userId, trackPracticeWrite, userId]);
+  }), [packageState.error, packageState.status, packageState.userId, trackPracticeWrite, userId]);
 
   const itemById = useMemo(
     () => new Map(activeItems.map((item) => [item.item_id, item])),
@@ -251,12 +266,13 @@ function synchronizeInitialTrainingPackage({
   userId,
   packageState,
   initialData,
+  isCurrentRequest,
   startedForUserRef,
   previousUserRef,
   completionHandledRef,
   trackPracticeWrite,
   setters,
-}: InitialTrainingSyncOptions): (() => void) | void {
+}: InitialTrainingSyncOptions): void {
   if (previousUserRef.current !== userId) {
     previousUserRef.current = userId;
     startedForUserRef.current = null;
@@ -289,10 +305,14 @@ function synchronizeInitialTrainingPackage({
     setters.setLoading(false);
     return;
   }
-  if (!initialData || startedForUserRef.current === userId) return;
+  if (!initialData) {
+    setters.setLoading(false);
+    return;
+  }
+  if (startedForUserRef.current === userId) return;
 
   startedForUserRef.current = userId;
-  return startInitialTrainingLoad(userId, initialData, setters, trackPracticeWrite);
+  startInitialTrainingLoad(userId, initialData, setters, trackPracticeWrite, isCurrentRequest);
 }
 
 function getReadyInitialTrainingData(
@@ -450,11 +470,11 @@ function startInitialTrainingLoad(
   initialData: InitialTrainingData,
   setters: InitialTrainingLoadSetters,
   trackPracticeWrite: <T>(operation: Promise<T>) => Promise<T>,
-): () => void {
-  let mounted = true;
+  isCurrentRequest: () => boolean,
+): void {
   void trackPracticeWrite(loadInitialTrainingData(userId, initialData))
     .then((result) => {
-      if (!mounted) return;
+      if (!isCurrentRequest()) return;
       if (!result) {
         setters.setLesson(null);
         setters.setItems([]);
@@ -480,15 +500,11 @@ function startInitialTrainingLoad(
       setters.setHasProgress(false);
     })
     .catch((caughtError) => {
-      if (mounted) setters.setError(toError(caughtError));
+      if (isCurrentRequest()) setters.setError(toError(caughtError));
     })
     .finally(() => {
-      if (mounted) setters.setLoading(false);
+      if (isCurrentRequest()) setters.setLoading(false);
     });
-
-  return () => {
-    mounted = false;
-  };
 }
 
 function getTrainingAnswerQueue(
