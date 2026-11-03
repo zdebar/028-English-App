@@ -150,12 +150,12 @@ function getCachedPackageValue<Request extends DataPackageRequest>(
   return cached.data as DataPackageValue<Request>;
 }
 
-async function buildAndCacheDataPackage<Request extends DataPackageRequest>(
+function buildAndCacheDataPackage<Request extends DataPackageRequest>(
   state: DataManagerState,
   userId: string,
   request: Request,
   key: string,
-): Promise<DataPackageValue<Request>> {
+): DataPackageValue<Request> {
   try {
     const data = buildDataPackage(state, request);
     dataManagerStore.setState((current) => {
