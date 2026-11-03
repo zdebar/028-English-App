@@ -26,6 +26,7 @@ function normalizeError(error: unknown): Error {
 }
 
 export function reportError(message: string, error: unknown, context?: LoggingContext): void {
+  if (!import.meta.env.DEV) return;
   console.error(message, normalizeError(error), context);
 }
 

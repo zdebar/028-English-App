@@ -1,5 +1,6 @@
 import { usePwaStore } from './use-pwa-store';
 import type { BeforeInstallPromptEvent } from './pwa.types';
+import { reportError, reportInfo } from '@/features/logging/logging-handler';
 
 let cleanup: (() => void) | null = null;
 
@@ -35,7 +36,7 @@ export function startPwaLifecycle(): void {
     const handleWindowLoad = (): void => {
       if (import.meta.env.PROD) {
         void serviceWorker.register(`${scope}service-worker.js`, { scope }).catch((error) => {
-          console.warn('Service worker registration failed:', error);
+          reportError('Service worker registration failed', error);
         });
         serviceWorker.addEventListener('message', handleServiceWorkerMessage);
         return;
@@ -77,10 +78,10 @@ function requestPersistentStorage(): void {
   storage.persisted()
     .then((alreadyPersistent) => alreadyPersistent || storage.persist())
     .then((isPersistent) => {
-      if (!isPersistent) console.info('Browser did not grant persistent storage.');
+      if (!isPersistent) reportInfo('Browser did not grant persistent storage.');
     })
     .catch((error: unknown) => {
-      console.warn('Persistent storage request failed:', error);
+      reportError('Persistent storage request failed', error);
     });
 }
 

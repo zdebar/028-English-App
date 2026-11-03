@@ -9,6 +9,7 @@ const distDir = resolve(frontendRoot, 'dist');
 const swSrc = resolve(frontendRoot, 'public/service-worker.js');
 const swDest = resolve(distDir, 'service-worker.js');
 const BUILD_HASH_PLACEHOLDER = '__APP_BUILD_HASH__';
+const DEVELOPMENT_LOGGING_PLACEHOLDER = 'const LOG_ERRORS_IN_CONSOLE = true;';
 
 async function buildServiceWorker() {
   const { count, size, warnings } = await injectManifest({
@@ -25,8 +26,16 @@ async function buildServiceWorker() {
   if (placeholderCount !== 1) {
     throw new Error(`Expected one ${BUILD_HASH_PLACEHOLDER} placeholder, found ${placeholderCount}.`);
   }
-  const hash = createHash('sha256').update(worker).digest('hex');
-  await writeFile(swDest, worker.replace(BUILD_HASH_PLACEHOLDER, hash));
+  const loggingPlaceholderCount = worker.split(DEVELOPMENT_LOGGING_PLACEHOLDER).length - 1;
+  if (loggingPlaceholderCount !== 1) {
+    throw new Error(`Expected one service worker logging placeholder, found ${loggingPlaceholderCount}.`);
+  }
+  const productionWorker = worker.replace(
+    DEVELOPMENT_LOGGING_PLACEHOLDER,
+    'const LOG_ERRORS_IN_CONSOLE = false;',
+  );
+  const hash = createHash('sha256').update(productionWorker).digest('hex');
+  await writeFile(swDest, productionWorker.replace(BUILD_HASH_PLACEHOLDER, hash));
 
   if (warnings.length > 0) {
     warnings.forEach((warning) => console.warn(warning));

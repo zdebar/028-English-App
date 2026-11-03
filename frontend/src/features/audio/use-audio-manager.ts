@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import AudioRecord from '@/database/models/audio-records';
 import { reportError } from '@/features/logging/logging-handler';
 import { useAudioStore } from './use-audio-store';
+import { AudioFileNotFoundError } from '@/types/error.types';
 
 type AudioInput = string | string[] | null;
 type ManagedAudio = {
@@ -272,7 +273,9 @@ async function loadSingleAudio(
     audioElement.addEventListener('ended', onEnded);
     return { element: audioElement, onEnded };
   } catch (error) {
-    reportError('Audio Manager Error', error);
+    if (!(error instanceof AudioFileNotFoundError)) {
+      reportError('Audio Manager Error', error);
+    }
     return null;
   }
 }
