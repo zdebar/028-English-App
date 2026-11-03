@@ -41,6 +41,7 @@ export default function Icon({
       strokeWidth={strokeWidth}
       className={className}
       viewBox={viewBox}
+      aria-hidden="true"
     >
       {children}
     </svg>

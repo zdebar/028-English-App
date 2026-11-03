@@ -4,7 +4,7 @@ import { TEXTS } from '@/locales/cs';
 import type { JSX } from 'react';
 import { useThemeStore } from '../theme/use-theme-store';
 import { MenuButtonText } from '@/components/UI/MenuButtonText';
-import { reportError } from '../logging/monitoring-handler';
+import { reportError } from '../logging/logging-handler';
 import { useToastStore } from '../toast/use-toast-store';
 
 type SignoutButtonProps = Readonly<{
@@ -41,7 +41,6 @@ export default function SignoutButton({ className }: SignoutButtonProps): JSX.El
       disabled={!userId}
       onConfirm={handleSignout}
       className={className}
-      aria-haspopup="dialog"
       title={TEXTS.actionRequiresConfirmation}
     >
       <MenuButtonText>{TEXTS.signoutButtonTitle}</MenuButtonText>

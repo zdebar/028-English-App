@@ -3,7 +3,6 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const mocks = vi.hoisted(() => ({
   navigate: vi.fn(),
-  getInitiatedByUserId: vi.fn(),
   userId: 'u1' as string | null,
   state: {
     data: [] as Array<{ id: number; name: string }>,
@@ -25,26 +24,18 @@ vi.mock('@/routing/data-navigation', () => ({
   ),
 }));
 
-vi.mock('@/database/models/topics', () => ({
-  default: {
-    getInitiatedByUserId: (...args: unknown[]) => mocks.getInitiatedByUserId(...args),
-  },
-}));
-
 vi.mock('@/features/auth/use-auth-store', () => ({
   useAuthStore: (selector: (state: { userId: string | null }) => unknown) =>
     selector({ userId: mocks.userId }),
 }));
 
-vi.mock('@/hooks/use-live-query-data', () => ({
-  useLiveQueryData: (fetcher: () => Promise<unknown[]>) => {
-    void fetcher();
-    return {
-      data: mocks.state.data,
-      error: mocks.state.error,
-      loading: mocks.state.loading,
-    };
-  },
+vi.mock('@/database/state/data-store', () => ({
+  useDataPackage: () => ({
+    userId: mocks.userId,
+    status: 'ready',
+    error: null,
+    data: mocks.state.data,
+  }),
 }));
 
 vi.mock('@/locales/cs', () => ({
@@ -56,7 +47,7 @@ vi.mock('@/locales/cs', () => ({
 }));
 
 vi.mock('@/components/UI/DelayedNotification', () => ({
-  default: ({ children }: any) => <div>{children}</div>,
+  default: ({ message }: any) => <div>{message}</div>,
 }));
 
 vi.mock('@/components/UI/Notification', () => ({
@@ -77,7 +68,6 @@ describe('TopicsOverview', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mocks.userId = 'u1';
-    mocks.getInitiatedByUserId.mockResolvedValue([]);
     mocks.state.data = [];
     mocks.state.error = null;
     mocks.state.loading = false;

@@ -54,10 +54,13 @@ vi.mock('react-router-dom', () => ({
   useLocation: () => ({ key: 'default' }),
 }));
 
-vi.mock('@/database/models/grammar-topics', () => ({
-  default: {
-    getStarted: vi.fn(),
-  },
+vi.mock('@/database/state/data-store', () => ({
+  useDataPackage: () => ({
+    userId: mocks.userId,
+    status: 'ready',
+    error: null,
+    data: mocks.arrayState.data,
+  }),
 }));
 
 vi.mock('@/database/models/user-items', () => ({
@@ -74,17 +77,9 @@ vi.mock('@/features/toast/use-toast-store', () => ({
   ),
 }));
 
-vi.mock('@/features/logging/monitoring-handler', () => ({
+vi.mock('@/features/logging/logging-handler', () => ({
   reportInfo: (...args: unknown[]) => mocks.reportInfo(...args),
   reportError: (...args: unknown[]) => mocks.reportError(...args),
-}));
-
-vi.mock('@/hooks/use-live-query-data', () => ({
-  useLiveQueryData: () => ({
-    data: mocks.arrayState.data,
-    loading: false,
-    error: null,
-  }),
 }));
 
 vi.mock('dompurify', () => ({
@@ -123,7 +118,7 @@ vi.mock('@/components/UI/buttons/ListButton', () => ({
 }));
 
 vi.mock('@/components/UI/DelayedNotification', () => ({
-  default: ({ children }: any) => <div>{children}</div>,
+  default: ({ message }: any) => <div>{message}</div>,
 }));
 
 vi.mock('@/components/UI/PropertyView', () => ({

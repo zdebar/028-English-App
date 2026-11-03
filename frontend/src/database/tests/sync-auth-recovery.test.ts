@@ -3,7 +3,7 @@ import { SupabaseError } from '@/types/error.types';
 
 const mocks = vi.hoisted(() => ({ getSession: vi.fn(), refreshSession: vi.fn() }));
 vi.mock('@/config/supabase.config', () => ({ supabaseInstance: { auth: mocks } }));
-import { settleSyncWithAuthRecovery } from '../utils/sync-auth-recovery.utils';
+import { settleSyncWithAuthRecovery } from '../sync/auth-recovery';
 
 const jwtError = new SupabaseError('Table sync failed', Object.assign(
   new Error('JWT issued at future'), { code: 'PGRST303' },
@@ -50,11 +50,13 @@ it('does not refresh for unrelated failures', async () => {
   expect(mocks.refreshSession).not.toHaveBeenCalled();
 });
 
-it('propagates refresh failure without retrying writes', async () => {
+it('returns the refresh error for failed JWT tasks without retrying writes', async () => {
   const error = new Error('Refresh failed');
   mocks.refreshSession.mockResolvedValue({ data: { session: null }, error });
   const task = vi.fn().mockRejectedValue(jwtError);
-  await expect(settleSyncWithAuthRecovery('u1', [task])).rejects.toBe(error);
+  await expect(settleSyncWithAuthRecovery('u1', [task])).resolves.toEqual([
+    { status: 'rejected', reason: error },
+  ]);
   expect(task).toHaveBeenCalledTimes(1);
 });
 

@@ -9,7 +9,7 @@ export default function OverlayMask(): JSX.Element | null {
   const isOverlayOpen = useOverlayStore((state) => state.isOverlayOpen);
   const handleClose = useCallback(() => dismissOverlay(), [dismissOverlay]);
 
-  useKey({ onKeyPress: handleClose, keys: KEYBOARD_LISTENERS.Exit });
+  useKey({ onKeyPress: handleClose, keys: KEYBOARD_LISTENERS.Exit, enabled: isOverlayOpen });
 
   if (!isOverlayOpen) {
     return null;
@@ -17,6 +17,7 @@ export default function OverlayMask(): JSX.Element | null {
 
   return (
     <button
+      type="button"
       className="bg-overlay z-overlay pointer-events-auto fixed inset-0 top-0 m-0 border-none p-0"
       onClick={handleClose}
       aria-label={ARIA_TEXTS.closeOverlay}

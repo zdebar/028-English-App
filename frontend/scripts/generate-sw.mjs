@@ -1,11 +1,14 @@
 import { injectManifest } from 'workbox-build';
 import { resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { readFile, writeFile } from 'node:fs/promises';
 import { createHash } from 'node:crypto';
 
-const distDir = resolve(process.cwd(), 'dist');
-const swSrc = resolve(process.cwd(), 'public/service-worker.js');
+const frontendRoot = fileURLToPath(new URL('..', import.meta.url));
+const distDir = resolve(frontendRoot, 'dist');
+const swSrc = resolve(frontendRoot, 'public/service-worker.js');
 const swDest = resolve(distDir, 'service-worker.js');
+const BUILD_HASH_PLACEHOLDER = '__APP_BUILD_HASH__';
 
 async function buildServiceWorker() {
   const { count, size, warnings } = await injectManifest({
@@ -18,8 +21,12 @@ async function buildServiceWorker() {
   });
 
   const worker = await readFile(swDest, 'utf8');
+  const placeholderCount = worker.split(BUILD_HASH_PLACEHOLDER).length - 1;
+  if (placeholderCount !== 1) {
+    throw new Error(`Expected one ${BUILD_HASH_PLACEHOLDER} placeholder, found ${placeholderCount}.`);
+  }
   const hash = createHash('sha256').update(worker).digest('hex');
-  await writeFile(swDest, worker.replace('__APP_BUILD_HASH__', hash));
+  await writeFile(swDest, worker.replace(BUILD_HASH_PLACEHOLDER, hash));
 
   if (warnings.length > 0) {
     warnings.forEach((warning) => console.warn(warning));

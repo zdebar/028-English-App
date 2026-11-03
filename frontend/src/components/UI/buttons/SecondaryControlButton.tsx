@@ -2,17 +2,16 @@ import type { ButtonHTMLAttributes, JSX, ReactNode } from 'react';
 
 type SecondaryControlButtonProps = Readonly<
   ButtonHTMLAttributes<HTMLButtonElement> & {
-    ariaLabel?: string;
     children: ReactNode;
   }
 >;
 
 export default function SecondaryControlButton({
-  ariaLabel,
   children,
   className = '',
   title,
   type = 'button',
+  'aria-label': ariaLabel,
   ...rest
 }: SecondaryControlButtonProps): JSX.Element {
   const buttonClassName = [

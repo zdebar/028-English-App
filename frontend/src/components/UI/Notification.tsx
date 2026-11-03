@@ -1,9 +1,15 @@
-import type { HTMLAttributes, JSX } from 'react';
+import type { HTMLAttributes, JSX, ReactNode } from 'react';
+
+type NotificationProps = Readonly<
+  Omit<HTMLAttributes<HTMLDivElement>, 'children'> & {
+    children: ReactNode;
+  }
+>;
 
 /**
  * Displays a centered notification message with customizable styling.
  */
-export default function Notification(props: Readonly<HTMLAttributes<HTMLDivElement>>): JSX.Element {
+export default function Notification(props: NotificationProps): JSX.Element {
   const { children, className, ...rest } = props;
 
   return (

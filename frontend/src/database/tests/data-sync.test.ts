@@ -1,27 +1,26 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import config from '@/config/config';
 
 const mocks = vi.hoisted(() => ({
-  getFullSyncTime: vi.fn(),
-  setFullSyncTime: vi.fn(),
   initDbMappings: vi.fn(),
-  withSettledSummary: vi.fn(),
+  summarizeSettledResults: vi.fn(),
   userItemSyncFromRemote: vi.fn(),
   userLessonSyncFromRemote: vi.fn(),
-  userSettingsSyncFromRemote: vi.fn(),
   groupsSyncFromRemote: vi.fn(),
   groupItemsSyncFromRemote: vi.fn(),
   groupRelationsSyncFromRemote: vi.fn(),
   levelsSyncFromRemote: vi.fn(),
   lessonsSyncFromRemote: vi.fn(),
+  notesSyncFromRemote: vi.fn(),
   audioSyncFromRemote: vi.fn(),
   getSession: vi.fn(),
+  mergeAppDataChanges: vi.fn((changes: unknown[]) => changes),
+  publishDataChanges: vi.fn(),
 }));
 
 vi.mock('@/config/config', () => ({
   default: {
-    sync: {
-      fullSyncInterval: 1000,
-    },
+    sync: {},
     database: {
       nullReplacementDate: '9999-12-31T23:59:59+00:00',
     },
@@ -31,20 +30,12 @@ vi.mock('@/config/config', () => ({
   },
 }));
 
-vi.mock('@/database/utils/sync-time.utils', () => ({
-  getFullSyncTime: (...args: unknown[]) => mocks.getFullSyncTime(...args),
-  setFullSyncTime: (...args: unknown[]) => mocks.setFullSyncTime(...args),
-}));
-
 vi.mock('@/database/models/db-init', () => ({
   initDbMappings: (...args: unknown[]) => mocks.initDbMappings(...args),
 }));
 
 vi.mock('@/features/logging/logging.utils', () => ({
-  withSettledSummary: async (promises: Promise<unknown>[], ...args: unknown[]) => {
-    await Promise.allSettled(promises);
-    return mocks.withSettledSummary(promises, ...args);
-  },
+  summarizeSettledResults: (...args: unknown[]) => mocks.summarizeSettledResults(...args),
 }));
 
 vi.mock('@/database/models/user-items', () => ({
@@ -55,9 +46,6 @@ vi.mock('@/database/models/user-items', () => ({
 
 vi.mock('@/database/models/user-lessons', () => ({
   default: { syncFromRemote: (...args: unknown[]) => mocks.userLessonSyncFromRemote(...args) },
-}));
-vi.mock('@/database/models/user-settings', () => ({
-  default: { syncFromRemote: (...args: unknown[]) => mocks.userSettingsSyncFromRemote(...args) },
 }));
 
 vi.mock('@/database/models/groups', () => ({
@@ -86,6 +74,10 @@ vi.mock('@/database/models/lessons', () => ({
   },
 }));
 
+vi.mock('@/database/models/notes', () => ({
+  default: { syncFromRemote: (...args: unknown[]) => mocks.notesSyncFromRemote(...args) },
+}));
+
 vi.mock('@/database/models/audio-records', () => ({
   default: {
     syncFromRemote: (...args: unknown[]) => mocks.audioSyncFromRemote(...args),
@@ -99,6 +91,11 @@ vi.mock('@/database/models/db', () => ({
   },
 }));
 
+vi.mock('@/database/state/data-store', () => ({
+  mergeAppDataChanges: (changes: unknown[]) => mocks.mergeAppDataChanges(changes),
+  publishDataChanges: (userId: string, changes: unknown) => mocks.publishDataChanges(userId, changes),
+}));
+
 vi.mock('@/config/supabase.config', () => ({
   supabaseInstance: {
     auth: {
@@ -107,25 +104,25 @@ vi.mock('@/config/supabase.config', () => ({
   },
 }));
 
-import { dataSync, dataSyncOnUnmount } from '@/database/utils/data-sync.utils';
-import { splitDeleted } from '@/database/utils/sync-generic.utils';
+import { dataSync, dataSyncBeforeSessionEnd } from '@/database/sync/data-sync';
+import { splitDeleted } from '@/database/sync/sync-helpers';
 
-describe('data-sync.utils', () => {
+describe('data synchronization', () => {
   beforeEach(() => {
     vi.clearAllMocks();
 
-    mocks.getFullSyncTime.mockReturnValue(0);
     mocks.initDbMappings.mockResolvedValue(undefined);
-    mocks.withSettledSummary.mockResolvedValue({ total: 10, success: 10, failed: 0 });
+    mocks.summarizeSettledResults.mockReturnValue({ total: 8, success: 8, failed: 0 });
 
-    mocks.userItemSyncFromRemote.mockResolvedValue(undefined);
-    mocks.userLessonSyncFromRemote.mockResolvedValue(0);
-    mocks.userSettingsSyncFromRemote.mockResolvedValue(undefined);
-    mocks.groupsSyncFromRemote.mockResolvedValue(undefined);
-    mocks.groupItemsSyncFromRemote.mockResolvedValue(undefined);
-    mocks.groupRelationsSyncFromRemote.mockResolvedValue(undefined);
-    mocks.levelsSyncFromRemote.mockResolvedValue(undefined);
-    mocks.lessonsSyncFromRemote.mockResolvedValue(undefined);
+    const noChanges = { count: 0, changes: {} };
+    mocks.userItemSyncFromRemote.mockResolvedValue(noChanges);
+    mocks.userLessonSyncFromRemote.mockResolvedValue(noChanges);
+    mocks.groupsSyncFromRemote.mockResolvedValue(noChanges);
+    mocks.groupItemsSyncFromRemote.mockResolvedValue(noChanges);
+    mocks.groupRelationsSyncFromRemote.mockResolvedValue(noChanges);
+    mocks.levelsSyncFromRemote.mockResolvedValue(noChanges);
+    mocks.lessonsSyncFromRemote.mockResolvedValue(noChanges);
+    mocks.notesSyncFromRemote.mockResolvedValue(noChanges);
     mocks.audioSyncFromRemote.mockResolvedValue(undefined);
     mocks.getSession.mockResolvedValue({ data: { session: { user: { id: 'u1' } } }, error: null });
   });
@@ -134,58 +131,47 @@ describe('data-sync.utils', () => {
     vi.restoreAllMocks();
   });
 
-  it('dataSync runs full sync and stores full sync time', async () => {
-    vi.spyOn(Date, 'now').mockReturnValue(5000);
-    mocks.getFullSyncTime.mockReturnValue(0);
-
+  it('dataSync runs date-based sync for each table', async () => {
     await dataSync('u1');
 
-    expect(mocks.userItemSyncFromRemote).toHaveBeenCalledWith('u1', true);
-    expect(mocks.userLessonSyncFromRemote).toHaveBeenCalledWith('u1', true);
-    expect(mocks.userSettingsSyncFromRemote).toHaveBeenCalledWith('u1');
-    expect(mocks.groupsSyncFromRemote).toHaveBeenCalledWith(true);
-    expect(mocks.groupItemsSyncFromRemote).toHaveBeenCalledWith(true);
-    expect(mocks.groupRelationsSyncFromRemote).toHaveBeenCalledWith(true);
-    expect(mocks.levelsSyncFromRemote).toHaveBeenCalledWith(true);
-    expect(mocks.lessonsSyncFromRemote).toHaveBeenCalledWith(true);
-    expect(mocks.setFullSyncTime).toHaveBeenCalledWith('u1', 5000);
-  });
-
-  it('dataSync runs partial sync and does not store full sync time', async () => {
-    vi.spyOn(Date, 'now').mockReturnValue(500);
-    mocks.getFullSyncTime.mockReturnValue(0);
-
-    await dataSync('u1');
-
-    expect(mocks.userItemSyncFromRemote).toHaveBeenCalledWith('u1', false);
-    expect(mocks.userLessonSyncFromRemote).toHaveBeenCalledWith('u1', false);
-    expect(mocks.userSettingsSyncFromRemote).toHaveBeenCalledWith('u1');
-    expect(mocks.groupsSyncFromRemote).toHaveBeenCalledWith(false);
-    expect(mocks.groupItemsSyncFromRemote).toHaveBeenCalledWith(false);
-    expect(mocks.groupRelationsSyncFromRemote).toHaveBeenCalledWith(false);
-    expect(mocks.levelsSyncFromRemote).toHaveBeenCalledWith(false);
-    expect(mocks.lessonsSyncFromRemote).toHaveBeenCalledWith(false);
-    expect(mocks.setFullSyncTime).not.toHaveBeenCalled();
+    expect(mocks.userItemSyncFromRemote).toHaveBeenCalledWith('u1');
+    expect(mocks.userLessonSyncFromRemote).toHaveBeenCalledWith('u1');
+    expect(mocks.groupsSyncFromRemote).toHaveBeenCalledWith();
+    expect(mocks.groupItemsSyncFromRemote).toHaveBeenCalledWith();
+    expect(mocks.groupRelationsSyncFromRemote).toHaveBeenCalledWith();
+    expect(mocks.levelsSyncFromRemote).toHaveBeenCalledWith();
+    expect(mocks.lessonsSyncFromRemote).toHaveBeenCalledWith();
   });
 
   it('dataSync throws when user sync reports rejected results', async () => {
-    mocks.withSettledSummary.mockResolvedValueOnce({ total: 10, success: 9, failed: 1 });
+    mocks.summarizeSettledResults.mockReturnValueOnce({ total: 8, success: 7, failed: 1 });
 
     await expect(dataSync('u1')).rejects.toThrow('Data synchronization error');
   });
 
-  it('dataSyncOnUnmount syncs only user stores in partial mode', async () => {
-    await dataSyncOnUnmount('u1');
+  it('publishes successful table deltas together when another table fails', async () => {
+    const groupChanges = { groups: { upserted: [{ id: 4, name: 'Group' }], deleted: [5] } };
+    mocks.groupsSyncFromRemote.mockResolvedValueOnce({ count: 1, changes: groupChanges });
+    mocks.notesSyncFromRemote.mockRejectedValueOnce(new Error('notes sync failed'));
+    mocks.summarizeSettledResults.mockReturnValueOnce({ total: 8, success: 7, failed: 1 });
 
-    expect(mocks.userItemSyncFromRemote).toHaveBeenCalledWith('u1', false);
-    expect(mocks.userLessonSyncFromRemote).toHaveBeenCalledWith('u1', false);
-    expect(mocks.userSettingsSyncFromRemote).toHaveBeenCalledWith('u1');
+    await expect(dataSync('u1')).rejects.toThrow('Data synchronization error');
+
+    expect(mocks.mergeAppDataChanges).toHaveBeenCalledWith([groupChanges]);
+    expect(mocks.publishDataChanges).toHaveBeenCalledWith('u1', [groupChanges]);
   });
 
-  it('dataSyncOnUnmount does nothing when no auth session exists', async () => {
+  it('dataSyncBeforeSessionEnd syncs only user stores', async () => {
+    await dataSyncBeforeSessionEnd('u1');
+
+    expect(mocks.userItemSyncFromRemote).toHaveBeenCalledWith('u1');
+    expect(mocks.userLessonSyncFromRemote).toHaveBeenCalledWith('u1');
+  });
+
+  it('dataSyncBeforeSessionEnd does nothing when no auth session exists', async () => {
     mocks.getSession.mockResolvedValue({ data: { session: null }, error: null });
 
-    await dataSyncOnUnmount('u1');
+    await dataSyncBeforeSessionEnd('u1');
 
     expect(mocks.userItemSyncFromRemote).not.toHaveBeenCalled();
   });
@@ -194,9 +180,13 @@ describe('data-sync.utils', () => {
     const result = splitDeleted([
       { id: 1, deleted_at: null },
       { id: 2, deleted_at: '2026-03-04T00:00:00.000Z' },
+      { id: 3, deleted_at: config.database.nullReplacementDate },
     ]);
 
-    expect(result.toUpsert).toEqual([{ id: 1, deleted_at: null }]);
+    expect(result.toUpsert).toEqual([
+      { id: 1, deleted_at: null },
+      { id: 3, deleted_at: config.database.nullReplacementDate },
+    ]);
     expect(result.toDelete).toEqual([{ id: 2, deleted_at: '2026-03-04T00:00:00.000Z' }]);
   });
 });

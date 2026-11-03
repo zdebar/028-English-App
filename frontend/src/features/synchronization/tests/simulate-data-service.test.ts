@@ -5,6 +5,7 @@ const mocks = vi.hoisted(() => ({
   getItemCandidates: vi.fn(),
   simulateItems: vi.fn(),
   putUserLessons: vi.fn(),
+  publishDataChanges: vi.fn(),
 }));
 
 vi.mock('@/database/models/db', () => ({
@@ -24,6 +25,10 @@ vi.mock('@/database/models/user-items', () => ({
   },
 }));
 
+vi.mock('@/database/state/data-store', () => ({
+  publishDataChanges: (...args: unknown[]) => mocks.publishDataChanges(...args),
+}));
+
 import { simulateUserProgress } from '@/features/synchronization/simulate-data-service';
 
 describe('simulateUserProgress', () => {
@@ -34,7 +39,7 @@ describe('simulateUserProgress', () => {
       return callback();
     });
     mocks.getItemCandidates.mockResolvedValue([{ item_id: 1, lesson_id: 10 }]);
-    mocks.simulateItems.mockResolvedValue(400);
+    mocks.simulateItems.mockResolvedValue({ count: 400, items: [{ item_id: 1, lesson_id: 10 }] });
   });
 
   it('updates items atomically', async () => {
@@ -58,5 +63,9 @@ describe('simulateUserProgress', () => {
     expect(mocks.putUserLessons).toHaveBeenCalledWith([
       { user_id: 'u1', lesson_id: 10, started_at: '2026-07-17T12:00:00.000Z' },
     ]);
+    expect(mocks.publishDataChanges).toHaveBeenCalledWith('u1', {
+      user_items: { upserted: [{ item_id: 1, lesson_id: 10 }] },
+      user_lessons: { upserted: [{ user_id: 'u1', lesson_id: 10, started_at: '2026-07-17T12:00:00.000Z' }] },
+    });
   });
 });

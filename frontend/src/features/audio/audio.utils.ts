@@ -1,6 +1,15 @@
 import type { UserItemLocal } from '@/types/user-item.types';
 import { TEXTS } from '@/locales/cs';
 
+export function isAudioPlayable(
+  audio: string | null | undefined,
+  audioLoading: boolean,
+  isAudioReady: (audio: string) => boolean,
+): boolean {
+  if (!audio?.trim()) return false;
+  return audioLoading || isAudioReady(audio);
+}
+
 export function getItemAudioSources(
   items: readonly Pick<UserItemLocal, 'audio'>[],
 ): string[] {

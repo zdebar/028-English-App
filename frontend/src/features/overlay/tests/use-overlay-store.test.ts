@@ -67,15 +67,20 @@ describe('useOverlayStore', () => {
     expect(onClose).toHaveBeenCalledTimes(1);
   });
 
-  it('uses latest callback when openOverlay is called again', () => {
+  it('ignores duplicate open requests while preserving the first callback', () => {
     const first = vi.fn();
     const second = vi.fn();
 
     useOverlayStore.getState().openOverlay(first);
+    useOverlayStore.getState().setOverlayDismissible(false);
     useOverlayStore.getState().openOverlay(second);
+
+    expect(useOverlayStore.getState().isOverlayOpen).toBe(true);
+    expect(useOverlayStore.getState().isOverlayDismissible).toBe(false);
+
     useOverlayStore.getState().closeOverlay();
 
-    expect(first).not.toHaveBeenCalled();
-    expect(second).toHaveBeenCalledTimes(1);
+    expect(first).toHaveBeenCalledTimes(1);
+    expect(second).not.toHaveBeenCalled();
   });
 });

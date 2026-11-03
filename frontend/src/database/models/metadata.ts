@@ -3,7 +3,6 @@ import type AppDB from '@/database/models/app-db';
 import { db } from '@/database/models/db';
 import { TableName } from '@/types/table.types';
 import { Entity } from 'dexie';
-import { validateUserIdUsage } from '../utils/metadata.utils';
 
 /**
  * Local sync metadata model for tracking per-table synchronization windows.
@@ -15,7 +14,7 @@ import { validateUserIdUsage } from '../utils/metadata.utils';
  *
  * User-specific tables require a user id; shared lookup tables must omit it.
  */
-export default class Metadata extends Entity<AppDB> {
+export default class SyncMetadata extends Entity<AppDB> {
   table_name!: TableName;
   synced_at?: string;
   user_id?: string;
@@ -29,12 +28,7 @@ export default class Metadata extends Entity<AppDB> {
    * @throws Error when userId usage does not match the table type.
    */
   static async getSyncedAt(tableName: TableName, userId?: string): Promise<string> {
-    const isUserSpecific = validateUserIdUsage(tableName, userId);
-
-    const metadata = await db.metadata.get([
-      tableName,
-      isUserSpecific ? userId! : config.database.nullReplacementUserId,
-    ]);
+    const metadata = await db.metadata.get(getSyncMetadataKey(tableName, userId));
 
     return metadata?.synced_at ?? config.database.epochStartDate;
   }
@@ -52,10 +46,10 @@ export default class Metadata extends Entity<AppDB> {
     syncTime: string,
     userId?: string,
   ): Promise<void> {
-    const isUserSpecific = validateUserIdUsage(tableName, userId);
+    const [metadataTableName, metadataUserId] = getSyncMetadataKey(tableName, userId);
     await db.metadata.put({
-      table_name: tableName,
-      user_id: isUserSpecific ? userId! : config.database.nullReplacementUserId,
+      table_name: metadataTableName,
+      user_id: metadataUserId,
       synced_at: syncTime,
     });
   }
@@ -68,10 +62,24 @@ export default class Metadata extends Entity<AppDB> {
    * @throws Error when userId usage does not match the table type.
    */
   static async deleteSyncRow(tableName: TableName, userId?: string): Promise<void> {
-    const isUserSpecific = validateUserIdUsage(tableName, userId);
-    await db.metadata.delete([
-      tableName,
-      isUserSpecific ? userId! : config.database.nullReplacementUserId,
-    ]);
+    await db.metadata.delete(getSyncMetadataKey(tableName, userId));
   }
+}
+
+function getSyncMetadataKey(tableName: TableName, userId?: string): [TableName, string] {
+  const isUserSpecific = isUserSpecificTable(tableName);
+  if (isUserSpecific && !userId) {
+    throw new Error(`userId is required for user-specific table: ${tableName}.`);
+  }
+  if (!isUserSpecific && userId) {
+    throw new Error(`userId must not be provided for shared table: ${tableName}.`);
+  }
+  const metadataUserId = isUserSpecific && userId
+    ? userId
+    : config.database.nullReplacementUserId;
+  return [tableName, metadataUserId];
+}
+
+function isUserSpecificTable(tableName: TableName): boolean {
+  return tableName === TableName.UserItems || tableName === TableName.UserLessons;
 }

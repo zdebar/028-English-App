@@ -1,48 +1,30 @@
-const DEFAULT_THEME_USER_ID = 'guest';
+export const DEFAULT_THEME_USER_ID = 'guest';
+
 const ACTIVE_THEME_STORAGE_KEY = 'theme_active';
-type StoredTheme = 'light' | 'dark';
 
-function resolveThemeUserId(userId?: string): string {
-  return userId || DEFAULT_THEME_USER_ID;
-}
-
-/**
- * Generates a storage key for user theme preferences.
- * @param userId - The unique identifier of the user
- * @returns A formatted storage key string for storing the user's theme preference
- */
-function getThemeStorageKey(userId?: string): string {
-  return `theme_${resolveThemeUserId(userId)}`;
-}
+export type ThemePreference = 'light' | 'dark';
 
 /**
  * Saves the user's theme preference to local storage.
- * @param theme - The theme to save (e.g., 'light', 'dark').
- * @param userId - The unique identifier of the user.
+ * @param theme Theme to save.
+ * @param userId Unique user id; omitted for the guest preference.
  */
-export function saveUserTheme(theme: string, userId?: string): void {
+export function saveUserTheme(theme: ThemePreference, userId?: string | null): void {
   localStorage.setItem(getThemeStorageKey(userId), theme);
 }
 
 /**
- * Loads the theme preference for a specific user from local storage.
- * @param userId - The unique identifier of the user whose theme preference should be loaded.
- * @returns The stored theme preference as a string, or null if no theme preference has been saved for the user.
+ * Loads a valid theme preference from local storage.
+ * @param userId Unique user id; omitted for the guest preference.
+ * @returns The saved theme or null when none is stored or the value is invalid.
  */
-export function loadUserTheme(userId?: string): string | null {
-  return localStorage.getItem(getThemeStorageKey(userId));
-}
-
-/**
- * Clears the theme preference for a specific user from local storage.
- * @param userId - The unique identifier of the user whose theme preference should be cleared.
- */
-export function clearUserTheme(userId?: string): void {
-  localStorage.removeItem(getThemeStorageKey(userId));
+export function loadUserTheme(userId?: string | null): ThemePreference | null {
+  const theme = localStorage.getItem(getThemeStorageKey(userId));
+  return theme === 'light' || theme === 'dark' ? theme : null;
 }
 
 /** Saves the theme used during the next pre-paint bootstrap. */
-export function saveActiveTheme(theme: StoredTheme): void {
+export function saveActiveTheme(theme: ThemePreference): void {
   try {
     localStorage.setItem(ACTIVE_THEME_STORAGE_KEY, theme);
   } catch {
@@ -51,7 +33,7 @@ export function saveActiveTheme(theme: StoredTheme): void {
 }
 
 /** Loads and validates the theme used during the pre-paint bootstrap. */
-export function loadActiveTheme(): StoredTheme | null {
+export function loadActiveTheme(): ThemePreference | null {
   try {
     const theme = localStorage.getItem(ACTIVE_THEME_STORAGE_KEY);
     return theme === 'light' || theme === 'dark' ? theme : null;
@@ -67,4 +49,8 @@ export function clearActiveTheme(): void {
   } catch {
     // Ignore unavailable or blocked storage.
   }
+}
+
+function getThemeStorageKey(userId?: string | null): string {
+  return `theme_${userId ?? DEFAULT_THEME_USER_ID}`;
 }

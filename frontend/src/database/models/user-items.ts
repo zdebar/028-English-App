@@ -12,8 +12,7 @@ import type {
 import type { ReviewDirection, ReviewKind } from '@/types/practice.types';
 import Dexie, { Entity } from 'dexie';
 
-import { resetUserItem } from '@/database/utils/user-items.utils';
-import { isReviewItemCandidate, isReviewItemDue } from '@/database/utils/review-items.utils';
+import { isReviewItemCandidate, isReviewItemDue } from '@/database/practice/review-items';
 import {
   applyPracticeProgress as applyUserItemPracticeProgress,
   compareCurriculumPaths,
@@ -25,48 +24,17 @@ import {
   getReadyAt,
   isInitialTrainingSkipped,
   isReviewDirectionEnabled,
-} from '@/database/utils/user-item-practice.utils';
+} from '@/database/practice/user-item-practice';
 import type { ReadyPracticeState } from '@/types/generic.types';
-import { syncUserItemsFromRemote } from '@/database/utils/sync-user-items';
+import { syncUserItemsFromRemote } from '@/database/sync/user-items-sync';
 import { assertNonEmptyString } from '@/utils/assertions.utils';
-import { isInitiated } from '@/utils/progress.utils';
+import { isInitiated } from '@/database/practice/user-item-progress';
+import type { AppDataSyncResult } from '@/database/state/data-types';
+import { publishDataChanges } from '@/database/state/data-store';
 
 const NULL_DATE = config.database.nullReplacementDate;
 const SIM_LESSON_COUNT = config.progress.simulationLessonCount;
 const SIM_ITEM_PROGRESS = config.progress.simulationItemProgress;
-
-async function getUnstartedItems(userId: string): Promise<UserItemLocal[]> {
-  const items = await db.user_items.where('user_id').equals(userId).toArray();
-  return items
-    .filter(
-      (item) =>
-        item.deleted_at === NULL_DATE &&
-        item.is_cz_to_en_enabled !== false &&
-        item.started_at === NULL_DATE &&
-        !isInitialTrainingSkipped(item),
-    )
-    .sort((left, right) =>
-      compareCurriculumPaths(left.curriculum_sort_path, right.curriculum_sort_path),
-    );
-}
-
-function getLessonTrainingSelection(
-  firstItem: UserItemLocal,
-  unstartedItems: UserItemLocal[],
-): InitialTrainingSelection {
-  return {
-    lessonId: firstItem.lesson_id,
-    items: unstartedItems.filter((item) => item.lesson_id === firstItem.lesson_id),
-  };
-}
-
-function resolveInitialTrainingSelection(
-  unstartedItems: UserItemLocal[],
-): InitialTrainingSelection | null {
-  const firstItem = unstartedItems[0];
-  if (!firstItem) return null;
-  return getLessonTrainingSelection(firstItem, unstartedItems);
-}
 
 /**
  * Local Dexie model and sync API for user-specific vocabulary and grammar item progress.
@@ -104,6 +72,8 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
   is_en_to_cz_enabled!: boolean;
   lesson_id!: number;
 
+  // -- Review selection and answer persistence --
+
   /**
    * Returns all due CZ-to-EN review items.
    * @param now Fixed current time shared with availability counts.
@@ -138,13 +108,14 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
    * Empty arrays are ignored.
    */
   static async savePracticeDeck(items: PracticeDeckItem[], direction: ReviewDirection = 'cz_to_en'): Promise<void> {
-    if (!items || items.length === 0) return;
+    if (items.length === 0) return;
 
-    await db.transaction('rw', db.user_items, async () => {
+    const updatedItems = await db.transaction('rw', db.user_items, async () => {
       const updates: Array<{
         key: [string, number];
         changes: Partial<UserItemLocal>;
       }> = [];
+      const updatedItems: UserItemLocal[] = [];
       const currentItems = await Promise.all(
         items.map((item) => db.user_items.get([item.user_id, item.item_id])),
       );
@@ -155,31 +126,37 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
         const currentMasteredAt = direction === 'cz_to_en' ? currentItem.mastered_at_cz_to_en : currentItem.mastered_at_en_to_cz;
         if (currentMasteredAt !== NULL_DATE) continue;
 
+        const changes = direction === 'cz_to_en'
+          ? {
+              progress_cz_to_en: item.progress_cz_to_en,
+              started_at: item.started_at,
+              updated_at: item.updated_at,
+              next_at_cz_to_en: item.next_at_cz_to_en,
+              mastered_at_cz_to_en: item.mastered_at_cz_to_en,
+            }
+          : {
+              progress_en_to_cz: item.progress_en_to_cz,
+              started_at: item.started_at,
+              updated_at: item.updated_at,
+              next_at_en_to_cz: item.next_at_en_to_cz,
+              mastered_at_en_to_cz: item.mastered_at_en_to_cz,
+            };
         updates.push({
           key: [item.user_id, item.item_id],
-          changes: direction === 'cz_to_en'
-            ? {
-                progress_cz_to_en: item.progress_cz_to_en,
-                started_at: item.started_at,
-                updated_at: item.updated_at,
-                next_at_cz_to_en: item.next_at_cz_to_en,
-                mastered_at_cz_to_en: item.mastered_at_cz_to_en,
-              }
-            : {
-                progress_en_to_cz: item.progress_en_to_cz,
-                started_at: item.started_at,
-                updated_at: item.updated_at,
-                next_at_en_to_cz: item.next_at_en_to_cz,
-                mastered_at_en_to_cz: item.mastered_at_en_to_cz,
-              },
+          changes,
         });
+        updatedItems.push({ ...currentItem, ...changes });
       }
 
       if (updates.length > 0) {
         await db.user_items.bulkUpdate(updates);
       }
+      return updatedItems;
     });
+    publishUserItemUpdates(updatedItems);
   }
+
+  // -- User-item lookups and eligibility --
 
   /**
    * Reads every local user item row.
@@ -200,6 +177,11 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
     return db.user_items.where('user_id').equals(userId).toArray();
   }
 
+  /**
+   * Reads the requested items for one user in curriculum order.
+   * @param userId Id of the user whose items should be read.
+   * @param itemIds Item ids to look up.
+   */
   static async getByItemIds(userId: string, itemIds: readonly number[]): Promise<UserItemLocal[]> {
     if (itemIds.length === 0) return [];
     const items = await db.user_items
@@ -313,6 +295,8 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
     };
   }
 
+  // -- Progress resets and account cleanup --
+
   /**
    * Resets one user item while preserving its started state.
    *
@@ -335,6 +319,14 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
     return itemId;
   }
 
+  /**
+   * Resets initiated items in a grammar group and its descendants.
+   * @param userId Id of the user whose items should be reset.
+   * @param grammarGroupId Id of the grammar group to reset.
+   * @param direction Review direction to reset.
+   * @param dateTime Timestamp to record for the reset.
+   * @returns Number of reset items.
+   */
   static async resetItemsByGrammarGroupId(
     userId: string,
     grammarGroupId: number,
@@ -376,12 +368,19 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
    * Deletes all local item rows for an account being removed.
    *
    * @param userId User id whose local item rows should be deleted.
-   * @returns true after IndexedDB deletion completes.
    */
-  static async deleteByUserId(userId: string): Promise<boolean> {
-    await db.user_items.where('user_id').equals(userId).delete();
-    return true;
+  static async deleteByUserId(userId: string): Promise<void> {
+    const deletedItemIds = await db.transaction('rw', db.user_items, async () => {
+      const items = await db.user_items.where('user_id').equals(userId).toArray();
+      await db.user_items.bulkDelete(items.map((item) => [userId, item.item_id]));
+      return items.map((item) => item.item_id);
+    });
+    if (deletedItemIds.length > 0) {
+      publishDataChanges(userId, { user_items: { deleted: deletedItemIds } });
+    }
   }
+
+  // -- Simulation fixture --
 
   /** Returns vocabulary rows from the first configured lessons in curriculum order. */
   static async getSimulationCandidates(userId: string): Promise<UserItemLocal[]> {
@@ -425,7 +424,10 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
   }
 
   /** Replaces progress on simulation candidates with one deterministic fixture. */
-  static async simulateData(items: UserItemLocal[], dateTime: string): Promise<number> {
+  static async simulateData(
+    items: UserItemLocal[],
+    dateTime: string,
+  ): Promise<Readonly<{ count: number; items: UserItemLocal[] }>> {
     const simulatedItems = items.map((item) => {
       return {
         ...item,
@@ -438,12 +440,14 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
     });
 
     await db.user_items.bulkPut(simulatedItems);
-    return simulatedItems.length;
+    return { count: simulatedItems.length, items: simulatedItems };
   }
 
+  // -- Remote sync and practice mutations --
+
   /** Pushes local progress and merges remote item updates. */
-  static syncFromRemote(userId: string, doFullSync: boolean): Promise<number> {
-    return syncUserItemsFromRemote(userId, doFullSync);
+  static syncFromRemote(userId: string): Promise<AppDataSyncResult> {
+    return syncUserItemsFromRemote(userId);
   }
 
   /** Reads due, unmastered CZ-to-EN practice items. */
@@ -501,7 +505,41 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
       });
       if (updatedCount !== 1) throw new Error('The trained item no longer exists locally.');
     });
+    publishUserItemUpdates([item]);
   }
+}
+
+async function getUnstartedItems(userId: string): Promise<UserItemLocal[]> {
+  const items = await db.user_items.where('user_id').equals(userId).toArray();
+  return items
+    .filter(
+      (item) =>
+        item.deleted_at === NULL_DATE &&
+        item.is_cz_to_en_enabled !== false &&
+        item.started_at === NULL_DATE &&
+        !isInitialTrainingSkipped(item),
+    )
+    .sort((left, right) =>
+      compareCurriculumPaths(left.curriculum_sort_path, right.curriculum_sort_path),
+    );
+}
+
+function getLessonTrainingSelection(
+  firstItem: UserItemLocal,
+  unstartedItems: UserItemLocal[],
+): InitialTrainingSelection {
+  return {
+    lessonId: firstItem.lesson_id,
+    items: unstartedItems.filter((item) => item.lesson_id === firstItem.lesson_id),
+  };
+}
+
+function resolveInitialTrainingSelection(
+  unstartedItems: UserItemLocal[],
+): InitialTrainingSelection | null {
+  const firstItem = unstartedItems[0];
+  if (!firstItem) return null;
+  return getLessonTrainingSelection(firstItem, unstartedItems);
 }
 
 async function getGroupAndDescendantIds(groupId: number): Promise<number[]> {
@@ -529,13 +567,41 @@ async function getGroupAndDescendantIds(groupId: number): Promise<number[]> {
 async function resetItems(items: UserItemLocal[], dateTime: string, direction: ReviewDirection = 'cz_to_en'): Promise<number> {
   if (items.length === 0) return 0;
 
-  return await db.transaction('rw', db.user_items, async () => {
+  const updatedItems = await db.transaction('rw', db.user_items, async () => {
     const updatedItems = items.map((item) => {
       const updatedItem = { ...item };
       resetUserItem(updatedItem, dateTime, direction);
       return updatedItem;
     });
     await db.user_items.bulkPut(updatedItems);
-    return updatedItems.length;
+    return updatedItems;
   });
+  publishUserItemUpdates(updatedItems);
+  return updatedItems.length;
+}
+
+function publishUserItemUpdates(items: readonly UserItemLocal[]): void {
+  if (items.length === 0) return;
+  const userId = items[0]?.user_id;
+  if (!userId) return;
+  publishDataChanges(userId, { user_items: { upserted: items } });
+}
+
+/** Resets one item's progress in the selected review direction. */
+export function resetUserItem(
+  item: UserItemLocal,
+  dateTime: string = new Date().toISOString(),
+  direction: ReviewDirection = 'cz_to_en',
+): void {
+  if (direction === 'en_to_cz') {
+    item.next_at_en_to_cz = dateTime;
+    item.mastered_at_en_to_cz = NULL_DATE;
+    item.updated_at = dateTime;
+    item.progress_en_to_cz = 0;
+    return;
+  }
+  item.next_at_cz_to_en = dateTime;
+  item.mastered_at_cz_to_en = NULL_DATE;
+  item.updated_at = dateTime;
+  item.progress_cz_to_en = 0;
 }

@@ -1,11 +1,10 @@
 import { usePracticeAvailabilityBoundary } from './use-practice-availability-boundary';
-import { refreshPracticeReviewAvailability } from '../practice-availability-controller';
-import Lessons from '@/database/models/lessons';
 import UserItem from '@/database/models/user-items';
 import UserLesson from '@/database/models/user-lessons';
-import Groups from '@/database/models/groups';
+import { useDataPackage, type DataPackageResult } from '@/database/state/data-store';
 import type { GrammarDetail } from '@/features/grammar/GrammarDetailCard';
-import { reportError } from '@/features/logging/monitoring-handler';
+import { reportError } from '@/features/logging/logging-handler';
+import { toError } from '@/utils/error.utils';
 import type { LessonType } from '@/types/generic.types';
 import type { GroupType } from '@/types/table.types';
 import type { ResolvedPracticeEntry, UserItemLocal } from '@/types/user-item.types';
@@ -20,33 +19,12 @@ import {
 } from 'react';
 import { NBSP } from './use-hint';
 import { usePracticeCardState } from './use-practice-card-state';
-import type { InitialTrainingData } from '@/routing/route-data';
-import {
-  resolvePracticeEntries,
-  resolvePracticeGrammarContext,
-} from '@/database/utils/practice-content.utils';
-import {
-  invalidateReviewArrays,
-  rebuildReviewArrays,
-  syncReviewItemToCache,
-} from '../review-prefetch';
-import {
-  getPrefetchedNextInitialLesson,
-  invalidateNextInitialLesson,
-} from '../practice-prefetch';
+import type { InitialTrainingData } from '../initial-training-data';
 
+// -- Training queue and view types --
 type TrainingOutcome = 'correct' | 'incorrect' | 'skip';
 
 type PracticeCompletionHandler = () => void;
-
-function toError(error: unknown): Error {
-  return error instanceof Error ? error : new Error(String(error));
-}
-
-function toGrammarDetail(grammar: GroupType | null | undefined): GrammarDetail | null {
-  if (!grammar) return null;
-  return { ...grammar, kind: 'chunk' };
-}
 
 type InitialTrainingLoadResult = Readonly<{
   lesson: LessonType | null;
@@ -57,6 +35,8 @@ type InitialTrainingLoadResult = Readonly<{
   groupNote: string | null;
   queue: InitialTrainingQueue;
 }>;
+
+type EligibleInitialTrainingData = InitialTrainingData & Readonly<{ lesson: LessonType }>;
 
 type InitialTrainingQueue = Readonly<{
   currentItemIds: number[];
@@ -71,6 +51,315 @@ type InitialTrainingView = Readonly<{
   pronunciation: string;
 }>;
 
+type InitialTrainingLoadSetters = Readonly<{
+  setLesson: Dispatch<SetStateAction<LessonType | null>>;
+  setItems: Dispatch<SetStateAction<UserItemLocal[]>>;
+  setActiveItems: Dispatch<SetStateAction<UserItemLocal[]>>;
+  setInitialItemCount: Dispatch<SetStateAction<number>>;
+  setResolvedEntries: Dispatch<SetStateAction<Array<ResolvedPracticeEntry<UserItemLocal>>>>;
+  setGrammar: Dispatch<SetStateAction<GrammarDetail | null>>;
+  setGrammarGroup: Dispatch<SetStateAction<GroupType | null>>;
+  setGroupNote: Dispatch<SetStateAction<string | null>>;
+  setQueue: Dispatch<SetStateAction<InitialTrainingQueue | null>>;
+  setHasProgress: Dispatch<SetStateAction<boolean>>;
+  setIsComplete: Dispatch<SetStateAction<boolean>>;
+  setRevealed: Dispatch<SetStateAction<boolean>>;
+  setLoading: Dispatch<SetStateAction<boolean>>;
+  setError: Dispatch<SetStateAction<Error | null>>;
+}>;
+
+type InitialTrainingSyncOptions = Readonly<{
+  userId: string | null;
+  packageState: DataPackageResult<InitialTrainingData>;
+  initialData: InitialTrainingData | undefined;
+  isCurrentRequest: () => boolean;
+  startedForUserRef: { current: string | null };
+  previousUserRef: { current: string | null };
+  completionHandledRef: { current: boolean };
+  trackPracticeWrite: <T>(operation: Promise<T>) => Promise<T>;
+  setters: InitialTrainingLoadSetters;
+}>;
+
+type AdvanceInitialTrainingOptions = Readonly<{
+  outcome: TrainingOutcome;
+  queue: InitialTrainingQueue | null;
+  currentItem: UserItemLocal | null;
+  isComplete: boolean;
+  setItems: Dispatch<SetStateAction<UserItemLocal[]>>;
+  setActiveItems: Dispatch<SetStateAction<UserItemLocal[]>>;
+  setQueue: Dispatch<SetStateAction<InitialTrainingQueue | null>>;
+  setHasProgress: Dispatch<SetStateAction<boolean>>;
+  setIsComplete: Dispatch<SetStateAction<boolean>>;
+  setError: Dispatch<SetStateAction<Error | null>>;
+  resetQuestionState: () => void;
+}>;
+
+// -- Public training hook --
+export function useInitialTrainingDeck(
+  userId: string | null,
+  onComplete?: PracticeCompletionHandler,
+) {
+  const { trackPracticeWrite, finishPractice } = usePracticeAvailabilityBoundary(userId);
+  const packageState = useDataPackage({ kind: 'initial-training' });
+  const initialData = getReadyInitialTrainingData(packageState, userId);
+  const initialState = getInitialTrainingState(initialData);
+  const [lesson, setLesson] = useState<LessonType | null>(initialState.lesson);
+  const [items, setItems] = useState<UserItemLocal[]>(initialState.items);
+  const [activeItems, setActiveItems] = useState<UserItemLocal[]>(initialState.items);
+  const [initialItemCount, setInitialItemCount] = useState(initialState.items.length);
+  const [resolvedEntries, setResolvedEntries] = useState<
+    Array<ResolvedPracticeEntry<UserItemLocal>>
+  >(initialState.entries);
+  const [grammar, setGrammar] = useState<GrammarDetail | null>(initialState.grammar);
+  const [grammarGroup, setGrammarGroup] = useState<GroupType | null>(
+    initialState.grammarGroup,
+  );
+  const [groupNote, setGroupNote] = useState<string | null>(initialData?.groupNote ?? null);
+  const [queue, setQueue] = useState<InitialTrainingQueue | null>(null);
+  const [isComplete, setIsComplete] = useState(false);
+  const [hasProgress, setHasProgress] = useState(false);
+  const [revealed, setRevealed] = useState(false);
+  const [loading, setLoading] = useState(userId != null);
+  const [error, setError] = useState<Error | null>(null);
+  const isTransitioningRef = useRef(false);
+  const completionHandledRef = useRef(false);
+  const startedForUserRef = useRef<string | null>(null);
+  const previousUserRef = useRef(userId);
+  const activeUserIdRef = useRef(userId);
+  const mountedRef = useRef(false);
+
+  useEffect(() => {
+    activeUserIdRef.current = userId;
+  }, [userId]);
+
+  useEffect(() => {
+    mountedRef.current = true;
+    return () => {
+      mountedRef.current = false;
+    };
+  }, []);
+
+  useEffect(() => synchronizeInitialTrainingPackage({
+    userId,
+    packageState,
+    initialData,
+    isCurrentRequest: () => mountedRef.current && activeUserIdRef.current === userId,
+    startedForUserRef,
+    previousUserRef,
+    completionHandledRef,
+    trackPracticeWrite,
+    setters: {
+      setLesson,
+      setItems,
+      setActiveItems,
+      setInitialItemCount,
+      setResolvedEntries,
+      setGrammar,
+      setGrammarGroup,
+      setGroupNote,
+      setQueue,
+      setHasProgress,
+      setIsComplete,
+      setRevealed,
+      setLoading,
+      setError,
+    },
+  }), [packageState.error, packageState.status, packageState.userId, trackPracticeWrite, userId]);
+
+  const itemById = useMemo(
+    () => new Map(activeItems.map((item) => [item.item_id, item])),
+    [activeItems],
+  );
+  const { currentItem, currentEntry, displayedCompletedCount, pronunciation } = useMemo(
+    () =>
+      getInitialTrainingView(
+        queue,
+        itemById,
+        resolvedEntries,
+        isComplete,
+        revealed,
+        initialItemCount,
+      ),
+    [activeItems, initialItemCount, isComplete, itemById, queue, resolvedEntries, revealed],
+  );
+  const cardState = usePracticeCardState({
+    currentItem,
+    revealed,
+    isCompletion: isComplete,
+    setRevealed,
+  });
+  const resetQuestionState = cardState.resetQuestionState;
+  const completePractice = useCallback(async () => {
+    await completeInitialTrainingOnce(completionHandledRef, finishPractice, onComplete);
+  }, [finishPractice, onComplete]);
+
+  useEffect(() => {
+    completeIfReady(isComplete, completePractice);
+  }, [completePractice, isComplete]);
+
+  const advance = useCallback(
+    async (outcome: TrainingOutcome) => {
+      await runInitialTrainingTransition({
+        isTransitioningRef,
+        trackPracticeWrite,
+        outcome,
+        queue,
+        currentItem,
+        isComplete,
+        setItems,
+        setActiveItems,
+        setQueue,
+        setHasProgress,
+        setIsComplete,
+        setError,
+        resetQuestionState,
+      });
+    },
+    [
+      currentItem,
+      isComplete,
+      resetQuestionState,
+      queue,
+      trackPracticeWrite,
+    ],
+  );
+
+  const completeCurrent = useCallback(() => advance('skip'), [advance]);
+
+  return {
+    lesson,
+    items,
+    hasContent: initialItemCount > 0,
+    grammar,
+    grammarGroup,
+    groupNote,
+    soundGroups: initialData?.soundGroups ?? [],
+    isComplete,
+    isCompletion: isComplete,
+    hasProgress,
+    loading,
+    error,
+    finishPractice,
+    currentItem,
+    note: currentEntry?.note ?? null,
+    practiceGrammar: currentEntry?.grammar ?? null,
+    progressLabel: `${displayedCompletedCount}/${initialItemCount}`,
+    revealed,
+    czech: cardState.czech,
+    english: cardState.english,
+    pronunciation,
+    audioDisabled: cardState.audioDisabled,
+    handleReveal: cardState.handleReveal,
+    plusHint: cardState.plusHint,
+    nextRepeat: () => advance('incorrect'),
+    nextKnown: () => advance('correct'),
+    completeCurrent,
+    audioError: cardState.audioError,
+    playAudio: cardState.playAudio,
+    audioLoading: cardState.audioLoading,
+    isPlaying: cardState.isPlaying,
+  };
+}
+
+// -- Package synchronization and completion --
+function synchronizeInitialTrainingPackage({
+  userId,
+  packageState,
+  initialData,
+  isCurrentRequest,
+  startedForUserRef,
+  previousUserRef,
+  completionHandledRef,
+  trackPracticeWrite,
+  setters,
+}: InitialTrainingSyncOptions): void {
+  if (previousUserRef.current !== userId) {
+    previousUserRef.current = userId;
+    startedForUserRef.current = null;
+    setters.setLesson(null);
+    setters.setItems([]);
+    setters.setActiveItems([]);
+    setters.setInitialItemCount(0);
+    setters.setResolvedEntries([]);
+    setters.setGrammar(null);
+    setters.setGrammarGroup(null);
+    setters.setGroupNote(null);
+    setters.setQueue(null);
+    setters.setHasProgress(false);
+    setters.setIsComplete(false);
+    setters.setRevealed(false);
+    setters.setError(null);
+    setters.setLoading(true);
+    completionHandledRef.current = false;
+  }
+  if (!userId) {
+    setters.setLoading(false);
+    return;
+  }
+  if (packageState.userId !== userId || packageState.status === 'loading') {
+    setters.setLoading(true);
+    return;
+  }
+  if (packageState.status === 'error') {
+    setters.setError(packageState.error);
+    setters.setLoading(false);
+    return;
+  }
+  if (!initialData) {
+    setters.setLoading(false);
+    return;
+  }
+  if (startedForUserRef.current === userId) return;
+
+  startedForUserRef.current = userId;
+  startInitialTrainingLoad(userId, initialData, setters, trackPracticeWrite, isCurrentRequest);
+}
+
+function getReadyInitialTrainingData(
+  packageState: DataPackageResult<InitialTrainingData>,
+  userId: string | null,
+): InitialTrainingData | undefined {
+  if (packageState.userId !== userId || packageState.status !== 'ready') return undefined;
+  return packageState.data;
+}
+
+function completeIfReady(isComplete: boolean, completePractice: () => Promise<void>): void {
+  if (isComplete) void completePractice();
+}
+
+async function completeInitialTrainingOnce(
+  handledRef: { current: boolean },
+  finishPractice: () => Promise<void>,
+  onComplete: PracticeCompletionHandler | undefined,
+): Promise<void> {
+  if (handledRef.current) return;
+  handledRef.current = true;
+  await finishPractice();
+  onComplete?.();
+}
+
+type InitialTrainingTransitionOptions = Omit<AdvanceInitialTrainingOptions, 'resetQuestionState'> & Readonly<{
+  isTransitioningRef: { current: boolean };
+  trackPracticeWrite: <T>(operation: Promise<T>) => Promise<T>;
+  resetQuestionState: () => void;
+}>;
+
+async function runInitialTrainingTransition(options: InitialTrainingTransitionOptions): Promise<void> {
+  if (options.isTransitioningRef.current) return;
+  options.isTransitioningRef.current = true;
+  try {
+    await options.trackPracticeWrite(advanceInitialTraining(options));
+  } finally {
+    options.isTransitioningRef.current = false;
+  }
+}
+
+function toGrammarDetail(grammar: GroupType | null | undefined): GrammarDetail | null {
+  if (!grammar) return null;
+  return { ...grammar, kind: 'chunk' };
+}
+
+// -- Initial view state and derived display data --
 function getInitialTrainingState(initialData: InitialTrainingData | undefined) {
   return {
     lesson: initialData?.lesson ?? null,
@@ -130,113 +419,62 @@ function getTrainingPronunciation(currentItem: UserItemLocal | null, revealed: b
   return currentItem?.pronunciation || NBSP;
 }
 
-async function resolveTrainingSelection(
-  userId: string,
-  initialData: InitialTrainingData | undefined,
-) {
-  if (initialData) {
-    return { lessonId: initialData.lesson?.id ?? null, items: initialData.items };
-  }
-  const preparedLesson = await getPrefetchedNextInitialLesson(userId);
-  if (!preparedLesson) return null;
-  return { lessonId: preparedLesson.lesson?.id ?? null, items: preparedLesson.items };
-}
-
-function resolveTrainingLesson(
-  initialData: InitialTrainingData | undefined,
-  selection: Awaited<ReturnType<typeof resolveTrainingSelection>>,
-): Promise<LessonType | null> {
-  if (initialData?.lesson) return Promise.resolve(initialData.lesson);
-  if (selection?.lessonId == null) return Promise.resolve(null);
-  return Lessons.getById(selection.lessonId);
-}
-
-function resolveTrainingGrammarContext(
-  userId: string,
-  initialData: InitialTrainingData | undefined,
-  lesson: LessonType | null,
-): ReturnType<typeof resolvePracticeGrammarContext> {
-  if (initialData) {
-    return Promise.resolve({ grammar: initialData.grammar, grammarGroup: initialData.grammarGroup });
-  }
-  return resolvePracticeGrammarContext(userId, lesson?.group_id);
-}
-
+// -- Local load fallback and queue construction --
 async function loadInitialTrainingData(
   userId: string,
-  initialData: InitialTrainingData | undefined,
+  initialData: InitialTrainingData,
 ): Promise<InitialTrainingLoadResult | null> {
-  const selection = await resolveTrainingSelection(userId, initialData);
-  const lesson = await resolveTrainingLesson(initialData, selection);
-  const items = getTrainingItems(selection);
-  if (items.length === 0 || !lesson) return null;
+  const prepared = getEligibleInitialTrainingData(initialData);
+  if (!prepared) return null;
 
-  const entries = await resolveTrainingEntries(userId, initialData, items);
-  const grammarContext = await resolveTrainingGrammarContext(userId, initialData, lesson);
-  const lessonGroup = lesson.group_id == null ? null : await Groups.getById(lesson.group_id);
-  const didStart = await UserLesson.startIfAllowed(
+  const didStart = await UserLesson.startIfEligible(
     userId,
-    lesson.id,
-    items.map((item) => item.item_id),
+    prepared.lesson.id,
+    prepared.items.map((item) => item.item_id),
   );
   if (!didStart) return null;
-  invalidateNextInitialLesson(userId);
 
   return {
-    lesson,
-    items,
-    entries,
-    grammar: grammarContext.grammar,
-    grammarGroup: grammarContext.grammarGroup,
-    groupNote: lessonGroup?.note ?? null,
+    ...createInitialTrainingLoadResult(prepared),
+  };
+}
+
+function getEligibleInitialTrainingData(
+  initialData: InitialTrainingData,
+): EligibleInitialTrainingData | null {
+  const prepared = initialData;
+  if (!prepared?.lesson || prepared.items.length === 0) return null;
+  return { ...prepared, lesson: prepared.lesson };
+}
+
+function createInitialTrainingLoadResult(
+  prepared: EligibleInitialTrainingData,
+): InitialTrainingLoadResult {
+  return {
+    lesson: prepared.lesson,
+    items: prepared.items,
+    entries: prepared.entries,
+    grammar: prepared.grammar,
+    grammarGroup: prepared.grammarGroup,
+    groupNote: prepared.groupNote,
     queue: {
-      currentItemIds: items.map((item) => item.item_id),
+      currentItemIds: prepared.items.map((item) => item.item_id),
       retryItemIds: [],
       completedCount: 0,
     },
   };
 }
 
-function getTrainingItems(
-  selection: Awaited<ReturnType<typeof resolveTrainingSelection>>,
-): UserItemLocal[] {
-  return selection?.items ?? [];
-}
-
-function resolveTrainingEntries(
-  userId: string,
-  initialData: InitialTrainingData | undefined,
-  items: UserItemLocal[],
-): Promise<Array<ResolvedPracticeEntry<UserItemLocal>>> {
-  if (initialData?.entries) return Promise.resolve(initialData.entries);
-  return resolvePracticeEntries(userId, items);
-}
-
-type InitialTrainingLoadSetters = Readonly<{
-  setLesson: Dispatch<SetStateAction<LessonType | null>>;
-  setItems: Dispatch<SetStateAction<UserItemLocal[]>>;
-  setActiveItems: Dispatch<SetStateAction<UserItemLocal[]>>;
-  setInitialItemCount: Dispatch<SetStateAction<number>>;
-  setResolvedEntries: Dispatch<SetStateAction<Array<ResolvedPracticeEntry<UserItemLocal>>>>;
-  setGrammar: Dispatch<SetStateAction<GrammarDetail | null>>;
-  setGrammarGroup: Dispatch<SetStateAction<GroupType | null>>;
-  setGroupNote: Dispatch<SetStateAction<string | null>>;
-  setQueue: Dispatch<SetStateAction<InitialTrainingQueue | null>>;
-  setHasProgress: Dispatch<SetStateAction<boolean>>;
-  setLoading: Dispatch<SetStateAction<boolean>>;
-  setError: Dispatch<SetStateAction<Error | null>>;
-}>;
-
 function startInitialTrainingLoad(
   userId: string,
-  initialData: InitialTrainingData | undefined,
+  initialData: InitialTrainingData,
   setters: InitialTrainingLoadSetters,
   trackPracticeWrite: <T>(operation: Promise<T>) => Promise<T>,
-): () => void {
-  let mounted = true;
+  isCurrentRequest: () => boolean,
+): void {
   void trackPracticeWrite(loadInitialTrainingData(userId, initialData))
     .then((result) => {
-      if (!mounted) return;
+      if (!isCurrentRequest()) return;
       if (!result) {
         setters.setLesson(null);
         setters.setItems([]);
@@ -262,15 +500,11 @@ function startInitialTrainingLoad(
       setters.setHasProgress(false);
     })
     .catch((caughtError) => {
-      if (mounted) setters.setError(toError(caughtError));
+      if (isCurrentRequest()) setters.setError(toError(caughtError));
     })
     .finally(() => {
-      if (mounted) setters.setLoading(false);
+      if (isCurrentRequest()) setters.setLoading(false);
     });
-
-  return () => {
-    mounted = false;
-  };
 }
 
 function getTrainingAnswerQueue(
@@ -300,32 +534,6 @@ function getTrainingAnswerQueue(
 function updateTrainingItem(items: UserItemLocal[], updatedItem: UserItemLocal): UserItemLocal[] {
   return items.map((item) => (item.item_id === updatedItem.item_id ? updatedItem : item));
 }
-
-async function syncPersistedItemToReviewCache(item: UserItemLocal): Promise<void> {
-  try {
-    await syncReviewItemToCache(item.user_id, item);
-  } catch (caughtError) {
-    invalidateReviewArrays(item.user_id);
-    void rebuildReviewArrays(item.user_id).catch((rebuildError: unknown) => {
-      reportError('Failed to rebuild review arrays', rebuildError);
-    });
-    reportError('Failed to update review cache', caughtError);
-  }
-}
-
-type AdvanceInitialTrainingOptions = Readonly<{
-  outcome: TrainingOutcome;
-  queue: InitialTrainingQueue | null;
-  currentItem: UserItemLocal | null;
-  isComplete: boolean;
-  setItems: Dispatch<SetStateAction<UserItemLocal[]>>;
-  setActiveItems: Dispatch<SetStateAction<UserItemLocal[]>>;
-  setQueue: Dispatch<SetStateAction<InitialTrainingQueue | null>>;
-  setHasProgress: Dispatch<SetStateAction<boolean>>;
-  setIsComplete: Dispatch<SetStateAction<boolean>>;
-  setError: Dispatch<SetStateAction<Error | null>>;
-  resetQuestionState: () => void;
-}>;
 
 async function advanceInitialTraining(options: AdvanceInitialTrainingOptions): Promise<void> {
   const {
@@ -359,9 +567,6 @@ async function advanceInitialTraining(options: AdvanceInitialTrainingOptions): P
       outcome,
     );
     await UserItem.saveInitialTrainingProgress(updatedItem);
-    await syncPersistedItemToReviewCache(updatedItem);
-    await refreshPracticeReviewAvailability(updatedItem.user_id);
-    invalidateNextInitialLesson(updatedItem.user_id);
 
     if (!nextQueue) {
       setHasProgress(true);
@@ -383,157 +588,4 @@ async function advanceInitialTraining(options: AdvanceInitialTrainingOptions): P
     setError(normalizedError);
     reportError('Failed to advance new-lesson training', normalizedError);
   }
-}
-
-export function useInitialTrainingDeck(
-  userId: string | null,
-  initialData?: InitialTrainingData,
-  onComplete?: PracticeCompletionHandler,
-) {
-  const { trackPracticeWrite, finishPractice } = usePracticeAvailabilityBoundary(userId);
-  const initialState = getInitialTrainingState(initialData);
-  const [lesson, setLesson] = useState<LessonType | null>(initialState.lesson);
-  const [items, setItems] = useState<UserItemLocal[]>(initialState.items);
-  const [activeItems, setActiveItems] = useState<UserItemLocal[]>(initialState.items);
-  const [initialItemCount, setInitialItemCount] = useState(initialState.items.length);
-  const [resolvedEntries, setResolvedEntries] = useState<
-    Array<ResolvedPracticeEntry<UserItemLocal>>
-  >(initialState.entries);
-  const [grammar, setGrammar] = useState<GrammarDetail | null>(initialState.grammar);
-  const [grammarGroup, setGrammarGroup] = useState<GroupType | null>(
-    initialState.grammarGroup,
-  );
-  const [groupNote, setGroupNote] = useState<string | null>(null);
-  const [queue, setQueue] = useState<InitialTrainingQueue | null>(null);
-  const [isComplete, setIsComplete] = useState(false);
-  const [hasProgress, setHasProgress] = useState(false);
-  const [revealed, setRevealed] = useState(false);
-  const [loading, setLoading] = useState(userId != null);
-  const [error, setError] = useState<Error | null>(null);
-  const isTransitioningRef = useRef(false);
-  const completionHandledRef = useRef(false);
-
-  useEffect(() => {
-    if (!userId) {
-      setLoading(false);
-      return;
-    }
-    return startInitialTrainingLoad(userId, initialData, {
-      setLesson,
-      setItems,
-      setActiveItems,
-      setInitialItemCount,
-      setResolvedEntries,
-      setGrammar,
-      setGrammarGroup,
-      setGroupNote,
-      setQueue,
-      setHasProgress,
-      setLoading,
-      setError,
-    }, trackPracticeWrite);
-  }, [initialData, userId, trackPracticeWrite]);
-
-  const itemById = useMemo(
-    () => new Map(activeItems.map((item) => [item.item_id, item])),
-    [activeItems],
-  );
-  const { currentItem, currentEntry, displayedCompletedCount, pronunciation } = useMemo(
-    () =>
-      getInitialTrainingView(
-        queue,
-        itemById,
-        resolvedEntries,
-        isComplete,
-        revealed,
-        initialItemCount,
-      ),
-    [activeItems, initialItemCount, isComplete, itemById, queue, resolvedEntries, revealed],
-  );
-  const cardState = usePracticeCardState({
-    currentItem,
-    revealed,
-    isCompletion: isComplete,
-    setRevealed,
-  });
-  const resetQuestionState = cardState.resetQuestionState;
-  const completePractice = useCallback(async () => {
-    if (completionHandledRef.current) return;
-    completionHandledRef.current = true;
-    await finishPractice();
-    onComplete?.();
-  }, [finishPractice, onComplete]);
-
-  useEffect(() => {
-    if (!isComplete) return;
-    void completePractice();
-  }, [completePractice, isComplete]);
-
-  const advance = useCallback(
-    async (outcome: TrainingOutcome) => {
-      if (isTransitioningRef.current) return;
-      isTransitioningRef.current = true;
-      try {
-        await trackPracticeWrite(
-          advanceInitialTraining({
-            outcome,
-            queue,
-            currentItem,
-            isComplete,
-            setItems,
-            setActiveItems,
-            setQueue,
-            setHasProgress,
-            setIsComplete,
-            setError,
-            resetQuestionState,
-          }),
-        );
-      } finally {
-        isTransitioningRef.current = false;
-      }
-    },
-    [
-      currentItem,
-      isComplete,
-      resetQuestionState,
-      queue,
-      trackPracticeWrite,
-    ],
-  );
-
-  const completeCurrent = useCallback(() => advance('skip'), [advance]);
-
-  return {
-    lesson,
-    items,
-    hasContent: initialItemCount > 0,
-    grammar,
-    grammarGroup,
-    groupNote,
-    isComplete,
-    isCompletion: isComplete,
-    hasProgress,
-    loading,
-    error,
-    finishPractice,
-    currentItem,
-    note: currentEntry?.note ?? null,
-    practiceGrammar: currentEntry?.grammar ?? null,
-    progressLabel: `${displayedCompletedCount}/${initialItemCount}`,
-    revealed,
-    czech: cardState.czech,
-    english: cardState.english,
-    pronunciation,
-    audioDisabled: cardState.audioDisabled,
-    handleReveal: cardState.handleReveal,
-    plusHint: cardState.plusHint,
-    nextRepeat: () => advance('incorrect'),
-    nextKnown: () => advance('correct'),
-    completeCurrent,
-    audioError: cardState.audioError,
-    playAudio: cardState.playAudio,
-    audioLoading: cardState.audioLoading,
-    isPlaying: cardState.isPlaying,
-  };
 }

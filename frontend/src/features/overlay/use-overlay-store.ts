@@ -36,6 +36,8 @@ export const useOverlayStore = create<OverlayState>()(
         isOverlayOpen: false,
         isOverlayDismissible: true,
         openOverlay: (closeCallback) => {
+          if (get().isOverlayOpen) return;
+
           onCloseOverlayCallback = closeCallback;
           set({ isOverlayOpen: true, isOverlayDismissible: true });
         },

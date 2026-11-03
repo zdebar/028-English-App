@@ -9,7 +9,7 @@ import {
 } from '@/features/vocabulary/vocabulary.utils';
 import type { UserItemLocal } from '@/types/user-item.types';
 import { useAudioManager } from '@/features/audio/use-audio-manager';
-import { playAudioWithToast } from '@/features/audio/audio.utils';
+import { isAudioPlayable, playAudioWithToast } from '@/features/audio/audio.utils';
 import PlayButton from '@/features/audio/PlayButton';
 import VolumeSlider from '../audio/VolumeSlider';
 import InfoButton from '@/features/notes/InfoButton';
@@ -22,22 +22,23 @@ import { getEnabledReviewDirections } from '@/features/practice/review-direction
 import type { ReviewDirection } from '@/types/practice.types';
 import SecondaryControlButton from '@/components/UI/buttons/SecondaryControlButton';
 import PronunciationIcon from '@/components/UI/icons/PronunciationIcon';
-import Groups from '@/database/models/groups';
 import PronunciationSoundDetailCard from '@/features/practice/PronunciationSoundDetailCard';
 import {
   getSoundsFromPronunciationSegments,
   getUniquePronunciationSounds,
   splitPronunciationIntoSegments,
   type PronunciationSegment,
-} from '@/utils/pronunciation.utils';
+} from '@/features/pronunciation/pronunciation.utils';
 import type { GroupType } from '@/types/table.types';
+import type { NoteType } from '@/types/generic.types';
 import { useState } from 'react';
-import { useLiveQueryData } from '@/hooks/use-live-query-data';
 
 const NOT_AVAILABLE = TEXTS.notAvailable;
 
 type VocabularyDetailCardProps = Readonly<{
   selectedWord: UserItemLocal | null;
+  notes?: readonly NoteType[];
+  soundGroups?: readonly GroupType[];
   onClose: () => void;
   onReset: (direction: ReviewDirection) => Promise<void>;
 }>;
@@ -54,6 +55,88 @@ type VocabularyDirectionSection = Readonly<{
   properties: readonly VocabularyProperty[];
 }>;
 
+/**
+ * VocabularyDetailCard component
+ *
+ * @param selectedWord - The vocabulary item to display details for.
+ * @param onClose - Callback to close the detail card.
+ * @param onReset - Callback to reset the user's progress for the word.
+ * @returns The vocabulary detail card UI.
+ */
+// -- Vocabulary detail card --
+export default function VocabularyDetailCard({
+  selectedWord,
+  notes = [],
+  soundGroups = [],
+  onClose,
+  onReset,
+}: VocabularyDetailCardProps) {
+  const cardValues = getVocabularyCardValues(selectedWord);
+  const baseProperties = getBaseProperties(selectedWord);
+  const directionSections = getDirectionSections(selectedWord);
+  const [pronunciationIndex, setPronunciationIndex] = useState<number | null>(null);
+  const pronunciationSegments = splitPronunciationIntoSegments(cardValues.pronunciation, soundGroups);
+  const pronunciationSounds = getUniquePronunciationSounds(
+    getSoundsFromPronunciationSegments(pronunciationSegments),
+  );
+
+  const {
+    playAudio,
+    isAudioReady,
+    loading: audioLoading,
+  } = useAudioManager(cardValues.audio);
+  const showToast = useToastStore((state) => state.showToast);
+  const audioControlsDisabled = isVocabularyAudioDisabled(
+    selectedWord,
+    audioLoading,
+    isAudioReady,
+  );
+
+  const { isNoteVisible, noteData, openNote, closeNote } = useNoteViewer(notes);
+
+  const noteId = cardValues.noteId;
+
+  if (pronunciationIndex !== null) {
+    return (
+      <VocabularyPronunciationDetail
+        sounds={pronunciationSounds}
+        pronunciationSegments={pronunciationSegments}
+        audio={cardValues.audio}
+        index={pronunciationIndex}
+        onIndexChange={setPronunciationIndex}
+        onClose={() => setPronunciationIndex(null)}
+      />
+    );
+  }
+
+  return (
+    <OverviewCard
+      buttonTitle={cardValues.title}
+      onClose={onClose}
+      className="bottom-controls-clearance relative"
+      showResetAction={false}
+    >
+      <VocabularyDetailContent
+        pronunciationSounds={pronunciationSounds}
+        isNoteVisible={isNoteVisible}
+        noteData={noteData}
+        onCloseNote={closeNote}
+        baseProperties={baseProperties}
+        directionSections={directionSections}
+        onReset={onReset}
+        selectedWord={selectedWord}
+        audioControlsDisabled={audioControlsDisabled}
+        onOpenPronunciation={() => setPronunciationIndex(0)}
+        playAudio={playAudio}
+        showToast={showToast}
+        noteId={noteId}
+        openNote={openNote}
+      />
+    </OverviewCard>
+  );
+}
+
+// -- Vocabulary fields and review-direction helpers --
 function getBaseProperties(selectedWord: UserItemLocal | null): readonly VocabularyProperty[] {
   return [
     { label: lowercaseInitial(TEXTS.czech), value: selectedWord?.czech },
@@ -105,11 +188,9 @@ function getDirectionSections(
 function isVocabularyAudioDisabled(
   selectedWord: UserItemLocal | null,
   audioLoading: boolean,
-  audioError: boolean,
   isAudioReady: (audio: string) => boolean,
 ): boolean {
-  if (!selectedWord?.audio?.trim()) return true;
-  return audioError || (!audioLoading && !isAudioReady(selectedWord.audio));
+  return !isAudioPlayable(selectedWord?.audio, audioLoading, isAudioReady);
 }
 
 async function playVocabularyAudio(
@@ -120,6 +201,7 @@ async function playVocabularyAudio(
   await playAudioWithToast(selectedWord?.audio, playAudio, showToast);
 }
 
+// -- Card subcomponents --
 function VocabularyPropertyList({
   properties,
   labelClassName,
@@ -136,7 +218,6 @@ function VocabularyPropertyList({
           className="grid grid-cols-2"
           classNameLabel={labelClassName}
           classNameValue={`min-w-0 break-words [overflow-wrap:anywhere] ${property.classNameValue ?? ''}`}
-          alignTop
         >
           {property.value ?? NOT_AVAILABLE}
         </PropertyView>
@@ -161,7 +242,7 @@ function VocabularyDetails({
       </div>
       {directionSections.map((section) => (
         <section key={section.title} className="relative flex flex-col gap-2">
-          <HelpText className="-top-5 left-0 whitespace-nowrap">
+          <HelpText className="pos-help-above-left whitespace-nowrap">
             {TEXTS.restartProgress}
           </HelpText>
           <DirectionResetButton
@@ -204,12 +285,12 @@ function VocabularyAudioControls({
       />
       <SecondaryControlButton
         title={TEXTS.pronunciationGuide}
-        ariaLabel={TEXTS.pronunciationGuide}
+        aria-label={TEXTS.pronunciationGuide}
         onClick={onOpenPronunciation}
         disabled={pronunciationSounds.length === 0}
       >
         <PronunciationIcon />
-        <HelpText className="-bottom-4 left-0 flex flex-col items-end landscape:invisible">
+        <HelpText className="pos-help-below-left flex flex-col items-end landscape:invisible">
           {TEXTS.pronunciationGuide}
         </HelpText>
       </SecondaryControlButton>
@@ -313,87 +394,7 @@ function VocabularyDetailContent({
   );
 }
 
-/**
- * VocabularyDetailCard component
- *
- * @param selectedWord - The vocabulary item to display details for.
- * @param onClose - Callback to close the detail card.
- * @param onReset - Callback to reset the user's progress for the word.
- * @returns The vocabulary detail card UI.
- */
-export default function VocabularyDetailCard({
-  selectedWord,
-  onClose,
-  onReset,
-}: VocabularyDetailCardProps) {
-  const cardValues = getVocabularyCardValues(selectedWord);
-  const baseProperties = getBaseProperties(selectedWord);
-  const directionSections = getDirectionSections(selectedWord);
-  const { data: sounds } = useLiveQueryData(() => Groups.getSounds(), { emptyData: [], sharedKey: JSON.stringify(['global', 'sounds-catalog']) });
-  const [pronunciationIndex, setPronunciationIndex] = useState<number | null>(null);
-  const pronunciationSegments = splitPronunciationIntoSegments(cardValues.pronunciation, sounds);
-  const pronunciationSounds = getUniquePronunciationSounds(
-    getSoundsFromPronunciationSegments(pronunciationSegments),
-  );
-
-  const {
-    playAudio,
-    audioError,
-    isAudioReady,
-    loading: audioLoading,
-  } = useAudioManager(cardValues.audio);
-  const showToast = useToastStore((state) => state.showToast);
-  const audioControlsDisabled = isVocabularyAudioDisabled(
-    selectedWord,
-    audioLoading,
-    audioError,
-    isAudioReady,
-  );
-
-  const { isNoteVisible, noteData, openNote, closeNote } = useNoteViewer();
-
-  const noteId = cardValues.noteId;
-
-  if (pronunciationIndex !== null) {
-    return (
-      <VocabularyPronunciationDetail
-        sounds={pronunciationSounds}
-        pronunciationSegments={pronunciationSegments}
-        audio={cardValues.audio}
-        index={pronunciationIndex}
-        onIndexChange={setPronunciationIndex}
-        onClose={() => setPronunciationIndex(null)}
-      />
-    );
-  }
-
-  return (
-    <OverviewCard
-      buttonTitle={cardValues.title}
-      onClose={onClose}
-      className="bottom-controls-clearance relative"
-      showResetAction={false}
-    >
-      <VocabularyDetailContent
-        pronunciationSounds={pronunciationSounds}
-        isNoteVisible={isNoteVisible}
-        noteData={noteData}
-        onCloseNote={closeNote}
-        baseProperties={baseProperties}
-        directionSections={directionSections}
-        onReset={onReset}
-        selectedWord={selectedWord}
-        audioControlsDisabled={audioControlsDisabled}
-        onOpenPronunciation={() => setPronunciationIndex(0)}
-        playAudio={playAudio}
-        showToast={showToast}
-        noteId={noteId}
-        openNote={openNote}
-      />
-    </OverviewCard>
-  );
-}
-
+// -- Display formatting --
 function lowercaseInitial(value: string): string {
   return value.charAt(0).toLocaleLowerCase('cs-CZ') + value.slice(1);
 }

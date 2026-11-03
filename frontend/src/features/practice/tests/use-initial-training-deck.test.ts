@@ -11,12 +11,8 @@ const mocks = vi.hoisted(() => ({
   resetQuestionState: vi.fn(),
   renderStates: [] as Array<{ itemId: number | null; revealed: boolean }>,
   transitionEvents: [] as string[],
-}));
-
-vi.mock('../practice-availability-controller', () => ({
-  beginPracticeAvailabilityBoundary: () => async () => {},
-  refreshPracticeReviewAvailability: (...args: unknown[]) =>
-    mocks.refreshPracticeReviewAvailability(...args),
+  dataState: { userId: 'u1', status: 'ready', groups: [] as any[] },
+  packageData: null as any,
 }));
 
 vi.mock('@/config/config', () => ({
@@ -26,7 +22,7 @@ vi.mock('@/config/config', () => ({
   },
 }));
 vi.mock('@/database/models/user-lessons', () => ({
-  default: { startIfAllowed: (...args: unknown[]) => mocks.startLesson(...args) },
+  default: { startIfEligible: (...args: unknown[]) => mocks.startLesson(...args) },
 }));
 vi.mock('@/database/models/lessons', () => ({ default: { getById: vi.fn() } }));
 vi.mock('@/database/models/user-items', () => ({
@@ -36,9 +32,8 @@ vi.mock('@/database/models/user-items', () => ({
     applyPracticeProgress: (...args: unknown[]) => mocks.applyPracticeProgress(...args),
   },
 }));
-vi.mock('@/database/utils/practice-content.utils', () => ({
-  resolvePracticeEntries: vi.fn(),
-  resolvePracticeGrammarContext: vi.fn(),
+vi.mock('@/database/state/data-store', () => ({
+  useDataPackage: () => ({ userId: 'u1', status: 'ready', error: null, data: mocks.packageData }),
 }));
 vi.mock('@/features/practice/hooks/use-practice-card-state', () => ({
   usePracticeCardState: ({ currentItem, revealed, setRevealed }: any) => {
@@ -61,15 +56,7 @@ vi.mock('@/features/practice/hooks/use-practice-card-state', () => ({
     };
   },
 }));
-vi.mock('@/features/logging/monitoring-handler', () => ({ reportError: vi.fn() }));
-vi.mock('../review-prefetch', () => ({
-  invalidateReviewArrays: vi.fn(),
-  rebuildReviewArrays: vi.fn().mockResolvedValue(undefined),
-  syncReviewItemToCache: (...args: unknown[]) => mocks.syncReviewItemToCache(...args),
-}));vi.mock('../practice-prefetch', () => ({
-  getPrefetchedNextInitialLesson: vi.fn(),
-  invalidateNextInitialLesson: (...args: unknown[]) => mocks.invalidateNextInitialLesson(...args),
-}));
+vi.mock('@/features/logging/logging-handler', () => ({ reportError: vi.fn() }));
 
 import { useInitialTrainingDeck } from '../hooks/use-initial-training-deck';
 
@@ -91,6 +78,8 @@ const initialData = {
   entries: items.map((value) => ({ item: value, note: null, grammar: null })),
   grammar: null,
   grammarGroup: null,
+  groupNote: null,
+  soundGroups: [],
 };
 const finalCardInitialData = {
   ...initialData,
@@ -103,6 +92,8 @@ describe('useInitialTrainingDeck', () => {
     vi.clearAllMocks();
     mocks.renderStates.length = 0;
     mocks.transitionEvents.length = 0;
+    mocks.dataState = { userId: 'u1', status: 'ready', groups: [] };
+    mocks.packageData = initialData;
     mocks.startLesson.mockResolvedValue(true);
     mocks.saveInitialTrainingProgress.mockResolvedValue(undefined);
     mocks.syncReviewItemToCache.mockResolvedValue(undefined);
@@ -114,7 +105,7 @@ describe('useInitialTrainingDeck', () => {
   });
 
   it('starts the first ordered phase and persists progress after each answer', async () => {
-    const { result } = renderHook(() => useInitialTrainingDeck('u1', initialData));
+    const { result } = renderHook(() => useInitialTrainingDeck('u1'));
     await waitFor(() => expect(result.current.currentItem?.item_id).toBe(1));
     expect(mocks.startLesson).toHaveBeenCalledWith('u1', 1, [1, 2]);
     await act(async () => result.current.nextKnown());
@@ -125,14 +116,11 @@ describe('useInitialTrainingDeck', () => {
       expect.any(String),
       { initialTraining: true },
     );
-    expect(mocks.syncReviewItemToCache).toHaveBeenCalledWith(
-      'u1',
-      expect.objectContaining({ item_id: 1 }),
-    );
+    expect(mocks.saveInitialTrainingProgress).toHaveBeenCalledOnce();
   });
 
   it('resets reveal before showing the next audio-less item', async () => {
-    const { result } = renderHook(() => useInitialTrainingDeck('u1', initialData));
+    const { result } = renderHook(() => useInitialTrainingDeck('u1'));
     await waitFor(() => expect(result.current.currentItem?.item_id).toBe(1));
 
     act(() => result.current.handleReveal());
@@ -147,7 +135,7 @@ describe('useInitialTrainingDeck', () => {
   });
 
   it('completes after the single ordered phase', async () => {
-    const { result } = renderHook(() => useInitialTrainingDeck('u1', initialData));
+    const { result } = renderHook(() => useInitialTrainingDeck('u1'));
     await waitFor(() => expect(result.current.currentItem?.item_id).toBe(1));
 
     await act(async () => result.current.nextKnown());
@@ -159,7 +147,7 @@ describe('useInitialTrainingDeck', () => {
   });
 
   it('retries incorrect items before completing the phase', async () => {
-    const { result } = renderHook(() => useInitialTrainingDeck('u1', initialData));
+    const { result } = renderHook(() => useInitialTrainingDeck('u1'));
     await waitFor(() => expect(result.current.currentItem?.item_id).toBe(1));
 
     await act(async () => result.current.nextRepeat());
@@ -174,7 +162,7 @@ describe('useInitialTrainingDeck', () => {
   });
 
   it('passes the initial-training skip option for CZ-to-EN', async () => {
-    const { result } = renderHook(() => useInitialTrainingDeck('u1', initialData));
+    const { result } = renderHook(() => useInitialTrainingDeck('u1'));
     await waitFor(() => expect(result.current.currentItem?.item_id).toBe(1));
 
     await act(async () => result.current.completeCurrent());
@@ -194,7 +182,8 @@ describe('useInitialTrainingDeck', () => {
         resolveCompletion = resolve;
       }),
     );
-    const { result, unmount } = renderHook(() => useInitialTrainingDeck('u1', finalCardInitialData));
+    mocks.packageData = finalCardInitialData;
+    const { result, unmount } = renderHook(() => useInitialTrainingDeck('u1'));
     await waitFor(() => expect(result.current.currentItem?.item_id).toBe(1));
 
     let completionPromise: Promise<void> | undefined;
@@ -221,7 +210,8 @@ describe('useInitialTrainingDeck', () => {
     mocks.saveInitialTrainingProgress
       .mockRejectedValueOnce(new Error('completion failed'))
       .mockResolvedValueOnce(undefined);
-    const { result } = renderHook(() => useInitialTrainingDeck('u1', finalCardInitialData));
+    mocks.packageData = finalCardInitialData;
+    const { result } = renderHook(() => useInitialTrainingDeck('u1'));
     await waitFor(() => expect(result.current.currentItem?.item_id).toBe(1));
 
     await act(async () => result.current.nextKnown());
@@ -229,13 +219,11 @@ describe('useInitialTrainingDeck', () => {
     expect(result.current.isComplete).toBe(false);
     expect(result.current.currentItem?.item_id).toBe(1);
     expect(result.current.error?.message).toBe('completion failed');
-    expect(mocks.syncReviewItemToCache).not.toHaveBeenCalled();
 
     await act(async () => result.current.nextKnown());
 
     await waitFor(() => expect(result.current.isComplete).toBe(true));
     expect(mocks.saveInitialTrainingProgress).toHaveBeenCalledTimes(2);
-    expect(mocks.syncReviewItemToCache).toHaveBeenCalledOnce();
   });
 });
 

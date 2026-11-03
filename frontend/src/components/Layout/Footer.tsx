@@ -17,7 +17,7 @@ export default function Footer(): JSX.Element | null {
   if (!homeMatch && !profileMatch) return null;
 
   return (
-    <footer className="m-4 mx-auto text-sm">
+    <footer className="mx-auto my-4 text-sm">
       <span>© {currentYear} </span>
       <PrivacyPolicyLink />
     </footer>

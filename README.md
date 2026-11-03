@@ -1,287 +1,118 @@
 # English Learning App
 
-English Learning App is a Czech-English practice application built around local-first progress tracking and Supabase-backed synchronization.
+A Czech-English practice application with local-first progress tracking and Supabase synchronization.
 
-The main product is the web frontend in [frontend](frontend), supported by backend SQL assets, and source lesson/audio data in this repository.
+## Repository
 
-## Repository Overview
+- **frontend/** — React, TypeScript, Vite application.
+- **supabase/** — Supabase CLI configuration, declarative schemas, migrations, and seed SQL.
+- **scripts/** — vocabulary, pronunciation, and audio preparation tools.
+- **data/** — lesson source files, audio assets, and archived/imported data.
 
-Main folders:
+For the current behavior and ownership boundaries, start with [docs/README.md](docs/README.md).
 
-- [frontend](frontend): React + TypeScript + Vite application
-- [supabase](supabase): Supabase CLI config, declarative schemas, seeds, and archived dumps
-- [scripts](scripts): preparation and utility scripts
+## Tech stack
 
-Repository docs:
+- React 19, TypeScript 5, Vite 7, React Router 7
+- Tailwind CSS 4, Zustand, Dexie / IndexedDB
+- Supabase Auth, PostgreSQL, and Storage
+- Vitest, Testing Library, jsdom
+- Workbox-based service-worker generation
 
-- [STYLEGUIDE.md](STYLEGUIDE.md): recommended repository coding style and review defaults
-- [docs/README.md](docs/README.md): frontend behavior docs for architecture, state, sync, practice flows, readiness counts, and domain models
+## Run the frontend
 
-## Tech Stack
+From **frontend/**:
 
-- Frontend: React 19, TypeScript 5, Vite 7, React Router 7
-- Styling: Tailwind CSS 4
-- State: Zustand
-- Local persistence: Dexie + IndexedDB
-- Backend platform: Supabase Auth, PostgreSQL, Storage, Edge Functions
-- Testing: Vitest, Testing Library, jsdom
-- Build tooling: Workbox-based service worker generation
+- Install dependencies: **npm install**
+- Development server: **npm run dev**
+- Production build: **npm run build**
+- Build service worker only: **npm run build:sw**
+- Preview production build: **npm run preview**
+- Lint: **npm run lint**
+- Tests: **npm test** or **npm run test:ui**
 
-## Quick Start
+The production build runs TypeScript, Vite, and service-worker generation through **frontend/scripts/build.mjs**.
 
-### Prerequisites
+## Application structure
 
-- Node.js 20+
-- npm 10+
-- Supabase project configuration for the frontend
+- **frontend/src/main.tsx** starts auth and PWA lifecycles and mounts the router.
+- **frontend/src/router.tsx** declares routes and connects them to route loaders.
+- **frontend/src/routing/** owns route-level data preparation and close navigation.
+- **frontend/src/database/models/** defines the Dexie database and table models.
+- **frontend/src/database/state/** owns the central in-memory data manager, selectors, and page-package builders.
+- **frontend/src/database/practice/** contains practice-selection rules.
+- **frontend/src/database/sync/** coordinates incremental data sync.
+- **frontend/src/features/** owns feature UI and interaction behavior.
+- **frontend/src/components/** contains shared UI and layout components.
 
-### Install
+### Data flow
 
-```bash
-cd frontend
-npm install
-```
+IndexedDB is the durable local source for curriculum and user progress. The central data manager loads the active user's local snapshot and builds typed packages for pages. Route loaders ensure a package is ready before navigation; page hooks subscribe to its updates. Successful local writes and sync batches publish committed row changes to the manager. Changes from other tabs arrive through BroadcastChannel.
 
-### Run Development Server
+Audio blobs remain in the separate audio-record cache. The manager does not hold IndexedDB sync metadata or audio blobs.
 
-```bash
-cd frontend
-npm run dev
-```
+### Routes
 
-### Build Production
+The application uses a hash router. Public routes are **/**, **/privacy-policy**, and **/guide**. Protected routes cover practice, initial training, profile, overviews, topics, grammar, vocabulary, sounds, and pronunciation. See **frontend/src/config/routes.config.ts** and **frontend/src/router.tsx** for the exact paths.
 
-```bash
-cd frontend
-npm run build
-```
+## Synchronization
 
-This runs the TypeScript build, the Vite production build, and service worker generation through [frontend/scripts/generate-sw.mjs](frontend/scripts/generate-sw.mjs).
+Data synchronization uses per-table timestamps and is incremental. It does not have a full-sync mode. The singleton sync manager owns periodic work, retryable task failures, online recovery, and audio-archive synchronization. IndexedDB remains available for local reads when the network is unavailable.
 
-### Preview Production Build
+The current Supabase model has shared curriculum tables (**levels**, **lessons**, **items**, **notes**), unified content tables (**groups**, **group_items**, **group_relations**), and user tables (**users**, **user_lessons**, **user_items**). User accounts and their user-owned records are hard-deleted; **deleted_at** is used for shared-content tombstones.
 
-```bash
-cd frontend
-npm run preview
-```
+## Supabase files
 
-## Frontend Scripts
+The active schema and seed order is configured in **supabase/config.toml**. Declarative schemas live in **supabase/schemas/**; migrations live in **supabase/migrations/**; reset seed SQL lives in **supabase/seeds/**.
 
-Run these from [frontend](frontend):
+Useful entrypoints include:
 
-```bash
-npm run dev
-npm run build
-npm run build:sw
-npm run preview
-npm run lint
-npm test
-npm run test:ui
-```
+- **supabase/schemas/00_tables.sql** — current tables, constraints, and indexes
+- **supabase/schemas/10_updated_at_triggers.sql** — timestamp triggers and group-relation validation
+- **supabase/schemas/20_auth_helpers.sql** and **21_json_key_helpers.sql** — shared RPC helpers
+- **supabase/schemas/30_rpc_fetch_user_items.sql** — incremental user-item fetch
+- **supabase/schemas/31_rpc_upsert_user_items.sql** — user-item upload RPC
+- **supabase/schemas/32_rpc_upsert_fetch_user_items.sql** — combined user-item sync RPC
+- **supabase/schemas/41_anonymous_cleanup_function.sql** and **42_cron_jobs.sql** — anonymous-account cleanup
+- **supabase/schemas/50_storage_buckets.sql** — private audio buckets and policies
+- **supabase/schemas/40_user_lifecycle_functions.sql** — authenticated hard-delete function
+- **supabase/schemas/90_rls.sql** — row-level security and grants
 
-Script notes:
+## Routes
 
-- `npm run dev`: start Vite dev server
-- `npm run build`: compile TypeScript, build app, generate service worker assets
-- `npm run build:sw`: run [frontend/scripts/generate-sw.mjs](frontend/scripts/generate-sw.mjs)
-- `npm run preview`: preview the production build
-- `npm test`: run Vitest in CLI mode
-- `npm run test:ui`: open Vitest UI
+The hash router exposes these paths:
 
-## Frontend Application Structure
+- Public: **/**, **/privacy-policy**, **/guide**
+- Practice: **/practice**, **/practice/grammar**, **/practice/vocabulary**, **/practice/initial-training**
+- Account: **/profile**
+- Overviews: **/overviews**, **/topics**, **/topics/:topicId**, **/grammar**, **/vocabulary**, **/sounds**, **/sounds/:groupId**, **/pronunciation**, **/pronunciation/:groupId**
 
-Top-level folders in [frontend/src](frontend/src):
+The route constants are maintained in **frontend/src/config/routes.config.ts**.
 
-- [frontend/src/components](frontend/src/components): shared UI, layout, and utility components
-- [frontend/src/config](frontend/src/config): routes and app configuration
-- [frontend/src/database](frontend/src/database): Dexie models, sync helpers, and DB hooks
-- [frontend/src/features](frontend/src/features): auth, practice, synchronization, toast, theme, help, overlay, vocabulary, and more
-- [frontend/src/hooks](frontend/src/hooks): generic reusable hooks
-- [frontend/src/locales](frontend/src/locales): UI text and localization data
-- [frontend/src/pages](frontend/src/pages): route-level pages
-- [frontend/src/styles](frontend/src/styles): global styling entrypoints
-- [frontend/src/types](frontend/src/types): shared types
-- [frontend/src/utils](frontend/src/utils): helper functions
-- [frontend/src/workers](frontend/src/workers): worker-oriented logic
-
-## Main Frontend Routes
-
-The current app wiring in [frontend/src/router.tsx](frontend/src/router.tsx) includes:
+## Local environment
 
-- Public routes: `/`, `/privacy-policy`, and `/guide`
-- Protected practice routes: `/practice`, `/practice/grammar`, `/practice/vocabulary`,
-  and `/practice/initial-training`
-- Protected overview routes: `/overviews`, `/topics`, `/topics/:topicId`, `/grammar`,
-  `/vocabulary`, `/sounds`, `/sounds/:groupId`, `/pronunciation`, and
-  `/pronunciation/:groupId`
-- Protected account route: `/profile`
-
-Unknown routes render a page-not-found notification.
-
-## Feature Summary
-
-The frontend initializes app-wide flows in [frontend/src/App.tsx](frontend/src/App.tsx)
-and keeps user progress local-first through IndexedDB. The main feature areas are:
-
-- Supabase authentication with anonymous sign-in, Google sign-in, account
-  conversion, sign-out, and hard-delete support.
-- Vocabulary and grammar review plus initial training, with local progress saves,
-  audio playback, and sync-backed recovery.
-- Home readiness buttons and a non-clickable progress dashboard, plus overview
-  pages for sounds, pronunciation, grammar, topics, and vocabulary.
-- Periodic, logout, and unmount synchronization for user progress and shared
-  content, plus audio archive synchronization.
-- Global UI infrastructure for theme, toast, help, overlay, PWA install prompt,
-  privacy policy, guide, logging, and analytics.
-
-For developer-oriented ownership, data flow, persistence, and side-effect details,
-start with [docs/features.md](docs/features.md).
-
-## Offline and Sync Architecture
-
-The app is designed around local-first reads with synchronization support.
+Create **frontend/.env.local** with **VITE_SUPABASE_URL** and **VITE_SUPABASE_PUBLISHABLE_KEY** for the Supabase project. Local Supabase settings are in **supabase/config.toml**. Manual account linking is enabled locally; hosted projects must enable **Allow manual linking** in Supabase Authentication settings for guest-account conversion.
 
-Typical flow:
+## PWA assets
 
-1. User actions update local IndexedDB state first.
-2. Synchronization pushes local changes to Supabase.
-3. Synchronization pulls remote deltas or full data.
-4. UI reads from local models, hooks, and stores for responsiveness.
+Static assets live in **frontend/public/**, including **manifest.json**, **service-worker.js**, **robots.txt**, and **sitemap.xml**. The build injects the production asset list into the service worker; development removes only registrations and caches belonging to this app's configured base path.
 
-Key frontend areas:
+## Tests and conventions
 
-- [frontend/src/database](frontend/src/database)
-- [frontend/src/features/synchronization](frontend/src/features/synchronization)
-- [frontend/src/features/auth](frontend/src/features/auth)
-- [frontend/src/features/user-stats](frontend/src/features/user-stats)
+Frontend tests are colocated under **tests/** folders and use Vitest, Testing Library, and jsdom. Run **npm test** from **frontend/** for the test suite. Run **npm run lint** for ESLint.
 
-## Database and Backend Assets
+Components and pages use PascalCase filenames; hooks and utilities use kebab-case where practical; SQL names use snake_case. Follow [STYLEGUIDE.md](STYLEGUIDE.md) for code and review conventions.
 
-Supabase SQL is managed through the CLI layout in [supabase](supabase).
-Declarative database objects live in [supabase/schemas](supabase/schemas),
-incremental migrations live in [supabase/migrations](supabase/migrations), and
-database-reset seed SQL lives in [supabase/seeds](supabase/seeds). The active
-schema and seed file order is configured in [supabase/config.toml](supabase/config.toml).
+## PWA
 
-Important files include:
+PWA startup is owned by **frontend/src/features/pwa/pwa-lifecycle.ts**. It requests persistent storage when supported, records install events, registers the service worker in production, and removes app-scoped worker registrations and caches in development. **frontend/scripts/generate-sw.mjs** adds the built asset list to the worker.
 
-- [supabase/schemas/00_tables.sql](supabase/schemas/00_tables.sql): core tables and indexes
-- [supabase/schemas/10_updated_at_triggers.sql](supabase/schemas/10_updated_at_triggers.sql): trigger wiring such as `updated_at`
-- [supabase/schemas/20_auth_helpers.sql](supabase/schemas/20_auth_helpers.sql): shared RPC auth helpers
-- [supabase/schemas/30_rpc_fetch_user_items.sql](supabase/schemas/30_rpc_fetch_user_items.sql): user item fetch RPC
-- [supabase/schemas/31_rpc_upsert_user_items.sql](supabase/schemas/31_rpc_upsert_user_items.sql): user item upsert RPC
-- [supabase/schemas/32_rpc_upsert_fetch_user_items.sql](supabase/schemas/32_rpc_upsert_fetch_user_items.sql): combined user item sync RPC
-- [supabase/schemas/40_user_lifecycle_functions.sql](supabase/schemas/40_user_lifecycle_functions.sql): authenticated user hard-delete function
-- [supabase/schemas/41_anonymous_cleanup_function.sql](supabase/schemas/41_anonymous_cleanup_function.sql): cleanup function for old anonymous accounts
-- [supabase/schemas/42_cron_jobs.sql](supabase/schemas/42_cron_jobs.sql): scheduled database jobs
-- [supabase/schemas/50_storage_buckets.sql](supabase/schemas/50_storage_buckets.sql): audio storage buckets and access policy
-- [supabase/schemas/90_rls.sql](supabase/schemas/90_rls.sql): row-level security policies and table grants
-- [supabase/seeds/remote_data.sql](supabase/seeds/remote_data.sql): shared lesson and item data loaded on database reset
-- [supabase/seeds/01_legacy_group_import.sql](supabase/seeds/01_legacy_group_import.sql), [supabase/seeds/02_unified_groups.sql](supabase/seeds/02_unified_groups.sql), and [supabase/seeds/03_cleanup_legacy_group_import.sql](supabase/seeds/03_cleanup_legacy_group_import.sql): import legacy group data into the unified group model
+## Content preparation
 
-Current application-owned database tables:
+See [scripts/README.md](scripts/README.md) for the CSV, IPA, and audio preparation scripts. Those scripts prepare files; Supabase seed SQL and schema setup are maintained separately.
 
-- Shared curriculum and content in `public`: `levels`, `lessons`, `items`, and `notes`
-- Unified content groups in `public`: `groups`, `group_items`, and `group_relations`.
-  Groups use the `topic`, `grammar`, `sound`, or `pronunciation` type; relations
-  represent hierarchy, detail, or contrast.
-- User records in `public`: `users`, `user_lessons`, and `user_items`
-- Operational settings in `private`: `private.settings`
+## Related guides
 
-The main content model links ordered `items` to `lessons`. `groups` organize topics,
-grammar content, sounds, and pronunciation content independently of the lesson
-curriculum; `group_items` links groups to items.
-
-Important sync and progress fields include:
-
-- `updated_at`
-- `deleted_at` for soft-deleted shared content
-- `started_at` for user lesson and item progress
-- `progress_cz_to_en` and `progress_en_to_cz` for directional progress
-- `next_at_cz_to_en` and `next_at_en_to_cz` for directional review scheduling
-- `mastered_at_cz_to_en` and `mastered_at_en_to_cz` for directional mastery
-
-## PWA and Static Assets
-
-Frontend static assets live in [frontend/public](frontend/public).
-
-Included assets:
-
-- [frontend/public/manifest.json](frontend/public/manifest.json)
-- [frontend/public/service-worker.js](frontend/public/service-worker.js)
-- [frontend/public/robots.txt](frontend/public/robots.txt)
-- [frontend/public/sitemap.xml](frontend/public/sitemap.xml)
-
-The production build runs [frontend/scripts/generate-sw.mjs](frontend/scripts/generate-sw.mjs)
-through [frontend/scripts/build-with-version.mjs](frontend/scripts/build-with-version.mjs)
-to inject the built asset list into `dist/service-worker.js`. Run `npm run build:sw`
-from [frontend](frontend) to generate it separately. In production,
-[frontend/src/main.tsx](frontend/src/main.tsx) registers the service worker after
-the page loads. In development, the app unregisters a service worker in its scope
-and clears its associated caches.
-
-## Styling and Build Configuration
-
-Relevant frontend files:
-
-- [frontend/vite.config.ts](frontend/vite.config.ts)
-- [frontend/tailwind.config.ts](frontend/tailwind.config.ts)
-- [frontend/src/styles/index.css](frontend/src/styles/index.css)
-- [frontend/src/App.css](frontend/src/App.css)
-
-Current build configuration includes:
-
-- `@vitejs/plugin-react`
-- `babel-plugin-react-compiler`
-- `@tailwindcss/vite`
-- `@` path alias to `frontend/src`
-- Vitest with `jsdom` and globals enabled
-
-## Testing and Quality
-
-Most frontend tests live close to the relevant domain code under `tests` folders.
-
-Typical patterns:
-
-- `frontend/src/**/tests/*.test.ts`
-- `frontend/src/**/tests/*.test.tsx`
-
-Recommended workflow:
-
-```bash
-cd frontend
-npm test
-npm run lint
-```
-
-## Environment Setup
-
-Frontend environment values should be placed in [frontend/.env.local](frontend/.env.local) when running locally.
-
-Typical values include:
-
-- Supabase project URL
-- Supabase anonymous key
-
-Google guest-account conversion also requires manual identity linking in both
-environments. Local development enables `auth.enable_manual_linking` in
-`supabase/config.toml`; hosted projects must separately enable **Allow manual
-linking** in Supabase Dashboard under Authentication configuration.
-
-## Data and Content Assets
-
-The [data](data) folder contains lesson source files, generated datasets, metadata, and audio assets used by the application and preparation scripts.
-
-The [scripts](scripts) and [data/scripts](data/scripts) areas support content preparation and transformation workflows.
-
-## Conventions
-
-- React components use PascalCase
-- hooks follow the `useXxx` pattern
-- SQL and table names use snake_case
-- file naming is kebab-case where practical
-
-## Related Documentation
-
-- frontend Vite reference: [frontend/VITE.md](frontend/VITE.md)
-- frontend behavior docs: [docs/README.md](docs/README.md)
+- [STYLEGUIDE.md](STYLEGUIDE.md) — code and review conventions
+- [DATA_GUIDE.md](DATA_GUIDE.md) — current data model and content boundaries
+- [frontend/VITE.md](frontend/VITE.md) — project-specific Vite configuration

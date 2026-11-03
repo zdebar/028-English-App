@@ -1,15 +1,15 @@
 import config from '@/config/config';
-import Dexie, { type EntityTable } from 'dexie';
+import Dexie, { type EntityTable, type Table } from 'dexie';
 import type AudioRecord from '@/database/models/audio-records';
 import type UserItem from '@/database/models/user-items';
 import type AudioMetadata from '@/database/models/audio-metadata';
-import type Metadata from '@/database/models/metadata';
+import type SyncMetadata from '@/database/models/metadata';
 import type Lessons from '@/database/models/lessons';
 import type Levels from '@/database/models/levels';
 import type Notes from '@/database/models/notes';
 import type UserLesson from '@/database/models/user-lessons';
-import type UserSettings from '@/database/models/user-settings';
-import type { GroupType, GroupItemType, GroupRelationType } from '@/types/table.types';
+import type { GroupType, GroupItemType, GroupRelationType, TableName } from '@/types/table.types';
+import type { UserItemLocal } from '@/types/user-item.types';
 
 const USER_ITEMS_SCHEMA =
   '[user_id+item_id], [user_id+grammar_chunk_id+started_at], [user_id+is_vocabulary+started_at], [user_id+started_at], [user_id+updated_at], [user_id+lesson_id+is_vocabulary+started_at], [user_id+block_id], [user_id+topic_id], [user_id+next_at_cz_to_en+mastered_at_cz_to_en+curriculum_sort_path], [user_id+next_at_en_to_cz+mastered_at_en_to_cz+curriculum_sort_path]';
@@ -17,6 +17,12 @@ const USER_ITEMS_SCHEMA_WITHOUT_BLOCK =
   '[user_id+item_id], [user_id+grammar_chunk_id+started_at], [user_id+is_vocabulary+started_at], [user_id+started_at], [user_id+updated_at], [user_id+lesson_id+is_vocabulary+started_at], [user_id+topic_id], [user_id+next_at_cz_to_en+mastered_at_cz_to_en+curriculum_sort_path], [user_id+next_at_en_to_cz+mastered_at_en_to_cz+curriculum_sort_path]';
 const USER_ITEMS_SCHEMA_UNIFIED =
   '[user_id+item_id], [user_id+is_vocabulary+started_at], [user_id+started_at], [user_id+updated_at], [user_id+lesson_id+is_vocabulary+started_at], [user_id+next_at_cz_to_en+mastered_at_cz_to_en+curriculum_sort_path], [user_id+next_at_en_to_cz+mastered_at_en_to_cz+curriculum_sort_path]';
+
+type UserItemKey = [userId: string, itemId: number];
+type MetadataKey = [tableName: TableName, userId: string];
+type UserLessonKey = [userId: string, lessonId: number, startedAt: string];
+type MetadataRow = Pick<SyncMetadata, 'table_name' | 'synced_at' | 'user_id'>;
+type UserLessonRow = Pick<UserLesson, 'user_id' | 'lesson_id' | 'started_at'>;
 
 /**
  * Application IndexedDB wrapper built on Dexie.
@@ -29,12 +35,11 @@ export default class AppDB extends Dexie {
   levels!: EntityTable<Levels, 'id'>;
   lessons!: EntityTable<Lessons, 'id'>;
   notes!: EntityTable<Notes, 'id'>;
-  user_items!: EntityTable<UserItem, any>;
+  user_items!: Table<UserItem, UserItemKey, UserItemLocal>;
   audio_records!: EntityTable<AudioRecord, 'filename'>;
   audio_metadata!: EntityTable<AudioMetadata, 'archive_name'>;
-  metadata!: EntityTable<Metadata, any>;
-  user_lessons!: EntityTable<UserLesson, any>;
-  users!: EntityTable<UserSettings, 'id'>;
+  metadata!: Table<SyncMetadata, MetadataKey, MetadataRow>;
+  user_lessons!: Table<UserLesson, UserLessonKey, UserLessonRow>;
   groups!: EntityTable<GroupType, 'id'>;
   group_items!: EntityTable<GroupItemType, 'id'>;
   group_relations!: EntityTable<GroupRelationType, 'id'>;
@@ -189,5 +194,10 @@ export default class AppDB extends Dexie {
           delete (lesson as Record<string, unknown>).grammar_chunk_id;
         });
       });
+
+    this.version(14).stores({ users: null });
+    this.version(15).stores({
+      user_lessons: '[user_id+lesson_id+started_at]',
+    });
   }
 }

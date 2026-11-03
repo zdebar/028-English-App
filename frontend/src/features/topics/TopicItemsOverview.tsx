@@ -1,5 +1,4 @@
 import { runProgressReset } from '@/features/practice/run-progress-reset';
-import { sharedQueryKey } from '@/hooks/shared-query-store';
 import { ROUTES } from '@/config/routes.config';
 import UserItem from '@/database/models/user-items';
 import { useAuthStore } from '@/features/auth/use-auth-store';
@@ -7,70 +6,34 @@ import { useToastStore } from '@/features/toast/use-toast-store';
 import { useAudioManager } from '@/features/audio/use-audio-manager';
 import { getItemAudioSources } from '@/features/audio/audio.utils';
 import { TEXTS } from '@/locales/cs';
-import type { UserItemLocal } from '@/types/user-item.types';
 import { useCallback, useEffect, useMemo } from 'react';
-import Topic from '@/database/models/topics';
 import { useNavigate, useParams } from 'react-router-dom';
-import type { GroupType } from '@/types/table.types';
 import { DataState } from '@/components/UI/DataState';
 import AudioItemList from '@/components/UI/AudioItemList';
 import HelpButton from '../help/HelpButton';
 import OverviewCard from '@/components/UI/OverviewCard';
-import VolumeSlider from '../audio/VolumeSlider';
-import { useLiveQueryData } from '@/hooks/use-live-query-data';
+import { AudioItemListControls } from '@/features/audio/AudioItemListControls';
 import { useRouteClose } from '@/routing/use-route-close';
 import { useQueryErrorToast } from '@/features/logging/use-query-error-toast';
+import { useDataPackage, type DataPackageResult } from '@/database/state/data-store';
+import type { TopicDetailData } from '@/database/state/data-types';
 
-export default function TopicItemsOverview({
-  initialTopic,
-  initialItems = [],
-}: Readonly<{ initialTopic?: GroupType | null; initialItems?: UserItemLocal[] }>) {
+export default function TopicItemsOverview() {
   const navigate = useNavigate();
   const closeRoute = useRouteClose(ROUTES.topics);
   const userId = useAuthStore((state) => state.userId);
   const showToast = useToastStore((state) => state.showToast);
   // -- Topic management --
   const { topicId: topicIdText } = useParams<{ topicId: string }>();
-  const parsedTopicId = Number(topicIdText);
-  const topicId =
-    initialTopic?.id ??
-    (Number.isSafeInteger(parsedTopicId) && parsedTopicId > 0 ? parsedTopicId : null);
+  const topicId = parseTopicId(topicIdText);
 
   useEffect(() => {
     if (topicId) return;
     void navigate(ROUTES.topics);
   }, [navigate, topicId]);
 
-  const fetchTopic = useCallback(async (): Promise<GroupType | null> => {
-    if (!userId || !topicId) return null;
-    return Topic.getById(userId, topicId);
-  }, [topicId, userId]);
-
-  const {
-    data: topic,
-    loading: topicLoading,
-    error: topicError,
-  } = useLiveQueryData<GroupType | null>(fetchTopic, {
-    emptyData: null,
-    initialData: initialTopic,
-    sharedKey: sharedQueryKey(userId, `topic:${topicId}`),
-  });
-
-  // -- Items management --
-  const fetchTopicItems = useCallback(async () => {
-    if (!userId || !topicId) return [];
-    return UserItem.getInitiatedByTopicId(userId, topicId);
-  }, [topicId, userId]);
-
-  const {
-    data: items,
-    loading: itemsLoading,
-    error: itemsError,
-  } = useLiveQueryData<UserItemLocal[]>(fetchTopicItems, {
-    emptyData: [],
-    initialData: initialItems,
-    sharedKey: sharedQueryKey(userId, `topic-items:${topicId}`),
-  });
+  const packageState = useDataPackage({ kind: 'topic-detail', topicId: topicId ?? 0 });
+  const { topic, items, loading: topicLoading, error: topicError } = getTopicDetailView(userId, packageState);
   const hasItems = items.length > 0;
 
   useEffect(() => {
@@ -78,8 +41,7 @@ export default function TopicItemsOverview({
     void navigate(ROUTES.topics, { replace: true });
   }, [navigate, topic, topicId, topicLoading, userId]);
 
-  useQueryErrorToast(topicError, 'Failed to fetch topic details');
-  useQueryErrorToast(itemsError, 'Failed to fetch topic items');
+  useQueryErrorToast(topicError, 'Failed to load topic data');
 
   const itemAudios = useMemo(() => getItemAudioSources(items), [items]);
 
@@ -106,7 +68,7 @@ export default function TopicItemsOverview({
       onClose={closeRoute}
       className="bottom-controls-clearance"
     >
-      <DataState loading={itemsLoading} hasData={hasItems} noDataMessage={TEXTS.noTopicItems}>
+      <DataState loading={topicLoading} hasData={hasItems} noDataMessage={TEXTS.noTopicItems}>
         <AudioItemList
           items={items}
           audioLoading={audioLoading}
@@ -115,14 +77,36 @@ export default function TopicItemsOverview({
           showToast={showToast}
         />
       </DataState>
-      <div className="pos-bottom-left-control">
-        <VolumeSlider />
-      </div>
-      {items && items.length > 0 && (
+      <AudioItemListControls items={items} />
+      {items.length > 0 && (
         <div className="pos-bottom-right-control">
           <HelpButton />
         </div>
       )}
     </OverviewCard>
   );
+}
+
+function parseTopicId(value: string | undefined): number | null {
+  const id = Number(value);
+  return Number.isSafeInteger(id) && id > 0 ? id : null;
+}
+
+function getTopicDetailView(
+  userId: string | null,
+  packageState: DataPackageResult<TopicDetailData>,
+): Readonly<{
+  topic: TopicDetailData['topic'];
+  items: TopicDetailData['items'];
+  loading: boolean;
+  error: Error | null;
+}> {
+  const isCurrentUser = packageState.userId === userId;
+  const data = isCurrentUser ? packageState.data : undefined;
+  return {
+    topic: data?.topic ?? null,
+    items: data?.items ?? [],
+    loading: Boolean(userId) && (!isCurrentUser || packageState.status === 'loading'),
+    error: isCurrentUser && packageState.status === 'error' ? packageState.error : null,
+  };
 }

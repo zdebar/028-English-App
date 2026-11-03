@@ -1,20 +1,19 @@
 import { create } from 'zustand';
 import {
+  DEFAULT_THEME_USER_ID,
   clearActiveTheme,
-  clearUserTheme,
   loadActiveTheme,
   loadUserTheme,
   saveActiveTheme,
   saveUserTheme,
+  type ThemePreference,
 } from './theme-utils';
 
-export type UserTheme = 'light' | 'dark';
-const DEFAULT_THEME_USER_ID = 'guest';
+export type UserTheme = ThemePreference;
 
 interface ThemeState {
   theme: UserTheme;
   loadTheme: (userId?: string | null) => void;
-  clearTheme: (userId?: string | null) => void;
   chooseTheme: (newTheme: UserTheme, userId?: string | null) => void;
   saveCurrentThemeAsGuest: () => void;
 }
@@ -28,8 +27,6 @@ interface ThemeState {
 export const useThemeStore = create<ThemeState>((set, get) => {
   const isBrowser = typeof globalThis !== 'undefined' && typeof document !== 'undefined';
   const resolveUserId = (userId?: string | null) => userId ?? DEFAULT_THEME_USER_ID;
-  const isUserTheme = (value: string | null): value is UserTheme =>
-    value === 'light' || value === 'dark';
 
   const getSystemTheme = (): UserTheme => {
     if (
@@ -46,8 +43,7 @@ export const useThemeStore = create<ThemeState>((set, get) => {
     if (!isBrowser) return null;
 
     try {
-      const stored = loadUserTheme(userId);
-      return isUserTheme(stored) ? stored : null;
+      return loadUserTheme(userId);
     } catch {
       return null;
     }
@@ -96,19 +92,6 @@ export const useThemeStore = create<ThemeState>((set, get) => {
       }
       set({ theme: nextTheme });
       applyTheme(nextTheme);
-    },
-    clearTheme: (userId?: string | null) => {
-      const resolvedUserId = resolveUserId(userId);
-      if (!isBrowser) return;
-      try {
-        clearUserTheme(resolvedUserId);
-      } catch {
-        // Ignore storage failures (e.g., blocked storage)
-      }
-      clearActiveTheme();
-      const fallbackTheme = getSystemTheme();
-      set({ theme: fallbackTheme });
-      applyTheme(fallbackTheme);
     },
     chooseTheme: (newTheme: UserTheme, userId?: string | null) => {
       const resolvedUserId = resolveUserId(userId);

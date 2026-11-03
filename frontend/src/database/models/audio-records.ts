@@ -2,8 +2,15 @@ import config from '@/config/config';
 import type AppDB from '@/database/models/app-db';
 import AudioMetadata from '@/database/models/audio-metadata';
 import { db } from '@/database/models/db';
-import { fetchStorage, fetchStorageBucketMetadata } from '@/database/utils/audio-records.utils';
-import { withSettledSummary, type SyncSummary } from '@/features/logging/logging.utils';
+import {
+  downloadStorageObject,
+  fetchZipArchiveMetadata,
+} from '@/database/audio/audio-storage';
+import {
+  summarizeSettledResults,
+  withSettledSummary,
+  type SyncSummary,
+} from '@/features/logging/logging.utils';
 import { ZipExtractionError } from '@/types/error.types';
 import type { AudioRecordLocal } from '@/types/audio.types';
 import { Entity } from 'dexie';
@@ -12,17 +19,9 @@ import UserItem from './user-items';
 const AUDIO_DOWNLOAD_MAX_ATTEMPTS = 2;
 const AUDIO_DOWNLOAD_RETRY_DELAY_MS = 100;
 
-function isValidAudioBlob(audioBlob: unknown): audioBlob is Blob {
-  return audioBlob instanceof Blob && audioBlob.size > 0;
-}
-
-function isValidAudioRecord(audioRecord: AudioRecordLocal | undefined): audioRecord is AudioRecordLocal {
-  return Boolean(audioRecord && isValidAudioBlob(audioRecord.audioBlob));
-}
-
-function waitForAudioRetry(): Promise<void> {
-  return new Promise((resolve) => setTimeout(resolve, AUDIO_DOWNLOAD_RETRY_DELAY_MS));
-}
+export type AudioArchiveSyncSummary = SyncSummary & Readonly<{
+  failedArchives: readonly Readonly<{ archiveName: string; error: unknown }>[];
+}>;
 
 /**
  * Local audio blob cache backed by IndexedDB and Supabase Storage.
@@ -64,21 +63,26 @@ export default class AudioRecord extends Entity<AppDB> implements AudioRecordLoc
    * is not newer than local audio metadata.
    * @throws SupabaseError when bucket metadata cannot be listed.
    */
-  static async syncFromRemote(): Promise<SyncSummary> {
-    const bucketMetadata = await fetchStorageBucketMetadata(config.audio.archiveBucketName);
+  static async syncFromRemote(archiveNames?: readonly string[]): Promise<AudioArchiveSyncSummary> {
+    const bucketMetadata = await fetchZipArchiveMetadata(config.audio.archiveBucketName);
 
     if (!bucketMetadata || bucketMetadata.size === 0) {
-      return { total: 0, success: 0, failed: 0 };
+      return { total: 0, success: 0, failed: 0, failedArchives: [] };
     }
 
-    return withSettledSummary(
-      Array.from(bucketMetadata.entries(), ([archiveName, remoteUpdatedAt]) =>
-        this.syncArchiveFromRemote(archiveName, remoteUpdatedAt),
-      ),
-      'Audio archive sync',
-      3,
-      false,
-    );
+    const selectedArchives = Array.from(bucketMetadata.entries())
+      .filter(([archiveName]) => archiveNames === undefined || archiveNames.includes(archiveName));
+    const results = await Promise.allSettled(selectedArchives.map(([archiveName, remoteUpdatedAt]) =>
+      this.syncArchiveFromRemote(archiveName, remoteUpdatedAt),
+    ));
+    const summary = summarizeSettledResults(results, 'Audio archive sync', 3, false, false);
+    const failedArchives = results.flatMap((result, index) => {
+      const archive = selectedArchives[index];
+      if (!archive || result.status !== 'rejected') return [];
+      return [{ archiveName: archive[0], error: result.reason }];
+    });
+
+    return { ...summary, failedArchives };
   }
 
   /**
@@ -103,7 +107,7 @@ export default class AudioRecord extends Entity<AppDB> implements AudioRecordLoc
     }
 
     const tasks = orphaned.map((filename) => db.audio_records.delete(filename));
-    return withSettledSummary(tasks, 'Remove orphaned audio', 3, false);
+    return withSettledSummary(tasks, 'Remove orphaned audio', 3, false, false);
   }
 
   /**
@@ -121,7 +125,7 @@ export default class AudioRecord extends Entity<AppDB> implements AudioRecordLoc
     const localUpdatedAt = await AudioMetadata.getRemoteUpdatedAt(archiveName);
     if (localUpdatedAt && localUpdatedAt >= remoteUpdatedAt) return;
 
-    const zipBlob = await fetchStorage(config.audio.archiveBucketName, archiveName);
+    const zipBlob = await downloadStorageObject(config.audio.archiveBucketName, archiveName);
     const extractedFiles = await this.extractZip(zipBlob);
 
     await db.transaction('rw', db.audio_records, db.audio_metadata, async () => {
@@ -190,7 +194,7 @@ export default class AudioRecord extends Entity<AppDB> implements AudioRecordLoc
     attempt = 1,
   ): Promise<Blob> {
     try {
-      const audioBlob = await fetchStorage(config.audio.audioBucketName, audioName);
+      const audioBlob = await downloadStorageObject(config.audio.audioBucketName, audioName);
       if (!isValidAudioBlob(audioBlob)) {
         throw new Error(`Downloaded audio file is empty: ${audioName}`);
       }
@@ -205,4 +209,16 @@ export default class AudioRecord extends Entity<AppDB> implements AudioRecordLoc
       return this.downloadAudioWithRetry(audioName, attempt + 1);
     }
   }
+}
+
+function isValidAudioBlob(audioBlob: unknown): audioBlob is Blob {
+  return audioBlob instanceof Blob && audioBlob.size > 0;
+}
+
+function isValidAudioRecord(audioRecord: AudioRecordLocal | undefined): audioRecord is AudioRecordLocal {
+  return Boolean(audioRecord && isValidAudioBlob(audioRecord.audioBlob));
+}
+
+function waitForAudioRetry(): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, AUDIO_DOWNLOAD_RETRY_DELAY_MS));
 }

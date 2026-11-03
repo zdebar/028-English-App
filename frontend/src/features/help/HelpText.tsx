@@ -8,6 +8,7 @@ import type { HTMLAttributes, JSX } from 'react';
 export default function HelpText(
   props: Readonly<HTMLAttributes<HTMLParagraphElement>>,
 ): JSX.Element | null {
+  const { children, className = '', ...paragraphProps } = props;
   const isHelpOpened = useHelpStore((state) => state.isHelpOpened);
 
   if (!isHelpOpened) {
@@ -16,10 +17,10 @@ export default function HelpText(
 
   return (
     <p
-      {...props}
-      className={`font-headings z-help-text pointer-events-none absolute overflow-hidden px-2 text-xl font-bold text-ellipsis whitespace-nowrap text-help ${props.className}`}
+      {...paragraphProps}
+      className={`font-headings z-help-text pointer-events-none absolute overflow-hidden px-2 text-xl font-bold text-ellipsis whitespace-nowrap text-help ${className}`}
     >
-      {props.children}
+      {children}
     </p>
   );
 }

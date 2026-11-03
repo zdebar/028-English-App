@@ -1,8 +1,7 @@
 import { supabaseInstance } from '@/config/supabase.config';
-import Metadata from '@/database/models/metadata';
+import SyncMetadata from '@/database/models/metadata';
 import UserItem from '@/database/models/user-items';
 import UserLesson from '@/database/models/user-lessons';
-import UserSettings from '@/database/models/user-settings';
 import { clearAllLocalStorageForUser } from '@/utils/storage.utils';
 import { useAuthStore } from '@/features/auth/use-auth-store';
 import { withSettledSummary } from '@/features/logging/logging.utils';
@@ -12,7 +11,7 @@ import { TableName } from '@/types/table.types';
 import { type JSX } from 'react';
 import { useThemeStore } from '../theme/use-theme-store';
 import { MenuButtonText } from '@/components/UI/MenuButtonText';
-import { reportError, reportInfo } from '../logging/monitoring-handler';
+import { reportError, reportInfo } from '../logging/logging-handler';
 import { useToastStore } from '../toast/use-toast-store';
 
 type DeleteUserButtonProps = Readonly<{
@@ -36,9 +35,13 @@ export default function DeleteUserButton({ className }: DeleteUserButtonProps): 
     const deletingUserId = userId;
 
     try {
-      const { error: deleteError } = await supabaseInstance.rpc('hard_delete_user');
+      const { data: deletionConfirmed, error: deleteError } =
+        await supabaseInstance.rpc('hard_delete_user');
       if (deleteError) {
         throw new Error(deleteError.message);
+      }
+      if (deletionConfirmed !== true) {
+        throw new Error('The server did not confirm account deletion.');
       }
     } catch (err) {
       reportError('Error deleting user', err);
@@ -50,9 +53,9 @@ export default function DeleteUserButton({ className }: DeleteUserButtonProps): 
     const cleanupSummary = await withSettledSummary(
       [
         UserItem.deleteByUserId(deletingUserId),
-        Metadata.deleteSyncRow(TableName.UserItems, deletingUserId),
+        SyncMetadata.deleteSyncRow(TableName.UserItems, deletingUserId),
+        SyncMetadata.deleteSyncRow(TableName.UserLessons, deletingUserId),
         UserLesson.removeByUserId(deletingUserId),
-        UserSettings.removeLocal(deletingUserId),
       ],
       'Operation failed during local cleanup',
     );
@@ -67,13 +70,13 @@ export default function DeleteUserButton({ className }: DeleteUserButtonProps): 
     }
 
     try {
-      await handleLogout({ skipSync: true, skipRemoteSignOut: true });
+      await handleLogout({ skipSync: true, scope: 'local' });
     } catch (err) {
       reportError('Failed to finish account logout after deletion', err);
     }
 
     showToast(TEXTS.deleteUserSuccessToast, 'success');
-    reportInfo(`User ${deletingUserId} hard deleted their account`);
+    reportInfo('User account deletion completed.');
   };
 
   return (
@@ -83,7 +86,6 @@ export default function DeleteUserButton({ className }: DeleteUserButtonProps): 
       disabled={!userId}
       onConfirm={handleDelete}
       className={className}
-      aria-haspopup="dialog"
       title={TEXTS.actionRequiresConfirmation}
     >
       <MenuButtonText>{TEXTS.deleteUserButtonTitle}</MenuButtonText>

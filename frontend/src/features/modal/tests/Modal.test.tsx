@@ -43,17 +43,20 @@ describe('Modal', () => {
     const onClose = vi.fn();
 
     render(
-      <Modal onConfirm={vi.fn()} onClose={onClose}>
+      <Modal onConfirm={vi.fn()} onClose={onClose} ariaLabel="Test dialog">
         content
       </Modal>,
     );
 
-    expect(mocks.openOverlay).toHaveBeenCalledWith(onClose);
+    const registeredClose = mocks.openOverlay.mock.calls[0]?.[0];
+    expect(registeredClose).toBeTypeOf('function');
+    registeredClose?.();
+    expect(onClose).toHaveBeenCalledTimes(1);
   });
 
   it('calls closeOverlay on cancel', () => {
     render(
-      <Modal onConfirm={vi.fn()} onClose={vi.fn()}>
+      <Modal onConfirm={vi.fn()} onClose={vi.fn()} ariaLabel="Test dialog">
         content
       </Modal>,
     );
@@ -72,7 +75,7 @@ describe('Modal', () => {
     );
 
     render(
-      <Modal onConfirm={onConfirm} onClose={vi.fn()}>
+      <Modal onConfirm={onConfirm} onClose={vi.fn()} ariaLabel="Test dialog">
         content
       </Modal>,
     );
@@ -98,7 +101,7 @@ describe('Modal', () => {
     const onConfirm = vi.fn(() => new Promise<void>(() => undefined));
 
     render(
-      <Modal onConfirm={onConfirm} onClose={vi.fn()}>
+      <Modal onConfirm={onConfirm} onClose={vi.fn()} ariaLabel="Test dialog">
         content
       </Modal>,
     );

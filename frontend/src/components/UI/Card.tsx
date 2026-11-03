@@ -4,6 +4,7 @@ type CardProps = Readonly<{
   children: ReactNode;
   className?: string;
 }>;
+
 /**
  * Generic card container used as a visual wrapper for content blocks.
  *
@@ -11,7 +12,5 @@ type CardProps = Readonly<{
  * overview/detail UI components.
  */
 export default function Card({ children, className = '' }: CardProps): JSX.Element {
-  return (
-    <div className={`card-width relative flex flex-col justify-start ${className}`}>{children}</div>
-  );
+  return <div className={`card-width relative ${className}`}>{children}</div>;
 }

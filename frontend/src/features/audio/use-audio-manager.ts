@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import AudioRecord from '@/database/models/audio-records';
-import { reportError } from '@/features/logging/monitoring-handler';
+import { reportError } from '@/features/logging/logging-handler';
 import { useAudioStore } from './use-audio-store';
 
 type AudioInput = string | string[] | null;
@@ -9,93 +9,6 @@ type ManagedAudio = {
   onEnded: () => void;
 };
 type AudioLoadPromise = Promise<boolean>;
-
-/**
- * Stop and reset an HTMLAudioElement to the start.
- */
-function stopAndReset(element: HTMLAudioElement) {
-  element.pause();
-  element.currentTime = 0;
-}
-
-/**
- * Stop and reset all managed audio elements in the provided map.
- */
-function stopAndResetAll(audioMap: Map<string, ManagedAudio>) {
-  audioMap.forEach(({ element }) => {
-    stopAndReset(element);
-  });
-}
-
-/**
- * Dispose managed audio elements and revoke object URLs where needed.
- */
-function disposeAudioMap(audioMap: Map<string, ManagedAudio>) {
-  audioMap.forEach(disposeManagedAudio);
-  audioMap.clear();
-}
-
-function disposeManagedAudio({ element, onEnded }: ManagedAudio) {
-  stopAndReset(element);
-  element.removeEventListener('ended', onEnded);
-  const objectUrl = element.src;
-  if (objectUrl.startsWith('blob:')) {
-    element.removeAttribute('src');
-    element.load();
-    URL.revokeObjectURL(objectUrl);
-  }
-}
-
-/**
- * Normalize audio input (string | string[] | null) into an array of filenames.
- */
-function normalizeAudioInput(audio: AudioInput): string[] {
-  if (typeof audio === 'string' && audio) {
-    return [audio];
-  }
-  if (Array.isArray(audio)) {
-    return [...new Set(audio.filter(Boolean))];
-  }
-  return [];
-}
-
-function getAudioInputKey(audio: AudioInput): string {
-  return JSON.stringify(normalizeAudioInput(audio));
-}
-
-function getAudioFilesFromInputKey(inputKey: string): string[] {
-  return JSON.parse(inputKey) as string[];
-}
-
-function resolveFilenameToPlay(
-  requestedFilename: string | undefined,
-  currentFilename: string | null,
-  filenames: string[],
-): string | null {
-  if (requestedFilename) return requestedFilename;
-  if (currentFilename) return currentFilename;
-  return filenames[0] ?? null;
-}
-
-async function loadSingleAudio(
-  filename: string,
-  onEnded: () => void,
-): Promise<ManagedAudio | null> {
-  try {
-    const audioRecord = await AudioRecord.getByFilename(filename);
-    if (!audioRecord?.audioBlob) {
-      throw new Error('Audio not found');
-    }
-
-    const objectUrl = URL.createObjectURL(audioRecord.audioBlob);
-    const audioElement = new Audio(objectUrl);
-    audioElement.addEventListener('ended', onEnded);
-    return { element: audioElement, onEnded };
-  } catch (error) {
-    reportError('Audio Manager Error', error);
-    return null;
-  }
-}
 
 /**
  * Hook to manage preloading and playback of audio files stored in the local
@@ -111,6 +24,7 @@ export function useAudioManager(audio: AudioInput) {
   const audioMapRef = useRef<Map<string, ManagedAudio>>(new Map());
   const loadPromisesRef = useRef<Map<string, AudioLoadPromise>>(new Map());
   const loadGenerationRef = useRef(0);
+  const volume = useAudioStore((state) => state.volume);
   const audioInputKey = getAudioInputKey(audio);
   const requestedFilenames = getAudioFilesFromInputKey(audioInputKey);
   const audioInputKeyRef = useRef(audioInputKey);
@@ -275,6 +189,12 @@ export function useAudioManager(audio: AudioInput) {
   const effectiveCurrent = audioStateMatchesInput ? current : null;
   const effectiveFilenames = audioStateMatchesInput ? filenames : [];
 
+  useEffect(() => {
+    audioMapRef.current.forEach(({ element }) => {
+      element.volume = volume;
+    });
+  }, [volume]);
+
   return {
     playAudio, // playAudio() or playAudio(filename)
     stopAudio,
@@ -285,4 +205,74 @@ export function useAudioManager(audio: AudioInput) {
     current: effectiveCurrent,
     filenames: effectiveFilenames,
   };
+}
+
+/** Stops and resets one audio element to the start. */
+function stopAndReset(element: HTMLAudioElement): void {
+  element.pause();
+  element.currentTime = 0;
+}
+
+/** Stops and resets all managed audio elements. */
+function stopAndResetAll(audioMap: Map<string, ManagedAudio>): void {
+  audioMap.forEach(({ element }) => stopAndReset(element));
+}
+
+/** Disposes all managed audio elements and revokes their object URLs. */
+function disposeAudioMap(audioMap: Map<string, ManagedAudio>): void {
+  audioMap.forEach(disposeManagedAudio);
+  audioMap.clear();
+}
+
+function disposeManagedAudio({ element, onEnded }: ManagedAudio): void {
+  stopAndReset(element);
+  element.removeEventListener('ended', onEnded);
+  const objectUrl = element.src;
+  if (!objectUrl.startsWith('blob:')) return;
+  element.removeAttribute('src');
+  element.load();
+  URL.revokeObjectURL(objectUrl);
+}
+
+/** Normalizes audio input to a deduplicated list of filenames. */
+function normalizeAudioInput(audio: AudioInput): string[] {
+  if (typeof audio === 'string' && audio) return [audio];
+  if (!Array.isArray(audio)) return [];
+  return [...new Set(audio.filter(Boolean))];
+}
+
+function getAudioInputKey(audio: AudioInput): string {
+  return JSON.stringify(normalizeAudioInput(audio));
+}
+
+function getAudioFilesFromInputKey(inputKey: string): string[] {
+  return JSON.parse(inputKey) as string[];
+}
+
+function resolveFilenameToPlay(
+  requestedFilename: string | undefined,
+  currentFilename: string | null,
+  filenames: string[],
+): string | null {
+  if (requestedFilename) return requestedFilename;
+  if (currentFilename) return currentFilename;
+  return filenames[0] ?? null;
+}
+
+async function loadSingleAudio(
+  filename: string,
+  onEnded: () => void,
+): Promise<ManagedAudio | null> {
+  try {
+    const audioRecord = await AudioRecord.getByFilename(filename);
+    if (!audioRecord?.audioBlob) throw new Error('Audio not found');
+
+    const objectUrl = URL.createObjectURL(audioRecord.audioBlob);
+    const audioElement = new Audio(objectUrl);
+    audioElement.addEventListener('ended', onEnded);
+    return { element: audioElement, onEnded };
+  } catch (error) {
+    reportError('Audio Manager Error', error);
+    return null;
+  }
 }

@@ -2,6 +2,7 @@ import { fireEvent, render, screen } from '@testing-library/react';
 import { Link, MemoryRouter, Route, Routes, useLocation } from 'react-router-dom';
 import { describe, expect, it } from 'vitest';
 import { useRouteClose } from '@/routing/use-route-close';
+import { useInAppRouteHistory } from '@/routing/in-app-route-history';
 
 function LocationView() {
   return <output data-testid="location">{useLocation().pathname}</output>;
@@ -14,6 +15,8 @@ function CloseRoute() {
 }
 
 function TestRoutes() {
+  useInAppRouteHistory();
+
   return (
     <>
       <Routes>

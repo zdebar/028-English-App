@@ -6,9 +6,6 @@ vi.mock('@/config/config', () => ({
     vocabulary: {
       itemsPerBatch: 2,
     },
-    buttons: {
-      loadingMessageDelay: 0,
-    },
     loading: {
       dataStateDelayMs: 0,
     },
@@ -48,7 +45,7 @@ vi.mock('@/features/vocabulary/DirectionToggle', () => ({
 }));
 
 vi.mock('@/components/UI/DelayedNotification', () => ({
-  default: ({ children }: any) => <>{children}</>,
+  default: ({ message }: any) => <>{message}</>,
 }));
 
 import VocabularyList from '@/features/vocabulary/VocabularyList';

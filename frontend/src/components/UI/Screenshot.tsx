@@ -8,9 +8,6 @@ type ScreenshotProps = Readonly<{
 
 /**
  * Renders a screenshot image with a caption.
- *
- * @param {string} src - The source URL of the screenshot image
- * @param {string} alt - The alt text for the image, also used as the figure caption
  */
 export function Screenshot({ src, alt }: ScreenshotProps): JSX.Element {
   const isDarkMode = useThemeStore((state) => state.theme === 'dark');

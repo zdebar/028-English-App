@@ -1,9 +1,12 @@
 export const HOME_TEXTS = {
   // Home Page
+  testModeWarning:
+    'Aplikace v testovacím režimu! V tuto chvíli Vaše tréninková data nebudou zachována.',
   appTitle: 'Angličtina',
   appDescription: 'Bez stresu. Bez přemýšlení. Jen dril.',
   guide: 'Návod',
   noDashboardData: 'Žádná dostupná data.',
+  dashboardLoadError: 'Přehled se nepodařilo načíst.',
   signupHint:
     'Aplikace po přihlášení ukládá cvičební data do úložiště Vašeho prohlížeče. Účet je možno kdykoliv smazat, včetně všech dat.',
   installButton: 'Nainstalovat aplikaci',
@@ -11,7 +14,6 @@ export const HOME_TEXTS = {
   grammarReviewButton: 'Opakování gramatiky',
   vocabularyReviewButton: 'Opakování slovíček',
   newButton: 'Další lekce',
-  dailyNewLessonLimitReached: 'Denní limit nových lekcí byl dosažen. Změňte jej v Profilu.',
 
   // User
   authInitErrorToast: 'Nastala chyba při přihlašování.',

@@ -1,95 +1,68 @@
-# Domain Models
+# Domain models
 
-Supabase stores shared content and user data. The frontend mirrors the records it
-needs in Dexie IndexedDB, where its model classes support local reads, writes, and
-synchronization.
+Supabase holds the remote curriculum and user data. Dexie mirrors the records needed by the frontend. The central data manager reads the active account's local records and builds page packages from them.
 
-## Current Supabase Tables
+## Current Supabase tables
 
-| Schema | Tables | Role |
+| Schema | Tables | Purpose |
 | --- | --- | --- |
-| `public` shared content | `levels`, `lessons`, `items`, `notes` | Ordered course content, practice items, and supporting notes. |
-| `public` group catalog | `groups`, `group_items`, `group_relations` | Topics, grammar, sounds, pronunciation groups, their item examples, and relationships. |
-| `public` user data | `users`, `user_lessons`, `user_items` | User settings, lesson starts, and per-item progress. |
-| `private` | `private.settings` | Operational settings used by database functions. |
+| public | levels, lessons, items, notes | Course structure, learning items, and supporting notes. |
+| public | groups, group_items, group_relations | Topic, grammar, sound, and pronunciation groupings. |
+| public | users, user_lessons, user_items | Account records, lesson starts, and per-item progress. |
+| private | settings | Operational settings used by database functions. |
 
-The active schema is defined in `supabase/schemas/00_tables.sql`. Older names such
-as `blocks`, `topics`, `grammar_chunks`, and `user_scores` belong to historical
-migrations or local Dexie upgrades; they are not current application tables.
+The current table definitions are in **supabase/schemas/00_tables.sql**. The old content tables such as blocks, topics, grammar chunks, and pronunciation groups are not current server tables.
 
-## Relationships
+## Content relationships
 
-| Entity | Relationship |
+| Relationship | Meaning |
 | --- | --- |
-| `levels` → `lessons` → `items` | Lessons are ordered within levels; items are ordered within lessons. |
-| `items` → `notes` | An item can reference an optional note through `note_id`. |
-| `lessons` → `groups` | Optional `lessons.group_id` links a lesson to its grammar detail group. |
-| `groups` ↔ `items` | `group_items` links a group to ordered example items. |
-| `groups` ↔ `groups` | `group_relations` records `hierarchy`, `detail`, and `contrast` relationships. |
-| `user_items` | One progress row per user and item, keyed by `(user_id, item_id)`. |
-| `user_lessons` | Records a user's lesson starts with `started_at`; a user may have start records for different dates. |
+| levels → lessons → items | Lessons belong to levels; ordered items belong to lessons. |
+| items → notes | An item can reference one optional note through note_id. |
+| lessons → groups | Optional lessons.group_id links a lesson to its grammar context. |
+| groups ↔ items | group_items assigns ordered example items to any supported group type. |
+| groups ↔ groups | group_relations stores supported hierarchy, detail, or contrast relations. |
 
-`groups.type` is `topic`, `grammar`, `sound`, or `pronunciation`. Sound groups also
-carry a sound class/category. The grammar, topic, sound, and pronunciation query
-helpers in `frontend/src/database/models` read this unified group model; their
-names do not imply separate current Supabase tables.
+A group has one of four types: topic, grammar, sound, or pronunciation. Current relation rules allow grammar hierarchy/detail, topic hierarchy, and pronunciation-to-sound contrast. Sound groups carry a sound class and category.
 
-## Progress And Sync Fields
+Shared catalog tables use deleted_at timestamps as sync tombstones. User records have no soft-delete lifecycle; account deletion removes the user and their owned records.
 
-The server's `user_items` table stores progress and scheduling. Sync RPCs combine
-those rows with item content for the local `UserItem` model.
+## Progress and synchronization fields
+
+Server user_items stores per-user progress; the sync RPC combines that progress with its item content for the local UserItem model. Local IndexedDB dates that participate in compound indexes use the configured null-replacement value; sync converts nullable remote values at the boundary.
 
 | Field | Meaning |
 | --- | --- |
-| `progress_cz_to_en`, `progress_en_to_cz` | Spaced-repetition progress for each review direction. |
-| `is_cz_to_en_enabled`, `is_en_to_cz_enabled` | Whether an item is enabled in each direction. |
-| `next_at_cz_to_en`, `next_at_en_to_cz` | Next scheduled review for each direction. |
-| `mastered_at_cz_to_en`, `mastered_at_en_to_cz` | Mastery timestamps for each direction. |
-| `started_at` | First practice start for an item, or the start time for a `user_lessons` record. |
-| `updated_at` | Change timestamp used by synchronization. |
-| `deleted_at` | Soft-delete marker for shared catalog content. User accounts are hard-deleted. |
+| progress_cz_to_en, progress_en_to_cz | Spaced-repetition progress by answer direction. |
+| is_cz_to_en_enabled, is_en_to_cz_enabled | Whether each answer direction is enabled. |
+| next_at_cz_to_en, next_at_en_to_cz | Next scheduled review. |
+| mastered_at_cz_to_en, mastered_at_en_to_cz | Mastery timestamp by direction. |
+| started_at | Item start, or the start timestamp of a user_lessons row. |
+| updated_at | Change timestamp used by incremental sync. |
 
-For IndexedDB compound indexes, null dates use
-`config.database.nullReplacementDate`. Sync converts the local sentinel back to
-null where the remote field is nullable. `items.is_vocabulary` separates
-vocabulary from grammar practice.
+## IndexedDB tables
 
-An item is considered initiated when it has a `started_at` value or has been
-skipped during initial training (its Czech-to-English direction is marked
-mastered). Lesson-start state in the Home dashboard comes from `user_lessons`.
+The active Dexie schema is version 15 in **frontend/src/database/models/app-db.ts**.
 
-## Frontend Models
-
-| Model | Responsibility |
+| Local table | Purpose |
 | --- | --- |
-| `Levels`, `Lessons`, `Notes`, `Groups`, `GroupItem`, `GroupRelation` | Read and synchronize shared catalog data. |
-| `UserItem` | Local user progress, review selection, initial-training selection, resets, and item sync. |
-| `UserLesson` | Record and synchronize lesson starts; enforce the daily new-lesson limit. |
-| `UserSettings` | Read and synchronize `users.max_new_lessons_per_day`. |
-| `AudioRecord`, `AudioMetadata` | Track local audio records and archive metadata. |
-| `Metadata` | Store local per-table, per-user sync metadata. |
-| `Topic`, `GrammarTopic`, `GrammarGroup`, `GrammarChunk`, `SoundGroup`, `PronunciationGroup` | Feature query helpers backed by the unified group tables. |
+| levels, lessons, notes | Shared curriculum data. |
+| groups, group_items, group_relations | Shared group catalog and links. |
+| user_items | User progress joined with the item fields required by the app. |
+| user_lessons | User lesson-start records. |
+| audio_records, audio_metadata | Audio blobs and archive metadata, separate from the data manager. |
+| metadata | Per-table and per-user incremental-sync cursors. |
 
-## Active IndexedDB Tables And Indexes
+There is no standalone IndexedDB items table. The application-facing UserItem rows contain the content and progress fields needed for practice. The data manager mirrors the curriculum, user_items, and user_lessons tables; it does not mirror metadata or audio blobs.
 
-The current Dexie schema is version 13 in
-`frontend/src/database/models/app-db.ts`. Its active tables are `levels`,
-`lessons`, `notes`, `user_items`, `user_lessons`, `users`, `groups`,
-`group_items`, `group_relations`, `audio_records`, `audio_metadata`, and
-`metadata`. Upgrades remove legacy block, topic, grammar, pronunciation, score,
-history, and practice-session stores.
+The active user_items indexes cover the user/item key, vocabulary and lesson selection, start and update times, and review scheduling by direction. user_lessons is keyed by user, lesson, and start time. The exact Dexie index definitions and historical upgrades are in app-db.ts.
 
-Key indexes on `user_items`:
+## Frontend database folders
 
-| Index | Used for |
-| --- | --- |
-| `[user_id+item_id]` | Direct user-item lookup, update, and reset. |
-| `[user_id+is_vocabulary+started_at]` | Started vocabulary lookup. |
-| `[user_id+started_at]` | User items ordered/filterable by start state. |
-| `[user_id+updated_at]` | Incremental sync windows. |
-| `[user_id+lesson_id+is_vocabulary+started_at]` | Lesson/type-specific selection. |
-| `[user_id+next_at_cz_to_en+mastered_at_cz_to_en+curriculum_sort_path]` | Czech-to-English review selection and order. |
-| `[user_id+next_at_en_to_cz+mastered_at_en_to_cz+curriculum_sort_path]` | English-to-Czech review selection and order. |
+- **database/models/** — Dexie schema, table models, and model-owned database operations.
+- **database/practice/** — practice selection, scheduling, and progress rules.
+- **database/sync/** — remote sync orchestration and shared sync helpers.
+- **database/state/** — data-manager types, selectors, and page-package builders.
+- **database/audio/** — remote audio storage access.
 
-`user_lessons` uses `[user_id+lesson_id+started_at]` and
-`[user_id+started_at]` to check lesson continuation and daily starts.
+For content authoring rules, see [DATA_GUIDE.md](../DATA_GUIDE.md).

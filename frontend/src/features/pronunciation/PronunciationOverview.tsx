@@ -4,12 +4,11 @@ import OverviewCard from '@/components/UI/OverviewCard';
 import { ROUTES } from '@/config/routes.config';
 import { TEXTS } from '@/locales/cs';
 import { NavigationButton } from '@/routing/data-navigation';
-import { usePronunciationGroupsStore } from './use-pronunciation-groups-store';
 import { useRouteClose } from '@/routing/use-route-close';
 import { useQueryErrorToast } from '@/features/logging/use-query-error-toast';
 import { useAuthStore } from '@/features/auth/use-auth-store';
-import { usePronunciationGroupsStoreSync } from './use-pronunciation-groups-store-sync';
 import type { SoundClass } from '@/types/table.types';
+import { useDataPackage } from '@/database/state/data-store';
 
 type ContrastClassPresentation = Readonly<{ key: SoundClass; title: string }>;
 
@@ -21,21 +20,14 @@ const CONTRAST_CLASS_PRESENTATION: readonly ContrastClassPresentation[] = [
 const CATEGORY_HEADING_CLASS_NAME =
   'h-input border-disabled-light text-light dark:border-disabled-dark dark:text-dark flex w-full items-center justify-start border border-dashed px-4 text-left';
 
-function splitContrastName(groupName: string): readonly [string, string] | null {
-  const separatorIndex = groupName.indexOf('|');
-  if (separatorIndex < 0) return null;
-  return [
-    groupName.slice(0, separatorIndex).trim(),
-    groupName.slice(separatorIndex + 1).trim(),
-  ];
-}
-
 export default function PronunciationOverview() {
-  usePronunciationGroupsStoreSync(useAuthStore((state) => state.userId));
+  const userId = useAuthStore((state) => state.userId);
+  const packageState = useDataPackage({ kind: 'pronunciation-overview' });
   const closeRoute = useRouteClose(ROUTES.home);
-  const data = usePronunciationGroupsStore((state) => state.groups);
-  const loading = usePronunciationGroupsStore((state) => state.loading);
-  const error = usePronunciationGroupsStore((state) => state.error);
+  const hasUserPackage = packageState.userId === userId;
+  const data = hasUserPackage ? packageState.data ?? [] : [];
+  const loading = Boolean(userId) && (!hasUserPackage || packageState.status === 'loading');
+  const error = hasUserPackage && packageState.status === 'error' ? packageState.error : null;
   const hasData = data.length > 0;
 
   useQueryErrorToast(error, 'Failed to fetch pronunciation overview');
@@ -86,4 +78,13 @@ export default function PronunciationOverview() {
       </DataState>
     </OverviewCard>
   );
+}
+
+function splitContrastName(groupName: string): readonly [string, string] | null {
+  const separatorIndex = groupName.indexOf('|');
+  if (separatorIndex < 0) return null;
+  return [
+    groupName.slice(0, separatorIndex).trim(),
+    groupName.slice(separatorIndex + 1).trim(),
+  ];
 }

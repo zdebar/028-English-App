@@ -2,133 +2,42 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const mocks = vi.hoisted(() => ({
   userId: 'u1' as string | null,
-  waitForAuthReady: vi.fn().mockResolvedValue(undefined),
-  loadPracticeAvailabilitySnapshot: vi.fn(),
-  reportError: vi.fn(),
-  showToast: vi.fn(),
+  waitForAuthReady: vi.fn(),
+  ensureDataPackage: vi.fn(),
 }));
 
 vi.mock('@/features/auth/auth-lifecycle', () => ({
-  waitForAuthReady: () => mocks.waitForAuthReady(),
+  waitForAuthReady: (...args: unknown[]) => mocks.waitForAuthReady(...args),
 }));
 vi.mock('@/features/auth/use-auth-store', () => ({
-  useAuthStore: {
-    getState: () => ({ userId: mocks.userId }),
-  },
+  useAuthStore: { getState: () => ({ userId: mocks.userId }) },
 }));
-vi.mock('@/features/practice/practice-availability', () => ({
-  loadPracticeAvailabilitySnapshot: (...args: unknown[]) =>
-    mocks.loadPracticeAvailabilitySnapshot(...args),
-}));
-vi.mock('@/features/logging/monitoring-handler', () => ({
-  reportError: (...args: unknown[]) => mocks.reportError(...args),
-}));
-vi.mock('@/features/toast/use-toast-store', () => ({
-  useToastStore: {
-    getState: () => ({ showToast: mocks.showToast }),
-  },
+vi.mock('@/database/state/data-store', () => ({
+  ensureDataPackage: (...args: unknown[]) => mocks.ensureDataPackage(...args),
 }));
 
-import { resetPracticeAvailability } from '@/features/practice/practice-availability-controller';
-import { loadHome } from '@/routing/home-loader';
-import { usePracticeAvailabilityStore } from '@/features/practice/use-practice-availability-store';
+import { loadHomeDataPackage } from '../home-loader';
 
-describe('loadHome', () => {
+describe('loadHomeDataPackage', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mocks.userId = 'u1';
-    resetPracticeAvailability();
+    mocks.waitForAuthReady.mockResolvedValue(undefined);
+    mocks.ensureDataPackage.mockResolvedValue(undefined);
   });
 
-  it('waits for and stores the availability snapshot before completing', async () => {
-    let resolveSnapshot!: (snapshot: object) => void;
-    mocks.loadPracticeAvailabilitySnapshot.mockReturnValueOnce(
-      new Promise((resolve) => {
-        resolveSnapshot = resolve;
-      }),
-    );
+  it('waits for authentication and the home package', async () => {
+    await expect(loadHomeDataPackage()).resolves.toBeNull();
 
-    let completed = false;
-    const loading = loadHome().then(() => {
-      completed = true;
-    });
-
-    await Promise.resolve();
-    expect(completed).toBe(false);
-    expect(usePracticeAvailabilityStore.getState()).toMatchObject({
-      availabilityUserId: 'u1',
-      practiceLoading: true,
-    });
-
-    resolveSnapshot({
-      grammarReviewReadyAt: '2026-07-21T10:00:00.000Z',
-      vocabularyReviewReadyAt: '2026-07-21T11:00:00.000Z',
-      grammarReviewDueCount: 0,
-      vocabularyReviewDueCount: 0,
-      nextReviewAt: null,
-      initialTrainingAvailable: true,
-      continuingInitialLessonToday: false,
-      dailyNewLessonLimitReached: false,
-      newLessonsStartedTodayCount: 0,
-      maxNewLessonsPerDay: 1,
-    });
-    await loading;
-
-    expect(usePracticeAvailabilityStore.getState()).toMatchObject({
-      availabilityUserId: 'u1',
-      grammarReviewReadyAt: '2026-07-21T10:00:00.000Z',
-      vocabularyReviewReadyAt: '2026-07-21T11:00:00.000Z',
-      initialTrainingAvailable: true,
-      practiceLoading: false,
-      practiceError: null,
-    });
+    expect(mocks.waitForAuthReady).toHaveBeenCalledOnce();
+    expect(mocks.ensureDataPackage).toHaveBeenCalledWith('u1', { kind: 'home' });
   });
 
-  it('reuses the snapshot when returning Home', async () => {
-    mocks.loadPracticeAvailabilitySnapshot.mockResolvedValue({ grammarReviewReadyAt: null, vocabularyReviewReadyAt: null, grammarReviewDueCount: 0, vocabularyReviewDueCount: 0, nextReviewAt: null, initialTrainingAvailable: true, continuingInitialLessonToday: false, dailyNewLessonLimitReached: false, newLessonsStartedTodayCount: 0, maxNewLessonsPerDay: 1 });
-    await loadHome();
-    await loadHome();
-    expect(mocks.loadPracticeAvailabilitySnapshot).toHaveBeenCalledOnce();
-  });
-
-  it('resets availability for a signed-out user', async () => {
-    usePracticeAvailabilityStore.setState({
-      availabilityUserId: 'u1',
-      grammarReviewReadyAt: '2026-07-21T10:00:00.000Z',
-      vocabularyReviewReadyAt: '2026-07-21T11:00:00.000Z',
-      practiceLoading: false,
-    });
+  it('does not bootstrap user data when signed out', async () => {
     mocks.userId = null;
 
-    await expect(loadHome()).resolves.toBeNull();
+    await expect(loadHomeDataPackage()).resolves.toBeNull();
 
-    expect(usePracticeAvailabilityStore.getState()).toMatchObject({
-      availabilityUserId: null,
-      grammarReviewReadyAt: null,
-      vocabularyReviewReadyAt: null,
-      practiceLoading: true,
-    });
-    expect(mocks.loadPracticeAvailabilitySnapshot).not.toHaveBeenCalled();
-  });
-
-  it('keeps Home navigable with a safe error state when loading fails', async () => {
-    const loadError = new Error('availability failed');
-    mocks.loadPracticeAvailabilitySnapshot.mockRejectedValueOnce(loadError);
-
-    await expect(loadHome()).resolves.toBeNull();
-
-    expect(usePracticeAvailabilityStore.getState()).toMatchObject({
-      availabilityUserId: 'u1',
-      practiceLoading: false,
-      practiceError: loadError,
-      grammarReviewReadyAt: null,
-      vocabularyReviewReadyAt: null,
-      initialTrainingAvailable: false,
-    });
-    expect(mocks.reportError).toHaveBeenCalledWith(
-      'Failed to load Home practice availability',
-      loadError,
-    );
-    expect(mocks.showToast).toHaveBeenCalledOnce();
+    expect(mocks.ensureDataPackage).not.toHaveBeenCalled();
   });
 });

@@ -2,98 +2,21 @@ import { ROUTES } from '@/config/routes.config';
 import { TEXTS } from '@/locales/cs';
 import { memo, type JSX } from 'react';
 import { NavigationButton } from '@/routing/data-navigation';
-import {
-  usePracticeAvailabilityStore,
-  type PracticeAvailabilityState,
-} from './use-practice-availability-store';
 import StyledButton from '@/components/UI/buttons/StyledButton';
 import { hasReachedReviewLimit } from './practice-availability';
 import { useAuthStore } from '@/features/auth/use-auth-store';
-import { usePronunciationGroupsStore } from '@/features/pronunciation/use-pronunciation-groups-store';
-import { usePronunciationGroupsStoreSync } from '@/features/pronunciation/use-pronunciation-groups-store-sync';
+import { useDataPackage } from '@/database/state/data-store';
+import type { DataPackageResult } from '@/database/state/data-store';
+import type { HomeDataPackage } from '@/database/state/data-types';
+import type { PracticeAvailabilitySnapshot } from './practice-availability';
 
 type ReviewKind = 'grammar' | 'vocabulary';
 
-function PracticeButtonLabel({ children }: Readonly<{ children: string }>): JSX.Element {
-  return (
-    <span className="grid w-full grid-cols-[1fr_max-content_1fr]">
-      <span
-        aria-hidden="true"
-        className="invisible col-start-2 row-start-1 whitespace-nowrap"
-      >
-        {TEXTS.grammarReviewButton}
-      </span>
-      <span
-        className="col-start-2 row-start-1 w-0 min-w-0 justify-self-start overflow-visible text-left whitespace-nowrap"
-      >
-        {children}
-      </span>
-    </span>
-  );
-}
-
-function selectReviewDueCount(
-  state: PracticeAvailabilityState,
-  reviewKind: ReviewKind,
-): number {
-  if (reviewKind === 'grammar') return state.grammarReviewDueCount;
-  return state.vocabularyReviewDueCount;
-}
-
-function selectReviewDisabled(
-  state: PracticeAvailabilityState,
-  reviewKind: ReviewKind,
-): boolean {
-  if (state.practiceLoading || state.practiceError) return true;
-  return selectReviewDueCount(state, reviewKind) === 0;
-}
-
-function resolveButtonTitle(
-  loading: boolean,
-  error: Error | null,
-  disabled: boolean,
-): string | undefined {
-  if (loading) return TEXTS.loadingMessage;
-  if (error) return TEXTS.loadingError;
-  if (disabled) return TEXTS.nothingToPractice;
-  return undefined;
-}
-
-function selectReviewTitle(
-  state: PracticeAvailabilityState,
-  reviewKind: ReviewKind,
-): string | undefined {
-  const disabled = selectReviewDisabled(state, reviewKind);
-  return resolveButtonTitle(state.practiceLoading, state.practiceError, disabled);
-}
-
-function selectNewAvailable(state: PracticeAvailabilityState): boolean {
-  return state.initialTrainingAvailable;
-}
-
-function selectNewDisabled(state: PracticeAvailabilityState): boolean {
-  if (state.practiceLoading || state.practiceError) return true;
-  if (!selectNewAvailable(state)) return true;
-  if (state.continuingInitialLessonToday) return false;
-  return hasReachedReviewLimit(state) || state.dailyNewLessonLimitReached;
-}
-
-function selectNewTitle(state: PracticeAvailabilityState): string | undefined {
-  if (state.dailyNewLessonLimitReached && !state.continuingInitialLessonToday) {
-    return TEXTS.dailyNewLessonLimitReached;
-  }
-  return resolveButtonTitle(
-    state.practiceLoading,
-    state.practiceError,
-    selectNewDisabled(state),
-  );
-}
-
 const NewPracticeButton = memo(function NewPracticeButton(): JSX.Element {
-  const available = usePracticeAvailabilityStore(selectNewAvailable);
-  const disabled = usePracticeAvailabilityStore(selectNewDisabled);
-  const loading = usePracticeAvailabilityStore((state) => state.practiceLoading);
-  const title = usePracticeAvailabilityStore(selectNewTitle);
+  const { availability, loading, error } = usePracticeStatus();
+  const available = availability?.initialTrainingAvailable ?? false;
+  const disabled = selectNewDisabled(availability, loading, error);
+  const title = resolveButtonTitle(loading, error, disabled);
 
   if (!available && !loading) {
     return (
@@ -126,9 +49,8 @@ type ReviewCountBadgeProps = Readonly<{
 const ReviewCountBadge = memo(function ReviewCountBadge({
   reviewKind,
 }: ReviewCountBadgeProps): JSX.Element | null {
-  const dueCount = usePracticeAvailabilityStore((state) =>
-    selectReviewDueCount(state, reviewKind),
-  );
+  const { availability } = usePracticeStatus();
+  const dueCount = selectReviewDueCount(availability, reviewKind);
 
   if (dueCount <= 0) return null;
 
@@ -153,12 +75,9 @@ const ReviewPracticeButton = memo(function ReviewPracticeButton({
   to,
   children,
 }: ReviewPracticeButtonProps): JSX.Element {
-  const disabled = usePracticeAvailabilityStore((state) =>
-    selectReviewDisabled(state, reviewKind),
-  );
-  const title = usePracticeAvailabilityStore((state) =>
-    selectReviewTitle(state, reviewKind),
-  );
+  const { availability, loading, error } = usePracticeStatus();
+  const disabled = selectReviewDisabled(availability, loading, error, reviewKind);
+  const title = resolveButtonTitle(loading, error, disabled);
 
   return (
     <NavigationButton
@@ -173,26 +92,13 @@ const ReviewPracticeButton = memo(function ReviewPracticeButton({
   );
 });
 
-function getPronunciationPracticeButtonTitle(
-  loading: boolean,
-  error: Error | null,
-  hasActiveGroup: boolean,
-): string | undefined {
-  if (loading) return TEXTS.loadingMessage;
-  if (error) return TEXTS.loadingError;
-  if (!hasActiveGroup) return TEXTS.noActivePronunciationGroups;
-  return undefined;
-}
-
 const PronunciationPracticeButton = memo(function PronunciationPracticeButton(): JSX.Element {
   const userId = useAuthStore((state) => state.userId);
-  usePronunciationGroupsStoreSync(userId);
-
-  const hasActiveGroup = usePronunciationGroupsStore((state) =>
-    state.groups.some((group) => group.isActive),
-  );
-  const loading = usePronunciationGroupsStore((state) => state.loading);
-  const error = usePronunciationGroupsStore((state) => state.error);
+  const homePackage = useDataPackage({ kind: 'home' });
+  const hasUserPackage = homePackage.userId === userId;
+  const loading = Boolean(userId) && (!hasUserPackage || homePackage.status === 'loading');
+  const error = hasUserPackage && homePackage.status === 'error' ? homePackage.error : null;
+  const hasActiveGroup = hasUserPackage && homePackage.data?.hasActivePronunciationGroups === true;
   const disabled = loading || error !== null || !hasActiveGroup;
 
   return (
@@ -220,4 +126,98 @@ export default function PracticeButtons(): JSX.Element {
       </ReviewPracticeButton>
     </div>
   );
+}
+
+function PracticeButtonLabel({ children }: Readonly<{ children: string }>): JSX.Element {
+  return (
+    <span className="grid w-full grid-cols-[1fr_max-content_1fr]">
+      <span
+        aria-hidden="true"
+        className="invisible col-start-2 row-start-1 whitespace-nowrap"
+      >
+        {TEXTS.grammarReviewButton}
+      </span>
+      <span
+        className="col-start-2 row-start-1 w-0 min-w-0 justify-self-start overflow-visible text-left whitespace-nowrap"
+      >
+        {children}
+      </span>
+    </span>
+  );
+}
+
+function usePracticeStatus(): Readonly<{
+  availability: PracticeAvailabilitySnapshot | null;
+  loading: boolean;
+  error: Error | null;
+}> {
+  const userId = useAuthStore((state) => state.userId);
+  const homePackage = useDataPackage({ kind: 'home' });
+  return getPracticeStatus(homePackage, userId);
+}
+
+function getPracticeStatus(
+  homePackage: DataPackageResult<HomeDataPackage>,
+  userId: string | null,
+): Readonly<{ availability: PracticeAvailabilitySnapshot | null; loading: boolean; error: Error | null }> {
+  const isCurrentUser = homePackage.userId === userId;
+  const isReady = isCurrentUser && homePackage.status === 'ready';
+  const error = isCurrentUser && homePackage.status === 'error' ? homePackage.error : null;
+  return {
+    availability: userId && isReady ? homePackage.data?.practiceAvailability ?? null : null,
+    loading: Boolean(userId) && !isReady && error === null,
+    error,
+  };
+}
+
+function selectReviewDueCount(
+  state: PracticeAvailabilitySnapshot | null,
+  reviewKind: ReviewKind,
+): number {
+  if (!state) return 0;
+  if (reviewKind === 'grammar') return state.grammarReviewDueCount;
+  return state.vocabularyReviewDueCount;
+}
+
+function selectReviewDisabled(
+  state: PracticeAvailabilitySnapshot | null,
+  loading: boolean,
+  error: Error | null,
+  reviewKind: ReviewKind,
+): boolean {
+  if (loading || error || !state) return true;
+  return selectReviewDueCount(state, reviewKind) === 0;
+}
+
+function resolveButtonTitle(
+  loading: boolean,
+  error: Error | null,
+  disabled: boolean,
+): string | undefined {
+  if (loading) return TEXTS.loadingMessage;
+  if (error) return TEXTS.loadingError;
+  if (disabled) return TEXTS.nothingToPractice;
+  return undefined;
+}
+
+function selectNewDisabled(
+  state: PracticeAvailabilitySnapshot | null,
+  loading: boolean,
+  error: Error | null,
+): boolean {
+  if (loading || error || !state) return true;
+  if (!state.initialTrainingAvailable) return true;
+  if (state.continuingInitialLessonToday) return false;
+  return hasReachedReviewLimit(state);
+}
+
+function getPronunciationPracticeButtonTitle(
+  loading: boolean,
+  error: Error | null,
+  hasActiveGroup: boolean,
+): string | undefined {
+  if (loading) return TEXTS.loadingMessage;
+  if (error) return TEXTS.loadingError;
+  if (!hasActiveGroup) return TEXTS.noActivePronunciationGroups;
+  return undefined;
 }

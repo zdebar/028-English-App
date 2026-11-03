@@ -1,10 +1,12 @@
-import { useState, useEffect, type HTMLAttributes, type JSX } from 'react';
+import { useState, useEffect, type HTMLAttributes, type JSX, type ReactNode } from 'react';
 import config from '@/config/config';
 
-type DelayedMessageProps = Readonly<{
-  timeDelay?: number;
-}> &
-  HTMLAttributes<HTMLDivElement>;
+type DelayedProps = Readonly<
+  Omit<HTMLAttributes<HTMLDivElement>, 'children'> & {
+    children: ReactNode;
+    timeDelay?: number;
+  }
+>;
 
 /**
  * Displays a delayed content after a specified delay.
@@ -12,9 +14,10 @@ type DelayedMessageProps = Readonly<{
  * @param timeDelay Delay before showing the content (ms).
  */
 export default function Delayed({
-  timeDelay = config.buttons.loadingMessageDelay,
+  timeDelay = config.loading.dataStateDelayMs,
+  children,
   ...rest
-}: DelayedMessageProps): JSX.Element | null {
+}: DelayedProps): JSX.Element | null {
   const [show, setShow] = useState(false);
 
   useEffect(() => {
@@ -26,5 +29,5 @@ export default function Delayed({
     return null;
   }
 
-  return <div {...rest}>{rest.children}</div>;
+  return <div {...rest}>{children}</div>;
 }

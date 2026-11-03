@@ -5,13 +5,10 @@ const mocks = vi.hoisted(() => ({
   userId: 'u1' as string | null,
   handleLogout: vi.fn(),
   showToast: vi.fn(),
-  clearTheme: vi.fn(),
   saveCurrentThemeAsGuest: vi.fn(),
   deleteAllByUserId: vi.fn(),
   deleteUserLessons: vi.fn(),
-  deleteUserSettings: vi.fn(),
   deleteSyncRow: vi.fn(),
-  clearSyncTimes: vi.fn(),
   rpc: vi.fn(),
   signOut: vi.fn(),
   reportError: vi.fn(),
@@ -35,12 +32,10 @@ vi.mock('@/features/toast/use-toast-store', () => ({
 vi.mock('@/features/theme/use-theme-store', () => ({
   useThemeStore: (
     selector: (state: {
-      clearTheme: typeof mocks.clearTheme;
       saveCurrentThemeAsGuest: typeof mocks.saveCurrentThemeAsGuest;
     }) => unknown,
   ) =>
     selector({
-      clearTheme: mocks.clearTheme,
       saveCurrentThemeAsGuest: mocks.saveCurrentThemeAsGuest,
     }),
 }));
@@ -60,13 +55,6 @@ vi.mock('@/database/models/metadata', () => ({
 
 vi.mock('@/database/models/user-lessons', () => ({
   default: { removeByUserId: (...args: unknown[]) => mocks.deleteUserLessons(...args) },
-}));
-vi.mock('@/database/models/user-settings', () => ({
-  default: { removeLocal: (...args: unknown[]) => mocks.deleteUserSettings(...args) },
-}));
-
-vi.mock('@/database/utils/sync-time.utils', () => ({
-  clearSyncTimes: (...args: unknown[]) => mocks.clearSyncTimes(...args),
 }));
 
 vi.mock('@/config/supabase.config', () => ({
@@ -90,10 +78,11 @@ vi.mock('@/locales/cs', () => ({
 vi.mock('@/types/table.types', () => ({
   TableName: {
     UserItems: 'user_items',
+    UserLessons: 'user_lessons',
   },
 }));
 
-vi.mock('@/features/logging/monitoring-handler', () => ({
+vi.mock('@/features/logging/logging-handler', () => ({
   reportError: (...args: unknown[]) => mocks.reportError(...args),
   reportInfo: (...args: unknown[]) => mocks.reportInfo(...args),
 }));
@@ -113,12 +102,10 @@ describe('DeleteUserButton', () => {
     vi.clearAllMocks();
     mocks.userId = 'u1';
 
-    mocks.rpc.mockResolvedValue({ error: null });
+    mocks.rpc.mockResolvedValue({ data: true, error: null });
     mocks.deleteAllByUserId.mockResolvedValue(0);
     mocks.deleteSyncRow.mockResolvedValue(true);
-    mocks.clearTheme.mockResolvedValue(undefined);
     mocks.saveCurrentThemeAsGuest.mockReturnValue(undefined);
-    mocks.clearSyncTimes.mockReturnValue(undefined);
     mocks.handleLogout.mockResolvedValue(undefined);
     mocks.signOut.mockResolvedValue({ error: null });
   });
@@ -141,7 +128,7 @@ describe('DeleteUserButton', () => {
       expect(mocks.rpc).toHaveBeenCalledWith('hard_delete_user');
       expect(mocks.handleLogout).toHaveBeenCalledWith({
         skipSync: true,
-        skipRemoteSignOut: true,
+        scope: 'local',
       });
       expect(mocks.showToast).toHaveBeenCalledWith('Delete success', 'success');
     });
@@ -178,7 +165,7 @@ describe('DeleteUserButton', () => {
     );
     expect(mocks.handleLogout).toHaveBeenCalledWith({
       skipSync: true,
-      skipRemoteSignOut: true,
+      scope: 'local',
     });
   });
 });

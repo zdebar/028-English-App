@@ -6,5 +6,7 @@ export const ARIA_TEXTS = {
   switchToDarkTheme: 'Přepnout na tmavý režim',
   switchToLightTheme: 'Přepnout na světlý režim',
   closeOverlay: 'zavřít překryv',
+  clearSearch: 'Vymazat hledaný výraz',
+  dismissNotification: 'Zavřít oznámení',
   note: 'poznámka',
 } as const;

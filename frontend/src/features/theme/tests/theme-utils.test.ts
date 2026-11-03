@@ -2,7 +2,6 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import {
   clearActiveTheme,
-  clearUserTheme,
   loadActiveTheme,
   loadUserTheme,
   saveActiveTheme,
@@ -26,14 +25,6 @@ describe('theme-utils', () => {
 
     expect(localStorage.getItem('theme_guest')).toBe('light');
     expect(loadUserTheme()).toBe('light');
-  });
-
-  it('clears saved theme for given user', () => {
-    saveUserTheme('dark', 'u1');
-
-    clearUserTheme('u1');
-
-    expect(loadUserTheme('u1')).toBeNull();
   });
 
   it('saves, loads, and clears the active theme', () => {

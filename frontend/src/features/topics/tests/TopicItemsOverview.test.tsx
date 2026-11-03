@@ -16,6 +16,7 @@ const mocks = vi.hoisted(() => ({
     itemsLoading: false,
     topic: { id: 2, name: 'Topic 2' } as any,
     topicLoading: false,
+    topicError: null as Error | null,
   },
 }));
 
@@ -38,19 +39,13 @@ vi.mock('@/features/toast/use-toast-store', () => ({
   ),
 }));
 
-vi.mock('@/hooks/use-live-query-data', () => ({
-  useLiveQueryData: (_query: unknown, options: { emptyData: unknown }) =>
-    Array.isArray(options.emptyData)
-      ? {
-          data: mocks.state.items,
-          loading: mocks.state.itemsLoading,
-          error: null,
-        }
-      : {
-          data: mocks.state.topic,
-          loading: mocks.state.topicLoading,
-          error: null,
-        },
+vi.mock('@/database/state/data-store', () => ({
+  useDataPackage: (request: { topicId: number }) => ({
+    userId: mocks.userId,
+    status: mocks.state.topicLoading ? 'loading' : 'ready',
+    error: mocks.state.topicError ?? null,
+    data: request.topicId === 2 ? { topic: mocks.state.topic, items: mocks.state.items } : undefined,
+  }),
 }));
 
 vi.mock('@/features/audio/use-audio-manager', () => ({
@@ -68,13 +63,7 @@ vi.mock('@/database/models/user-items', () => ({
   },
 }));
 
-vi.mock('@/database/models/topics', () => ({
-  default: {
-    getById: vi.fn(),
-  },
-}));
-
-vi.mock('@/features/logging/monitoring-handler', () => ({
+vi.mock('@/features/logging/logging-handler', () => ({
   reportInfo: (...args: unknown[]) => mocks.reportInfo(...args),
   reportError: (...args: unknown[]) => mocks.reportError(...args),
 }));
@@ -97,7 +86,7 @@ vi.mock('@/locales/cs', () => ({
 }));
 
 vi.mock('@/components/UI/DelayedNotification', () => ({
-  default: ({ children, message }: any) => <div>{children ?? message}</div>,
+  default: ({ message }: any) => <div>{message}</div>,
 }));
 
 vi.mock('@/components/UI/Notification', () => ({

@@ -1,4 +1,5 @@
 import { usePwaStore } from './use-pwa-store';
+import type { BeforeInstallPromptEvent } from './pwa.types';
 
 let cleanup: (() => void) | null = null;
 
@@ -6,12 +7,19 @@ let cleanup: (() => void) | null = null;
 export function startPwaLifecycle(): void {
   if (cleanup !== null) return;
 
+  requestPersistentStorage();
+
   const handleBeforeInstallPrompt = (event: Event): void => {
     event.preventDefault();
-    usePwaStore.getState().setPromptEvent(event as any);
+    usePwaStore.getState().setPromptEvent(event as BeforeInstallPromptEvent);
+  };
+
+  const handleAppInstalled = (): void => {
+    usePwaStore.getState().clearPromptEvent();
   };
 
   globalThis.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+  globalThis.addEventListener('appinstalled', handleAppInstalled);
 
   if ('serviceWorker' in navigator) {
     const serviceWorker = navigator.serviceWorker;
@@ -49,6 +57,7 @@ export function startPwaLifecycle(): void {
       globalThis.removeEventListener('load', handleWindowLoad);
       serviceWorker.removeEventListener('message', handleServiceWorkerMessage);
       globalThis.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+      globalThis.removeEventListener('appinstalled', handleAppInstalled);
       cleanup = null;
     };
     return;
@@ -56,8 +65,23 @@ export function startPwaLifecycle(): void {
 
   cleanup = () => {
     globalThis.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    globalThis.removeEventListener('appinstalled', handleAppInstalled);
     cleanup = null;
   };
+}
+
+function requestPersistentStorage(): void {
+  const storage = globalThis.navigator?.storage;
+  if (typeof storage?.persist !== 'function' || typeof storage.persisted !== 'function') return;
+
+  storage.persisted()
+    .then((alreadyPersistent) => alreadyPersistent || storage.persist())
+    .then((isPersistent) => {
+      if (!isPersistent) console.info('Browser did not grant persistent storage.');
+    })
+    .catch((error: unknown) => {
+      console.warn('Persistent storage request failed:', error);
+    });
 }
 
 /** Removes only this app's service workers and caches while running the dev server. */

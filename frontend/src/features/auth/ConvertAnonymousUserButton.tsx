@@ -2,7 +2,7 @@ import { useCallback, useState, type JSX } from 'react';
 import { supabaseInstance } from '@/config/supabase.config';
 import SigninButton from '@/features/auth/SigninButton';
 import { useToastStore } from '@/features/toast/use-toast-store';
-import { reportError } from '@/features/logging/monitoring-handler';
+import { reportError } from '@/features/logging/logging-handler';
 import {
   clearAnonymousSessionFallback,
   saveAnonymousSessionFallback,

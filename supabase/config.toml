@@ -65,6 +65,7 @@ schema_paths = [
   "./schemas/00_tables.sql",
   "./schemas/10_updated_at_triggers.sql",
   "./schemas/20_auth_helpers.sql",
+  "./schemas/21_json_key_helpers.sql",
   "./schemas/30_rpc_fetch_user_items.sql",
   "./schemas/31_rpc_upsert_user_items.sql",
   "./schemas/32_rpc_upsert_fetch_user_items.sql",

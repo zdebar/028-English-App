@@ -2,59 +2,28 @@ import { DataState } from '@/components/UI/DataState';
 import OverviewCard from '@/components/UI/OverviewCard';
 import AudioItemList from '@/components/UI/AudioItemList';
 import { ROUTES } from '@/config/routes.config';
-import SoundGroup from '@/database/models/sound-groups';
 import { useAuthStore } from '@/features/auth/use-auth-store';
+import { AudioItemListControls } from '@/features/audio/AudioItemListControls';
 import { useAudioManager } from '@/features/audio/use-audio-manager';
 import { getItemAudioSources } from '@/features/audio/audio.utils';
-import VolumeSlider from '@/features/audio/VolumeSlider';
 import { useQueryErrorToast } from '@/features/logging/use-query-error-toast';
 import { useToastStore } from '@/features/toast/use-toast-store';
-import { sharedQueryKey } from '@/hooks/shared-query-store';
-import { useLiveQueryData } from '@/hooks/use-live-query-data';
 import { TEXTS } from '@/locales/cs';
-import type { SoundGroupDetailType } from '@/database/models/sound-groups';
-import { useCallback, useEffect, useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useRouteClose } from '@/routing/use-route-close';
+import { useDataPackage, type DataPackageResult } from '@/database/state/data-store';
+import type { SoundGroupDetail } from '@/database/state/data-types';
 
-function parseGroupId(value: string | undefined): number | null {
-  const groupId = Number(value);
-  return Number.isSafeInteger(groupId) && groupId > 0 ? groupId : null;
-}
-
-function SoundDetailControls({
-  items,
-}: Readonly<{ items: SoundGroupDetailType['items'] }>) {
-  if (items.length === 0) return null;
-  const hasAudio = items.some((item) => Boolean(item.audio?.trim()));
-
-  return (
-    <div className="secondary-controls-after-list">
-      <div className="pos-bottom-left-control">
-        <VolumeSlider disabled={!hasAudio} />
-      </div>
-    </div>
-  );
-}
-
-export default function SoundGroupDetail({
-  initialData,
-}: Readonly<{ initialData?: SoundGroupDetailType | null }>) {
+export default function SoundGroupDetail() {
   const userId = useAuthStore((state) => state.userId);
   const showToast = useToastStore((state) => state.showToast);
   const navigate = useNavigate();
   const { groupId: groupIdText } = useParams<{ groupId: string }>();
   const groupId = parseGroupId(groupIdText);
   const closeRoute = useRouteClose(ROUTES.sounds);
-  const fetchDetail = useCallback(() => {
-    if (!userId || !groupId) return Promise.resolve(null);
-    return SoundGroup.getDetail(userId, groupId);
-  }, [groupId, userId]);
-  const { data, loading, error } = useLiveQueryData<SoundGroupDetailType | null>(fetchDetail, {
-    emptyData: null,
-    initialData,
-    sharedKey: sharedQueryKey(userId, `sound:${groupId}`),
-  });
+  const packageState = useDataPackage({ kind: 'sound-detail', groupId: groupId ?? 0 });
+  const { data, loading, error } = getSoundDetailView(userId, packageState);
   const audios = useMemo(() => getItemAudioSources(data?.items ?? []), [data]);
   const { playAudio, isAudioReady, loading: audioLoading } = useAudioManager(audios);
 
@@ -64,9 +33,9 @@ export default function SoundGroupDetail({
   }, [groupId, navigate]);
 
   useEffect(() => {
-    if (loading || !userId || !groupId || data !== null) return;
+    if (!shouldRedirectForMissingData(loading, error, userId, groupId, data)) return;
     void navigate(ROUTES.sounds, { replace: true });
-  }, [data, groupId, loading, navigate, userId]);
+  }, [data, error, groupId, loading, navigate, userId]);
 
   useQueryErrorToast(error, 'Failed to fetch sound group detail');
 
@@ -93,8 +62,35 @@ export default function SoundGroupDetail({
           showPronunciation
           hideCzechOnNarrow
         />
-        <SoundDetailControls items={items} />
+        <AudioItemListControls items={items} />
       </DataState>
     </OverviewCard>
   );
+}
+
+function parseGroupId(value: string | undefined): number | null {
+  const groupId = Number(value);
+  return Number.isSafeInteger(groupId) && groupId > 0 ? groupId : null;
+}
+
+function shouldRedirectForMissingData(
+  loading: boolean,
+  error: Error | null,
+  userId: string | null,
+  groupId: number | null,
+  data: ReturnType<typeof useDataPackage<{ kind: 'sound-detail'; groupId: number }>>['data'],
+): boolean {
+  return !loading && !error && Boolean(userId) && Boolean(groupId) && data === null;
+}
+
+function getSoundDetailView(
+  userId: string | null,
+  packageState: DataPackageResult<SoundGroupDetail | null>,
+): Readonly<{ data: SoundGroupDetail | null; loading: boolean; error: Error | null }> {
+  const isCurrentUser = packageState.userId === userId;
+  return {
+    data: isCurrentUser ? packageState.data ?? null : null,
+    loading: Boolean(userId) && (!isCurrentUser || packageState.status === 'loading'),
+    error: isCurrentUser && packageState.status === 'error' ? packageState.error : null,
+  };
 }

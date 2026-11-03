@@ -1,5 +1,6 @@
 import { fireEvent, render, screen } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { ARIA_TEXTS } from '@/locales/cs';
 
 const mocks = vi.hoisted(() => ({
   hideToast: vi.fn(),
@@ -17,10 +18,10 @@ describe('Toast', () => {
     vi.clearAllMocks();
   });
 
-  it('hides toast on click and stops propagation', () => {
-    render(<Toast type="error">Close me</Toast>);
+  it('hides toast using the labelled dismiss button', () => {
+    render(<Toast type="error" message="Close me" />);
 
-    fireEvent.click(screen.getByText('Close me'));
+    fireEvent.click(screen.getByRole('button', { name: ARIA_TEXTS.dismissNotification }));
 
     expect(mocks.hideToast).toHaveBeenCalledTimes(1);
   });

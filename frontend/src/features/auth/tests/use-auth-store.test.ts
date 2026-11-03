@@ -9,8 +9,7 @@ const mocks = vi.hoisted(() => ({
   signOut: vi.fn(),
   onAuthStateChange: vi.fn(),
   unsubscribe: vi.fn(),
-  dataSyncOnUnmount: vi.fn(),
-  setMonitoringUser: vi.fn(),
+  dataSyncBeforeSessionEnd: vi.fn(),
   reportError: vi.fn(),
   reportInfo: vi.fn(),
   showToast: vi.fn(),
@@ -31,14 +30,13 @@ vi.mock('@/config/supabase.config', () => ({
   },
 }));
 
-vi.mock('@/database/utils/data-sync.utils', () => ({
-  dataSyncOnUnmount: (...args: unknown[]) => mocks.dataSyncOnUnmount(...args),
+vi.mock('@/database/sync/data-sync', () => ({
+  dataSyncBeforeSessionEnd: (...args: unknown[]) => mocks.dataSyncBeforeSessionEnd(...args),
 }));
 
-vi.mock('@/features/logging/monitoring-handler', () => ({
+vi.mock('@/features/logging/logging-handler', () => ({
   reportError: (...args: unknown[]) => mocks.reportError(...args),
   reportInfo: (...args: unknown[]) => mocks.reportInfo(...args),
-  setMonitoringUser: (...args: unknown[]) => mocks.setMonitoringUser(...args),
 }));
 
 vi.mock('@/features/toast/use-toast-store', () => ({
@@ -91,7 +89,7 @@ describe('useAuthStore', () => {
       error: null,
     });
     mocks.refreshSession.mockResolvedValue({ data: { session: null }, error: null });
-    mocks.dataSyncOnUnmount.mockResolvedValue(undefined);
+    mocks.dataSyncBeforeSessionEnd.mockResolvedValue(undefined);
   });
 
   it('initializeAuth loads current session and updates auth state', async () => {
@@ -433,7 +431,7 @@ describe('useAuthStore', () => {
 
     await useAuthStore.getState().handleLogout();
 
-    expect(mocks.dataSyncOnUnmount).toHaveBeenCalledWith('u1');
+    expect(mocks.dataSyncBeforeSessionEnd).toHaveBeenCalledWith('u1');
     expect(mocks.signOut).toHaveBeenCalledWith({ scope: 'global' });
 
     const state = useAuthStore.getState();
@@ -451,7 +449,7 @@ describe('useAuthStore', () => {
       userFullName: 'User One',
       loading: false,
     });
-    mocks.dataSyncOnUnmount.mockRejectedValue(syncError);
+    mocks.dataSyncBeforeSessionEnd.mockRejectedValue(syncError);
 
     await useAuthStore.getState().handleLogout();
 
@@ -490,17 +488,17 @@ describe('useAuthStore', () => {
 
     await useAuthStore.getState().handleLogout({ skipSync: true });
 
-    expect(mocks.dataSyncOnUnmount).not.toHaveBeenCalled();
+    expect(mocks.dataSyncBeforeSessionEnd).not.toHaveBeenCalled();
     expect(mocks.signOut).toHaveBeenCalledWith({ scope: 'global' });
   });
 
-  it('handleLogout can clear local auth state without remote signout', async () => {
+  it('handleLogout can sign out locally without a global signout', async () => {
     useAuthStore.setState({ userId: 'u1', userEmail: 'u1@example.com', userFullName: 'User One' });
 
-    await useAuthStore.getState().handleLogout({ skipSync: true, skipRemoteSignOut: true });
+    await useAuthStore.getState().handleLogout({ skipSync: true, scope: 'local' });
 
-    expect(mocks.dataSyncOnUnmount).not.toHaveBeenCalled();
-    expect(mocks.signOut).not.toHaveBeenCalled();
+    expect(mocks.dataSyncBeforeSessionEnd).not.toHaveBeenCalled();
+    expect(mocks.signOut).toHaveBeenCalledWith({ scope: 'local' });
 
     const state = useAuthStore.getState();
     expect(state.userId).toBeNull();

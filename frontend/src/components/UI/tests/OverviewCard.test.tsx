@@ -29,7 +29,7 @@ vi.mock('@/components/UI/Card', () => ({
 }));
 
 vi.mock('@/components/UI/DelayedNotification', () => ({
-  default: ({ children }: any) => <span data-testid="delayed-notification">{children}</span>,
+  default: ({ message }: any) => <span data-testid="delayed-notification">{message}</span>,
 }));
 
 vi.mock('@/features/help/HelpText', () => ({

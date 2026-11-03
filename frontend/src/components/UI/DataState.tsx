@@ -1,12 +1,13 @@
+import type { ReactNode } from 'react';
 import { TEXTS } from '@/locales/cs';
-import DelayedMessage from './DelayedMessage';
+import DelayedNotification from './DelayedNotification';
 import Notification from './Notification';
 
 type DataStateProps = Readonly<{
   loading: boolean;
   hasData: boolean;
   noDataMessage?: string;
-  children?: React.ReactNode;
+  children: ReactNode;
 }>;
 
 export function DataState({
@@ -17,7 +18,7 @@ export function DataState({
 }: DataStateProps) {
   if (hasData) return <>{children}</>;
   if (loading) {
-    return <DelayedMessage />;
+    return <DelayedNotification />;
   }
 
   return <Notification className="pt-4">{noDataMessage}</Notification>;

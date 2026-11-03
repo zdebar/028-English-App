@@ -1,37 +1,20 @@
-# Home Practice Availability
+# Home readiness
 
-`PracticeButton` renders three actions from
-`usePracticeAvailabilityStore`: New, Grammar Review, and Vocabulary Review. The
-Home route loader waits for the first availability snapshot so the controls do
-not briefly appear disabled while local data is loading.
+Home reads its dashboard and practice state from the cached Home package in the central data manager. The Home route loader ensures that package for a signed-in user; the dashboard and buttons subscribe to it through **useDataPackage**.
 
-| Button | Enabled when | Badge |
+| Action | Enabled when | Count |
 | --- | --- | --- |
-| Grammar Review | At least one due grammar review direction-item is available. | Number of due grammar direction-items. |
-| Vocabulary Review | At least one due vocabulary review direction-item is available. | Number of due vocabulary direction-items. |
-| New | An eligible unstarted lesson exists, review limits are below threshold, and the daily new-lesson limit allows it. A lesson already started today can be continued. | None. |
+| Grammar review | At least one due grammar direction-item is available and the package has loaded. | Number of due grammar direction-items. |
+| Vocabulary review | At least one due vocabulary direction-item is available and the package has loaded. | Number of due vocabulary direction-items. |
+| Pronunciation practice | At least one pronunciation group has an active contrast. | None. |
+| New training | An eligible unstarted lesson exists and neither review category has reached its configured threshold. A lesson started today can be continued. | None. |
 
-Review availability includes both review directions. A direction-item is due
-when it is active, already started, enabled for that direction, not mastered in
-that direction, and its schedule is ready. Grammar and vocabulary are classified
-by `user_items.is_vocabulary`.
+A review direction-item must be active, initiated, enabled in its direction, not mastered in that direction, and due. Grammar and vocabulary are separated by the item's vocabulary flag.
 
-New training selects the next eligible unstarted lesson in curriculum order. It
-is blocked when either grammar or vocabulary reaches its configured review limit
-or when the user's maximum number of distinct lesson starts for the local day has
-been reached. The maximum is stored in `users.max_new_lessons_per_day` and can be
-changed on the Profile page. Continuing a lesson already started today bypasses
-both new-lesson checks.
+The current review thresholds are 50 due direction-items for grammar and 50 for vocabulary. Reaching either threshold blocks starting a new lesson. This is a review-volume gate, not a daily lesson quota.
 
-## Refresh Behavior
+## Refresh behavior
 
-`loadPracticeAvailabilitySnapshot` combines cached review arrays, the next
-initial-training lesson, user settings, and today's `user_lessons` starts.
-Availability is refreshed after sign-in, when the page gains focus or becomes
-visible, after sync, after progress resets, and after practice writes. Review
-counts are also updated after each saved answer.
+The Home package is rebuilt when a relevant committed row changes, a sync batch updates its dependencies, another tab publishes a change, or time reaches a review date or a new local day. The package contains level progress, practice availability, active pronunciation availability, and sound groups.
 
-The controller schedules a refresh for the next review time or the next local
-day. While practice is active, it coalesces full availability refreshes until
-pending writes settle and the user exits the practice route. If loading fails,
-the store exposes the error state and disables the controls safely.
+There is no separate Home availability store or focus/visibility refresh controller. The route loader waits for the package and the page remains subscribed to the same package. If package preparation fails, its error state is exposed to the UI.

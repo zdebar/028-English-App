@@ -6,32 +6,6 @@ import Card from './Card';
 import { CardHeader } from './CardHeader';
 import DelayedNotification from './DelayedNotification';
 
-const DEFAULT_OVERVIEW_CARD_PROPS = {
-  modalTitle: TEXTS.restartProgress,
-  modalText: TEXTS.restartDescription,
-  helpText: TEXTS.restartProgressHelp,
-  loading: false,
-  showResetAction: true,
-  className: '',
-} as const;
-
-function getOverviewCardButtonContent(
-  buttonTitle: string | undefined,
-  loading: boolean,
-): ReactNode {
-  if (buttonTitle !== undefined) return buttonTitle;
-  if (loading) return '';
-  return <DelayedNotification>{TEXTS.notAvailable}</DelayedNotification>;
-}
-
-async function confirmOverviewCardAction(
-  handleReset: (() => Promise<void>) | undefined,
-  onClose: (() => void) | undefined,
-): Promise<void> {
-  if (handleReset) await handleReset();
-  if (onClose) onClose();
-}
-
 type OverviewCardProps = Readonly<{
   buttonTitle?: string;
   modalTitle?: string;
@@ -45,6 +19,15 @@ type OverviewCardProps = Readonly<{
   showResetAction?: boolean;
   titleAlignment?: 'left' | 'center';
 }>;
+
+const DEFAULT_OVERVIEW_CARD_PROPS = {
+  modalTitle: TEXTS.restartProgress,
+  modalText: TEXTS.restartDescription,
+  helpText: TEXTS.restartProgressHelp,
+  loading: false,
+  showResetAction: true,
+  className: '',
+} as const;
 
 /**
  * OverviewCard component for displaying a card with a title, and content.
@@ -106,4 +89,21 @@ export default function OverviewCard(props: OverviewCardProps): JSX.Element {
       {children}
     </Card>
   );
+}
+
+function getOverviewCardButtonContent(
+  buttonTitle: string | undefined,
+  loading: boolean,
+): ReactNode {
+  if (buttonTitle !== undefined) return buttonTitle;
+  if (loading) return '';
+  return <DelayedNotification message={TEXTS.notAvailable} />;
+}
+
+async function confirmOverviewCardAction(
+  handleReset: (() => Promise<void>) | undefined,
+  onClose: (() => void) | undefined,
+): Promise<void> {
+  await handleReset?.();
+  onClose?.();
 }

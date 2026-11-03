@@ -3,16 +3,15 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 const mocks = vi.hoisted(() => ({
   loadUserTheme: vi.fn(),
   saveUserTheme: vi.fn(),
-  clearUserTheme: vi.fn(),
   loadActiveTheme: vi.fn(),
   saveActiveTheme: vi.fn(),
   clearActiveTheme: vi.fn(),
 }));
 
 vi.mock('@/features/theme/theme-utils', () => ({
+  DEFAULT_THEME_USER_ID: 'guest',
   loadUserTheme: (...args: unknown[]) => mocks.loadUserTheme(...args),
   saveUserTheme: (...args: unknown[]) => mocks.saveUserTheme(...args),
-  clearUserTheme: (...args: unknown[]) => mocks.clearUserTheme(...args),
   loadActiveTheme: (...args: unknown[]) => mocks.loadActiveTheme(...args),
   saveActiveTheme: (...args: unknown[]) => mocks.saveActiveTheme(...args),
   clearActiveTheme: (...args: unknown[]) => mocks.clearActiveTheme(...args),
@@ -72,18 +71,6 @@ describe('useThemeStore', () => {
 
     expect(mocks.saveUserTheme).not.toHaveBeenCalled();
     expect(mocks.saveActiveTheme).toHaveBeenCalledWith('light');
-    expect(document.documentElement.classList.contains('light')).toBe(true);
-  });
-
-  it('clearTheme removes stored value and resets to system theme', () => {
-    vi.stubGlobal('matchMedia', vi.fn().mockReturnValue({ matches: false }));
-    useThemeStore.setState({ theme: 'dark' });
-
-    useThemeStore.getState().clearTheme('u1');
-
-    expect(mocks.clearUserTheme).toHaveBeenCalledWith('u1');
-    expect(mocks.clearActiveTheme).toHaveBeenCalled();
-    expect(useThemeStore.getState().theme).toBe('light');
     expect(document.documentElement.classList.contains('light')).toBe(true);
   });
 });

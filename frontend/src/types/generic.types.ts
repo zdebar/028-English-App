@@ -51,12 +51,6 @@ export interface UserInfoType {
   picture_url: string | null; // URL to the user's profile picture
 }
 
-export interface UserSettingsType {
-  id: string;
-  max_new_lessons_per_day: number;
-  updated_at: string;
-}
-
 export interface UserLessonType {
   user_id: string;
   lesson_id: number;

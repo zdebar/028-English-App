@@ -14,7 +14,7 @@ export default function PlayButton({ onClick, disabled = false, className = '' }
       onClick={onClick}
       disabled={disabled}
       title={TEXTS.audio}
-      ariaLabel={TEXTS.audio}
+      aria-label={TEXTS.audio}
       className={className}
     >
       <PlayIcon />

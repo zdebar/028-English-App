@@ -35,6 +35,38 @@ type GrammarDetailCardProps = Readonly<{
   onReset?: (grammarGroupId: number, direction: ReviewDirection) => Promise<void>;
 }>;
 
+export default function GrammarDetailCard({
+  grammar,
+  onClose,
+  onReset,
+}: GrammarDetailCardProps) {
+  const showToast = useToastStore((state) => state.showToast);
+  const chunks = useMemo(() => getGrammarChunks(grammar), [grammar]);
+  const items = useMemo(() => chunks.flatMap((chunk) => chunk.items ?? []), [chunks]);
+  const audios = useMemo(() => getItemAudioSources(items), [items]);
+  const { playAudio, isAudioReady, loading: audioLoading } = useAudioManager(audios);
+
+  const hasContent = hasGrammarContent(grammar, chunks);
+  const hasBottomControls = items.length > 0;
+
+  return (
+    <OverviewCard
+      buttonTitle={grammar?.name}
+      onClose={onClose}
+      className={hasBottomControls ? 'bottom-controls-clearance relative' : 'relative'}
+      showResetAction={false}
+    >
+      <GrammarContent
+        grammar={grammar}
+        itemsProps={{ audioLoading, isAudioReady, playAudio, showToast }}
+        onReset={onReset}
+      />
+      {!hasContent && TEXTS.noNotesToDisplay}
+      <GrammarBottomControls hasItems={hasBottomControls} />
+    </OverviewCard>
+  );
+}
+
 function getGrammarChunks(
   grammar: GrammarDetail | null | undefined,
 ): readonly GrammarChunkDetail[] {
@@ -96,14 +128,12 @@ function GrammarContent({
 }
 
 function GrammarBottomControls({ hasItems }: Readonly<{ hasItems: boolean }>) {
+  if (!hasItems) return null;
+
   return (
-    <>
-      {hasItems && (
-        <div className="pos-bottom-left-control">
-          <VolumeSlider />
-        </div>
-      )}
-    </>
+    <div className="pos-bottom-left-control">
+      <VolumeSlider />
+    </div>
   );
 }
 
@@ -132,37 +162,5 @@ function GrammarDirectionResetButtons({
         />
       ))}
     </div>
-  );
-}
-
-export default function GrammarDetailCard({
-  grammar,
-  onClose,
-  onReset,
-}: GrammarDetailCardProps) {
-  const showToast = useToastStore((state) => state.showToast);
-  const chunks = useMemo(() => getGrammarChunks(grammar), [grammar]);
-  const items = useMemo(() => chunks.flatMap((chunk) => chunk.items ?? []), [chunks]);
-  const audios = useMemo(() => getItemAudioSources(items), [items]);
-  const { playAudio, isAudioReady, loading: audioLoading } = useAudioManager(audios);
-
-  const hasContent = hasGrammarContent(grammar, chunks);
-  const hasBottomControls = items.length > 0;
-
-  return (
-    <OverviewCard
-      buttonTitle={grammar?.name}
-      onClose={onClose}
-      className={hasBottomControls ? 'bottom-controls-clearance relative' : 'relative'}
-      showResetAction={false}
-    >
-      <GrammarContent
-        grammar={grammar}
-        itemsProps={{ audioLoading, isAudioReady, playAudio, showToast }}
-        onReset={onReset}
-      />
-      {!hasContent && TEXTS.noNotesToDisplay}
-      <GrammarBottomControls hasItems={items.length > 0} />
-    </OverviewCard>
   );
 }

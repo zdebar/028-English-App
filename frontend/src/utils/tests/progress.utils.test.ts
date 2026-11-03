@@ -1,14 +1,11 @@
 import { describe, expect, it } from 'vitest';
 import type { UserItemLocal } from '@/types/user-item.types';
-import {
-  formatProgress,
-  getEffectiveProgress,
-  getSrsLength,
-  isInitiated,
-} from '@/utils/progress.utils';
+import config from '@/config/config';
+import { isInitiated } from '@/database/practice/user-item-progress';
+import { formatProgress } from '@/utils/progress.utils';
 
 const NULL_DATE = '9999-12-31T23:59:59+00:00';
-const MAX_PROGRESS = getSrsLength();
+const SRS_LENGTH = config.srs.intervals.length;
 
 function makeItem(overrides: Partial<UserItemLocal> = {}): UserItemLocal {
   return {
@@ -20,26 +17,8 @@ function makeItem(overrides: Partial<UserItemLocal> = {}): UserItemLocal {
 
 describe('progress utilities', () => {
   it('formats progress using the configured SRS length', () => {
-    expect(formatProgress(0)).toBe(`0 / ${MAX_PROGRESS}`);
+    expect(formatProgress(0)).toBe(`0 / ${SRS_LENGTH}`);
     expect(formatProgress(null)).toBeUndefined();
-  });
-
-  it('clamps unfinished progress and treats mastered directions as full', () => {
-    const item = makeItem({
-      progress_cz_to_en: 999,
-      mastered_at_cz_to_en: '2026-08-31T10:00:00.000Z',
-    });
-
-    expect(getEffectiveProgress(item)).toBe(MAX_PROGRESS);
-  });
-
-  it('treats a mastered direction as full progress', () => {
-    const skipped = makeItem({
-      progress_cz_to_en: 3,
-      mastered_at_cz_to_en: '2026-08-31T10:00:00.000Z',
-    });
-
-    expect(getEffectiveProgress(skipped)).toBe(MAX_PROGRESS);
   });
 
   it.each([

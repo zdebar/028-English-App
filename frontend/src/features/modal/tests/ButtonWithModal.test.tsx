@@ -57,7 +57,7 @@ describe('ButtonWithModal', () => {
   });
 
   it('renders trigger button and opens modal on click with default text', async () => {
-    render(<ButtonWithModal>Open</ButtonWithModal>);
+    render(<ButtonWithModal onConfirm={vi.fn()}>Open</ButtonWithModal>);
 
     await clickWithinAct(screen.getByRole('button', { name: 'Open' }));
 
@@ -68,7 +68,7 @@ describe('ButtonWithModal', () => {
 
   it('uses custom modal title and text', async () => {
     render(
-      <ButtonWithModal modalTitle="Custom title" modalText="Custom text">
+      <ButtonWithModal onConfirm={vi.fn()} modalTitle="Custom title" modalText="Custom text">
         Open
       </ButtonWithModal>,
     );
@@ -94,21 +94,21 @@ describe('ButtonWithModal', () => {
   });
 
   it('disables trigger when disabled prop is true', () => {
-    render(<ButtonWithModal disabled>Open</ButtonWithModal>);
+    render(<ButtonWithModal onConfirm={vi.fn()} disabled>Open</ButtonWithModal>);
 
     expect((screen.getByRole('button', { name: 'Open' }) as HTMLButtonElement).disabled).toBe(true);
   });
 
   it('disables trigger when loading is active', () => {
     mocks.isLoading = true;
-    render(<ButtonWithModal>Open</ButtonWithModal>);
+    render(<ButtonWithModal onConfirm={vi.fn()}>Open</ButtonWithModal>);
 
     expect((screen.getByRole('button', { name: 'Open' }) as HTMLButtonElement).disabled).toBe(true);
   });
 
   it('uses the default disabled text styling', () => {
     render(
-      <ButtonWithModal disabled>Open</ButtonWithModal>,
+      <ButtonWithModal onConfirm={vi.fn()} disabled>Open</ButtonWithModal>,
     );
 
     const button = screen.getByRole('button', { name: 'Open' }) as HTMLButtonElement;

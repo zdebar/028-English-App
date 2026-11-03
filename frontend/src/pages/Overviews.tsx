@@ -4,52 +4,39 @@ import { useAuthStore } from '@/features/auth/use-auth-store';
 import {
   type OverviewAvailability,
   useOverviewAvailability,
-} from '@/hooks/use-overview-availability';
+} from '@/features/overviews/use-overview-availability';
 import { TEXTS } from '@/locales/cs';
 import type { JSX } from 'react';
-import { useLoaderData } from 'react-router-dom';
-import type { OverviewAvailabilityData } from '@/routing/route-data';
 import { NavigationButton } from '@/routing/data-navigation';
-
-function getButtonState(
-  availability: OverviewAvailability,
-  availableTitle: string,
-  emptyTitle: string,
-) {
-  if (availability.loading) return { disabled: true, title: TEXTS.loadingMessage };
-  if (availability.error) return { disabled: true, title: TEXTS.loadingError };
-  return {
-    disabled: !availability.hasData,
-    title: availability.hasData ? availableTitle : emptyTitle,
-  };
-}
 
 export default function Overviews(): JSX.Element {
   const userId = useAuthStore((state) => state.userId);
-  const initialAvailability = useLoaderData() as OverviewAvailabilityData;
-  const availability = useOverviewAvailability(userId, initialAvailability);
-  const grammarButton = getButtonState(
+  const availability = useOverviewAvailability(userId);
+  const grammarButton = getOverviewButtonState(
     availability.grammar,
     TEXTS.grammarOverviewTooltip,
     TEXTS.noGrammar,
   );
-  const topicsButton = getButtonState(
+  const topicsButton = getOverviewButtonState(
     availability.topics,
     TEXTS.topicsOverviewTooltip,
     TEXTS.noTopics,
   );
-  const vocabularyButton = getButtonState(
+  const vocabularyButton = getOverviewButtonState(
     availability.vocabulary,
     TEXTS.vocabularyOverviewTooltip,
     TEXTS.noStartedVocabulary,
   );
-  const soundsButton = { disabled: false, title: TEXTS.soundsOverview };
   return (
     <div className="card-width grow-0 gap-1">
       <h1 className="sr-only">{TEXTS.overviews}</h1>
       <section aria-label={TEXTS.progressOverviews}>
         <div className="flex flex-col gap-1">
-          <NavigationButton className="h-button w-full" to={ROUTES.sounds} {...soundsButton}>
+          <NavigationButton
+            className="h-button w-full"
+            to={ROUTES.sounds}
+            title={TEXTS.soundsOverview}
+          >
             <MenuButtonText>{TEXTS.soundsOverview}</MenuButtonText>
           </NavigationButton>
           <NavigationButton
@@ -69,4 +56,17 @@ export default function Overviews(): JSX.Element {
       </section>
     </div>
   );
+}
+
+function getOverviewButtonState(
+  availability: OverviewAvailability,
+  availableTitle: string,
+  emptyTitle: string,
+) {
+  if (availability.loading) return { disabled: true, title: TEXTS.loadingMessage };
+  if (availability.error) return { disabled: true, title: TEXTS.loadingError };
+  return {
+    disabled: !availability.hasData,
+    title: availability.hasData ? availableTitle : emptyTitle,
+  };
 }

@@ -23,6 +23,7 @@ export default function ControlButton({
         {...rest}
         className="h-controls w-full"
         title={rest.disabled ? undefined : label}
+        aria-label={label}
       >
         {icon}
         {children}

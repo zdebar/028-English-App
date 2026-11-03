@@ -1,140 +1,45 @@
-import { refreshPracticeAvailability } from '@/features/practice/practice-availability-controller';
-import { useEffect, useRef } from 'react';
-import config from '@/config/config';
-import AudioRecord from '@/database/models/audio-records';
-import { dataSync, dataSyncOnUnmount } from '@/database/utils/data-sync.utils';
-import { reportError, reportInfo } from '@/features/logging/monitoring-handler';
-import { TEXTS } from '@/locales/cs';
-import { useToastStore } from '@/features/toast/use-toast-store';
+import { useEffect } from 'react';
+import { dataSyncBeforeSessionEnd } from '@/database/sync/data-sync';
+import { reportError } from '@/features/logging/logging-handler';
+import { useAuthStore } from '@/features/auth/use-auth-store';
 import { useSyncStore } from './use-sync-store';
 import {
-  clearPracticeCache,
-  invalidatePracticeCache,
-  warmPracticeCache,
-} from '@/features/practice/practice-prefetch';
-import { warmOverviewQueries } from '@/hooks/overview-query-store';
+  startSyncManager,
+  stopSyncManager,
+  waitForSyncManagerIdle,
+} from './sync-manager';
 
-/**
- * Runs initial, periodic, and unmount data synchronization for a signed-in user.
- *
- * @param userId User id to sync. Null resets sync state and skips scheduling.
- * @returns loading flag from the sync store. Overlapping scheduled syncs reuse the in-flight promise.
- */
+/** Connects the app lifecycle to the singleton sync coordinator. */
 export function usePeriodicSync(userId: string | null): { loading: boolean } {
-  const inFlightSync = useRef<Promise<void> | null>(null);
-  const isUnmounted = useRef(false);
-  const intervalId = useRef<ReturnType<typeof setInterval> | null>(null);
-  const initialSyncTimeoutId = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  const showToast = useToastStore((state) => state.showToast);
-  const resetSyncState = useSyncStore((state) => state.resetSyncState);
-  const setSynchronized = useSyncStore((state) => state.setSynchronized);
-  const setSynchronizing = useSyncStore((state) => state.setSynchronizing);
-  const setSyncError = useSyncStore((state) => state.setSyncError);
   const isSynchronizing = useSyncStore((state) => state.isSynchronizing);
 
   useEffect(() => {
-    if (!userId) {
-      resetSyncState();
-      clearPracticeCache(null);
-      return;
-    }
+    startSyncManager(userId);
+    if (!userId) return () => stopSyncManager(null);
 
     const activeUserId = userId;
-    isUnmounted.current = false;
-    setSynchronizing(true);
+    return () => {
+      stopSyncManager(activeUserId);
+      const currentUserId = useAuthStore.getState().userId;
+      if (currentUserId !== null && currentUserId !== activeUserId) return;
 
-    const performSync = async () => {
-      setSynchronizing(true);
-      try {
-        try {
-          await dataSync(activeUserId);
-        } finally {
-          // A partially failed sync may still have committed updated item data.
-          invalidatePracticeCache(activeUserId);
-          void warmPracticeCache(activeUserId).catch((error) => {
-            reportError('Failed to prefetch practice cache', error);
-          });
-          void refreshPracticeAvailability(activeUserId);
-        }
-        const audioSummary = await AudioRecord.syncFromRemote();
-        if (audioSummary.failed > 0) {
-          reportError('Audio archive sync errors', audioSummary.sampleErrors);
-        }
-
-        const orphanedCount = await AudioRecord.removeOrphaned();
-        if (orphanedCount.failed > 0) {
-          reportError('Audio archive sync errors', orphanedCount.sampleErrors);
-        }
-        if (orphanedCount.success > 0) {
-          reportInfo(`Deleted ${orphanedCount.success} orphaned audio records.`);
-        }
-
-        showToast(TEXTS.syncSuccessToast, 'success');
-        setSynchronized(true);
-        setSyncError(false);
-      } catch (error) {
-        showToast(TEXTS.syncErrorToast, 'error');
-        setSynchronized(false);
-        setSyncError(true);
-        reportError('Data synchronization failed', error);
-      } finally {
-        if (!isUnmounted.current) {
-          setSynchronizing(false);
-        }
-      }
-    };
-
-    const runSync = async () => {
-      // Reuse ongoing sync promise to avoid overlapping synchronization calls.
-      if (inFlightSync.current !== null) {
-        await inFlightSync.current;
+      const idlePromise = waitForSyncManagerIdle();
+      if (idlePromise) {
+        void idlePromise
+          .then(() => runSessionEndSync(activeUserId))
+          .catch((error: unknown) => reportError('Session end synchronization failed', error));
         return;
       }
-      if (useSyncStore.getState().isManualSyncing) return;
-      inFlightSync.current = (async () => {
-        try {
-          await performSync();
-        } finally {
-          inFlightSync.current = null;
-        }
-      })();
-
-      await inFlightSync.current;
+      void runSessionEndSync(activeUserId)
+        .catch((error: unknown) => reportError('Session end synchronization failed', error));
     };
-
-    initialSyncTimeoutId.current = globalThis.setTimeout(() => {
-      void runSync();
-    }, 3000);
-    void warmPracticeCache(activeUserId).catch((error) => {
-      reportError('Failed to prefetch practice cache', error);
-    });
-    void warmOverviewQueries(activeUserId).catch((error) => {
-      reportError('Failed to prefetch overview queries', error);
-    });
-    intervalId.current = setInterval(() => {
-      void runSync();
-    }, config.sync.periodicSyncInterval);
-
-    return () => {
-      isUnmounted.current = true;
-
-      if (initialSyncTimeoutId.current) {
-        globalThis.clearTimeout(initialSyncTimeoutId.current);
-        initialSyncTimeoutId.current = null;
-      }
-
-      if (intervalId.current) {
-        clearInterval(intervalId.current);
-        intervalId.current = null;
-      }
-
-      resetSyncState();
-      dataSyncOnUnmount(activeUserId).catch((error) => {
-        reportError('Unmount synchronization failed', error);
-      });
-    };
-  }, [resetSyncState, setSynchronizing, setSynchronized, showToast, userId]);
+  }, [userId]);
 
   return { loading: isSynchronizing };
+}
+
+function runSessionEndSync(activeUserId: string): Promise<void> {
+  const latestUserId = useAuthStore.getState().userId;
+  if (latestUserId !== null && latestUserId !== activeUserId) return Promise.resolve();
+  return dataSyncBeforeSessionEnd(activeUserId);
 }

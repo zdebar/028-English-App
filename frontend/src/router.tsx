@@ -1,13 +1,9 @@
 import App from '@/App';
-import DelayedMessage from '@/components/UI/DelayedMessage';
+import DelayedNotification from '@/components/UI/DelayedNotification';
 import RouteDataError from '@/components/utils/route-data-error';
-import ProtectedLayout from '@/components/utils/protected-laout';
+import ProtectedLayout from '@/components/utils/protected-layout';
 import { ROUTES } from '@/config/routes.config';
-import { waitForAuthReady } from '@/features/auth/auth-lifecycle';
-import { useAuthStore } from '@/features/auth/use-auth-store';
-import { loadHome } from '@/routing/home-loader';
-import { reportError } from '@/features/logging/monitoring-handler';
-import { useToastStore } from '@/features/toast/use-toast-store';
+import { loadHomeDataPackage } from '@/routing/home-loader';
 import { TEXTS } from '@/locales/cs';
 import InitialTrainingPractice from '@/pages/InitialTrainingPractice';
 import Grammar from '@/pages/Grammar';
@@ -25,117 +21,22 @@ import Vocabulary from '@/pages/Vocabulary';
 import Sounds from '@/pages/Sounds';
 import SoundGroupPage from '@/pages/SoundGroupPage';
 import Notification from '@/components/UI/Notification';
-import type { RouteDataDescriptor } from '@/routing/route-data';
 import {
-  initialTrainingDescriptor,
-  grammarDescriptor,
-  overviewAvailabilityDescriptor,
-  reviewPracticeDescriptor,
-  soundsDescriptor,
-  soundGroupDetailDescriptor,
-  pronunciationGroupDetailDescriptor,
-  topicDetailDescriptor,
-  topicsDescriptor,
-  vocabularyDescriptor,
-} from '@/routing/route-data';
-import { createHashRouter, redirect, type LoaderFunctionArgs } from 'react-router-dom';
-
-export async function protectedLoader() {
-  await requireUserId();
-  return null;
-}
-
-function InitialLoadingFallback() {
-  return <DelayedMessage className="mt-20" />;
-}
-
-async function requireUserId(): Promise<string> {
-  await waitForAuthReady();
-  const userId = useAuthStore.getState().userId;
-  if (!userId) throw redirect(ROUTES.home);
-  return userId;
-}
-
-async function loadProtectedData<T>(
-  routeName: string,
-  createDescriptor: (userId: string) => RouteDataDescriptor<T>,
-): Promise<T> {
-  const userId = await requireUserId();
-  try {
-    return await createDescriptor(userId).load();
-  } catch (error) {
-    reportError(`Failed to load ${routeName} route data`, error);
-    useToastStore.getState().showToast(TEXTS.loadingError, 'error');
-    throw error;
-  }
-}
-
-function parsePositiveId(value: string | undefined): number | null {
-  const id = Number(value);
-  return Number.isSafeInteger(id) && id > 0 ? id : null;
-}
-
-async function loadTopicDetail({ params }: LoaderFunctionArgs) {
-  const topicId = parsePositiveId(params.topicId);
-  if (!topicId) throw redirect(ROUTES.topics);
-  const userId = await requireUserId();
-  try {
-    const data = await topicDetailDescriptor(userId, topicId).load();
-    if (!data.topic) throw redirect(ROUTES.topics);
-    return data;
-  } catch (error) {
-    if (error instanceof Response) throw error;
-    reportError('Failed to load topic detail route data', error);
-    useToastStore.getState().showToast(TEXTS.loadingError, 'error');
-    throw error;
-  }
-}
-
-async function loadPronunciationGroupDetail({ params }: LoaderFunctionArgs) {
-  const groupId = parsePositiveId(params.groupId);
-  if (!groupId) throw redirect(ROUTES.pronunciationGroups);
-  const userId = await requireUserId();
-  try {
-    const data = await pronunciationGroupDetailDescriptor(userId, groupId).load();
-    if (!data) throw redirect(ROUTES.pronunciationGroups);
-    return data;
-  } catch (error) {
-    if (error instanceof Response) throw error;
-    reportError('Failed to load pronunciation group detail route data', error);
-    useToastStore.getState().showToast(TEXTS.loadingError, 'error');
-    throw error;
-  }
-}
-
-async function loadSoundGroupDetail({ params }: LoaderFunctionArgs) {
-  const groupId = parsePositiveId(params.groupId);
-  if (!groupId) throw redirect(ROUTES.sounds);
-  const userId = await requireUserId();
-  try {
-    const data = await soundGroupDetailDescriptor(userId, groupId).load();
-    if (!data) throw redirect(ROUTES.sounds);
-    return data;
-  } catch (error) {
-    if (error instanceof Response) throw error;
-    reportError('Failed to load sound group detail route data', error);
-    useToastStore.getState().showToast(TEXTS.loadingError, 'error');
-    throw error;
-  }
-}
-
-async function loadInitialTraining() {
-  const userId = await requireUserId();
-  try {
-    const data = await initialTrainingDescriptor(userId).load();
-    if (data.items.length === 0) throw redirect(ROUTES.home);
-    return data;
-  } catch (error) {
-    if (error instanceof Response) throw error;
-    reportError('Failed to load initial training route data', error);
-    useToastStore.getState().showToast(TEXTS.loadingError, 'error');
-    throw error;
-  }
-}
+  loadGrammarOverviewRoute,
+  loadGrammarReviewRoute,
+  loadInitialTrainingRoute,
+  loadOverviewsRoute,
+  loadPronunciationGroupDetailRoute,
+  loadPronunciationOverviewRoute,
+  loadSoundGroupDetailRoute,
+  loadSoundsRoute,
+  loadTopicDetailRoute,
+  loadTopicsRoute,
+  loadVocabularyReviewRoute,
+  loadVocabularyRoute,
+  protectedLoader,
+} from '@/routing/route-loaders';
+import { createHashRouter } from 'react-router-dom';
 
 export const router = createHashRouter([
   {
@@ -144,7 +45,7 @@ export const router = createHashRouter([
     HydrateFallback: InitialLoadingFallback,
     errorElement: <RouteDataError />,
     children: [
-      { index: true, loader: loadHome, Component: Home },
+      { index: true, loader: loadHomeDataPackage, Component: Home },
       { path: ROUTES.privacyPolicy, Component: PrivacyPolicy },
       { path: ROUTES.guide, Component: Guide },
       {
@@ -154,85 +55,68 @@ export const router = createHashRouter([
         children: [
           {
             path: ROUTES.practice,
-            loader: () =>
-              loadProtectedData('grammar review', (userId) =>
-                reviewPracticeDescriptor(userId, 'grammar'),
-              ),
+            loader: loadGrammarReviewRoute,
             Component: Practice,
           },
           {
             path: ROUTES.grammarPractice,
-            loader: () =>
-              loadProtectedData('grammar review', (userId) =>
-                reviewPracticeDescriptor(userId, 'grammar'),
-              ),
+            loader: loadGrammarReviewRoute,
             Component: Practice,
           },
           {
             path: ROUTES.vocabularyPractice,
-            loader: () =>
-              loadProtectedData('vocabulary review', (userId) =>
-                reviewPracticeDescriptor(userId, 'vocabulary'),
-              ),
+            loader: loadVocabularyReviewRoute,
             Component: Practice,
           },
           {
             path: ROUTES.initialTraining,
-            loader: loadInitialTraining,
+            loader: loadInitialTrainingRoute,
             Component: InitialTrainingPractice,
           },
           {
             path: ROUTES.overviews,
-            handle: { appShellBottomPadding: true },
-            loader: () => loadProtectedData('overviews', overviewAvailabilityDescriptor),
+            loader: loadOverviewsRoute,
             Component: Overviews,
           },
           { path: ROUTES.profile, Component: Profile },
           {
             path: ROUTES.topics,
-            handle: { appShellBottomPadding: true },
-            loader: () => loadProtectedData('topics', topicsDescriptor),
+            loader: loadTopicsRoute,
             Component: Topics,
           },
           {
             path: ROUTES.topicDetail,
-            handle: { appShellBottomPadding: true },
-            loader: loadTopicDetail,
+            loader: loadTopicDetailRoute,
             Component: TopicItems,
           },
           {
             path: ROUTES.grammar,
-            handle: { appShellBottomPadding: true },
-            loader: () => loadProtectedData('grammar', grammarDescriptor),
+            loader: loadGrammarOverviewRoute,
             Component: Grammar,
           },
           {
             path: ROUTES.vocabulary,
-            handle: { appShellBottomPadding: true },
-            loader: () => loadProtectedData('vocabulary', vocabularyDescriptor),
+            loader: loadVocabularyRoute,
             Component: Vocabulary,
           },
           {
             path: ROUTES.sounds,
-            handle: { appShellBottomPadding: true },
-            loader: () => loadProtectedData('sound groups', soundsDescriptor),
+            loader: loadSoundsRoute,
             Component: Sounds,
           },
           {
             path: ROUTES.soundDetail,
-            handle: { appShellBottomPadding: true },
-            loader: loadSoundGroupDetail,
+            loader: loadSoundGroupDetailRoute,
             Component: SoundGroupPage,
           },
           {
             path: ROUTES.pronunciationGroups,
-            handle: { appShellBottomPadding: true },
+            loader: loadPronunciationOverviewRoute,
             Component: PronunciationOverviewPage,
           },
           {
             path: ROUTES.pronunciationGroup,
-            handle: { appShellBottomPadding: true },
-            loader: loadPronunciationGroupDetail,
+            loader: loadPronunciationGroupDetailRoute,
             Component: PronunciationGroupPage,
           },
         ],
@@ -244,3 +128,7 @@ export const router = createHashRouter([
     ],
   },
 ]);
+
+function InitialLoadingFallback() {
+  return <DelayedNotification className="mt-20" />;
+}

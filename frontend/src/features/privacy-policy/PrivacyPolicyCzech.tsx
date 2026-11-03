@@ -26,10 +26,11 @@ export default function PrivacyPolicyCzech(): JSX.Element {
       {/* 2. Účel a právní základ zpracování */}
       <h2>2. Účel a právní základ zpracování</h2>
       <table className="mb-4 w-full border text-left text-sm">
+        <caption className="sr-only">Účely a právní základy zpracování osobních údajů</caption>
         <thead>
           <tr>
-            <th>Účel</th>
-            <th>Právní základ</th>
+            <th scope="col">Účel</th>
+            <th scope="col">Právní základ</th>
           </tr>
         </thead>
         <tbody>
@@ -41,48 +42,29 @@ export default function PrivacyPolicyCzech(): JSX.Element {
             <td>Poskytování jazykových funkcí</td>
             <td>Čl. 6 odst. 1 písm. b&#41; GDPR</td>
           </tr>
-          <tr>
-            <td>Zlepšování funkcí aplikace na základě agregovaných údajů o procvičování</td>
-            <td>Čl. 6 odst. 1 písm. f&#41; GDPR – oprávněný zájem</td>
-          </tr>
         </tbody>
       </table>
-      <p className="text-sm">
-        Náš oprávněný zájem spočívá ve zlepšování kvality, přesnosti a efektivity výuky.
-      </p>
-      {/* 3. Analytika */}
-      <h2>3. Analytika</h2>
-      <ul>
-        <li>
-          Analyzujeme údaje o procvičování a používání pouze za účelem zlepšení funkcí aplikace.
-        </li>
-        <li>Údaje nepoužíváme pro marketing ani reklamu.</li>
-        <li>Analytická data nesdílíme s třetími stranami.</li>
-        <li>Analytická data jsou využívána pouze v agregované nebo interní podobě.</li>
-      </ul>
-      {/* 4. Doba uchování údajů */}
-      <h2>4. Doba uchování údajů</h2>
+      {/* 3. Doba uchování údajů */}
+      <h2>3. Doba uchování údajů</h2>
       <ul>
         <li>Osobní údaje uchováváme pouze po dobu existence uživatelského účtu.</li>
         <li>Po smazání účtu jsou všechny osobní údaje smazány nebo nevratně anonymizovány.</li>
-        <li>Anonymizovaná statistická data mohou být uchována za účelem zlepšování produktu.</li>
       </ul>
-      {/* 5. Práva uživatelů */}
-      <h2>5. Práva uživatelů</h2>
+      {/* 4. Práva uživatelů */}
+      <h2>4. Práva uživatelů</h2>
       <ul>
         <li>Právo na přístup ke svým osobním údajům</li>
         <li>Právo na opravu nepřesných údajů</li>
         <li>Právo na smazání účtu a osobních údajů</li>
         <li>Právo vznést námitku proti zpracování na základě oprávněného zájmu</li>
       </ul>
-      {/* 6. Kontakt */}
-      <h2>6. Kontakt</h2>
+      {/* 5. Kontakt */}
+      <h2>5. Kontakt</h2>
       <p className="text-sm">
         V případě dotazů týkajících se ochrany soukromí mě kontaktujte na adrese{' '}
         <a href={CONTACTS.mailTo} className="font-bold">
           {CONTACTS.email}
-        </a>{' '}
-        .
+        </a>.
       </p>
     </div>
   );

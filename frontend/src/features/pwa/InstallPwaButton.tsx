@@ -1,11 +1,13 @@
 import { TEXTS } from '@/locales/cs';
+import { reportError } from '@/features/logging/logging-handler';
 import { usePwaStore } from './use-pwa-store';
+import type { JSX } from 'react';
 
 type InstallPWAButtonProps = Readonly<{
   className?: string;
 }>;
 
-export function InstallPWAButton({ className }: InstallPWAButtonProps) {
+export function InstallPWAButton({ className }: InstallPWAButtonProps): JSX.Element | null {
   const promptEvent = usePwaStore((state) => state.promptEvent);
   const clearPromptEvent = usePwaStore((state) => state.clearPromptEvent);
 
@@ -13,10 +15,16 @@ export function InstallPWAButton({ className }: InstallPWAButtonProps) {
     return null;
   }
 
-  const handleInstall = () => {
-    if (promptEvent) {
-      promptEvent.prompt();
-      promptEvent.userChoice.then(() => clearPromptEvent());
+  const handleInstall = async (): Promise<void> => {
+    if (!promptEvent) return;
+
+    try {
+      await promptEvent.prompt();
+      await promptEvent.userChoice;
+    } catch (error) {
+      reportError('PWA installation prompt failed', error);
+    } finally {
+      clearPromptEvent();
     }
   };
 
@@ -24,7 +32,7 @@ export function InstallPWAButton({ className }: InstallPWAButtonProps) {
     <button
       type="button"
       title={TEXTS.installButtonTooltip}
-      onClick={handleInstall}
+      onClick={() => void handleInstall()}
       className={`cursor-pointer ${className ?? ''}`.trim()}
     >
       {TEXTS.installButton}

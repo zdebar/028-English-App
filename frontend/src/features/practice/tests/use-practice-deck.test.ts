@@ -1,5 +1,4 @@
 import { act, renderHook, waitFor } from '@testing-library/react';
-import * as React from 'react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { PracticeDeckEntry } from '@/types/user-item.types';
 
@@ -7,13 +6,42 @@ const mocks = vi.hoisted(() => ({
   reload: vi.fn(),
   savePracticeDeck: vi.fn(),
   applyPracticeProgress: vi.fn(),
-  loadReviewEntryDetails: vi.fn(),
   resetHint: vi.fn(),
-  rebuildReviewArrays: vi.fn(),
-  syncReviewItemToCache: vi.fn(),
-  refreshPracticeReviewAvailability: vi.fn(),
-  loadReviewDeckData: vi.fn(),
   fetchData: null as ReviewDeckData | null,
+  directionDecks: {} as Record<string, ReviewDeckData>,
+  dataState: { userId: 'u1', status: 'ready', nowIso: '2026-06-24T10:00:00.000Z', user_items: [] as PracticeDeckEntry['item'][] },
+  availability: {
+    grammarReviewReadyAt: null,
+    vocabularyReviewReadyAt: null,
+    grammarReviewDueCount: 0,
+    vocabularyReviewDueCount: 2,
+    nextReviewAt: null,
+  },
+  ensureDataPackage: vi.fn(),
+  createReviewPackage: () => {
+    const emptyDeck = (reviewDirection: 'cz_to_en' | 'en_to_cz') => ({
+      entries: [],
+      availabilityCheckedAt: '2026-06-24T10:00:00.000Z',
+      abandoned: true,
+      reviewKind: 'grammar' as const,
+      reviewDirection,
+    });
+    const initialDeck = mocks.fetchData ?? emptyDeck('cz_to_en');
+    return {
+      availability: {
+        ...mocks.availability,
+        initialTrainingAvailable: false,
+        continuingInitialLessonToday: false,
+      },
+      initialDeck,
+      decks: {
+        cz_to_en: mocks.directionDecks.cz_to_en ?? emptyDeck('cz_to_en'),
+        en_to_cz: mocks.directionDecks.en_to_cz ?? emptyDeck('en_to_cz'),
+      },
+      soundGroups: [],
+    };
+  },
+  ensureDetailLoaded: vi.fn(),
 }));
 
 type ReviewDeckData = {
@@ -26,30 +54,6 @@ type ReviewDeckData = {
   availableCount?: number;
 };
 
-vi.mock('../practice-availability-controller', () => ({
-  beginPracticeAvailabilityBoundary: () => async () => {},
-  refreshPracticeReviewAvailability: (...args: unknown[]) =>
-    mocks.refreshPracticeReviewAvailability(...args),
-}));
-
-vi.mock('@/hooks/use-fetch', () => ({
-  useFetch: (
-    _fetchFunction: unknown,
-    options: { initialData?: ReviewDeckData } = {},
-  ) => {
-    const [data, setData] = React.useState(options.initialData ?? mocks.fetchData);
-    return {
-      data,
-      loading: false,
-      error: null,
-      reload: async () => {
-        await mocks.reload();
-        setData(mocks.fetchData);
-      },
-    };
-  },
-}));
-
 vi.mock('@/database/models/user-items', () => ({
   default: {
     applyPracticeProgress: (...args: unknown[]) => mocks.applyPracticeProgress(...args),
@@ -57,9 +61,34 @@ vi.mock('@/database/models/user-items', () => ({
   },
 }));
 
-vi.mock('@/database/utils/practice-content.utils', () => ({
-  loadReviewDeckData: (...args: unknown[]) => mocks.loadReviewDeckData(...args),
-  loadReviewEntryDetails: (...args: unknown[]) => mocks.loadReviewEntryDetails(...args),
+vi.mock('@/database/state/data-store', () => ({
+  useDataPackage: () => ({
+    userId: 'u1',
+    status: 'ready',
+    error: null,
+    data: mocks.createReviewPackage(),
+  }),
+  ensureDataPackage: (...args: unknown[]) => mocks.ensureDataPackage(...args),
+}));
+
+vi.mock('@/database/state/data-selectors', () => ({
+}));
+
+vi.mock('@/database/practice/review-item-order', () => ({
+  compareReviewItems: (left: PracticeDeckEntry['item'], right: PracticeDeckEntry['item']) =>
+    left.next_at_cz_to_en.localeCompare(right.next_at_cz_to_en),
+}));
+
+vi.mock('../hooks/use-review-entry-details', () => ({
+  useReviewEntryDetails: (entry: PracticeDeckEntry | null) => ({
+    note: null,
+    grammar: null,
+    noteAvailable: Boolean(entry?.item.note_id),
+    grammarAvailable: entry?.item.is_vocabulary === 0,
+    noteLoadFailed: false,
+    grammarLoadFailed: false,
+    ensureDetailLoaded: (...args: unknown[]) => mocks.ensureDetailLoaded(...args),
+  }),
 }));
 
 vi.mock('@/features/practice/hooks/use-practice-card-state', () => ({
@@ -78,17 +107,7 @@ vi.mock('@/features/practice/hooks/use-practice-card-state', () => ({
   }),
 }));
 
-vi.mock('@/features/logging/monitoring-handler', () => ({ reportError: vi.fn() }));
-
-vi.mock('../review-prefetch', () => ({
-  compareReviewItems: (
-    left: PracticeDeckEntry['item'],
-    right: PracticeDeckEntry['item'],
-  ) => left.next_at_cz_to_en.localeCompare(right.next_at_cz_to_en),
-  invalidateReviewArrays: vi.fn(),
-  rebuildReviewArrays: (...args: unknown[]) => mocks.rebuildReviewArrays(...args),
-  syncReviewItemToCache: (...args: unknown[]) => mocks.syncReviewItemToCache(...args),
-}));
+vi.mock('@/features/logging/logging-handler', () => ({ reportError: vi.fn() }));
 
 import { usePracticeDeck } from '../hooks/use-practice-deck';
 
@@ -96,14 +115,27 @@ describe('usePracticeDeck', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mocks.fetchData = reviewDeckResult([entry(1), entry(2)]);
+    mocks.directionDecks = {};
+    mocks.dataState = { userId: 'u1', status: 'ready', nowIso: '2026-06-24T10:00:00.000Z', user_items: [] };
+    mocks.availability = {
+      grammarReviewReadyAt: null,
+      vocabularyReviewReadyAt: null,
+      grammarReviewDueCount: 2,
+      vocabularyReviewDueCount: 2,
+      nextReviewAt: null,
+    };
     mocks.reload.mockResolvedValue(undefined);
     mocks.applyPracticeProgress.mockImplementation((item) => ({ ...item, updated_at: 'now' }));
-    mocks.loadReviewEntryDetails.mockResolvedValue({ note: null, grammar: null });
-    mocks.savePracticeDeck.mockResolvedValue(undefined);
-    mocks.rebuildReviewArrays.mockResolvedValue(undefined);
-    mocks.syncReviewItemToCache.mockResolvedValue(undefined);
-    mocks.refreshPracticeReviewAvailability.mockResolvedValue(null);
-    mocks.loadReviewDeckData.mockResolvedValue(reviewDeckResult([]));
+    mocks.ensureDetailLoaded.mockResolvedValue(true);
+    mocks.ensureDataPackage.mockImplementation(async () => mocks.createReviewPackage());
+    mocks.savePracticeDeck.mockImplementation(async (items: PracticeDeckEntry['item'][]) => {
+      mocks.dataState = { ...mocks.dataState, user_items: [...mocks.dataState.user_items, ...items] };
+      if ((mocks.fetchData?.reviewKind ?? 'grammar') === 'vocabulary') {
+        mocks.availability.vocabularyReviewDueCount = Math.max(0, mocks.availability.vocabularyReviewDueCount - items.length);
+      } else {
+        mocks.availability.grammarReviewDueCount = Math.max(0, mocks.availability.grammarReviewDueCount - items.length);
+      }
+    });
   });
 
   it('saves each answered card while advancing to the next card', async () => {
@@ -124,25 +156,19 @@ describe('usePracticeDeck', () => {
   it('adds currently available prompts in both directions to the session total', async () => {
     const initialData = reviewDeckResult([entry(1), entry(2)], 'cz_to_en', 2);
     mocks.fetchData = initialData;
-    mocks.refreshPracticeReviewAvailability.mockResolvedValue({
-      grammarReviewReadyAt: null,
-      vocabularyReviewReadyAt: '2026-06-24T10:00:00.000Z',
-      grammarReviewDueCount: 0,
-      vocabularyReviewDueCount: 2,
-      nextReviewAt: '2026-06-24T10:00:00.000Z',
-    });
-    const { result } = renderHook(() => usePracticeDeck('u1', initialData));
+    mocks.availability.grammarReviewDueCount = 3;
+    const { result } = renderHook(() => usePracticeDeck('u1', 'grammar'));
     await waitFor(() => expect(result.current.progressLabel).toBe('0 / 2'));
 
     await act(async () => result.current.nextItem('correct'));
 
-    expect(mocks.refreshPracticeReviewAvailability).toHaveBeenCalledWith('u1');
     expect(result.current.progressLabel).toBe('1 / 3');
   });
 
   it('initializes the review queue from initial data before the first render', async () => {
     const initialData = reviewDeckResult([entry(7)]);
-    const { result } = renderHook(() => usePracticeDeck('u1', initialData));
+    mocks.fetchData = initialData;
+    const { result } = renderHook(() => usePracticeDeck('u1', 'grammar'));
 
     expect(result.current.currentItem?.item_id).toBe(7);
     expect(result.current.progressLabel).toBe('0 / 1');
@@ -153,7 +179,8 @@ describe('usePracticeDeck', () => {
 
   it('marks an empty initial review queue as finished before the first render', () => {
     const initialData = reviewDeckResult([]);
-    const { result } = renderHook(() => usePracticeDeck('u1', initialData));
+    mocks.fetchData = initialData;
+    const { result } = renderHook(() => usePracticeDeck('u1', 'grammar'));
 
     expect(result.current.currentItem).toBeNull();
     expect(result.current.finishedReview).toBe(true);
@@ -176,41 +203,24 @@ describe('usePracticeDeck', () => {
     expect(mocks.reload).not.toHaveBeenCalled();
   });
 
-  it('reuses the background detail request when detail is requested early', async () => {
+  it('resolves detail availability from the central data without a fetch', async () => {
     mocks.fetchData = reviewDeckResult([entry(1)]);
-    let resolveDetails!: (details: unknown) => void;
-    mocks.loadReviewEntryDetails.mockReturnValue(
-      new Promise((resolve) => {
-        resolveDetails = resolve;
-      }),
-    );
 
     const { result } = renderHook(() => usePracticeDeck('u1'));
     await waitFor(() => expect(result.current.currentItem?.item_id).toBe(1));
 
-    let ensurePromise!: Promise<boolean>;
-    act(() => {
-      ensurePromise = result.current.ensureDetailLoaded('grammar');
-    });
-
-    expect(mocks.loadReviewEntryDetails).toHaveBeenCalledOnce();
-
-    await act(async () => {
-      resolveDetails({
-        note: null,
-        grammar: { id: 10 },
-        noteLoadFailed: false,
-        grammarLoadFailed: false,
-      });
-      await ensurePromise;
-    });
-
-    await expect(ensurePromise).resolves.toBe(true);
+    await expect(result.current.ensureDetailLoaded('grammar')).resolves.toBe(true);
+    expect(mocks.ensureDetailLoaded).toHaveBeenCalledWith('grammar');
   });
 
   it('publishes the count after each saved answer in the prefetched queue', async () => {
     mocks.savePracticeDeck.mockImplementation(async (items: PracticeDeckEntry['item'][]) => {
       expect(items).toHaveLength(1);
+      mocks.dataState = { ...mocks.dataState, user_items: [...mocks.dataState.user_items, ...items] };
+      mocks.availability.grammarReviewDueCount = Math.max(
+        0,
+        mocks.availability.grammarReviewDueCount - items.length,
+      );
       if (items[0].item_id === 2) mocks.fetchData = reviewDeckResult([entry(3)]);
     });
     const { result } = renderHook(() => usePracticeDeck('u1'));
@@ -232,12 +242,14 @@ describe('usePracticeDeck', () => {
     expect(result.current.currentItem?.item_id).toBe(2);
     expect(result.current.finishedReview).toBe(false);
     expect(result.current.progressLabel).toBe('2 / 2');
-    expect(mocks.syncReviewItemToCache).toHaveBeenCalledTimes(2);
+    expect(mocks.dataState.user_items).toHaveLength(2);
   });
 
   it('counts a final answer without adding a nonexistent next batch', async () => {
     mocks.fetchData = reviewDeckResult([entry(1)]);
+    mocks.availability.grammarReviewDueCount = 1;
     mocks.savePracticeDeck.mockImplementation(async () => {
+      mocks.availability.grammarReviewDueCount = 0;
       mocks.fetchData = reviewDeckResult([entry(2)]);
     });
     const { result } = renderHook(() => usePracticeDeck('u1'));
@@ -259,18 +271,26 @@ describe('usePracticeDeck', () => {
     await waitFor(() => expect(result.current.error?.message).toBe('save failed'));
     expect(mocks.reload).not.toHaveBeenCalled();
     expect(result.current.currentItem?.item_id).toBe(1);
-    expect(mocks.syncReviewItemToCache).not.toHaveBeenCalled();
   });
 
-  it('rebuilds the cache after persistence succeeds but cache synchronization fails', async () => {
-    mocks.syncReviewItemToCache.mockRejectedValueOnce(new Error('cache update failed'));
+  it('publishes a successful persistence result to the central data snapshot', async () => {
     const { result } = renderHook(() => usePracticeDeck('u1'));
     await waitFor(() => expect(result.current.progressLabel).toBe('0 / 2'));
 
     await act(async () => result.current.nextItem('correct'));
 
     expect(result.current.currentItem?.item_id).toBe(2);
-    expect(mocks.rebuildReviewArrays).toHaveBeenCalledWith('u1');
+    expect(mocks.dataState.user_items).toHaveLength(1);
+  });
+
+  it('keeps the active queue when a saved answer updates the central snapshot', async () => {
+    const { result } = renderHook(() => usePracticeDeck('u1'));
+    await waitFor(() => expect(result.current.currentItem?.item_id).toBe(1));
+
+    await act(async () => result.current.nextItem('correct'));
+
+    expect(result.current.currentItem?.item_id).toBe(2);
+    expect(result.current.progressLabel).toBe('1 / 2');
   });
 
   it('finishes when the next batch is empty', async () => {
@@ -300,10 +320,8 @@ describe('usePracticeDeck', () => {
       next_at_cz_to_en: '9999-01-01T00:00:00.000Z',
       updated_at: 'now',
     }));
-    mocks.loadReviewDeckData.mockImplementation(async (_userId: string, _kind: string, direction: string) => {
-      if (direction === 'en_to_cz') return reviewDeckResult([entry(2, 'en_to_cz')], 'en_to_cz', 2);
-      return reviewDeckResult([], 'cz_to_en', 2);
-    });
+    mocks.directionDecks.en_to_cz = reviewDeckResult([entry(2, 'en_to_cz')], 'en_to_cz', 2);
+    mocks.directionDecks.cz_to_en = reviewDeckResult([], 'cz_to_en', 2);
 
     const { result } = renderHook(() => usePracticeDeck('u1'));
     await waitFor(() => expect(result.current.currentItem?.item_id).toBe(1));
@@ -314,8 +332,7 @@ describe('usePracticeDeck', () => {
     expect(result.current.currentItem?.item_id).toBe(2);
     expect(result.current.currentItem?.review_direction).toBe('en_to_cz');
     expect(result.current.progressLabel).toBe('1 / 2');
-    expect(mocks.loadReviewDeckData).toHaveBeenCalledWith('u1', 'grammar', 'en_to_cz');
-    expect(mocks.loadReviewDeckData).not.toHaveBeenCalledWith('u1', 'grammar', 'cz_to_en');
+    expect(mocks.ensureDataPackage).toHaveBeenCalledWith('u1', { kind: 'review-practice', reviewKind: 'grammar' });
   });
 
   it('keeps the last card visible while the final batch is being saved', async () => {
@@ -357,6 +374,7 @@ describe('usePracticeDeck', () => {
 
   it('retries a failed final save without counting the answer twice', async () => {
     mocks.fetchData = reviewDeckResult([entry(1)]);
+    mocks.availability.grammarReviewDueCount = 1;
     mocks.savePracticeDeck.mockRejectedValueOnce(new Error('save failed'));
     const { result } = renderHook(() => usePracticeDeck('u1'));
     await waitFor(() => expect(result.current.currentItem?.item_id).toBe(1));
@@ -366,7 +384,9 @@ describe('usePracticeDeck', () => {
     await waitFor(() => expect(result.current.error?.message).toBe('save failed'));
     await waitFor(() => expect(result.current.retryPractice).toBeDefined());
     mocks.fetchData = reviewDeckResult([entry(2)]);
-    mocks.savePracticeDeck.mockResolvedValue(undefined);
+    mocks.savePracticeDeck.mockImplementation(async () => {
+      mocks.availability.grammarReviewDueCount = 0;
+    });
 
     await act(async () => result.current.retryPractice?.());
 
@@ -379,6 +399,7 @@ describe('usePracticeDeck', () => {
 
   it('does not reload after a successful final save', async () => {
     mocks.fetchData = reviewDeckResult([entry(1)]);
+    mocks.availability.grammarReviewDueCount = 1;
     const { result } = renderHook(() => usePracticeDeck('u1'));
     await waitFor(() => expect(result.current.currentItem?.item_id).toBe(1));
 
@@ -402,7 +423,7 @@ function reviewDeckResult(
     entries,
     availabilityCheckedAt: '2026-06-24T10:00:00.000Z',
     abandoned: false,
-    reviewKind: 'vocabulary',
+    reviewKind: 'grammar',
     reviewDirection,
     availableCount,
   };
@@ -425,7 +446,7 @@ function entry(
       english: 'hello',
       pronunciation: '',
       audio: null,
-      is_vocabulary: 1,
+      is_vocabulary: 0,
       sort_order: itemId,
       curriculum_sort_path: [1, 1, itemId],
       note_id: null,

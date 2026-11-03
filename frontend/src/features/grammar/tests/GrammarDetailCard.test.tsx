@@ -29,6 +29,7 @@ vi.mock('@/locales/cs', () => ({
     restartProgressEnToCz: 'reset postupu en to cz',
     directionCzToEn: 'Czech to English',
     directionEnToCz: 'English to Czech',
+    pronunciationTitle: (value: string) => value,
   },
 }));
 

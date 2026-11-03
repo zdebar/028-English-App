@@ -1,10 +1,10 @@
-import { getOverviewQuery, overviewQueryKey } from '@/hooks/overview-query-store';
 import config from '@/config/config';
 import type { UserItemLocal } from '@/types/user-item.types';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { compareCzechStrings, filterSortedWords, type DisplayField } from './vocabulary.utils';
 import { useLocalStorageSync } from '@/hooks/use-local-storage-sync';
-import { useLiveQueryData } from '@/hooks/use-live-query-data';
+import { useDataPackage, type DataPackageResult } from '@/database/state/data-store';
+import type { VocabularyPackage } from '@/database/state/data-types';
 
 const INITIAL_VISIBLE_COUNT = config.vocabulary.itemsPerBatch;
 const SEARCH_KEY = 'vocabulary_search_term';
@@ -15,17 +15,16 @@ const DISPLAY_FIELD_KEY = 'vocabulary_display_field';
  * @param userId - The ID of the user for whom to fetch vocabulary items.
  * @returns An object containing vocabulary state and actions.
  */
-export function useVocabulary(userId: string | null, initialWords?: UserItemLocal[]) {
-  const fetchVocabulary = useCallback(async () => {
-    if (!userId) return [];
-    return getOverviewQuery(userId, 'vocabulary')();
-  }, [userId]);
-
-  const { data: words, loading, error } = useLiveQueryData(fetchVocabulary, {
-    emptyData: [],
-    initialData: initialWords,
-    sharedKey: userId ? overviewQueryKey(userId, 'vocabulary') : undefined,
-  });
+export function useVocabulary(userId: string | null) {
+  const packageState = useDataPackage({ kind: 'vocabulary' });
+  const packageView = getVocabularyPackageView(userId, packageState);
+  const { hasUserPackage, loading, error } = packageView;
+  const words = useMemo(
+    () => hasUserPackage ? packageState.data?.items ?? [] : [],
+    [hasUserPackage, packageState.data],
+  );
+  const notes = packageView.data?.notes ?? [];
+  const soundGroups = packageView.data?.soundGroups ?? [];
 
   const [visibleCount, setVisibleCount] = useState(INITIAL_VISIBLE_COUNT);
   const [searchTerm, setSearchTerm] = useLocalStorageSync<string>(`${SEARCH_KEY}_${userId}`, '');
@@ -80,5 +79,25 @@ export function useVocabulary(userId: string | null, initialWords?: UserItemLoca
     selectedWord,
     setSelectedWord,
     filteredWords,
+    notes,
+    soundGroups,
+  };
+}
+
+function getVocabularyPackageView(
+  userId: string | null,
+  packageState: DataPackageResult<VocabularyPackage>,
+): Readonly<{
+  hasUserPackage: boolean;
+  data: VocabularyPackage | undefined;
+  loading: boolean;
+  error: Error | null;
+}> {
+  const hasUserPackage = packageState.userId === userId;
+  return {
+    hasUserPackage,
+    data: hasUserPackage ? packageState.data : undefined,
+    loading: Boolean(userId) && (!hasUserPackage || packageState.status === 'loading'),
+    error: hasUserPackage && packageState.status === 'error' ? packageState.error : null,
   };
 }

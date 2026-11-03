@@ -4,7 +4,6 @@ const config = {
     releaseByFeature: {} as Record<string, boolean>,
   },
   sync: {
-    fullSyncInterval: 7 * 24 * 60 * 60 * 1000, // Interval for performing a full sync in milliseconds (7 days)
     periodicSyncInterval: 24 * 60 * 60 * 1000, // Interval for periodic sync in milliseconds (1 day)
     scoreResetCheckInterval: 60 * 1000, // Interval for resetting daily scores in milliseconds (1 minute)
   },
@@ -50,7 +49,6 @@ const config = {
   practice: {
     grammarReviewLimitSize: 50, // New training locks only above this grammar review count
     vocabularyReviewLimitSize: 50, // New training locks only above this vocabulary review count
-    dailyStartedLessonLimit: 5, // Default daily lesson limit
     audioDelay: 100, // Delay in milliseconds for automatically playing audio
     holdDuration: 300, // Duration in milliseconds for which the practice card is held before moving to the next item
     maxReviewReadyTimerDelayMs: 2_147_483_647, // Maximum setTimeout delay supported by browsers
@@ -65,12 +63,11 @@ const config = {
   },
 
   loading: {
-    dataStateDelayMs: 300, // Delay before showing loading indicator for data views
+    dataStateDelayMs: 300, // Delay before showing loading or status messages
   },
 
   buttons: {
     minLoadingTime: 400, // Minimum loading time for loading buttons in milliseconds
-    loadingMessageDelay: 300, // Delay before showing loading message in milliseconds
   },
 };
 

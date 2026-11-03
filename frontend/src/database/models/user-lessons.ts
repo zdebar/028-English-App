@@ -1,33 +1,52 @@
 import { supabaseInstance } from '@/config/supabase.config';
+import SyncMetadata from '@/database/models/metadata';
 import { db } from '@/database/models/db';
+import { getSyncTimestamps } from '@/database/sync/sync-helpers';
 import type { UserLessonType } from '@/types/generic.types';
 import { SupabaseError } from '@/types/error.types';
+import { TableName } from '@/types/table.types';
 import { Entity } from 'dexie';
 import type AppDB from './app-db';
-import UserSettings from './user-settings';
 import config from '@/config/config';
+import type { AppDataSyncResult } from '@/database/state/data-types';
+import { publishDataChanges } from '@/database/state/data-store';
 
 export default class UserLesson extends Entity<AppDB> implements UserLessonType {
   user_id!: string;
   lesson_id!: number;
   started_at!: string;
 
-  static async recordStart(userId: string, lessonId: number, startedAt: string): Promise<void> {
+  /** Adds a lesson start to the local history. */
+  private static async recordStart(userId: string, lessonId: number, startedAt: string): Promise<void> {
     await db.user_lessons.put({ user_id: userId, lesson_id: lessonId, started_at: startedAt });
   }
 
+  /** Returns lesson start records for a user. */
   static getByUserId(userId: string): Promise<UserLessonType[]> {
     return db.user_lessons.where('user_id').equals(userId).toArray();
   }
 
-  /** Records a lesson's first daily start while enforcing the current daily limit. */
-  static startIfAllowed(
+  /**
+   * Records a lesson start once per local day when all supplied items are eligible.
+   * @returns True when eligible or already started today; otherwise false.
+   */
+  static startIfEligible(
     userId: string,
     lessonId: number,
     itemIds: number[],
     startedAt: string = new Date().toISOString(),
   ): Promise<boolean> {
-    return db.transaction('rw', db.user_lessons, db.users, db.user_items, async () => {
+    return this.startIfEligibleInternal(userId, lessonId, itemIds, startedAt);
+  }
+
+  /** Checks and persists a lesson start while publishing only after transaction commit. */
+  private static async startIfEligibleInternal(
+    userId: string,
+    lessonId: number,
+    itemIds: number[],
+    startedAt: string,
+  ): Promise<boolean> {
+    const result = await db.transaction('rw', db.user_lessons, db.user_items, async () => {
       const items = await db.user_items
         .where('[user_id+item_id]')
         .anyOf(itemIds.map((itemId) => [userId, itemId]))
@@ -43,21 +62,23 @@ export default class UserLesson extends Entity<AppDB> implements UserLessonType 
             !item.is_cz_to_en_enabled,
         )
       ) {
-        return false;
+        return { started: false, row: null };
       }
 
       const startedToday = await this.hasStartedToday(userId, lessonId, new Date(startedAt));
-      if (startedToday) return true;
+      if (startedToday) return { started: true, row: null };
 
-      const settings = await UserSettings.getOrCreate(userId);
-      const startedCount = await this.getStartedCountForToday(userId, new Date(startedAt));
-      if (startedCount >= settings.max_new_lessons_per_day) return false;
-
+      const row = { user_id: userId, lesson_id: lessonId, started_at: startedAt };
       await this.recordStart(userId, lessonId, startedAt);
-      return true;
+      return { started: true, row };
     });
+    if (result.row) {
+      publishDataChanges(userId, { user_lessons: { upserted: [result.row] } });
+    }
+    return result.started;
   }
 
+  /** Checks whether the user has a lesson start in the local calendar day of `now`. */
   static async hasStartedToday(userId: string, lessonId: number, now: Date = new Date()): Promise<boolean> {
     const start = new Date(now.getFullYear(), now.getMonth(), now.getDate()).toISOString();
     const end = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1).toISOString();
@@ -68,31 +89,19 @@ export default class UserLesson extends Entity<AppDB> implements UserLessonType 
     return row !== undefined;
   }
 
-  static async canStartToday(userId: string, lessonId: number, now: Date = new Date()): Promise<boolean> {
-    const [startedToday, settings, startedCount] = await Promise.all([
-      this.hasStartedToday(userId, lessonId, now),
-      UserSettings.getOrCreate(userId),
-      this.getStartedCountForToday(userId, now),
-    ]);
-    return startedToday || startedCount < settings.max_new_lessons_per_day;
-  }
-
-  static async getStartedCountForToday(userId: string, now: Date = new Date()): Promise<number> {
-    const start = new Date(now.getFullYear(), now.getMonth(), now.getDate()).toISOString();
-    const end = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1).toISOString();
-    const rows = await db.user_lessons
-      .where('[user_id+started_at]')
-      .between([userId, start], [userId, end], true, false)
-      .toArray();
-    return new Set(rows.map((row) => row.lesson_id)).size;
-  }
-
-  static async syncFromRemote(userId: string, _doFullSync = false): Promise<number> {
-    const [remoteResult, localRows] = await Promise.all([
+  /**
+   * Synchronizes lesson starts newer than the stored date checkpoint.
+   * @returns Remote lesson-start count and committed local changes.
+   */
+  static async syncFromRemote(userId: string): Promise<AppDataSyncResult> {
+    const { lastSyncedAt, newSyncedAt } = await getSyncTimestamps(TableName.UserLessons, userId);
+    const [remoteResult, localSnapshot] = await Promise.all([
       supabaseInstance
         .from('user_lessons')
         .select('user_id, lesson_id, started_at')
         .eq('user_id', userId)
+        .gt('started_at', lastSyncedAt)
+        .lte('started_at', newSyncedAt)
         .order('started_at'),
       db.user_lessons.where('user_id').equals(userId).toArray(),
     ]);
@@ -105,29 +114,56 @@ export default class UserLesson extends Entity<AppDB> implements UserLessonType 
       ...row,
       started_at: new Date(row.started_at).toISOString(),
     }));
-    if (localRows.length > 0) {
-      const { error } = await supabaseInstance.from('user_lessons').upsert(localRows, {
+    const localRowsToPush = localSnapshot.filter((row) =>
+      isWithinSyncWindow(row.started_at, lastSyncedAt, newSyncedAt),
+    );
+    if (localRowsToPush.length > 0) {
+      const { error } = await supabaseInstance.from('user_lessons').upsert(localRowsToPush, {
         onConflict: 'user_id,lesson_id,started_at',
         ignoreDuplicates: true,
       });
       if (error) throw new SupabaseError('Failed to sync user lesson history to Supabase', error);
     }
 
-    await db.transaction('rw', db.user_lessons, async () => {
+    let hasUnpushedConcurrentRows = false;
+    await db.transaction('rw', db.user_lessons, db.metadata, async () => {
       const currentLocalRows = await db.user_lessons.where('user_id').equals(userId).toArray();
-      const rowsByKey = new Map(
-        [...remoteRows, ...localRows, ...currentLocalRows].map((row) => [getUserLessonKey(row), row]),
+      const initialKeys = new Set(localSnapshot.map(getUserLessonKey));
+      hasUnpushedConcurrentRows = currentLocalRows.some(
+        (row) =>
+          isWithinSyncWindow(row.started_at, lastSyncedAt, newSyncedAt) &&
+          !initialKeys.has(getUserLessonKey(row)),
       );
-      if (rowsByKey.size > 0) await db.user_lessons.bulkPut([...rowsByKey.values()]);
+      if (remoteRows.length > 0) await db.user_lessons.bulkPut(remoteRows);
+      if (!hasUnpushedConcurrentRows) {
+        await SyncMetadata.markAsSynced(TableName.UserLessons, newSyncedAt, userId);
+      }
     });
-    return remoteRows.length;
+    return {
+      count: remoteRows.length,
+      changes: { user_lessons: { upserted: remoteRows } },
+    };
   }
 
+  /** Removes all local lesson-start records for a user. */
   static async removeByUserId(userId: string): Promise<void> {
-    await db.user_lessons.where('user_id').equals(userId).delete();
+    const rows = await db.transaction('rw', db.user_lessons, async () => {
+      const existing = await db.user_lessons.where('user_id').equals(userId).toArray();
+      await db.user_lessons.bulkDelete(existing.map((row) => [row.user_id, row.lesson_id, row.started_at]));
+      return existing;
+    });
+    if (rows.length > 0) {
+      publishDataChanges(userId, {
+        user_lessons: { deleted: rows.map(getUserLessonKey) },
+      });
+    }
   }
 }
 
 function getUserLessonKey(row: UserLessonType): string {
   return `${row.user_id}:${row.lesson_id}:${row.started_at}`;
+}
+
+function isWithinSyncWindow(startedAt: string, lastSyncedAt: string, newSyncedAt: string): boolean {
+  return startedAt > lastSyncedAt && startedAt <= newSyncedAt;
 }

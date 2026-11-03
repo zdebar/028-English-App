@@ -1,85 +1,45 @@
-# Data And Sync
+# Data and synchronization
 
-Practice and overview pages read local Dexie models. User changes are written to
-IndexedDB first; sync later pushes local changes to Supabase and applies remote
-updates.
+IndexedDB is the durable local source for curriculum and user progress. Supabase provides the remote copy. The central data manager is an in-memory mirror and view-data cache; it is rebuilt from IndexedDB for the active account.
 
-## Local Writes
+## Local writes and data-manager updates
 
-| Action | Local write | Remote sync path |
-| --- | --- | --- |
-| Review answer | Save one direction's `user_items` progress before advancing. | `UserItem.syncFromRemote` calls `upsert_fetch_user_items`. |
-| Initial-training answer | Save progress immediately; mirror the initial result to both directions. | Pushed with the next user-item sync. |
-| Lesson start | Add a `user_lessons` record after validating the daily limit. | `UserLesson.syncFromRemote` merges lesson-start records. |
-| Progress reset | Update the affected local `user_items` rows. | Pushed with the next user-item sync. |
-| Daily lesson limit | Update the local `users` settings row. | `UserSettings.syncFromRemote` compares `updated_at` and writes the selected setting. |
+Application commands write to IndexedDB first. After a successful commit, the model publishes changed rows or deleted keys to the manager. A failed database write does not update the in-memory snapshot. A write can finish after its calling component unmounts; account checks prevent its changes from leaking into a different active account.
 
-Route loaders, feature hooks, and models work from local data. Supabase calls are
-owned by auth, data sync, settings sync, and audio storage flows.
+The manager applies each committed batch to its base snapshot, recomputes derived review data, and rebuilds only cached page packages that depend on changed tables. Account changes clear user-specific state and cached packages. BroadcastChannel carries committed changes between tabs; user-owned rows are applied only to the matching account, while shared catalog changes can be applied by other accounts.
 
-## Sync Lifecycle
+## Incremental remote sync
 
-`frontend/src/database/utils/data-sync.utils.ts` synchronizes groups, group items,
-group relations, levels, lessons, notes, user items, user lessons, and user
-settings. The shared table models pull rows whose `updated_at` is newer than the
-local sync cursor. They apply soft-deleted content as local deletes.
+Each syncable table keeps its own cursor in IndexedDB metadata. A first pull starts at the configured epoch; later pulls use that table's saved timestamp. Cursors advance after local database work succeeds. There is no full-sync mode.
 
-User-item sync exports local rows within the incremental sync window to the
-`upsert_fetch_user_items` RPC. The RPC upserts progress and returns current item
-content with user progress. The model merges those results into IndexedDB while
-preserving concurrent local edits. User-lesson sync merges start records; user
-settings use their own timestamp comparison.
+The data tables are synchronized independently. Successful table changes are merged and published to the data manager as one batch, even if another table fails. Sync tasks include shared groups, group items, group relations, levels, lessons, and notes, plus user items and lesson starts.
 
-| Moment | Owner | Behavior |
-| --- | --- | --- |
-| User becomes active | `usePeriodicSync` | Warms practice and overview caches and schedules the first sync after three seconds. |
-| Periodic interval | `usePeriodicSync` | Runs `dataSync`; the default interval is one day. |
-| Full sync due | `dataSync` | Uses the per-user localStorage timestamp; the default interval is seven days. |
-| App unmount or logout | `dataSyncOnUnmount` / `handleLogout` | Best-effort incremental sync of user items, lesson starts, and user settings when a session exists. |
-| Profile full-sync action | `Profile` | Forces a full data sync, refreshes audio archives, and removes orphaned local audio. |
+## Sync lifecycle and retry
 
-Overlapping periodic syncs reuse the current promise. A completed data sync
-invalidates and rebuilds practice caches and refreshes Home availability. Audio
-archive sync then checks remote bucket metadata, downloads changed archives,
-updates local audio records, and removes records no longer referenced by items.
-Sync status lives in `useSyncStore`; failure leaves local reads available and
-sets the Home sync warning.
+**frontend/src/features/synchronization/sync-manager.ts** is the singleton coordinator used by the app lifecycle:
 
-## Full And Incremental Sync
+- It starts an initial sync three seconds after a user becomes active and repeats at the configured 24-hour interval.
+- Transient task failures receive quick retries after one and three seconds.
+- Remaining retryable failures are retried after one, five, and then fifteen minutes; later scheduled retries remain at fifteen minutes. Server Retry-After hints can extend the delay.
+- A browser online event retries failed retryable tasks immediately.
+- Authentication failures and permanent client errors are not automatically retried.
+- Overlapping requests for the same account share the in-flight sync.
 
-| Mode | Behavior |
+A session-end sync is best-effort and covers user items and lesson starts. It does not keep a closing page alive for a retry schedule. Sync status and task errors are exposed by the synchronization feature.
+
+Audio archive synchronization is handled by the same coordinator, but audio blobs stay in the audio-record cache and are not part of the data-manager snapshot.
+
+## Storage boundaries
+
+| Storage | Contents |
 | --- | --- |
-| Full | Reads from the epoch cursor and replaces local shared rows where supported. User-item sync reconciles remote results while preserving changes made during the sync. |
-| Incremental | Pushes local changes newer than the stored cursor, then applies remote changes within the sync window. |
+| IndexedDB curriculum tables | Levels, lessons, notes, groups, group items, and group relations. |
+| IndexedDB user tables | The active user's user items and lesson starts. |
+| IndexedDB metadata | Per-table sync timestamps; not copied into the data manager. |
+| IndexedDB audio tables | Cached audio blobs and archive metadata; separate from the data manager. |
+| localStorage | Theme, audio volume, vocabulary search, and simulation-fixture preference. |
+| sessionStorage | Temporary anonymous-session recovery during Google sign-in. |
 
-Sync cursors are stored in the local Dexie `metadata` table. The full-sync
-throttle timestamp is stored under `last-full-sync-at_${userId}` in localStorage.
+The data manager's timers refresh time-sensitive packages when a review becomes due or the local date changes. Changes caused by elapsed time do not require an IndexedDB write.
 
-## Local And Browser Storage
-
-| Storage | Key/data | Purpose |
-| --- | --- | --- |
-| IndexedDB `user_items` | Item content plus per-user progress locally | Practice, review scheduling, and incremental sync. |
-| IndexedDB `user_lessons` | User, lesson, and start timestamp | Lesson continuation and daily new-lesson limit. |
-| IndexedDB `users` | User ID and `max_new_lessons_per_day` | Per-user training limit. |
-| IndexedDB `metadata` | Table name, optional user ID, sync timestamp | Incremental sync cursors. |
-| IndexedDB `audio_records`, `audio_metadata` | Audio blobs and archive timestamps | Offline audio playback and archive refresh. |
-| localStorage | `theme_${userId}`, `theme_guest`, `theme_active` | Theme preference and pre-paint theme. |
-| localStorage | `volume-${userId}` | Per-user playback volume. |
-| localStorage | `vocabulary_search_term_${userId}` | Vocabulary search text. |
-| localStorage | `simulate-data-v2-${userId}` | Whether the anonymous-user fixture was applied. |
-| sessionStorage | `google-signin-anonymous-session-fallback` | Short-lived anonymous-session recovery during Google sign-in. |
-
-The simulation fixture updates vocabulary progress in the first 100 curriculum
-lessons that contain vocabulary and records those lessons as started. It waits
-for the initial sync and requires confirmation. Practice answers and the active
-review/training queue are not stored in localStorage.
-
-## Reactive Refresh
-
-Overview and dashboard queries use Dexie `liveQuery` observers, which rerun when
-their IndexedDB inputs change. Home practice availability uses an explicit
-controller and in-memory caches. It refreshes after sync, progress reset, and
-practice writes, and schedules a timer for review due times and local-day
-rollover. See [state-and-events.md](state-and-events.md) and
-[home-readiness.md](home-readiness.md) for those refresh paths.
+See [state-and-events.md](state-and-events.md) for subscriptions and [domain-models.md](domain-models.md) for the local tables.

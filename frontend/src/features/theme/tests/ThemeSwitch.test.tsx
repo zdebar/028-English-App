@@ -64,12 +64,12 @@ describe('ThemeSwitch', () => {
     expect(mocks.chooseTheme).toHaveBeenCalledWith('light', 'u1');
   });
 
-  it('passes undefined user id when user is not authenticated', () => {
+  it('passes null user id when user is not authenticated', () => {
     mocks.userId = null;
     render(<ThemeSwitch />);
 
     fireEvent.click(screen.getByRole('button', { name: 'Light mode' }));
 
-    expect(mocks.chooseTheme).toHaveBeenCalledWith('dark', undefined);
+    expect(mocks.chooseTheme).toHaveBeenCalledWith('dark', null);
   });
 });

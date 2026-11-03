@@ -1,4 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { assertFunction } from '@/utils/assertions.utils';
+import { toError } from '@/utils/error.utils';
 
 type UseAsyncDataOptions<T> = Readonly<{
   emptyData: T;
@@ -12,20 +14,15 @@ type UseAsyncDataResult<T> = Readonly<{
   reload: () => Promise<void>;
 }>;
 
-function toError(error: unknown): Error {
-  return error instanceof Error ? error : new Error(String(error));
-}
-
 /** Shared async loading lifecycle for data hooks with different empty-data semantics. */
 export function useAsyncData<T>(
   fetchFunction: () => Promise<T>,
   options: UseAsyncDataOptions<T>,
 ): UseAsyncDataResult<T> {
-  if (typeof fetchFunction !== 'function') {
-    throw new TypeError('fetchFunction must be a function.');
-  }
+  assertFunction(fetchFunction, 'fetchFunction');
 
   const hasInitialData = options.initialData !== undefined;
+
   const [data, setData] = useState<T>(() => options.initialData ?? options.emptyData);
   const [loading, setLoading] = useState(!hasInitialData);
   const [error, setError] = useState<Error | null>(null);
@@ -34,15 +31,6 @@ export function useAsyncData<T>(
   const requestGenerationRef = useRef(0);
   const hasResolvedDataRef = useRef(hasInitialData);
   const initialFetchFunctionRef = useRef(hasInitialData ? fetchFunction : null);
-
-  useEffect(() => {
-    requestGenerationRef.current += 1;
-    if (options.initialData === undefined) return;
-    setData(options.initialData);
-    hasResolvedDataRef.current = true;
-    setError(null);
-    setLoading(false);
-  }, [options.initialData]);
 
   const load = useCallback(async () => {
     if (!isActiveRef.current) return;

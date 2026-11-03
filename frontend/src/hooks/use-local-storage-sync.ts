@@ -13,10 +13,7 @@ export function useLocalStorageSync<T>(
   key: string,
   initialValue: T,
 ): [T, Dispatch<SetStateAction<T>>] {
-  const storedValue = localStorage.getItem(key);
-  const initial = storedValue ? (JSON.parse(storedValue) as T) : initialValue;
-
-  const [value, setValue] = useState<T>(initial);
+  const [value, setValue] = useState<T>(() => readStoredValue(key, initialValue));
   const previousKey = useRef(key);
   const skipNextSave = useRef(false);
 
@@ -42,4 +39,9 @@ export function useLocalStorageSync<T>(
   }, [key, value]);
 
   return [value, setValue];
+}
+
+function readStoredValue<T>(key: string, initialValue: T): T {
+  const storedValue = localStorage.getItem(key);
+  return storedValue ? (JSON.parse(storedValue) as T) : initialValue;
 }

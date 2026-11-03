@@ -52,10 +52,6 @@ export default defineConfig({
             return 'supabase-vendor';
           }
 
-          if (normalizedId.includes('/node_modules/@sentry/')) {
-            return 'sentry-vendor';
-          }
-
           if (normalizedId.includes('/node_modules/dexie/')) {
             return 'dexie-vendor';
           }

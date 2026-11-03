@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { reportError } from './monitoring-handler';
+import { reportError } from './logging-handler';
 import { useToastStore } from '@/features/toast/use-toast-store';
 import { TEXTS } from '@/locales/cs';
 

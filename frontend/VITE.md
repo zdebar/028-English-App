@@ -1,132 +1,21 @@
-# React + TypeScript + Vite
+# Vite configuration
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+The frontend uses the Vite configuration in **vite.config.ts**. This file describes project-specific settings; for install and run commands, see the repository [README](../README.md).
 
-Currently, two official plugins are available:
+## Plugins and compiler
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- **@vitejs/plugin-react** provides React integration and Fast Refresh.
+- **babel-plugin-react-compiler** is enabled through the React plugin.
+- **@tailwindcss/vite** processes Tailwind CSS 4.
 
-## React Compiler
+The React Compiler is enabled; the default Vite template instructions about enabling it do not apply here.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Aliases and base path
 
-## Expanding the ESLint configuration
+The **@** import alias points to **frontend/src**. Set **VITE_BASE_PATH** to change Vite's public base path; it defaults to **/**. The base path is also used to scope PWA service-worker registration and caches.
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+## Build behavior
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+The build defines separate vendor chunks for React/router, Supabase, and Dexie. HTML module-preload hints are disabled to avoid conflicts with service-worker cached module responses in Chrome.
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
-
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
-
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
-
-## Sentry Monitoring (Production)
-
-Sentry is initialized in `src/main.tsx` only when all conditions below are met:
-
-- build runs in production mode
-- `VITE_SENTRY_DSN` is set
-- `VITE_SENTRY_ENABLED` is not set to `false`
-
-### Setup
-
-1. Create `.env.production` from `.env.production.example`.
-2. Set a real DSN from your Sentry project.
-3. Keep sample rates conservative for external testing first.
-
-Default sample rates in the example:
-
-- `VITE_SENTRY_TRACES_SAMPLE_RATE=0.1`
-- `VITE_SENTRY_REPLAYS_SESSION_SAMPLE_RATE=0`
-- `VITE_SENTRY_REPLAYS_ON_ERROR_SAMPLE_RATE=1`
-
-This gives low-overhead performance traces, no full-session replay, and full replay capture when an error occurs.
-
-### App-level helpers
-
-Use centralized helpers from `src/features/logging/monitoring-handler.ts`:
-
-- `reportError(message, error, context?)`
-- `reportInfo(message, context?)`
-- `setMonitoringUser(userId)`
-
-Use these helpers directly in app code and tests.
-
-`setMonitoringUser` is now called automatically from auth state changes, so Sentry issues are linked to the current user ID when signed in.
-
-Current sync events sent as `info`/`error` messages:
-
-- `unmount_sync_failed`
-
-### Build release version
-
-The `build` script now generates `VITE_APP_VERSION` automatically for release tracking.
-
-Default format:
-
-- `<package-name>@<package-version>+<git-sha>`
-
-Example:
-
-- `028-english-app@0.0.0+1a2b3c4`
-
-Implementation file:
-
-- `scripts/build-with-version.mjs`
-
-Behavior:
-
-- If `VITE_APP_VERSION` is already set in environment, it is preserved.
-- If git SHA is unavailable, fallback suffix is `+local`.
+The project build wrapper runs the TypeScript build, Vite production build, then service-worker generation. Vitest is configured here with the jsdom environment and globals.

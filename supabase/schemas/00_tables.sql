@@ -12,7 +12,6 @@ SET search_path TO public;
 
 CREATE TABLE IF NOT EXISTS users (
   id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
-  max_new_lessons_per_day INTEGER NOT NULL DEFAULT 1 CHECK (max_new_lessons_per_day >= 1),
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
@@ -73,9 +72,6 @@ CREATE TABLE IF NOT EXISTS user_lessons (
   started_at TIMESTAMPTZ NOT NULL,
   PRIMARY KEY (user_id, lesson_id, started_at)
 );
-
-CREATE INDEX IF NOT EXISTS idx_user_lessons_user_started_at
-  ON public.user_lessons (user_id, started_at);
 
 CREATE TABLE IF NOT EXISTS notes (
   id SERIAL PRIMARY KEY,
@@ -177,6 +173,7 @@ CREATE INDEX IF NOT EXISTS idx_lessons_level_id ON public.lessons (level_id);
 CREATE INDEX IF NOT EXISTS idx_items_note_id ON public.items (note_id);
 CREATE INDEX IF NOT EXISTS idx_groups_type_sort_order ON public.groups (type, sort_order);
 CREATE INDEX IF NOT EXISTS idx_group_items_item_id ON public.group_items (item_id);
+CREATE INDEX IF NOT EXISTS idx_group_items_updated_at ON public.group_items (updated_at);
 CREATE INDEX IF NOT EXISTS idx_group_items_group_sort_order ON public.group_items (group_id, sort_order);
 CREATE INDEX IF NOT EXISTS idx_group_relations_child_id ON public.group_relations (child_group_id);
 
