@@ -57,6 +57,12 @@
   --color-success-dark: #22c55e;
   --color-error-dark: #ef4444;
   --color-info-dark: #3b82f6;
+  --color-success-hover-light: #096029;
+  --color-error-hover-light: #7d1111;
+  --color-info-hover-light: #1b468c;
+  --color-success-hover-dark: #237a43;
+  --color-error-hover-dark: #972b2b;
+  --color-info-hover-dark: #3560a6;
 
   /** LAYOUT DIMENSIONS **/
   --max-width-container: 900px;

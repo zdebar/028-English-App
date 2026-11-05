@@ -3,9 +3,11 @@ import { useToastStore, type ToastType } from './use-toast-store';
 import type { JSX } from 'react';
 
 const typeStyles = {
-  success: 'bg-success-light',
-  error: 'bg-error-light',
-  info: 'bg-info-light',
+  success:
+    'bg-success-light hover:bg-success-hover-light dark:hover:bg-success-hover-dark focus-visible:bg-success-hover-light dark:focus-visible:bg-success-hover-dark',
+  error:
+    'bg-error-light hover:bg-error-hover-light dark:hover:bg-error-hover-dark focus-visible:bg-error-hover-light dark:focus-visible:bg-error-hover-dark',
+  info: 'bg-info-light hover:bg-info-hover-light dark:hover:bg-info-hover-dark focus-visible:bg-info-hover-light dark:focus-visible:bg-info-hover-dark',
 };
 
 type ToastProps = Readonly<{
@@ -28,7 +30,7 @@ export default function Toast({ message, type = 'info' }: ToastProps): JSX.Eleme
       type="button"
       aria-label={ARIA_TEXTS.dismissNotification}
       onClick={hideToast}
-      className={`z-modal text-dark absolute top-0 right-0 flex min-h-input w-fit max-w-full cursor-pointer items-center px-4 text-left hover:bg-button-hover hover:text-light focus-visible:bg-button-hover focus-visible:text-light focus-visible:outline-none ${typeStyles[type]}`}
+      className={`z-modal text-dark absolute top-0 right-0 flex min-h-input w-fit max-w-full cursor-pointer items-center px-4 text-left focus-visible:outline-none ${typeStyles[type]}`}
     >
       {message}
     </button>
