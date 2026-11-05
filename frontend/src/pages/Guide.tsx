@@ -1,5 +1,4 @@
 import type { JSX } from 'react';
-import { Screenshot } from '@/components/UI/Screenshot';
 
 /**
  * Renders the guide page.
@@ -23,15 +22,10 @@ export default function Guide(): JSX.Element {
       </section>
       <section>
         <h2>Odhalená kartička</h2>
-        <Screenshot
-          src={`${import.meta.env.BASE_URL}screenshots/revealed`}
-          alt="Ukázka kartičky po odhalení"
-        />
-        <h3>Opakovat, těžké, dobře, snadné</h3>
+        <h3>Opakovat, znám, snadné</h3>
         <p>
-          Vaše vlastní hodnocení obtížnosti položky. Opakovat je pokud si nedokáže vzpomenout. Těžké
-          pokud s obtížemi. Dobře je doporučené výchozí hodnocení. Aplikace dle tohoto hodnocení
-          naplánuje další opakování položky.
+          Po odhalení vyberte, jak jste si vedli. Opakovat sníží postup o jeden krok, Znám jej posune
+          o jeden krok a Snadné o čtyři kroky. Aplikace podle postupu naplánuje další opakování.
         </p>
       </section>
       <section>

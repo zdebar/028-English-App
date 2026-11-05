@@ -298,8 +298,7 @@ describe('UserItem', () => {
 
   it.each([
     ['repeat', 1],
-    ['hard', 2],
-    ['good', 3],
+    ['known', 3],
     ['easy', 6],
   ] as const)('applies the %s review rating progress delta', (rating, expectedProgress) => {
     const item = makeItem({ progress_cz_to_en: 2 });

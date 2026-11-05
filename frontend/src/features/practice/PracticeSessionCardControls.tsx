@@ -39,8 +39,6 @@ type PracticeControlsProps = Pick<
   | 'completeDisabled'
   | 'nextKnown'
   | 'nextRepeat'
-  | 'nextHard'
-  | 'nextGood'
   | 'nextEasy'
   | 'isReviewPractice'
   | 'plusHint'
@@ -70,8 +68,6 @@ export default function PracticeSessionCardControls({
     completeDisabled,
     nextKnown,
     nextRepeat,
-    nextHard,
-    nextGood,
     nextEasy,
     plusHint,
     isReviewPractice,
@@ -90,8 +86,6 @@ export default function PracticeSessionCardControls({
           completeDisabled={completeDisabled}
           nextKnown={nextKnown}
           nextRepeat={nextRepeat}
-          nextHard={nextHard}
-          nextGood={nextGood}
           nextEasy={nextEasy}
           isReviewPractice={isReviewPractice}
           plusHint={plusHint}
@@ -169,8 +163,6 @@ function PracticeControls({
   completeDisabled = false,
   nextKnown,
   nextRepeat,
-  nextHard,
-  nextGood,
   nextEasy,
   isReviewPractice = false,
   plusHint,
@@ -200,7 +192,7 @@ function PracticeControls({
   if (isReviewPractice) {
     return (
       <ReviewPracticeControls
-        {...{ nextRepeat, nextHard, nextGood, nextEasy, repeatDisabled, controlsLocked }}
+        {...{ nextRepeat, nextKnown, nextEasy, repeatDisabled, controlsLocked }}
       />
     );
   }
@@ -222,20 +214,18 @@ function PracticeControls({
 
 function ReviewPracticeControls({
   nextRepeat,
-  nextHard,
-  nextGood,
+  nextKnown,
   nextEasy,
   repeatDisabled,
   controlsLocked,
 }: Pick<
   PracticeControlsProps,
-  'nextRepeat' | 'nextHard' | 'nextGood' | 'nextEasy' | 'repeatDisabled' | 'controlsLocked'
+  'nextRepeat' | 'nextKnown' | 'nextEasy' | 'repeatDisabled' | 'controlsLocked'
 >) {
   return (
     <>
       <RepeatButton onClick={() => void nextRepeat()} disabled={repeatDisabled || controlsLocked} />
-      <ReviewRatingButton rating="hard" onClick={nextHard} disabled={controlsLocked} />
-      <ReviewRatingButton rating="good" onClick={nextGood} disabled={controlsLocked} />
+      <ReviewRatingButton rating="known" onClick={nextKnown} disabled={controlsLocked} />
       <ReviewRatingButton rating="easy" onClick={nextEasy} disabled={controlsLocked} />
     </>
   );

@@ -90,8 +90,7 @@ function PracticeCardBody({ deck, onDetailLoadError }: PracticeCardBodyProps) {
       handleReveal={deck.handleReveal}
       plusHint={deck.plusHint}
       nextRepeat={() => deck.nextItem('repeat')}
-      nextHard={() => deck.nextItem('hard')}
-      nextGood={() => deck.nextItem('good')}
+      nextKnown={() => deck.nextItem('known')}
       nextEasy={() => deck.nextItem('easy')}
       retryAction={deck.retryPractice}
       audioError={deck.audioError}

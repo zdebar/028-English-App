@@ -271,7 +271,7 @@ function getPracticeCardDisplayState(
     noteButtonDisabled: detailButtons.noteButtonDisabled,
     controlsLocked,
     showHintControl: !revealed,
-    practiceControlColumns: getPracticeControlColumns(!revealed, props.isReviewPractice),
+    practiceControlColumns: getPracticeControlColumns(!revealed),
     showTopBar: true,
     showRevealHelp: !revealed && !controlsLocked,
   };
@@ -349,11 +349,7 @@ function isAudioControlDisabled(
   return celebrationLocked || !showAudioControls;
 }
 
-function getPracticeControlColumns(
-  showHintControl: boolean,
-  isReviewPractice = false,
-): string {
-  if (!showHintControl && isReviewPractice) return 'grid-cols-4';
+function getPracticeControlColumns(showHintControl: boolean): string {
   if (!showHintControl) return 'grid-cols-3';
   return 'grid-cols-1';
 }

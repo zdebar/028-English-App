@@ -32,8 +32,6 @@ export type PracticeSessionCardProps = Readonly<{
   nextRepeat: () => void | Promise<void>;
   repeatDisabled?: boolean;
   nextKnown?: () => void | Promise<void>;
-  nextHard?: () => void | Promise<void>;
-  nextGood?: () => void | Promise<void>;
   nextEasy?: () => void | Promise<void>;
   isReviewPractice?: boolean;
   completeCurrent?: () => void | Promise<void>;

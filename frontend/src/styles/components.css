@@ -73,10 +73,6 @@
     max-width: var(--responsive-card-width);
   }
 
-  .screenshot-figure {
-    max-width: var(--max-width-screenshot);
-  }
-
   /** DASHBOARD PROGRESS BAR **/
   progress.bg-progress-bg {
     background-color: var(--color-progress-bg);
