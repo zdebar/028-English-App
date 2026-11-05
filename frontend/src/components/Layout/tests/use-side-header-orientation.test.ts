@@ -26,6 +26,24 @@ function addHeaderSide(): void {
   document.body.appendChild(headerSide);
 }
 
+function mockOrientationMeasurements(getButtonWidth: () => number = () => 52): void {
+  vi.spyOn(window, 'requestAnimationFrame').mockImplementation((callback) => {
+    callback(0);
+    return 1;
+  });
+  vi.spyOn(window, 'cancelAnimationFrame').mockImplementation(() => undefined);
+  vi.spyOn(globalThis, 'getComputedStyle').mockReturnValue({
+    columnGap: '8px',
+  } as CSSStyleDeclaration);
+  vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockImplementation(function (
+    this: HTMLElement,
+  ) {
+    if (this.style.width === 'var(--max-width-card)') return createRect(600);
+    if (this instanceof HTMLButtonElement) return createRect(getButtonWidth());
+    return createRect(0);
+  });
+}
+
 describe('resolveSideHeaderOrientation', () => {
   afterEach(() => {
     document.body.replaceChildren();
@@ -48,24 +66,9 @@ describe('resolveSideHeaderOrientation', () => {
 
   it('measures two 52px buttons and their 8px gap before switching', () => {
     addHeaderSide();
-    addHeaderSide();
-    vi.spyOn(window, 'requestAnimationFrame').mockImplementation((callback) => {
-      callback(0);
-      return 1;
-    });
-    vi.spyOn(window, 'cancelAnimationFrame').mockImplementation(() => undefined);
-    vi.spyOn(globalThis, 'getComputedStyle').mockReturnValue({
-      columnGap: '8px',
-    } as CSSStyleDeclaration);
-    vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockImplementation(function (
-      this: HTMLElement,
-    ) {
-      if (this.style.width === 'var(--max-width-card)') return createRect(600);
-      if (this instanceof HTMLButtonElement) return createRect(52);
-      return createRect(0);
-    });
+    mockOrientationMeasurements();
 
-    const { result } = renderHook(() => useSideHeaderOrientation(600));
+    const { result } = renderHook(() => useSideHeaderOrientation(823));
 
     expect(result.current).toBe('vertical');
   });
@@ -86,21 +89,7 @@ describe('resolveSideHeaderOrientation', () => {
         }
       },
     );
-    vi.spyOn(window, 'requestAnimationFrame').mockImplementation((callback) => {
-      callback(0);
-      return 1;
-    });
-    vi.spyOn(window, 'cancelAnimationFrame').mockImplementation(() => undefined);
-    vi.spyOn(globalThis, 'getComputedStyle').mockReturnValue({
-      columnGap: '8px',
-    } as CSSStyleDeclaration);
-    vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockImplementation(function (
-      this: HTMLElement,
-    ) {
-      if (this.style.width === 'var(--max-width-card)') return createRect(600);
-      if (this instanceof HTMLButtonElement) return createRect(buttonWidth);
-      return createRect(0);
-    });
+    mockOrientationMeasurements(() => buttonWidth);
 
     const { result } = renderHook(() => useSideHeaderOrientation(850));
 
