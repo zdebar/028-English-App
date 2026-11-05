@@ -11,6 +11,7 @@ import './styles/index.css';
 import { useAudioLoader } from './features/audio/use-audio-loader';
 import { useResponsiveLayout } from './components/Layout/use-responsive-layout';
 import { useSideHeaderOrientation } from './components/Layout/use-side-header-orientation';
+import { useViewportSize } from './components/Layout/use-viewport-size';
 import { useInAppRouteHistory } from '@/routing/in-app-route-history';
 import { useDataManagerLifecycle } from '@/database/state/use-data-manager-lifecycle';
 import { ROUTES } from '@/config/routes.config';
@@ -25,8 +26,9 @@ export default function App() {
   useAudioLoader(userId);
   useThemeLoader(userId, authLoading);
   usePeriodicSync(userId);
-  const { headerLayout, secondaryLayout } = useResponsiveLayout();
-  const sideHeaderOrientation = useSideHeaderOrientation();
+  const viewportSize = useViewportSize();
+  const { headerLayout, secondaryLayout } = useResponsiveLayout(viewportSize);
+  const sideHeaderOrientation = useSideHeaderOrientation(viewportSize.width);
   return (
     <div
       className="app-shell max-w-container relative mx-auto flex flex-col justify-start"

@@ -1,4 +1,5 @@
 import { useLayoutEffect, useState } from 'react';
+import type { ViewportSize } from './use-viewport-size';
 
 type ResponsiveLayout = Readonly<{
   headerLayout: 'side' | 'top';
@@ -39,24 +40,18 @@ export function resolveResponsiveLayout({
 
 // --- Hook lifecycle ---
 
-export function useResponsiveLayout(): ResponsiveLayout {
+export function useResponsiveLayout(viewportSize: ViewportSize): ResponsiveLayout {
   const [layout, setLayout] = useState<ResponsiveLayout>(DEFAULT_LAYOUT);
 
   useLayoutEffect(() => {
-    const updateLayout = () => {
-      const nextLayout = measureResponsiveLayout();
-      setLayout((currentLayout) => {
-        const layoutUnchanged =
-          currentLayout.headerLayout === nextLayout.headerLayout &&
-          currentLayout.secondaryLayout === nextLayout.secondaryLayout;
-        return layoutUnchanged ? currentLayout : nextLayout;
-      });
-    };
-
-    updateLayout();
-    window.addEventListener('resize', updateLayout);
-    return () => window.removeEventListener('resize', updateLayout);
-  }, []);
+    const nextLayout = measureResponsiveLayout(viewportSize);
+    setLayout((currentLayout) => {
+      const layoutUnchanged =
+        currentLayout.headerLayout === nextLayout.headerLayout &&
+        currentLayout.secondaryLayout === nextLayout.secondaryLayout;
+      return layoutUnchanged ? currentLayout : nextLayout;
+    });
+  }, [viewportSize.height, viewportSize.width]);
 
   return layout;
 }
@@ -68,7 +63,7 @@ function readCssLength(probe: HTMLDivElement, variableName: string): number {
   return probe.getBoundingClientRect().height;
 }
 
-function measureResponsiveLayout(): ResponsiveLayout {
+function measureResponsiveLayout(viewportSize: ViewportSize): ResponsiveLayout {
   const probe = document.createElement('div');
   probe.style.position = 'fixed';
   probe.style.visibility = 'hidden';
@@ -81,8 +76,8 @@ function measureResponsiveLayout(): ResponsiveLayout {
   probe.remove();
 
   return resolveResponsiveLayout({
-    viewportWidth: window.innerWidth,
-    viewportHeight: window.innerHeight,
+    viewportWidth: viewportSize.width,
+    viewportHeight: viewportSize.height,
     maxCardHeight,
     headerHeight,
     secondaryControlsHeight,
