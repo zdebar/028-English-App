@@ -8,7 +8,7 @@ Routes are **/practice**, **/practice/grammar**, and **/practice/vocabulary**. T
 
 Candidates must be active, initiated, not mastered in the chosen direction, enabled in that direction, and due. When a review package is first built, Czech-to-English is selected if it has due items; otherwise it can fall back to English-to-Czech. Items are ordered by schedule and curriculum position.
 
-The package includes review entries, fallback decks, availability, sound groups, and each entry's note and grammar context. When an answer is submitted, the local write completes before the queue advances. If it fails, the current item remains available to retry. Successful writes update the data manager.
+The package includes review entries, fallback decks, availability, sound groups, and each entry's note and grammar context. On a revealed review card, the choices are Repeat, Znám, and Snadné. Repeat decreases progress by one step, Znám increases it by one step, and Snadné increases it by four steps. When an answer is submitted, the local write completes before the queue advances. If it fails, the current item remains available to retry. Successful writes update the data manager.
 
 The current queue remains local to the active practice session. Updated package data does not reorder it; the new package is used by the next session. A still-due answered item may re-enter the queue according to the active queue rules.
 

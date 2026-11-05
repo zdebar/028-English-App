@@ -15,39 +15,37 @@ export function resolveSideHeaderOrientation(
 
 // --- Hook lifecycle ---
 
-export function useSideHeaderOrientation(): SideHeaderOrientation {
+export function useSideHeaderOrientation(viewportWidth: number): SideHeaderOrientation {
   const [orientation, setOrientation] = useState<SideHeaderOrientation>('horizontal');
 
   useLayoutEffect(() => {
-    const updateOrientation = () => setOrientation(measureOrientation());
+    const updateOrientation = () => setOrientation(measureOrientation(viewportWidth));
     const resizeObserver =
       typeof ResizeObserver === 'undefined' ? null : new ResizeObserver(updateOrientation);
 
     updateOrientation();
     const initialFrame = window.requestAnimationFrame(updateOrientation);
-    window.addEventListener('resize', updateOrientation);
     document.querySelectorAll<HTMLElement>('[data-header-side]').forEach((headerSide) => {
       resizeObserver?.observe(headerSide);
     });
 
     return () => {
       window.cancelAnimationFrame(initialFrame);
-      window.removeEventListener('resize', updateOrientation);
       resizeObserver?.disconnect();
     };
-  }, []);
+  }, [viewportWidth]);
 
   return orientation;
 }
 
 // --- DOM measurements ---
 
-function measureOrientation(): SideHeaderOrientation {
+function measureOrientation(viewportWidth: number): SideHeaderOrientation {
   const headerSides = document.querySelectorAll<HTMLElement>('[data-header-side]');
   const measuredWidths = Array.from(headerSides, measureHeaderSideHorizontalWidth);
   const sideHeaderWidth = Math.max(0, ...measuredWidths);
   const maxCardWidth = measureCssWidth('--max-width-card');
-  return resolveSideHeaderOrientation(window.innerWidth, maxCardWidth, sideHeaderWidth);
+  return resolveSideHeaderOrientation(viewportWidth, maxCardWidth, sideHeaderWidth);
 }
 
 function measureHeaderSideHorizontalWidth(headerSide: HTMLElement): number {

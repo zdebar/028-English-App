@@ -2,7 +2,7 @@ import type { GroupType } from './table.types';
 import type { NoteType } from './generic.types';
 import type { ReviewDirection } from './practice.types';
 
-export type PracticeOutcome = 'correct' | 'incorrect' | 'skip' | 'repeat' | 'hard' | 'good' | 'easy';
+export type PracticeOutcome = 'correct' | 'incorrect' | 'skip' | 'repeat' | 'known' | 'easy';
 
 export type CurriculumSortPath = readonly [
   levelSortOrder: number,

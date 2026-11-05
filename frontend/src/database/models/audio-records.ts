@@ -11,7 +11,7 @@ import {
   withSettledSummary,
   type SyncSummary,
 } from '@/features/logging/logging.utils';
-import { ZipExtractionError } from '@/types/error.types';
+import { AudioFileNotFoundError, ZipExtractionError } from '@/types/error.types';
 import type { AudioRecordLocal } from '@/types/audio.types';
 import { Entity } from 'dexie';
 import UserItem from './user-items';
@@ -40,7 +40,8 @@ export default class AudioRecord extends Entity<AppDB> implements AudioRecordLoc
    *
    * @param audioName Filename/path stored on a user item.
    * @returns The local audio record; missing records are fetched from the audio bucket and cached.
-   * @throws SupabaseError when the fallback storage download fails.
+   * @throws AudioFileNotFoundError when the optional audio object is absent from storage.
+   * @throws SupabaseError when the fallback storage download fails for another reason.
    */
   static async getByFilename(audioName: string): Promise<AudioRecordLocal> {
     const localRecord = await db.audio_records.get(audioName);
@@ -172,7 +173,8 @@ export default class AudioRecord extends Entity<AppDB> implements AudioRecordLoc
    *
    * @param audioName Filename/path in the configured audio bucket.
    * @returns Newly cached audio record.
-   * @throws SupabaseError when storage download fails.
+   * @throws AudioFileNotFoundError when the optional audio object is absent from storage.
+   * @throws SupabaseError when storage download fails for another reason.
    */
   private static async fetchAudioRecord(audioName: string): Promise<AudioRecordLocal> {
     const audioBlob = await this.downloadAudioWithRetry(audioName);
@@ -187,7 +189,8 @@ export default class AudioRecord extends Entity<AppDB> implements AudioRecordLoc
    *
    * @param audioName Filename/path in the configured audio bucket.
    * @returns Downloaded audio blob.
-   * @throws SupabaseError when all storage download attempts fail.
+   * @throws AudioFileNotFoundError when the optional audio object is absent from storage.
+   * @throws SupabaseError when all transient storage download attempts fail.
    */
   private static async downloadAudioWithRetry(
     audioName: string,
@@ -201,6 +204,9 @@ export default class AudioRecord extends Entity<AppDB> implements AudioRecordLoc
 
       return audioBlob;
     } catch (error) {
+      if (isMissingStorageObject(error)) {
+        throw new AudioFileNotFoundError(audioName, { cause: error });
+      }
       if (attempt >= AUDIO_DOWNLOAD_MAX_ATTEMPTS) {
         throw error;
       }
@@ -221,4 +227,23 @@ function isValidAudioRecord(audioRecord: AudioRecordLocal | undefined): audioRec
 
 function waitForAudioRetry(): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, AUDIO_DOWNLOAD_RETRY_DELAY_MS));
+}
+
+function isMissingStorageObject(error: unknown): boolean {
+  const visited = new Set<object>();
+  let current = error;
+
+  while (typeof current === 'object' && current !== null && !visited.has(current)) {
+    visited.add(current);
+    const storageError = current as Readonly<{
+      status?: unknown;
+      cause?: unknown;
+      originalError?: unknown;
+    }>;
+    // Supabase Storage may wrap missing-object responses as unknown errors with status 400 or 404.
+    if (storageError.status === 400 || storageError.status === 404) return true;
+    current = storageError.cause ?? storageError.originalError;
+  }
+
+  return false;
 }

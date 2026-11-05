@@ -50,8 +50,8 @@ export default function Home(): JSX.Element {
   return (
     <>
       {userId ? (
-        <div className="card-width relative flex h-full w-full grow flex-col justify-start gap-4">
-          <div className="landscape:hidden">
+        <div className="card-width relative flex h-full w-full grow flex-col justify-start gap-4 landscape:pt-4">
+          <div>
             <HomeActionLinks />
             <p className="text-error-light dark:text-error-dark px-4 text-center text-sm">
               {TEXTS.testModeWarning}

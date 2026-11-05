@@ -1,4 +1,5 @@
 const BUILD_HASH = '__APP_BUILD_HASH__';
+const LOG_ERRORS_IN_CONSOLE = true;
 const SCOPE_URL = new URL(globalThis.registration.scope);
 const CACHE_PREFIX = `english-app:${encodeURIComponent(SCOPE_URL.href)}:`;
 const PRECACHE_CACHE = `${CACHE_PREFIX}precache:${BUILD_HASH}`;
@@ -44,7 +45,9 @@ async function activate() {
   );
   const cleanupResults = await Promise.allSettled(obsolete.map((name) => caches.delete(name)));
   cleanupResults.forEach((result) => {
-    if (result.status === 'rejected') console.warn('Failed to remove obsolete cache:', result.reason);
+    if (LOG_ERRORS_IN_CONSOLE && result.status === 'rejected') {
+      console.warn('Failed to remove obsolete cache:', result.reason);
+    }
   });
 
   await globalThis.clients.claim();
@@ -60,7 +63,9 @@ async function activate() {
   try {
     await precache.delete(UPDATE_MARKER_URL);
   } catch (error) {
-    console.warn('Failed to remove service worker install marker:', error);
+    if (LOG_ERRORS_IN_CONSOLE) {
+      console.warn('Failed to remove service worker install marker:', error);
+    }
   }
 }
 
@@ -80,7 +85,9 @@ async function storeResponse(cacheName, key, response) {
     const cache = await caches.open(cacheName);
     await cache.put(key, response);
   } catch (error) {
-    console.warn('Failed to cache resource:', error);
+    if (LOG_ERRORS_IN_CONSOLE) {
+      console.warn('Failed to cache resource:', error);
+    }
   }
 }
 

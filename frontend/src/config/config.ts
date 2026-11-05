@@ -34,8 +34,7 @@ const config = {
     ],
     ratingProgressDelta: {
       repeat: -1,
-      hard: 0,
-      good: 1,
+      known: 1,
       easy: 4,
     },
     randomness: 0.2, // Randomness of SRS algorithm

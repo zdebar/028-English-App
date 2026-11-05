@@ -152,9 +152,8 @@ function applyReviewProgress(
 
 function getReviewProgressDelta(outcome: PracticeOutcome): number {
   if (outcome === 'repeat' || outcome === 'incorrect') return config.srs.ratingProgressDelta.repeat;
-  if (outcome === 'hard') return config.srs.ratingProgressDelta.hard;
   if (outcome === 'easy') return config.srs.ratingProgressDelta.easy;
-  return config.srs.ratingProgressDelta.good;
+  return config.srs.ratingProgressDelta.known;
 }
 
 function getStartedAt(item: UserItemLocal, dateTime: string): string {

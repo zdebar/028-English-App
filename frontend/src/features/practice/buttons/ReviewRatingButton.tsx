@@ -1,10 +1,9 @@
 import ForwardIcon from '@/components/UI/icons/ForwardIcon';
 import ChevronRightIcon from '@/components/UI/icons/ChevronRightIcon';
-import TripleChevronIcon from '@/components/UI/icons/TripleChevronIcon';
 import { TEXTS } from '@/locales/cs';
 import ControlButton from './ControlButton';
 
-type ReviewRating = 'hard' | 'good' | 'easy';
+type ReviewRating = 'known' | 'easy';
 
 type ReviewRatingButtonProps = Readonly<{
   rating: ReviewRating;
@@ -13,26 +12,24 @@ type ReviewRatingButtonProps = Readonly<{
 }>;
 
 const RATING_LABELS = {
-  hard: TEXTS.hard,
-  good: TEXTS.good,
+  known: TEXTS.known,
   easy: TEXTS.easy,
+} as const;
+
+const RATING_ICONS = {
+  known: <ChevronRightIcon />,
+  easy: <ForwardIcon />,
 } as const;
 
 export default function ReviewRatingButton({ rating, onClick, disabled }: ReviewRatingButtonProps) {
   return (
     <ControlButton
       data-testid={`${rating}-btn`}
-      icon={getRatingIcon(rating)}
+      icon={RATING_ICONS[rating]}
       label={RATING_LABELS[rating]}
       className="pos-help-top-right"
       onClick={() => void onClick?.()}
       disabled={disabled}
     />
   );
-}
-
-function getRatingIcon(rating: ReviewRating) {
-  if (rating === 'good') return <ForwardIcon />;
-  if (rating === 'hard') return <ChevronRightIcon />;
-  return <TripleChevronIcon />;
 }

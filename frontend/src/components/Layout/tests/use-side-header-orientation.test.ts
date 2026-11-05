@@ -1,4 +1,4 @@
-import { renderHook } from '@testing-library/react';
+import { act, renderHook } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import {
   resolveSideHeaderOrientation,
@@ -26,6 +26,24 @@ function addHeaderSide(): void {
   document.body.appendChild(headerSide);
 }
 
+function mockOrientationMeasurements(getButtonWidth: () => number = () => 52): void {
+  vi.spyOn(window, 'requestAnimationFrame').mockImplementation((callback) => {
+    callback(0);
+    return 1;
+  });
+  vi.spyOn(window, 'cancelAnimationFrame').mockImplementation(() => undefined);
+  vi.spyOn(globalThis, 'getComputedStyle').mockReturnValue({
+    columnGap: '8px',
+  } as CSSStyleDeclaration);
+  vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockImplementation(function (
+    this: HTMLElement,
+  ) {
+    if (this.style.width === 'var(--max-width-card)') return createRect(600);
+    if (this instanceof HTMLButtonElement) return createRect(getButtonWidth());
+    return createRect(0);
+  });
+}
+
 describe('resolveSideHeaderOrientation', () => {
   afterEach(() => {
     document.body.replaceChildren();
@@ -48,25 +66,37 @@ describe('resolveSideHeaderOrientation', () => {
 
   it('measures two 52px buttons and their 8px gap before switching', () => {
     addHeaderSide();
-    addHeaderSide();
-    vi.stubGlobal('innerWidth', 600);
-    vi.spyOn(window, 'requestAnimationFrame').mockImplementation((callback) => {
-      callback(0);
-      return 1;
-    });
-    vi.spyOn(window, 'cancelAnimationFrame').mockImplementation(() => undefined);
-    vi.spyOn(globalThis, 'getComputedStyle').mockReturnValue({
-      columnGap: '8px',
-    } as CSSStyleDeclaration);
-    vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockImplementation(function (
-      this: HTMLElement,
-    ) {
-      if (this.style.width === 'var(--max-width-card)') return createRect(600);
-      if (this instanceof HTMLButtonElement) return createRect(52);
-      return createRect(0);
-    });
+    mockOrientationMeasurements();
 
-    const { result } = renderHook(() => useSideHeaderOrientation());
+    const { result } = renderHook(() => useSideHeaderOrientation(823));
+
+    expect(result.current).toBe('vertical');
+  });
+
+  it('recalculates when ResizeObserver reports a header width change', () => {
+    addHeaderSide();
+    let buttonWidth = 52;
+    let resizeObserverCallback: ResizeObserverCallback | undefined;
+    vi.stubGlobal(
+      'ResizeObserver',
+      class {
+        observe = vi.fn();
+        unobserve = vi.fn();
+        disconnect = vi.fn();
+
+        constructor(callback: ResizeObserverCallback) {
+          resizeObserverCallback = callback;
+        }
+      },
+    );
+    mockOrientationMeasurements(() => buttonWidth);
+
+    const { result } = renderHook(() => useSideHeaderOrientation(850));
+
+    expect(result.current).toBe('horizontal');
+
+    buttonWidth = 61;
+    act(() => resizeObserverCallback?.([], {} as ResizeObserver));
 
     expect(result.current).toBe('vertical');
   });
