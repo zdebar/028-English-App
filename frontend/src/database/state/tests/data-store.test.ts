@@ -55,15 +55,15 @@ vi.mock('@/database/models/db', () => {
 
 import {
   applyRemoteDataChanges,
-  dataManagerStore,
   ensureDataPackage,
+  getDataManagerState,
   initializeDataManager,
   mergeAppDataChanges,
   publishDataChanges,
   resetDataManager,
+  subscribeToDataManager,
   useDataPackage,
 } from '../data-store';
-import { EMPTY_APP_DATA, EMPTY_REVIEW_ARRAYS } from '../data-types';
 
 describe('central data manager', () => {
   beforeEach(() => {
@@ -90,7 +90,7 @@ describe('central data manager', () => {
 
     await initializeDataManager('u1');
 
-    expect(dataManagerStore.getState()).toMatchObject({
+    expect(getDataManagerState()).toMatchObject({
       userId: 'u1',
       status: 'ready',
       levels: [{ id: 1 }],
@@ -112,11 +112,11 @@ describe('central data manager', () => {
     expect(result.current.status).toBe('ready');
     expect(result.current.data?.notes).toEqual([]);
 
-    const cachedEntry = dataManagerStore.getState().dataPackages.vocabulary;
+    const cachedEntry = getDataManagerState().dataPackages.vocabulary;
     act(() => {
       publishDataChanges('u1', { levels: { upserted: [{ id: 1 }] as never[] } });
     });
-    expect(dataManagerStore.getState().dataPackages.vocabulary).toBe(cachedEntry);
+    expect(getDataManagerState().dataPackages.vocabulary).toBe(cachedEntry);
 
     await act(async () => {
       publishDataChanges('u1', {
@@ -144,20 +144,20 @@ describe('central data manager', () => {
       },
     });
 
-    expect(dataManagerStore.getState().dataPackages['topics-overview']?.data).not.toBe(initialTopics);
-    expect(dataManagerStore.getState().dataPackages['sounds-overview']?.data).not.toBe(initialSounds);
-    expect(dataManagerStore.getState().dataPackages['pronunciation-overview']?.data).not.toBe(initialPronunciation);
+    expect(getDataManagerState().dataPackages['topics-overview']?.data).not.toBe(initialTopics);
+    expect(getDataManagerState().dataPackages['sounds-overview']?.data).not.toBe(initialSounds);
+    expect(getDataManagerState().dataPackages['pronunciation-overview']?.data).not.toBe(initialPronunciation);
   });
 
   it('clears cached packages when the active account changes', async () => {
     await initializeDataManager('u1');
     await ensureDataPackage('u1', { kind: 'overview-menu' });
-    expect(Object.keys(dataManagerStore.getState().dataPackages)).toEqual(['overview-menu']);
+    expect(Object.keys(getDataManagerState().dataPackages)).toEqual(['overview-menu']);
 
     await initializeDataManager('u2');
 
-    expect(dataManagerStore.getState().userId).toBe('u2');
-    expect(dataManagerStore.getState().dataPackages).toEqual({});
+    expect(getDataManagerState().userId).toBe('u2');
+    expect(getDataManagerState().dataPackages).toEqual({});
   });
 
   it('ignores a delayed bootstrap after the active account changes', async () => {
@@ -174,8 +174,8 @@ describe('central data manager', () => {
     oldItems.resolve([{ item_id: 1, user_id: 'u1' }]);
     await oldLoad;
 
-    expect(dataManagerStore.getState().userId).toBe('u2');
-    expect(dataManagerStore.getState().user_items).toEqual([{ item_id: 2, user_id: 'u2' }]);
+    expect(getDataManagerState().userId).toBe('u2');
+    expect(getDataManagerState().user_items).toEqual([{ item_id: 2, user_id: 'u2' }]);
   });
 
   it('applies committed upserts and deletions as one store update', async () => {
@@ -183,7 +183,7 @@ describe('central data manager', () => {
     mocks.rows.user_items.push({ item_id: 1, user_id: 'u1' }, { item_id: 2, user_id: 'u1' });
     await initializeDataManager('u1');
     const listener = vi.fn();
-    const unsubscribe = dataManagerStore.subscribe(listener);
+    const unsubscribe = subscribeToDataManager(listener);
 
     publishDataChanges('u1', {
       levels: { upserted: [{ id: 1, name: 'After' }, { id: 2, name: 'New' }] as never[] },
@@ -191,8 +191,8 @@ describe('central data manager', () => {
     });
 
     expect(listener).toHaveBeenCalledOnce();
-    expect(dataManagerStore.getState().levels).toEqual([{ id: 1, name: 'After' }, { id: 2, name: 'New' }]);
-    expect(dataManagerStore.getState().user_items.map((item) => item.item_id)).toEqual([2, 3]);
+    expect(getDataManagerState().levels).toEqual([{ id: 1, name: 'After' }, { id: 2, name: 'New' }]);
+    expect(getDataManagerState().user_items.map((item) => item.item_id)).toEqual([2, 3]);
     unsubscribe();
   });
 
@@ -221,9 +221,9 @@ describe('central data manager', () => {
       user_items: { upserted: [{ item_id: 1, user_id: 'u2' }, { item_id: 2, user_id: 'u1' }] as never[] },
     });
 
-    expect(dataManagerStore.getState().levels).toEqual([{ id: 1 }]);
-    expect(dataManagerStore.getState().user_items).toEqual([{ item_id: 2, user_id: 'u1' }]);
-    expect(dataManagerStore.getState().user_lessons).toEqual([]);
+    expect(getDataManagerState().levels).toEqual([{ id: 1 }]);
+    expect(getDataManagerState().user_items).toEqual([{ item_id: 2, user_id: 'u1' }]);
+    expect(getDataManagerState().user_lessons).toEqual([]);
   });
 
   it('broadcasts deltas and applies matching cross-tab messages', async () => {
@@ -244,15 +244,16 @@ describe('central data manager', () => {
         notes: { upserted: [{ id: 9, name: 'Cross-tab note', note: 'Shared', sort_order: 1, deleted_at: null }] as never[] },
       },
     });
-    expect(dataManagerStore.getState().levels).toEqual([{ id: 2 }, { id: 3 }]);
-    expect((dataManagerStore.getState().dataPackages.vocabulary?.data as { notes: unknown[] }).notes)
+    expect(getDataManagerState().levels).toEqual([{ id: 2 }, { id: 3 }]);
+    expect((getDataManagerState().dataPackages.vocabulary?.data as { notes: unknown[] }).notes)
       .toMatchObject([{ name: 'Cross-tab note' }]);
   });
 
   it('keeps a committed write alive through unmount and publishes it after commit', async () => {
     const original = createUserItem();
     const updated = { ...original, progress_cz_to_en: 3, updated_at: '2026-02-01T00:00:00.000Z' };
-    setReadyUserItems([original]);
+    mocks.rows.user_items.push(original);
+    await initializeDataManager('u1');
     const commit = deferred<number>();
     mocks.userItemUpdate.mockReturnValueOnce(commit.promise);
     const { result, unmount } = renderHook(() => usePracticeAvailabilityBoundary('u1'));
@@ -265,21 +266,21 @@ describe('central data manager', () => {
     commit.resolve(1);
     await write;
 
-    expect(dataManagerStore.getState().user_items[0]?.progress_cz_to_en).toBe(3);
+    expect(getDataManagerState().user_items[0]?.progress_cz_to_en).toBe(3);
   });
 
   it('does not publish a write whose IndexedDB transaction fails', async () => {
     const original = createUserItem();
-    setReadyUserItems([original]);
+    mocks.rows.user_items.push(original);
     await ensureDataPackage('u1', { kind: 'vocabulary' });
-    const cachedPackage = dataManagerStore.getState().dataPackages.vocabulary;
+    const cachedPackage = getDataManagerState().dataPackages.vocabulary;
     mocks.userItemUpdate.mockRejectedValueOnce(new Error('IndexedDB failed'));
 
     await expect(UserItem.saveInitialTrainingProgress({ ...original, progress_cz_to_en: 4 }))
       .rejects.toThrow('IndexedDB failed');
 
-    expect(dataManagerStore.getState().user_items).toEqual([original]);
-    expect(dataManagerStore.getState().dataPackages.vocabulary).toBe(cachedPackage);
+    expect(getDataManagerState().user_items).toEqual([original]);
+    expect(getDataManagerState().dataPackages.vocabulary).toBe(cachedPackage);
   });
 });
 
@@ -309,21 +310,6 @@ function deferred<T>() {
   let resolve!: (value: T) => void;
   const promise = new Promise<T>((done) => { resolve = done; });
   return { promise, resolve };
-}
-
-function setReadyUserItems(userItems: readonly UserItemLocal[]): void {
-  dataManagerStore.setState({
-    ...EMPTY_APP_DATA,
-    userId: 'u1',
-    status: 'ready',
-    error: null,
-    nowIso: '2026-02-01T00:00:00.000Z',
-    localDate: '2026-02-01',
-    dataPackages: {},
-    user_items: userItems,
-    reviewArrays: EMPTY_REVIEW_ARRAYS,
-    nextInitialLesson: null,
-  });
 }
 
 function createUserItem(): UserItemLocal {

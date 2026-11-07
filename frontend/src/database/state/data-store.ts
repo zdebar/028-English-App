@@ -48,7 +48,7 @@ let currentLoad: { userId: string; promise: Promise<void> } | null = null;
 let channel: BroadcastChannel | null = null;
 let clockTimer: ReturnType<typeof setTimeout> | null = null;
 
-export const dataManagerStore = createStore<DataManagerState>(() => EMPTY_STATE);
+const dataManagerStore = createStore<DataManagerState>(() => EMPTY_STATE);
 
 // -- Account lifecycle and local snapshot --
 /** Loads the active user's local dataset once and starts cross-tab change delivery. */
@@ -223,6 +223,18 @@ export function useDataPackage<Request extends DataPackageRequest>(
       };
     }),
   );
+}
+
+/** Reads the current data-manager snapshot without exposing the underlying store. */
+export function getDataManagerState(): DataManagerState {
+  return dataManagerStore.getState();
+}
+
+/** Subscribes to state changes without exposing the underlying store API. */
+export function subscribeToDataManager(
+  listener: (state: DataManagerState) => void,
+): () => void {
+  return dataManagerStore.subscribe((state) => listener(state));
 }
 
 // -- Committed changes and cross-tab delivery --
