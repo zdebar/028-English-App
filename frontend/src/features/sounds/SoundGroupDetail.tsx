@@ -12,7 +12,7 @@ import { TEXTS } from '@/locales/cs';
 import { useEffect, useMemo } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useRouteClose } from '@/routing/use-route-close';
-import { useDataPackage, type DataPackageResult } from '@/database/state/data-store';
+import { useCurrentUserDataPackage } from '@/database/state/use-current-user-data-package';
 import type { SoundGroupDetail } from '@/database/state/data-types';
 
 export default function SoundGroupDetail() {
@@ -22,8 +22,11 @@ export default function SoundGroupDetail() {
   const { groupId: groupIdText } = useParams<{ groupId: string }>();
   const groupId = parseGroupId(groupIdText);
   const closeRoute = useRouteClose(ROUTES.sounds);
-  const packageState = useDataPackage({ kind: 'sound-detail', groupId: groupId ?? 0 });
-  const { data, loading, error } = getSoundDetailView(userId, packageState);
+  const { data: packageData, loading, error } = useCurrentUserDataPackage(userId, {
+    kind: 'sound-detail',
+    groupId: groupId ?? 0,
+  });
+  const data = packageData ?? null;
   const audios = useMemo(() => getItemAudioSources(data?.items ?? []), [data]);
   const { playAudio, isAudioReady, loading: audioLoading } = useAudioManager(audios);
 
@@ -78,19 +81,7 @@ function shouldRedirectForMissingData(
   error: Error | null,
   userId: string | null,
   groupId: number | null,
-  data: ReturnType<typeof useDataPackage<{ kind: 'sound-detail'; groupId: number }>>['data'],
+  data: SoundGroupDetail | null,
 ): boolean {
   return !loading && !error && Boolean(userId) && Boolean(groupId) && data === null;
-}
-
-function getSoundDetailView(
-  userId: string | null,
-  packageState: DataPackageResult<SoundGroupDetail | null>,
-): Readonly<{ data: SoundGroupDetail | null; loading: boolean; error: Error | null }> {
-  const isCurrentUser = packageState.userId === userId;
-  return {
-    data: isCurrentUser ? packageState.data ?? null : null,
-    loading: Boolean(userId) && (!isCurrentUser || packageState.status === 'loading'),
-    error: isCurrentUser && packageState.status === 'error' ? packageState.error : null,
-  };
 }

@@ -1,7 +1,10 @@
 import { usePracticeAvailabilityBoundary } from './use-practice-availability-boundary';
 import UserItem from '@/database/models/user-items';
 import UserLesson from '@/database/models/user-lessons';
-import { useDataPackage, type DataPackageResult } from '@/database/state/data-store';
+import {
+  useCurrentUserDataPackage,
+  type CurrentUserDataPackageResult,
+} from '@/database/state/use-current-user-data-package';
 import type { GrammarDetail } from '@/features/grammar/GrammarDetailCard';
 import { reportError } from '@/features/logging/logging-handler';
 import { toError } from '@/utils/error.utils';
@@ -70,7 +73,7 @@ type InitialTrainingLoadSetters = Readonly<{
 
 type InitialTrainingSyncOptions = Readonly<{
   userId: string | null;
-  packageState: DataPackageResult<InitialTrainingData>;
+  packageState: CurrentUserDataPackageResult<InitialTrainingData>;
   initialData: InitialTrainingData | undefined;
   isCurrentRequest: () => boolean;
   startedForUserRef: { current: string | null };
@@ -100,8 +103,8 @@ export function useInitialTrainingDeck(
   onComplete?: PracticeCompletionHandler,
 ) {
   const { trackPracticeWrite, finishPractice } = usePracticeAvailabilityBoundary(userId);
-  const packageState = useDataPackage({ kind: 'initial-training' });
-  const initialData = getReadyInitialTrainingData(packageState, userId);
+  const packageState = useCurrentUserDataPackage(userId, { kind: 'initial-training' });
+  const initialData = packageState.data;
   const initialState = getInitialTrainingState(initialData);
   const [lesson, setLesson] = useState<LessonType | null>(initialState.lesson);
   const [items, setItems] = useState<UserItemLocal[]>(initialState.items);
@@ -164,7 +167,7 @@ export function useInitialTrainingDeck(
       setLoading,
       setError,
     },
-  }), [packageState.error, packageState.status, packageState.userId, trackPracticeWrite, userId]);
+  }), [packageState.data, packageState.error, packageState.loading, packageState.ready, trackPracticeWrite, userId]);
 
   const itemById = useMemo(
     () => new Map(activeItems.map((item) => [item.item_id, item])),
@@ -296,16 +299,16 @@ function synchronizeInitialTrainingPackage({
     setters.setLoading(false);
     return;
   }
-  if (packageState.userId !== userId || packageState.status === 'loading') {
+  if (packageState.loading) {
     setters.setLoading(true);
     return;
   }
-  if (packageState.status === 'error') {
+  if (packageState.error) {
     setters.setError(packageState.error);
     setters.setLoading(false);
     return;
   }
-  if (!initialData) {
+  if (!packageState.ready || !initialData) {
     setters.setLoading(false);
     return;
   }
@@ -313,14 +316,6 @@ function synchronizeInitialTrainingPackage({
 
   startedForUserRef.current = userId;
   startInitialTrainingLoad(userId, initialData, setters, trackPracticeWrite, isCurrentRequest);
-}
-
-function getReadyInitialTrainingData(
-  packageState: DataPackageResult<InitialTrainingData>,
-  userId: string | null,
-): InitialTrainingData | undefined {
-  if (packageState.userId !== userId || packageState.status !== 'ready') return undefined;
-  return packageState.data;
 }
 
 function completeIfReady(isComplete: boolean, completePractice: () => Promise<void>): void {

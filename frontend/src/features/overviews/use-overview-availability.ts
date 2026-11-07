@@ -1,4 +1,4 @@
-import { useDataPackage } from '@/database/state/data-store';
+import { useCurrentUserDataPackage } from '@/database/state/use-current-user-data-package';
 
 export type OverviewAvailability = Readonly<{
   hasData: boolean;
@@ -34,9 +34,9 @@ const INITIAL_AVAILABILITY: OverviewAvailabilityState = {
 
 /** Selects every overview's availability from the central IndexedDB mirror. */
 export function useOverviewAvailability(userId: string | null): OverviewAvailabilityState {
-  const result = useDataPackage({ kind: 'overview-menu' });
+  const result = useCurrentUserDataPackage(userId, { kind: 'overview-menu' });
   if (!userId) return INITIAL_AVAILABILITY;
-  if (result.userId !== userId || result.status === 'loading') {
+  if (result.loading) {
     return {
       grammar: LOADING_AVAILABILITY,
       topics: LOADING_AVAILABILITY,
@@ -44,7 +44,7 @@ export function useOverviewAvailability(userId: string | null): OverviewAvailabi
       sounds: LOADING_AVAILABILITY,
     };
   }
-  if (result.status === 'error') {
+  if (result.error) {
     return {
       grammar: { ...EMPTY_AVAILABILITY, error: result.error },
       topics: { ...EMPTY_AVAILABILITY, error: result.error },

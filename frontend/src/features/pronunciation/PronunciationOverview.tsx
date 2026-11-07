@@ -8,7 +8,7 @@ import { useRouteClose } from '@/routing/use-route-close';
 import { useQueryErrorToast } from '@/features/logging/use-query-error-toast';
 import { useAuthStore } from '@/features/auth/use-auth-store';
 import type { SoundClass } from '@/types/table.types';
-import { useDataPackage } from '@/database/state/data-store';
+import { useCurrentUserDataPackage } from '@/database/state/use-current-user-data-package';
 
 type ContrastClassPresentation = Readonly<{ key: SoundClass; title: string }>;
 
@@ -22,12 +22,12 @@ const CATEGORY_HEADING_CLASS_NAME =
 
 export default function PronunciationOverview() {
   const userId = useAuthStore((state) => state.userId);
-  const packageState = useDataPackage({ kind: 'pronunciation-overview' });
+  const { data: packageData, loading, error } = useCurrentUserDataPackage(
+    userId,
+    { kind: 'pronunciation-overview' },
+  );
   const closeRoute = useRouteClose(ROUTES.home);
-  const hasUserPackage = packageState.userId === userId;
-  const data = hasUserPackage ? packageState.data ?? [] : [];
-  const loading = Boolean(userId) && (!hasUserPackage || packageState.status === 'loading');
-  const error = hasUserPackage && packageState.status === 'error' ? packageState.error : null;
+  const data = packageData ?? [];
   const hasData = data.length > 0;
 
   useQueryErrorToast(error, 'Failed to fetch pronunciation overview');

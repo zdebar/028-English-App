@@ -2,7 +2,7 @@ import Notification from '@/components/UI/Notification';
 import HelpText from '@/features/help/HelpText';
 import { ARIA_TEXTS, TEXTS } from '@/locales/cs';
 import { useAuthStore } from '@/features/auth/use-auth-store';
-import { useDataPackage } from '@/database/state/data-store';
+import { useCurrentUserDataPackage } from '@/database/state/use-current-user-data-package';
 import { aggregateLevels } from '@/database/models/levels';
 
 type DashboardProps = Readonly<{
@@ -49,12 +49,11 @@ export default function Dashboard({ className = '' }: DashboardProps) {
 }
 
 function useDashboardData(userId: string | null) {
-  const homePackage = useDataPackage({ kind: 'home' });
-  const isCurrentUser = homePackage.userId === userId;
+  const { data, loading, error } = useCurrentUserDataPackage(userId, { kind: 'home' });
   return {
-    levels: isCurrentUser ? homePackage.data?.levels ?? [] : [],
-    levelsLoading: Boolean(userId) && (!isCurrentUser || homePackage.status === 'loading'),
-    levelsError: isCurrentUser && homePackage.status === 'error' ? homePackage.error : null,
+    levels: data?.levels ?? [],
+    levelsLoading: loading,
+    levelsError: error,
   };
 }
 
