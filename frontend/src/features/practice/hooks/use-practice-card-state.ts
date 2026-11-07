@@ -32,7 +32,7 @@ export function usePracticeCardState({
 }: UsePracticeCardStateOptions) {
   const isEnToCz = currentItem?.review_direction === 'en_to_cz';
   const attemptedAudioItem = useRef<UserItemLocal | null>(null);
-  const { englishHinted, resetHint, plusHint } = useHint(
+  const { englishHinted, czechHinted, resetHint, plusHint } = useHint(
     currentItem?.czech,
     currentItem?.english,
   );
@@ -64,9 +64,9 @@ export function usePracticeCardState({
     stopAudio,
   });
 
-  const audioOnlyPhase = isAudioOnlyPhase(currentItem, isEnToCz, revealed, audioError);
-  const czech = getPracticeCzech(currentItem, isEnToCz, revealed);
-  const english = getPracticeEnglish(currentItem, isEnToCz, audioOnlyPhase, revealed, englishHinted);
+  const czech = getPracticeCzech(currentItem, isEnToCz, revealed, czechHinted);
+  const english = getPracticeEnglish(currentItem, isEnToCz, revealed, englishHinted);
+  const czechHintVisible = isEnToCz && !revealed && czechHinted !== NBSP;
 
   const resetQuestionState = useCallback(() => {
     setRevealed(false);
@@ -88,12 +88,13 @@ export function usePracticeCardState({
     audioError,
     audioLoading,
     czech,
+    czechHintVisible,
     english,
     handleReveal,
     isPlaying,
     playAudio: playAudioInternal,
     plusHint,
-    pronunciation: getPracticePronunciation(currentItem, isEnToCz, audioOnlyPhase, revealed),
+    pronunciation: getPronunciationText(currentItem, revealed),
     resetHint,
     resetQuestionState,
   };
@@ -102,24 +103,11 @@ export function usePracticeCardState({
 function getPracticeEnglish(
   item: UserItemLocal | null,
   isEnToCz: boolean,
-  audioOnlyPhase: boolean,
   revealed: boolean,
   englishHinted: string,
 ): string | undefined {
   if (!isEnToCz) return getEnglishText(item, revealed, englishHinted);
-  if (audioOnlyPhase) return undefined;
-  return item?.english;
-}
-
-function getPracticePronunciation(
-  item: UserItemLocal | null,
-  isEnToCz: boolean,
-  audioOnlyPhase: boolean,
-  revealed: boolean,
-): string {
-  if (!isEnToCz) return getPronunciationText(item, revealed);
-  if (audioOnlyPhase) return NBSP;
-  return item?.pronunciation || NBSP;
+  return revealed ? item?.english : englishHinted;
 }
 
 function isPracticeAudioDisabled(
@@ -151,18 +139,14 @@ function getPronunciationText(currentItem: UserItemLocal | null, revealed: boole
   return currentItem?.pronunciation || NBSP;
 }
 
-function getPracticeCzech(item: UserItemLocal | null, isEnToCz: boolean, revealed: boolean): string | undefined {
-  if (isEnToCz && !revealed) return undefined;
-  return getCzechText(item);
-}
-
-function isAudioOnlyPhase(
+function getPracticeCzech(
   item: UserItemLocal | null,
   isEnToCz: boolean,
   revealed: boolean,
-  audioError: boolean,
-): boolean {
-  return isEnToCz && !revealed && Boolean(item?.audio) && !audioError;
+  czechHinted: string,
+): string | undefined {
+  if (isEnToCz && !revealed) return czechHinted;
+  return getCzechText(item);
 }
 
 function stopAudioOnCompletion(isCompletion: boolean, stopAudio: () => void): void {

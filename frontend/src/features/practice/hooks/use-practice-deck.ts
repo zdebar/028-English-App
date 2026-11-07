@@ -281,6 +281,7 @@ export function usePracticeDeck(
     revealed,
     setRevealed,
     czech: cardState.czech,
+    czechHintVisible: cardState.czechHintVisible,
     english: cardState.english,
     pronunciation: getReviewPronunciation(currentItem, revealed),
     audio: getReviewAudio(currentItem),

@@ -104,6 +104,7 @@ function PracticeCardFace({
           czech={czech}
           czechDescription={props.czechDescription}
           czechHidden={props.czechHidden}
+          czechHintVisible={props.czechHintVisible}
           english={english}
           pronunciation={pronunciation}
           isContentLoading={props.isContentLoading ?? false}
@@ -139,6 +140,7 @@ function PracticeMainContent({
   czech,
   czechDescription,
   czechHidden,
+  czechHintVisible,
   english,
   pronunciation,
   isContentLoading,
@@ -146,6 +148,7 @@ function PracticeMainContent({
   czech: string | undefined;
   czechDescription: string | null | undefined;
   czechHidden: boolean;
+  czechHintVisible: boolean;
   english: string | undefined;
   pronunciation: string | undefined;
   isContentLoading: boolean;
@@ -175,7 +178,10 @@ function PracticeMainContent({
 
   return (
     <div id="item" className="flex flex-col justify-center gap-1">
-      <p lang="cs" className={`text-center font-bold ${czechHidden ? 'invisible' : ''}`}>
+      <p
+        lang="cs"
+        className={`text-center font-bold ${czechHidden && !czechHintVisible ? 'invisible' : ''}`}
+      >
         {czech}
       </p>
       {czechDescription && (
