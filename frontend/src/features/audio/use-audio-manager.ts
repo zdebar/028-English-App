@@ -10,6 +10,11 @@ type ManagedAudio = {
   onEnded: () => void;
 };
 type AudioLoadPromise = Promise<boolean>;
+type PlaybackStateSetters = Readonly<{
+  setIsPlaying: (isPlaying: boolean) => void;
+  setFailedFilenames: (update: (previous: Set<string>) => Set<string>) => void;
+  setAudioError: (audioError: boolean) => void;
+}>;
 
 /**
  * Hook to manage preloading and playback of audio files stored in the local
@@ -154,10 +159,11 @@ export function useAudioManager(audio: AudioInput) {
 
         return true;
       } catch (error) {
-        reportError('Audio Playback Error', error);
-        setFailedFilenames((prev) => new Set(prev).add(toPlay));
-        setAudioError(true);
-        setIsPlaying(false);
+        handlePlaybackError(error, toPlay, {
+          setIsPlaying,
+          setFailedFilenames,
+          setAudioError,
+        });
         return false;
       }
     },
@@ -258,6 +264,28 @@ function resolveFilenameToPlay(
   if (requestedFilename) return requestedFilename;
   if (currentFilename) return currentFilename;
   return filenames[0] ?? null;
+}
+
+function isAbortError(error: unknown): boolean {
+  return (
+    typeof error === 'object' &&
+    error !== null &&
+    'name' in error &&
+    error.name === 'AbortError'
+  );
+}
+
+function handlePlaybackError(
+  error: unknown,
+  filename: string,
+  setters: PlaybackStateSetters,
+): void {
+  setters.setIsPlaying(false);
+  if (isAbortError(error)) return;
+
+  reportError('Audio Playback Error', error);
+  setters.setFailedFilenames((previous) => new Set(previous).add(filename));
+  setters.setAudioError(true);
 }
 
 async function loadSingleAudio(

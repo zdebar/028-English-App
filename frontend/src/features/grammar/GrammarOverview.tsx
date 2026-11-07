@@ -14,20 +14,17 @@ import GrammarDetailCard from './GrammarDetailCard';
 import { ROUTES } from '@/config/routes.config';
 import { useRouteClose } from '@/routing/use-route-close';
 import type { ReviewDirection } from '@/types/practice.types';
-import { useDataPackage } from '@/database/state/data-store';
+import { useCurrentUserDataPackage } from '@/database/state/use-current-user-data-package';
 
 type GrammarSelection = Readonly<Pick<GrammarGroupWithChunks, 'id'>>;
 
 export default function GrammarOverview(): JSX.Element {
   const userId = useAuthStore((state) => state.userId);
-  const packageState = useDataPackage({ kind: 'grammar-overview' });
+  const { data, loading, error } = useCurrentUserDataPackage(userId, { kind: 'grammar-overview' });
   const closeRoute = useRouteClose(ROUTES.overviews);
   const [selection, setSelection] = useState<GrammarSelection | null>(null);
   const [unpackedTopicId, setUnpackedTopicId] = useState<number | null>(null);
-  const hasUserPackage = packageState.userId === userId;
-  const grammarList = hasUserPackage ? packageState.data ?? [] : [];
-  const loading = Boolean(userId) && (!hasUserPackage || packageState.status === 'loading');
-  const error = hasUserPackage && packageState.status === 'error' ? packageState.error : null;
+  const grammarList = data ?? [];
   const hasData = grammarList.length > 0;
   const currentItem = useMemo(() => {
     if (!selection) return null;

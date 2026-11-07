@@ -23,6 +23,7 @@ export type PracticeSessionCardProps = Readonly<{
   czech: string | undefined;
   czechDescription?: string | null;
   czechHidden?: boolean;
+  czechHintVisible?: boolean;
   english: string | undefined;
   pronunciation: string | undefined;
   audio?: string | null;
@@ -54,6 +55,7 @@ export type NormalizedPracticeSessionCardProps = PracticeSessionCardProps &
     isInitialTrainingPractice: boolean;
     showProgressLabel: boolean;
     czechHidden: boolean;
+    czechHintVisible: boolean;
   }>;
 
 export type PracticeCardDisplayState = Readonly<{

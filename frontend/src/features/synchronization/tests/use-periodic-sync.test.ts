@@ -2,9 +2,9 @@ import { act, renderHook } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { useSyncStore } from '@/features/synchronization/use-sync-store';
 import {
+  SyncManager,
   isRetryableSyncError,
-  startSyncManager,
-  stopSyncManager,
+  syncManager,
 } from '@/features/synchronization/sync-manager';
 
 const mocks = vi.hoisted(() => ({
@@ -62,6 +62,7 @@ vi.mock('@/locales/cs', () => ({
 import { usePeriodicSync } from '@/features/synchronization/use-periodic-sync';
 
 const syncTables = ['Groups', 'GroupItems', 'GroupRelations', 'Levels', 'Lessons', 'Notes', 'UserItems', 'UserLessons'];
+const isolatedManagers: SyncManager[] = [];
 
 describe('usePeriodicSync', () => {
   beforeEach(() => {
@@ -85,8 +86,9 @@ describe('usePeriodicSync', () => {
   });
 
   afterEach(() => {
-    stopSyncManager('u1');
-    stopSyncManager('u2');
+    syncManager.stop();
+    for (const manager of isolatedManagers) manager.stop();
+    isolatedManagers.length = 0;
     try {
       vi.runOnlyPendingTimers();
     } catch {
@@ -111,6 +113,8 @@ describe('usePeriodicSync', () => {
 
   it('cancels a long Retry-After wait when the active account changes', async () => {
     const rateLimitError = { status: 429, retryAfterMs: 60_000 };
+    const manager = new SyncManager();
+    isolatedManagers.push(manager);
     mocks.syncDataTables.mockImplementation(async (userId: string, selectedTables = syncTables) =>
       selectedTables.map((table: string) => ({
         table,
@@ -120,13 +124,13 @@ describe('usePeriodicSync', () => {
       })),
     );
 
-    startSyncManager('u1');
+    manager.start('u1');
     await act(async () => {
       await vi.advanceTimersByTimeAsync(3000);
     });
     expect(mocks.syncDataTables).toHaveBeenCalledTimes(1);
 
-    startSyncManager('u2');
+    manager.start('u2');
     await act(async () => {
       await vi.advanceTimersByTimeAsync(3000);
     });

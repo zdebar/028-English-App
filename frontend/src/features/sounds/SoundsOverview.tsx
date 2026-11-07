@@ -6,7 +6,7 @@ import { TEXTS } from '@/locales/cs';
 import type { SoundCategory } from '@/types/table.types';
 import { NavigationButton } from '@/routing/data-navigation';
 import { useRouteClose } from '@/routing/use-route-close';
-import { useDataPackage } from '@/database/state/data-store';
+import { useCurrentUserDataPackage } from '@/database/state/use-current-user-data-package';
 import type { SoundOverviewGroup } from '@/database/state/data-types';
 
 type SoundCategoryPresentation = Readonly<{ key: SoundCategory; title: string }>;
@@ -25,9 +25,9 @@ const SOUND_CATEGORY_HEADING_CLASS_NAME =
 
 export default function SoundsOverview() {
   const userId = useAuthStore((state) => state.userId);
-  const packageState = useDataPackage({ kind: 'sounds-overview' });
+  const { data } = useCurrentUserDataPackage(userId, { kind: 'sounds-overview' });
   const closeRoute = useRouteClose(ROUTES.overviews);
-  const sounds = packageState.userId === userId ? packageState.data ?? [] : [];
+  const sounds = data ?? [];
 
   return (
     <OverviewCard

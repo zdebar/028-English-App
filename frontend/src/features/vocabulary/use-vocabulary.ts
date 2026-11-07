@@ -3,8 +3,7 @@ import type { UserItemLocal } from '@/types/user-item.types';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { compareCzechStrings, filterSortedWords, type DisplayField } from './vocabulary.utils';
 import { useLocalStorageSync } from '@/hooks/use-local-storage-sync';
-import { useDataPackage, type DataPackageResult } from '@/database/state/data-store';
-import type { VocabularyPackage } from '@/database/state/data-types';
+import { useCurrentUserDataPackage } from '@/database/state/use-current-user-data-package';
 
 const INITIAL_VISIBLE_COUNT = config.vocabulary.itemsPerBatch;
 const SEARCH_KEY = 'vocabulary_search_term';
@@ -16,15 +15,13 @@ const DISPLAY_FIELD_KEY = 'vocabulary_display_field';
  * @returns An object containing vocabulary state and actions.
  */
 export function useVocabulary(userId: string | null) {
-  const packageState = useDataPackage({ kind: 'vocabulary' });
-  const packageView = getVocabularyPackageView(userId, packageState);
-  const { hasUserPackage, loading, error } = packageView;
+  const { data: vocabulary, loading, error } = useCurrentUserDataPackage(userId, { kind: 'vocabulary' });
   const words = useMemo(
-    () => hasUserPackage ? packageState.data?.items ?? [] : [],
-    [hasUserPackage, packageState.data],
+    () => vocabulary?.items ?? [],
+    [vocabulary],
   );
-  const notes = packageView.data?.notes ?? [];
-  const soundGroups = packageView.data?.soundGroups ?? [];
+  const notes = vocabulary?.notes ?? [];
+  const soundGroups = vocabulary?.soundGroups ?? [];
 
   const [visibleCount, setVisibleCount] = useState(INITIAL_VISIBLE_COUNT);
   const [searchTerm, setSearchTerm] = useLocalStorageSync<string>(`${SEARCH_KEY}_${userId}`, '');
@@ -81,23 +78,5 @@ export function useVocabulary(userId: string | null) {
     filteredWords,
     notes,
     soundGroups,
-  };
-}
-
-function getVocabularyPackageView(
-  userId: string | null,
-  packageState: DataPackageResult<VocabularyPackage>,
-): Readonly<{
-  hasUserPackage: boolean;
-  data: VocabularyPackage | undefined;
-  loading: boolean;
-  error: Error | null;
-}> {
-  const hasUserPackage = packageState.userId === userId;
-  return {
-    hasUserPackage,
-    data: hasUserPackage ? packageState.data : undefined,
-    loading: Boolean(userId) && (!hasUserPackage || packageState.status === 'loading'),
-    error: hasUserPackage && packageState.status === 'error' ? packageState.error : null,
   };
 }

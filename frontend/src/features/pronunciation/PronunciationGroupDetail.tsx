@@ -17,7 +17,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import type { PronunciationGroupDetailType } from '@/types/pronunciation.types';
 import { useRouteClose } from '@/routing/use-route-close';
 import type { UserItemLocal } from '@/types/user-item.types';
-import { useDataPackage } from '@/database/state/data-store';
+import { useCurrentUserDataPackage } from '@/database/state/use-current-user-data-package';
 
 // -- Pronunciation detail route --
 export default function PronunciationGroupDetail() {
@@ -29,11 +29,11 @@ export default function PronunciationGroupDetail() {
   const validGroupId = parseGroupId(groupIdText);
   const selectionStorageKey =
     `pronunciation_group_selected_words_${userId ?? 'guest'}_${validGroupId ?? 'unknown'}`;
-  const packageState = useDataPackage({ kind: 'pronunciation-detail', groupId: validGroupId ?? 0 });
-  const hasUserPackage = packageState.userId === userId;
-  const data = hasUserPackage ? packageState.data ?? null : null;
-  const loading = Boolean(userId) && (!hasUserPackage || packageState.status === 'loading');
-  const error = hasUserPackage && packageState.status === 'error' ? packageState.error : null;
+  const { data: packageData, loading, error } = useCurrentUserDataPackage(userId, {
+    kind: 'pronunciation-detail',
+    groupId: validGroupId ?? 0,
+  });
+  const data = packageData ?? null;
   const audios = useMemo(() => getItemAudioSources(data?.items ?? []), [data]);
   const {
     playAudio,

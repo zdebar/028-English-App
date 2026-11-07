@@ -133,7 +133,6 @@ export type DataManagerState = AppDataSnapshot & Readonly<{
   dataPackages: Readonly<Record<string, CachedDataPackage>>;
 }>;
 
-export type VisibleGroup = GroupType & Readonly<{ examples: UserItemLocal[] }>;
 export type GrammarChunkWithExamples = GroupType & Readonly<{ items: UserItemLocal[] }>;
 export type GrammarGroupWithChunks = GroupType & Readonly<{
   kind: 'group';

@@ -2,6 +2,7 @@ import { act, renderHook } from '@testing-library/react';
 import { useState } from 'react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { UserItemLocal } from '@/types/user-item.types';
+import { NBSP } from '../hooks/use-hint';
 
 const playAudioMock = vi.fn();
 const stopAudioMock = vi.fn();
@@ -76,13 +77,29 @@ describe('usePracticeCardState', () => {
     expect(stopAudioMock).toHaveBeenCalledOnce();
   });
 
-  it('plays audio only before reveal, then reveals the full EN-to-CZ card in one click', () => {
+  it('plays audio before reveal and progressively hints EN then CZ', () => {
     const enToCzItem = { ...item, item_id: 1, review_direction: 'en_to_cz' } as UserItemLocal;
     const { result } = renderHook(() => useTestCard(enToCzItem));
 
-    expect(result.current.czech).toBeUndefined();
-    expect(result.current.english).toBeUndefined();
+    expect(result.current.czech).toBe(NBSP);
+    expect(result.current.english).toBe(NBSP);
+    expect(result.current.pronunciation).toBe(NBSP);
     expect(playAudioMock).toHaveBeenCalledOnce();
+
+    act(() => result.current.plusHint());
+    expect(result.current.english).toBe('h');
+    expect(result.current.czech).toBe(NBSP);
+    expect(result.current.pronunciation).toBe(NBSP);
+
+    act(() => {
+      for (let index = 0; index < 4; index += 1) result.current.plusHint();
+    });
+    expect(result.current.english).toBe('hello');
+    expect(result.current.czech).toBe(NBSP);
+
+    act(() => result.current.plusHint());
+    expect(result.current.czech).toBe('a');
+    expect(result.current.pronunciation).toBe(NBSP);
 
     act(() => result.current.handleReveal());
     expect(result.current.revealed).toBe(true);
@@ -91,15 +108,24 @@ describe('usePracticeCardState', () => {
     expect(result.current.czech).toBe('ahoj');
   });
 
-  it('skips the hidden audio phase when EN-to-CZ audio is missing', () => {
+  it('keeps EN-to-CZ hints available when audio is missing', () => {
     const enToCzItem = { ...item, item_id: 2, audio: null, review_direction: 'en_to_cz' } as UserItemLocal;
     const { result } = renderHook(() => useTestCard(enToCzItem));
 
-    expect(result.current.english).toBe('hello');
+    expect(result.current.english).toBe(NBSP);
+    expect(result.current.czech).toBe(NBSP);
     expect(playAudioMock).not.toHaveBeenCalled();
+
+    act(() => result.current.plusHint());
+    expect(result.current.english).toBe('h');
+    expect(result.current.czech).toBe(NBSP);
+    expect(result.current.pronunciation).toBe(NBSP);
+
     act(() => result.current.handleReveal());
     expect(result.current.revealed).toBe(true);
+    expect(result.current.english).toBe('hello');
     expect(result.current.czech).toBe('ahoj');
+    expect(result.current.pronunciation).toBe('hello-pron');
   });
 
   it('holds the hidden audio phase until loading confirms that audio is unavailable', () => {
@@ -107,14 +133,14 @@ describe('usePracticeCardState', () => {
     audioStateMock.loading = true;
     const { result, rerender } = renderHook(() => useTestCard(enToCzItem));
 
-    expect(result.current.english).toBeUndefined();
-    expect(result.current.czech).toBeUndefined();
+    expect(result.current.english).toBe(NBSP);
+    expect(result.current.czech).toBe(NBSP);
 
     audioStateMock.loading = false;
     audioStateMock.error = true;
     rerender();
 
-    expect(result.current.english).toBe('hello');
-    expect(result.current.czech).toBeUndefined();
+    expect(result.current.english).toBe(NBSP);
+    expect(result.current.czech).toBe(NBSP);
   });
 });

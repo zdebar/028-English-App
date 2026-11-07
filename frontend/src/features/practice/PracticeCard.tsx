@@ -80,9 +80,10 @@ function PracticeCardBody({ deck, onDetailLoadError }: PracticeCardBodyProps) {
       isReviewPractice
       isInitialTrainingPractice={false}
       revealed={deck.revealed}
-      czech={currentItem.review_direction === 'en_to_cz' ? currentItem.czech : deck.czech}
+      czech={deck.czech}
       czechDescription={currentItem.czech_description}
       czechHidden={currentItem.review_direction === 'en_to_cz' && !deck.revealed}
+      czechHintVisible={deck.czechHintVisible}
       english={deck.english}
       pronunciation={deck.pronunciation}
       audio={currentItem.audio}

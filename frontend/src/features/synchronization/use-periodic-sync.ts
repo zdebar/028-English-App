@@ -3,27 +3,23 @@ import { dataSyncBeforeSessionEnd } from '@/database/sync/data-sync';
 import { reportError } from '@/features/logging/logging-handler';
 import { useAuthStore } from '@/features/auth/use-auth-store';
 import { useSyncStore } from './use-sync-store';
-import {
-  startSyncManager,
-  stopSyncManager,
-  waitForSyncManagerIdle,
-} from './sync-manager';
+import { syncManager } from './sync-manager';
 
-/** Connects the app lifecycle to the singleton sync coordinator. */
+/** Connects the app lifecycle to the shared SyncManager instance. */
 export function usePeriodicSync(userId: string | null): { loading: boolean } {
   const isSynchronizing = useSyncStore((state) => state.isSynchronizing);
 
   useEffect(() => {
-    startSyncManager(userId);
-    if (!userId) return () => stopSyncManager(null);
+    syncManager.start(userId);
+    if (!userId) return () => syncManager.stop(null);
 
     const activeUserId = userId;
     return () => {
-      stopSyncManager(activeUserId);
+      syncManager.stop(activeUserId);
       const currentUserId = useAuthStore.getState().userId;
       if (currentUserId !== null && currentUserId !== activeUserId) return;
 
-      const idlePromise = waitForSyncManagerIdle();
+      const idlePromise = syncManager.waitForIdle();
       if (idlePromise) {
         void idlePromise
           .then(() => runSessionEndSync(activeUserId))

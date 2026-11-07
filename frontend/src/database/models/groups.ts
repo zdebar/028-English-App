@@ -2,12 +2,7 @@ import Dexie from 'dexie';
 import { db } from '@/database/models/db';
 import type { GroupType as GroupRow, GroupTypeName } from '@/types/table.types';
 import type { UserItemLocal } from '@/types/user-item.types';
-import { isInitiated } from '@/database/practice/user-item-progress';
-import config from '@/config/config';
 import SyncEntityModel from './sync-entity-model';
-
-/** A group with the user's started example items. */
-export type VisibleGroup = GroupRow & { examples: UserItemLocal[] };
 
 /** IndexedDB model and queries for curriculum groups. */
 export default class Groups extends SyncEntityModel implements GroupRow {
@@ -109,123 +104,5 @@ export default class Groups extends SyncEntityModel implements GroupRow {
       const item = itemById.get(itemId);
       return item ? [item] : [];
     });
-  }
-
-  /**
-   * Returns groups with started examples from lessons the user has started.
-   * @param userId Id of the user whose progress should be used.
-   * @param type Optional group type to include.
-   */
-  static async getStartedByUser(userId: string, type?: GroupTypeName): Promise<VisibleGroup[]> {
-    const [groups, memberships, userItems, userLessons] = await Promise.all([
-      db.groups.toArray(),
-      db.group_items.toArray(),
-      db.user_items.where('user_id').equals(userId).toArray(),
-      db.user_lessons.where('user_id').equals(userId).toArray(),
-    ]);
-    const startedLessonIds = new Set(userLessons.map((lesson) => lesson.lesson_id));
-    const startedItems = new Map<number, UserItemLocal>(
-      userItems
-        .filter(
-          (item) => item.deleted_at === config.database.nullReplacementDate && isInitiated(item),
-        )
-        .filter((item) => startedLessonIds.has(item.lesson_id))
-        .map((item) => [item.item_id, item] as const),
-    );
-    const membershipsByGroup = new Map<number, typeof memberships>();
-
-    for (const membership of memberships) {
-      const entries = membershipsByGroup.get(membership.group_id) ?? [];
-      entries.push(membership);
-      membershipsByGroup.set(membership.group_id, entries);
-    }
-
-    const visibleGroups = groups.filter((group) => !group.deleted_at && (!type || group.type === type));
-    visibleGroups.sort((left, right) => left.sort_order - right.sort_order || left.id - right.id);
-
-    return visibleGroups.flatMap((group) => {
-      const groupMemberships = [...(membershipsByGroup.get(group.id) ?? [])]
-        .filter((membership) => membership.deleted_at == null);
-      groupMemberships.sort((left, right) => left.sort_order - right.sort_order);
-      const examples = groupMemberships
-        .flatMap((membership) => {
-          const item = startedItems.get(membership.item_id);
-          return item ? [item] : [];
-        });
-      return examples.length > 0 ? [{ ...group, examples }] : [];
-    });
-  }
-
-  /**
-   * Returns groups of a type that contain an active item in a started lesson.
-   * @param userId Id of the user whose progress should be used.
-   * @param type Group type to include.
-   */
-  static async getByTypeWithStartedLessons(
-    userId: string,
-    type: GroupTypeName,
-  ): Promise<GroupRow[]> {
-    const [groups, memberships, userItems, userLessons] = await Promise.all([
-      db.groups.toArray(),
-      db.group_items.toArray(),
-      db.user_items.where('user_id').equals(userId).toArray(),
-      db.user_lessons.where('user_id').equals(userId).toArray(),
-    ]);
-    const startedLessonIds = new Set(userLessons.map((lesson) => lesson.lesson_id));
-    const itemIdsInStartedLessons = new Set(
-      userItems
-        .filter(
-          (item) =>
-            item.deleted_at === config.database.nullReplacementDate &&
-            startedLessonIds.has(item.lesson_id),
-        )
-        .map((item) => item.item_id),
-    );
-    const visibleGroupIds = new Set(
-      memberships
-        .filter(
-          (membership) =>
-            membership.deleted_at == null && itemIdsInStartedLessons.has(membership.item_id),
-        )
-        .map((membership) => membership.group_id),
-    );
-
-    return groups
-      .filter(
-        (group) =>
-          group.type === type && !group.deleted_at && visibleGroupIds.has(group.id),
-      )
-      .sort((left, right) => left.sort_order - right.sort_order || left.id - right.id);
-  }
-
-  /**
-   * Returns every active group of a type with the user's started examples, if any.
-   * @param userId Id of the user whose progress should be used.
-   * @param type Group type to include.
-   */
-  static async getAllByTypeWithStartedExamples(
-    userId: string,
-    type: GroupTypeName,
-  ): Promise<VisibleGroup[]> {
-    const [groups, startedGroups] = await Promise.all([
-      db.groups.toArray().then((rows) => {
-        const matchingGroups: GroupRow[] = rows.filter(
-          (group) => group.type === type && !group.deleted_at,
-        );
-        matchingGroups.sort(
-          (left: GroupRow, right: GroupRow) =>
-            left.sort_order - right.sort_order || left.id - right.id,
-        );
-        return matchingGroups;
-      }),
-      this.getStartedByUser(userId, type),
-    ]);
-    const startedGroupsById = new Map<number, VisibleGroup>(
-      startedGroups.map((group) => [group.id, group]),
-    );
-    return groups.map((group) => ({
-      ...group,
-      examples: startedGroupsById.get(group.id)?.examples ?? [],
-    }));
   }
 }

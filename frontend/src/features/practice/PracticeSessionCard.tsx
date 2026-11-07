@@ -23,6 +23,7 @@ const DEFAULT_PRACTICE_SESSION_CARD_PROPS = {
   isInitialTrainingPractice: false,
   showProgressLabel: false,
   czechHidden: false,
+  czechHintVisible: false,
 } as const;
 
 /** Displays one practice card and its related detail panels. */

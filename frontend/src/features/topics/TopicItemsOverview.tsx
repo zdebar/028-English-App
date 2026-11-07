@@ -15,8 +15,7 @@ import OverviewCard from '@/components/UI/OverviewCard';
 import { AudioItemListControls } from '@/features/audio/AudioItemListControls';
 import { useRouteClose } from '@/routing/use-route-close';
 import { useQueryErrorToast } from '@/features/logging/use-query-error-toast';
-import { useDataPackage, type DataPackageResult } from '@/database/state/data-store';
-import type { TopicDetailData } from '@/database/state/data-types';
+import { useCurrentUserDataPackage } from '@/database/state/use-current-user-data-package';
 
 export default function TopicItemsOverview() {
   const navigate = useNavigate();
@@ -32,8 +31,12 @@ export default function TopicItemsOverview() {
     void navigate(ROUTES.topics);
   }, [navigate, topicId]);
 
-  const packageState = useDataPackage({ kind: 'topic-detail', topicId: topicId ?? 0 });
-  const { topic, items, loading: topicLoading, error: topicError } = getTopicDetailView(userId, packageState);
+  const { data, loading: topicLoading, error: topicError } = useCurrentUserDataPackage(
+    userId,
+    { kind: 'topic-detail', topicId: topicId ?? 0 },
+  );
+  const topic = data?.topic ?? null;
+  const items = data?.items ?? [];
   const hasItems = items.length > 0;
 
   useEffect(() => {
@@ -90,23 +93,4 @@ export default function TopicItemsOverview() {
 function parseTopicId(value: string | undefined): number | null {
   const id = Number(value);
   return Number.isSafeInteger(id) && id > 0 ? id : null;
-}
-
-function getTopicDetailView(
-  userId: string | null,
-  packageState: DataPackageResult<TopicDetailData>,
-): Readonly<{
-  topic: TopicDetailData['topic'];
-  items: TopicDetailData['items'];
-  loading: boolean;
-  error: Error | null;
-}> {
-  const isCurrentUser = packageState.userId === userId;
-  const data = isCurrentUser ? packageState.data : undefined;
-  return {
-    topic: data?.topic ?? null,
-    items: data?.items ?? [],
-    loading: Boolean(userId) && (!isCurrentUser || packageState.status === 'loading'),
-    error: isCurrentUser && packageState.status === 'error' ? packageState.error : null,
-  };
 }

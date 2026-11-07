@@ -1,5 +1,4 @@
 import config from '@/config/config';
-import Groups from './groups';
 import type AppDB from '@/database/models/app-db';
 import { db } from '@/database/models/db';
 import type {
@@ -41,7 +40,6 @@ const SIM_ITEM_PROGRESS = config.progress.simulationItemProgress;
  *
  * Public API:
  * - Review flow: `getReviewDeck`, `savePracticeDeck`, and `getReadyReviewState`.
- * - Progress lookups: initiated grammar chunks, topic items, and vocabulary.
  * - Initial-training selection and progress.
  * - Maintenance: reset helpers, simulation data, local account deletion, and remote sync.
  *
@@ -200,59 +198,6 @@ export default class UserItem extends Entity<AppDB> implements UserItemLocal {
     assertNonEmptyString(userId, 'userId');
     const unstartedItems = await getUnstartedItems(userId);
     return resolveInitialTrainingSelection(unstartedItems);
-  }
-
-  /** Reads initiated items assigned to one topic, ordered by curriculum position. */
-  static async getInitiatedByTopicId(userId: string, topicId: number): Promise<UserItemLocal[]> {
-    const topic = (await Groups.getStartedByUser(userId, 'topic')).find(
-      (group) => group.id === topicId,
-    );
-    return topic?.examples ?? [];
-  }
-
-  /**
-   * Returns whether the user has at least one initiated grammar practice item.
-   *
-   * @param userId User id whose grammar availability should be checked.
-   */
-  static async hasInitiatedGrammar(userId: string): Promise<boolean> {
-    return (await Groups.getStartedByUser(userId, 'grammar')).length > 0;
-  }
-
-  /**
-   * Reads unique grammar ids from initiated practice items.
-   *
-   * @param userId User id whose started items should be inspected.
-   * @returns Unique non-null-replacement grammar ids.
-   */
-  static async getInitiatedGrammarGroupIds(userId: string): Promise<number[]> {
-    const groups = await Groups.getStartedByUser(userId, 'grammar');
-    return groups.map((group) => group.id);
-  }
-
-  /**
-   * Reads initiated vocabulary practice items for a user.
-   *
-   * @param userId User id whose vocabulary items should be read.
-   * @returns Vocabulary practice items that have been initiated.
-   */
-  static async getInitiatedVocabulary(userId: string): Promise<UserItemLocal[]> {
-    const result = await db.user_items
-      .where('[user_id+is_vocabulary+started_at]')
-      .between([userId, 1, Dexie.minKey], [userId, 1, NULL_DATE], true, true)
-      .filter((item) => item.deleted_at === NULL_DATE && isInitiated(item))
-      .toArray();
-    return result;
-  }
-
-  /** Checks availability without materializing the vocabulary list. */
-  static async hasInitiatedVocabulary(userId: string): Promise<boolean> {
-    const item = await db.user_items
-      .where('[user_id+is_vocabulary+started_at]')
-      .between([userId, 1, Dexie.minKey], [userId, 1, NULL_DATE], true, true)
-      .filter((candidate) => candidate.deleted_at === NULL_DATE && isInitiated(candidate))
-      .first();
-    return item !== undefined;
   }
 
   /**

@@ -35,7 +35,6 @@ vi.mock('react-router-dom', () => ({
 
 vi.mock('@/database/models/user-items', () => ({
   default: {
-    getInitiatedVocabulary: vi.fn(),
     resetItemById: (...args: unknown[]) => mocks.resetItemById(...args),
   },
 }));

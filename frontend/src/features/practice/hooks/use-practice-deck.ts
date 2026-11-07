@@ -8,7 +8,8 @@ import {
 } from 'react';
 import type { PracticeDeckEntry, PracticeOutcome, UserItemLocal } from '@/types/user-item.types';
 import type { ReviewDirection, ReviewKind } from '@/types/practice.types';
-import { ensureDataPackage, useDataPackage, type DataPackageResult } from '@/database/state/data-store';
+import { ensureDataPackage } from '@/database/state/data-store';
+import { useCurrentUserDataPackage } from '@/database/state/use-current-user-data-package';
 import type { ReviewAvailability, ReviewDeckData, ReviewPracticePackage } from '@/database/state/data-types';
 import UserItem from '@/database/models/user-items';
 import { reportError } from '@/features/logging/logging-handler';
@@ -129,8 +130,13 @@ export function usePracticeDeck(
   );
 
   const [queueVersion, setQueueVersion] = useState(0);
-  const packageState = useDataPackage({ kind: 'review-practice', reviewKind });
-  const { reviewPackage, initialReviewDeck } = getReadyReviewPackage(packageState, userId);
+  const {
+    data: reviewPackage,
+    ready: dataReady,
+    loading,
+    error,
+  } = useCurrentUserDataPackage(userId, { kind: 'review-practice', reviewKind });
+  const initialReviewDeck = reviewPackage?.initialDeck;
   const activeDirectionRef = useRef<ReviewDirection>(getInitialReviewDirection(initialReviewDeck));
   const reviewQueueRef = useRef<ReviewQueue | null>(null);
   const queueDataRef = useRef<ReviewDeckData | null>(null);
@@ -155,7 +161,6 @@ export function usePracticeDeck(
   const completedOffsetRef = useRef(0);
   const isTransitioningRef = useRef(false);
 
-  const { dataReady, loading, error } = getReviewDataStatus(packageState.status, packageState.error, packageState.userId, userId);
   const fetchedResult = useMemo(
     () => getFetchedReviewDeck(dataReady, initialReviewDeck),
     [dataReady, initialReviewDeck],
@@ -276,6 +281,7 @@ export function usePracticeDeck(
     revealed,
     setRevealed,
     czech: cardState.czech,
+    czechHintVisible: cardState.czechHintVisible,
     english: cardState.english,
     pronunciation: getReviewPronunciation(currentItem, revealed),
     audio: getReviewAudio(currentItem),
@@ -295,44 +301,7 @@ export function usePracticeDeck(
 }
 
 // -- Package and presentation helpers --
-type ReviewDataStatus = Readonly<{
-  dataReady: boolean;
-  loading: boolean;
-  error: Error | null;
-}>;
-
 type SaveErrorSetter = (error: Error | null) => void;
-
-function getReviewDataStatus(
-  status: 'loading' | 'ready' | 'error',
-  packageError: Error | null,
-  packageUserId: string | null,
-  userId: string | null,
-): ReviewDataStatus {
-  const isCurrentUser = Boolean(userId) && packageUserId === userId;
-  const dataReady = isCurrentUser && status === 'ready';
-  return {
-    dataReady,
-    loading: Boolean(userId) && !dataReady && !(isCurrentUser && status === 'error'),
-    error: isCurrentUser && status === 'error' ? packageError : null,
-  };
-}
-
-function getReadyReviewPackage(
-  packageState: DataPackageResult<ReviewPracticePackage>,
-  userId: string | null,
-): Readonly<{
-  reviewPackage: ReviewPracticePackage | undefined;
-  initialReviewDeck: ReviewDeckData | undefined;
-}> {
-  if (packageState.userId !== userId || packageState.status !== 'ready' || !packageState.data) {
-    return { reviewPackage: undefined, initialReviewDeck: undefined };
-  }
-  return {
-    reviewPackage: packageState.data,
-    initialReviewDeck: packageState.data.initialDeck,
-  };
-}
 
 function getInitialReviewDirection(deck: ReviewDeckData | undefined): ReviewDirection {
   return deck?.reviewDirection ?? 'cz_to_en';

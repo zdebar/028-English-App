@@ -5,9 +5,7 @@ import { NavigationButton } from '@/routing/data-navigation';
 import StyledButton from '@/components/UI/buttons/StyledButton';
 import { hasReachedReviewLimit } from './practice-availability';
 import { useAuthStore } from '@/features/auth/use-auth-store';
-import { useDataPackage } from '@/database/state/data-store';
-import type { DataPackageResult } from '@/database/state/data-store';
-import type { HomeDataPackage } from '@/database/state/data-types';
+import { useCurrentUserDataPackage } from '@/database/state/use-current-user-data-package';
 import type { PracticeAvailabilitySnapshot } from './practice-availability';
 
 type ReviewKind = 'grammar' | 'vocabulary';
@@ -94,11 +92,8 @@ const ReviewPracticeButton = memo(function ReviewPracticeButton({
 
 const PronunciationPracticeButton = memo(function PronunciationPracticeButton(): JSX.Element {
   const userId = useAuthStore((state) => state.userId);
-  const homePackage = useDataPackage({ kind: 'home' });
-  const hasUserPackage = homePackage.userId === userId;
-  const loading = Boolean(userId) && (!hasUserPackage || homePackage.status === 'loading');
-  const error = hasUserPackage && homePackage.status === 'error' ? homePackage.error : null;
-  const hasActiveGroup = hasUserPackage && homePackage.data?.hasActivePronunciationGroups === true;
+  const { data, loading, error } = useCurrentUserDataPackage(userId, { kind: 'home' });
+  const hasActiveGroup = data?.hasActivePronunciationGroups === true;
   const disabled = loading || error !== null || !hasActiveGroup;
 
   return (
@@ -152,20 +147,10 @@ function usePracticeStatus(): Readonly<{
   error: Error | null;
 }> {
   const userId = useAuthStore((state) => state.userId);
-  const homePackage = useDataPackage({ kind: 'home' });
-  return getPracticeStatus(homePackage, userId);
-}
-
-function getPracticeStatus(
-  homePackage: DataPackageResult<HomeDataPackage>,
-  userId: string | null,
-): Readonly<{ availability: PracticeAvailabilitySnapshot | null; loading: boolean; error: Error | null }> {
-  const isCurrentUser = homePackage.userId === userId;
-  const isReady = isCurrentUser && homePackage.status === 'ready';
-  const error = isCurrentUser && homePackage.status === 'error' ? homePackage.error : null;
+  const { data, loading, error } = useCurrentUserDataPackage(userId, { kind: 'home' });
   return {
-    availability: userId && isReady ? homePackage.data?.practiceAvailability ?? null : null,
-    loading: Boolean(userId) && !isReady && error === null,
+    availability: data?.practiceAvailability ?? null,
+    loading,
     error,
   };
 }
