@@ -34,69 +34,267 @@ class SyncOfflineError extends Error {
   }
 }
 
-let activeUserId: string | null = null;
-let inFlightSync: InFlightSync | null = null;
-let initialSyncTimer: ReturnType<typeof setTimeout> | null = null;
-let periodicSyncTimer: ReturnType<typeof setInterval> | null = null;
-let retryTimer: ReturnType<typeof setTimeout> | null = null;
-let cancelPendingDelay: (() => void) | null = null;
-let onlineListener: (() => void) | null = null;
-let retryAttempt = 0;
-let hasShownFailureToast = false;
-const failuresByTask = new Map<SyncTaskId, TaskErrors>();
-const reportedFailureKeys = new Set<string>();
+/** Owns the scheduled sync work and retry state for one application lifecycle. */
+export class SyncManager {
+  private activeUserId: string | null = null;
+  private inFlightSync: InFlightSync | null = null;
+  private initialSyncTimer: ReturnType<typeof setTimeout> | null = null;
+  private periodicSyncTimer: ReturnType<typeof setInterval> | null = null;
+  private retryTimer: ReturnType<typeof setTimeout> | null = null;
+  private cancelPendingDelay: (() => void) | null = null;
+  private onlineListener: (() => void) | null = null;
+  private retryAttempt = 0;
+  private hasShownFailureToast = false;
+  private readonly failuresByTask = new Map<SyncTaskId, TaskErrors>();
+  private readonly reportedFailureKeys = new Set<string>();
 
-// -- Account-scoped sync lifecycle --
-/** Starts the shared synchronization lifecycle for one authenticated user. */
-export function startSyncManager(userId: string | null): void {
-  if (activeUserId === userId) return;
-  stopTimers();
-  activeUserId = userId;
-  failuresByTask.clear();
-  reportedFailureKeys.clear();
-  retryAttempt = 0;
-  hasShownFailureToast = false;
-  useSyncStore.getState().resetSyncState();
+  /** Starts scheduled synchronization for the authenticated user. */
+  start(userId: string | null): void {
+    if (this.activeUserId === userId) return;
+    this.stopTimers();
+    this.activeUserId = userId;
+    this.failuresByTask.clear();
+    this.reportedFailureKeys.clear();
+    this.retryAttempt = 0;
+    this.hasShownFailureToast = false;
+    useSyncStore.getState().resetSyncState();
 
-  if (!userId) return;
+    if (!userId) return;
 
-  useSyncStore.getState().setSynchronizing(true);
-  initialSyncTimer = globalThis.setTimeout(() => {
-    void requestSync(userId, ...DATA_SYNC_TABLES, AUDIO_ARCHIVES_TASK, ORPHANED_AUDIO_TASK)
-      .catch((error: unknown) => reportError('Failed to start data synchronization', error));
-  }, 3_000);
-  periodicSyncTimer = globalThis.setInterval(() => {
-    void requestSync(userId, ...DATA_SYNC_TABLES, AUDIO_ARCHIVES_TASK, ORPHANED_AUDIO_TASK)
-      .catch((error: unknown) => reportError('Failed to start data synchronization', error));
-  }, config.sync.periodicSyncInterval);
+    useSyncStore.getState().setSynchronizing(true);
+    this.initialSyncTimer = globalThis.setTimeout(() => {
+      void this.requestSync(userId, ...DATA_SYNC_TABLES, AUDIO_ARCHIVES_TASK, ORPHANED_AUDIO_TASK)
+        .catch((error: unknown) => reportError('Failed to start data synchronization', error));
+    }, 3_000);
+    this.periodicSyncTimer = globalThis.setInterval(() => {
+      void this.requestSync(userId, ...DATA_SYNC_TABLES, AUDIO_ARCHIVES_TASK, ORPHANED_AUDIO_TASK)
+        .catch((error: unknown) => reportError('Failed to start data synchronization', error));
+    }, config.sync.periodicSyncInterval);
 
-  onlineListener = () => {
-    if (!isOnline() || activeUserId !== userId) return;
-    const retryableTasks = getRetryableTaskIds();
-    if (retryableTasks.length === 0) return;
-    clearRetryTimer();
-    void requestSync(userId, ...retryableTasks)
-      .catch((error: unknown) => reportError('Failed to retry data synchronization', error));
-  };
-  globalThis.addEventListener?.('online', onlineListener);
+    this.onlineListener = () => {
+      if (!isOnline() || !this.isActiveUser(userId)) return;
+      const retryableTasks = this.getRetryableTaskIds();
+      if (retryableTasks.length === 0) return;
+      this.clearRetryTimer();
+      void this.requestSync(userId, ...retryableTasks)
+        .catch((error: unknown) => reportError('Failed to retry data synchronization', error));
+    };
+    globalThis.addEventListener?.('online', this.onlineListener);
+  }
+
+  /** Stops timers and retries, optionally guarding against stale lifecycle cleanup. */
+  stop(expectedUserId?: string | null): void {
+    if (expectedUserId !== undefined && expectedUserId !== this.activeUserId) return;
+    this.stopTimers();
+    this.activeUserId = null;
+    this.failuresByTask.clear();
+    this.reportedFailureKeys.clear();
+    this.retryAttempt = 0;
+    this.hasShownFailureToast = false;
+    useSyncStore.getState().resetSyncState();
+  }
+
+  /** Returns the active run so callers can wait before session-end synchronization. */
+  waitForIdle(): Promise<void> | null {
+    return this.inFlightSync?.promise ?? null;
+  }
+
+  private requestSync(userId: string, ...requestedTasks: readonly SyncTaskId[]): Promise<void> {
+    if (!this.isActiveUser(userId) || requestedTasks.length === 0) return Promise.resolve();
+    if (this.inFlightSync) {
+      if (this.inFlightSync.userId === userId) return this.inFlightSync.promise;
+      return this.inFlightSync.promise.then(() => this.requestSync(userId, ...requestedTasks));
+    }
+
+    const promise = this.performSync(userId, requestedTasks)
+      .catch((error: unknown) => {
+        reportError('Unexpected synchronization manager error', error);
+      });
+    let trackedSync: InFlightSync | null = null;
+    const trackedPromise = promise.finally(() => {
+      if (this.inFlightSync === trackedSync) this.inFlightSync = null;
+    });
+    trackedSync = { userId, promise: trackedPromise };
+    this.inFlightSync = trackedSync;
+    return trackedPromise;
+  }
+
+  private async performSync(userId: string, requestedTasks: readonly SyncTaskId[]): Promise<void> {
+    if (!this.isActiveUser(userId)) return;
+    useSyncStore.getState().setSynchronizing(true);
+
+    const pendingTasks = [...new Set(requestedTasks)];
+    if (!isOnline()) {
+      this.applyTaskOutcomes(userId, new Map(pendingTasks.map((task) => [task, [new SyncOfflineError()]])));
+      this.finishSyncState(userId);
+      return;
+    }
+
+    for (let attempt = 0; attempt <= QUICK_RETRY_DELAYS_MS.length; attempt += 1) {
+      if (attempt > 0) {
+        const retryDelay = this.getQuickRetryDelay(pendingTasks, attempt - 1);
+        await this.delay(retryDelay);
+        if (!this.isActiveUser(userId)) return;
+        if (!isOnline()) {
+          this.applyTaskOutcomes(userId, new Map(pendingTasks.map((task) => [task, [new SyncOfflineError()]])));
+          break;
+        }
+      }
+
+      const outcomes = await runTaskBatch(userId, pendingTasks);
+      if (!this.isActiveUser(userId)) return;
+      this.applyTaskOutcomes(userId, outcomes);
+
+      const retryableTasks = [...outcomes.keys()].filter((task) => {
+        const errors = this.failuresByTask.get(task);
+        return errors?.some(isRetryableSyncError) ?? false;
+      });
+      pendingTasks.splice(0, pendingTasks.length, ...retryableTasks);
+      if (pendingTasks.length === 0) break;
+    }
+
+    this.finishSyncState(userId);
+  }
+
+  private applyTaskOutcomes(userId: string, outcomes: SyncTaskOutcomes): void {
+    if (!this.isActiveUser(userId)) return;
+
+    if (outcomes.has(AUDIO_ARCHIVES_TASK)) this.clearAudioArchiveFailures();
+    for (const [task, errors] of outcomes) {
+      if (errors?.length) this.failuresByTask.set(task, errors);
+      else this.failuresByTask.delete(task);
+    }
+  }
+
+  private finishSyncState(userId: string): void {
+    if (!this.isActiveUser(userId)) return;
+
+    const failedTasks = [...this.failuresByTask.keys()];
+    const retryableTasks = this.getRetryableTaskIds();
+    const isSuccessful = failedTasks.length === 0;
+    const retryAt = retryableTasks.length > 0 && isOnline()
+      ? Date.now() + this.getScheduledRetryDelay()
+      : null;
+
+    useSyncStore.getState().setSynchronized(isSuccessful);
+    useSyncStore.getState().setSyncError(!isSuccessful);
+    useSyncStore.getState().setSyncDetails(failedTasks, retryAt);
+    useSyncStore.getState().setSynchronizing(false);
+
+    if (isSuccessful) {
+      this.retryAttempt = 0;
+      this.hasShownFailureToast = false;
+      this.reportedFailureKeys.clear();
+      this.clearRetryTimer();
+      useToastStore.getState().showToast(TEXTS.syncSuccessToast, 'success');
+      return;
+    }
+
+    this.reportUnreportedFailures();
+    if (!this.hasShownFailureToast) {
+      useToastStore.getState().showToast(TEXTS.syncErrorToast, 'error');
+      this.hasShownFailureToast = true;
+    }
+
+    if (retryableTasks.length > 0) this.scheduleRetry(userId);
+    else this.clearRetryTimer();
+  }
+
+  private reportUnreportedFailures(): void {
+    for (const [task, errors] of this.failuresByTask) {
+      for (const error of errors) {
+        if (error instanceof SyncOfflineError) continue;
+        const key = `${task}:${getErrorMessage(error)}`;
+        if (this.reportedFailureKeys.has(key)) continue;
+        this.reportedFailureKeys.add(key);
+        reportError(`Synchronization task failed: ${task}`, error);
+      }
+    }
+  }
+
+  private scheduleRetry(userId: string): void {
+    this.clearRetryTimer();
+    if (!isOnline() || !this.isActiveUser(userId)) return;
+    const retryDelay = this.getScheduledRetryDelay();
+    useSyncStore.getState().setSyncDetails([...this.failuresByTask.keys()], Date.now() + retryDelay);
+    this.retryTimer = globalThis.setTimeout(() => {
+      this.retryTimer = null;
+      if (!this.isActiveUser(userId)) return;
+      void this.requestSync(userId, ...this.getRetryableTaskIds())
+        .catch((error: unknown) => reportError('Scheduled synchronization retry failed', error));
+    }, retryDelay);
+    this.retryAttempt = Math.min(this.retryAttempt + 1, SCHEDULED_RETRY_DELAYS_MS.length - 1);
+  }
+
+  private getRetryableTaskIds(): SyncTaskId[] {
+    return [...this.failuresByTask.entries()]
+      .filter(([, errors]) => errors.some(isRetryableSyncError))
+      .map(([task]) => task);
+  }
+
+  private getScheduledRetryDelay(): number {
+    const defaultDelay = SCHEDULED_RETRY_DELAYS_MS[this.retryAttempt] ??
+      SCHEDULED_RETRY_DELAYS_MS.at(-1) ??
+      15 * 60_000;
+    const retryAfterDelays = [...this.failuresByTask.values()]
+      .flatMap((errors) => errors.filter(isRetryableSyncError))
+      .map(getRetryAfterMs)
+      .filter((delayMs): delayMs is number => delayMs !== null);
+    return Math.max(defaultDelay, ...retryAfterDelays);
+  }
+
+  private getQuickRetryDelay(tasks: readonly SyncTaskId[], retryIndex: number): number {
+    const defaultDelay = QUICK_RETRY_DELAYS_MS[retryIndex] ?? 0;
+    const retryAfter = tasks.flatMap((task) => this.failuresByTask.get(task) ?? [])
+      .filter(isRetryableSyncError)
+      .map(getRetryAfterMs)
+      .filter((delayMs): delayMs is number => delayMs !== null);
+    return Math.max(defaultDelay, ...retryAfter);
+  }
+
+  private clearAudioArchiveFailures(): void {
+    for (const task of this.failuresByTask.keys()) {
+      if (task === AUDIO_ARCHIVES_TASK || isAudioArchiveTask(task)) this.failuresByTask.delete(task);
+    }
+  }
+
+  private stopTimers(): void {
+    if (this.initialSyncTimer !== null) globalThis.clearTimeout(this.initialSyncTimer);
+    if (this.periodicSyncTimer !== null) globalThis.clearInterval(this.periodicSyncTimer);
+    this.clearRetryTimer();
+    this.cancelPendingDelay?.();
+    if (this.onlineListener) globalThis.removeEventListener?.('online', this.onlineListener);
+    this.initialSyncTimer = null;
+    this.periodicSyncTimer = null;
+    this.onlineListener = null;
+  }
+
+  private clearRetryTimer(): void {
+    if (this.retryTimer !== null) globalThis.clearTimeout(this.retryTimer);
+    this.retryTimer = null;
+  }
+
+  private isActiveUser(userId: string): boolean {
+    return this.activeUserId === userId;
+  }
+
+  private delay(delayMs: number): Promise<void> {
+    return new Promise((resolve) => {
+      let timeout: ReturnType<typeof setTimeout> | null = null;
+      const finish = () => {
+        if (timeout !== null) globalThis.clearTimeout(timeout);
+        if (this.cancelPendingDelay === finish) this.cancelPendingDelay = null;
+        resolve();
+      };
+
+      timeout = globalThis.setTimeout(finish, delayMs);
+      this.cancelPendingDelay = finish;
+    });
+  }
 }
 
-/** Stops scheduled work when the authenticated user leaves the app shell. */
-export function stopSyncManager(userId: string | null): void {
-  if (userId !== activeUserId) return;
-  stopTimers();
-  activeUserId = null;
-  failuresByTask.clear();
-  reportedFailureKeys.clear();
-  retryAttempt = 0;
-  hasShownFailureToast = false;
-  useSyncStore.getState().resetSyncState();
-}
-
-/** Waits for the current sync run before a best-effort session-end sync begins. */
-export function waitForSyncManagerIdle(): Promise<void> | null {
-  return inFlightSync?.promise ?? null;
-}
+/** Shared app instance; tests or other isolated lifecycles can construct their own. */
+export const syncManager = new SyncManager();
 
 // -- Failure classification and sync requests --
 /** Returns whether a failed sync task should receive automatic retry attempts. */
@@ -119,63 +317,6 @@ export function isRetryableSyncError(error: unknown): boolean {
 }
 
 // -- Sync execution --
-function requestSync(userId: string, ...requestedTasks: readonly SyncTaskId[]): Promise<void> {
-  if (activeUserId !== userId || requestedTasks.length === 0) return Promise.resolve();
-  if (inFlightSync) {
-    if (inFlightSync.userId === userId) return inFlightSync.promise;
-    return inFlightSync.promise.then(() => requestSync(userId, ...requestedTasks));
-  }
-
-  const promise = performSync(userId, requestedTasks)
-    .catch((error: unknown) => {
-      reportError('Unexpected synchronization manager error', error);
-    });
-  let trackedSync: InFlightSync | null = null;
-  const trackedPromise = promise.finally(() => {
-    if (inFlightSync === trackedSync) inFlightSync = null;
-  });
-  trackedSync = { userId, promise: trackedPromise };
-  inFlightSync = trackedSync;
-  return trackedPromise;
-}
-
-async function performSync(userId: string, requestedTasks: readonly SyncTaskId[]): Promise<void> {
-  if (!isActiveUser(userId)) return;
-  useSyncStore.getState().setSynchronizing(true);
-
-  const pendingTasks = [...new Set(requestedTasks)];
-  if (!isOnline()) {
-    applyTaskOutcomes(userId, new Map(pendingTasks.map((task) => [task, [new SyncOfflineError()]])));
-    finishSyncState(userId);
-    return;
-  }
-
-  for (let attempt = 0; attempt <= QUICK_RETRY_DELAYS_MS.length; attempt += 1) {
-    if (attempt > 0) {
-      const retryDelay = getQuickRetryDelay(pendingTasks, attempt - 1);
-      await delay(retryDelay);
-      if (!isActiveUser(userId)) return;
-      if (!isOnline()) {
-        applyTaskOutcomes(userId, new Map(pendingTasks.map((task) => [task, [new SyncOfflineError()]])));
-        break;
-      }
-    }
-
-    const outcomes = await runTaskBatch(userId, pendingTasks);
-    if (!isActiveUser(userId)) return;
-    applyTaskOutcomes(userId, outcomes);
-
-    const retryableTasks = [...outcomes.keys()].filter((task) => {
-      const errors = failuresByTask.get(task);
-      return errors?.some(isRetryableSyncError) ?? false;
-    });
-    pendingTasks.splice(0, pendingTasks.length, ...retryableTasks);
-    if (pendingTasks.length === 0) break;
-  }
-
-  finishSyncState(userId);
-}
-
 async function runTaskBatch(userId: string, tasks: readonly SyncTaskId[]): Promise<SyncTaskOutcomes> {
   const outcomes = new Map<SyncTaskId, TaskErrors | null>();
   const dataTables = tasks.filter(isDataSyncTable);
@@ -263,106 +404,7 @@ async function runOrphanedAudioTask(
   }
 }
 
-// -- Sync status and retry scheduling --
-function applyTaskOutcomes(userId: string, outcomes: SyncTaskOutcomes): void {
-  if (!isActiveUser(userId)) return;
-
-  if (outcomes.has(AUDIO_ARCHIVES_TASK)) {
-    clearAudioArchiveFailures();
-  }
-  for (const [task, errors] of outcomes) {
-    if (errors?.length) failuresByTask.set(task, errors);
-    else failuresByTask.delete(task);
-  }
-}
-
-function finishSyncState(userId: string): void {
-  if (!isActiveUser(userId)) return;
-
-  const failedTasks = [...failuresByTask.keys()];
-  const retryableTasks = getRetryableTaskIds();
-  const isSuccessful = failedTasks.length === 0;
-  const retryAt = retryableTasks.length > 0 && isOnline()
-    ? Date.now() + getScheduledRetryDelay()
-    : null;
-
-  useSyncStore.getState().setSynchronized(isSuccessful);
-  useSyncStore.getState().setSyncError(!isSuccessful);
-  useSyncStore.getState().setSyncDetails(failedTasks, retryAt);
-  useSyncStore.getState().setSynchronizing(false);
-
-  if (isSuccessful) {
-    retryAttempt = 0;
-    hasShownFailureToast = false;
-    reportedFailureKeys.clear();
-    clearRetryTimer();
-    useToastStore.getState().showToast(TEXTS.syncSuccessToast, 'success');
-    return;
-  }
-
-  reportUnreportedFailures();
-  if (!hasShownFailureToast) {
-    useToastStore.getState().showToast(TEXTS.syncErrorToast, 'error');
-    hasShownFailureToast = true;
-  }
-
-  if (retryableTasks.length > 0) scheduleRetry(userId);
-  else clearRetryTimer();
-}
-
-function reportUnreportedFailures(): void {
-  for (const [task, errors] of failuresByTask) {
-    for (const error of errors) {
-      if (error instanceof SyncOfflineError) continue;
-      const key = `${task}:${getErrorMessage(error)}`;
-      if (reportedFailureKeys.has(key)) continue;
-      reportedFailureKeys.add(key);
-      reportError(`Synchronization task failed: ${task}`, error);
-    }
-  }
-}
-
-function scheduleRetry(userId: string): void {
-  clearRetryTimer();
-  if (!isOnline() || !isActiveUser(userId)) return;
-  const retryDelay = getScheduledRetryDelay();
-  useSyncStore.getState().setSyncDetails([...failuresByTask.keys()], Date.now() + retryDelay);
-  retryTimer = globalThis.setTimeout(() => {
-    retryTimer = null;
-    if (!isActiveUser(userId)) return;
-    void requestSync(userId, ...getRetryableTaskIds())
-      .catch((error: unknown) => reportError('Scheduled synchronization retry failed', error));
-  }, retryDelay);
-  retryAttempt = Math.min(retryAttempt + 1, SCHEDULED_RETRY_DELAYS_MS.length - 1);
-}
-
 // -- Retry timing and error parsing --
-function getRetryableTaskIds(): SyncTaskId[] {
-  return [...failuresByTask.entries()]
-    .filter(([, errors]) => errors.some(isRetryableSyncError))
-    .map(([task]) => task);
-}
-
-function getScheduledRetryDelay(): number {
-  const defaultDelay = SCHEDULED_RETRY_DELAYS_MS[retryAttempt] ??
-    SCHEDULED_RETRY_DELAYS_MS.at(-1) ??
-    15 * 60_000;
-  const retryAfterDelays = [...failuresByTask.values()]
-    .flatMap((errors) => errors.filter(isRetryableSyncError))
-    .map(getRetryAfterMs)
-    .filter((delayMs): delayMs is number => delayMs !== null);
-  return Math.max(defaultDelay, ...retryAfterDelays);
-}
-
-function getQuickRetryDelay(tasks: readonly SyncTaskId[], retryIndex: number): number {
-  const defaultDelay = QUICK_RETRY_DELAYS_MS[retryIndex] ?? 0;
-  const retryAfter = tasks.flatMap((task) => failuresByTask.get(task) ?? [])
-    .filter(isRetryableSyncError)
-    .map(getRetryAfterMs)
-    .filter((delayMs): delayMs is number => delayMs !== null);
-  return Math.max(defaultDelay, ...retryAfter);
-}
-
 function getRetryAfterMs(error: unknown): number | null {
   const visited = new Set<unknown>();
   let current: unknown = error;
@@ -447,48 +489,8 @@ function getSummaryErrors(
   return summary.errors ?? summary.sampleErrors ?? [new Error(fallbackMessage)];
 }
 
-function clearAudioArchiveFailures(): void {
-  for (const task of failuresByTask.keys()) {
-    if (task === AUDIO_ARCHIVES_TASK || isAudioArchiveTask(task)) failuresByTask.delete(task);
-  }
-}
-
-function stopTimers(): void {
-  if (initialSyncTimer !== null) globalThis.clearTimeout(initialSyncTimer);
-  if (periodicSyncTimer !== null) globalThis.clearInterval(periodicSyncTimer);
-  clearRetryTimer();
-  cancelPendingDelay?.();
-  if (onlineListener) globalThis.removeEventListener?.('online', onlineListener);
-  initialSyncTimer = null;
-  periodicSyncTimer = null;
-  onlineListener = null;
-}
-
-function clearRetryTimer(): void {
-  if (retryTimer !== null) globalThis.clearTimeout(retryTimer);
-  retryTimer = null;
-}
-
-function isActiveUser(userId: string): boolean {
-  return activeUserId === userId;
-}
-
 function isOnline(): boolean {
   return typeof navigator === 'undefined' || navigator.onLine;
-}
-
-function delay(delayMs: number): Promise<void> {
-  return new Promise((resolve) => {
-    let timeout: ReturnType<typeof setTimeout> | null = null;
-    const finish = () => {
-      if (timeout !== null) globalThis.clearTimeout(timeout);
-      if (cancelPendingDelay === finish) cancelPendingDelay = null;
-      resolve();
-    };
-
-    timeout = globalThis.setTimeout(finish, delayMs);
-    cancelPendingDelay = finish;
-  });
 }
 
 function isErrorLike(value: unknown): value is Record<string, unknown> {
