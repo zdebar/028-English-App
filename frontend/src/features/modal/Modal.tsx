@@ -1,4 +1,3 @@
-import { useOverlayStore } from '@/features/overlay/use-overlay-store';
 import { reportError } from '@/features/logging/logging-handler';
 import { useToastStore } from '@/features/toast/use-toast-store';
 import { TEXTS } from '@/locales/cs';
@@ -8,16 +7,14 @@ import {
   useRef,
   useState,
   type JSX,
-  type KeyboardEvent,
   type ReactNode,
 } from 'react';
-import { createPortal } from 'react-dom';
 import StyledButton from '../../components/UI/buttons/StyledButton';
 
 type ModalProps = Readonly<{
   /** Confirmation action. Rejections are logged and shown as a generic failure. */
   onConfirm: () => void | Promise<void>;
-  /** Registered with the overlay store so Escape/outside overlay close can dismiss the owner. */
+  /** Called when the user cancels or a confirmation succeeds. */
   onClose: () => void;
   /** Accessible name for the dialog. */
   ariaLabel: string;
@@ -39,28 +36,36 @@ export function Modal({
   cancelLabel = TEXTS.cancel,
   confirmLabel = TEXTS.confirm,
   actionsLayout = 'horizontal',
-}: ModalProps): JSX.Element | null {
-  const closeOverlay = useOverlayStore((state) => state.closeOverlay);
-  const openOverlay = useOverlayStore((state) => state.openOverlay);
-  const setOverlayDismissible = useOverlayStore((state) => state.setOverlayDismissible);
+}: ModalProps): JSX.Element {
   const showToast = useToastStore((state) => state.showToast);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const isSubmittingRef = useRef(false);
+  const hasRequestedCloseRef = useRef(false);
   const dialogRef = useRef<HTMLDialogElement>(null);
-  const onCloseRef = useRef(onClose);
-  const previouslyFocusedElementRef = useRef<HTMLElement | null>(null);
 
-  const handleCancel = useCallback(() => {
-    if (isSubmittingRef.current) return;
-    closeOverlay();
-  }, [closeOverlay]);
+  const requestClose = useCallback(() => {
+    if (isSubmittingRef.current || hasRequestedCloseRef.current) return;
+
+    hasRequestedCloseRef.current = true;
+    const dialog = dialogRef.current;
+    if (dialog?.open) dialog.close();
+    onClose();
+  }, [onClose]);
+  const requestCloseRef = useRef(requestClose);
+
+  useEffect(() => {
+    requestCloseRef.current = requestClose;
+  }, [requestClose]);
+
+  useEffect(() => {
+    if (!isSubmitting) isSubmittingRef.current = false;
+  }, [isSubmitting]);
 
   const handleConfirm = useCallback(async () => {
     if (isSubmittingRef.current) return;
 
     isSubmittingRef.current = true;
     setIsSubmitting(true);
-    setOverlayDismissible(false);
     let succeeded = false;
 
     try {
@@ -70,104 +75,80 @@ export function Modal({
       reportError('Modal confirmation failed', error);
       showToast(TEXTS.genericFailure, 'error');
     } finally {
-      isSubmittingRef.current = false;
       setIsSubmitting(false);
-      setOverlayDismissible(true);
     }
 
-    if (succeeded) closeOverlay();
-  }, [closeOverlay, onConfirm, setOverlayDismissible, showToast]);
+    if (succeeded) {
+      isSubmittingRef.current = false;
+      requestClose();
+    }
+  }, [onConfirm, requestClose, showToast]);
 
-  const handleDialogKeyDown = useCallback((event: KeyboardEvent<HTMLDialogElement>) => {
-    if (event.key !== 'Tab') return;
-
+  useEffect(() => {
     const dialog = dialogRef.current;
     if (!dialog) return;
 
-    const focusableElements = dialog.querySelectorAll<HTMLElement>(
-      'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])',
-    );
-    const firstElement = focusableElements[0];
-    const lastElement = focusableElements[focusableElements.length - 1];
-
-    if (!firstElement || !lastElement) {
+    const handleCancel = (event: Event) => {
       event.preventDefault();
-      dialog.focus();
-      return;
-    }
+      requestCloseRef.current();
+    };
+    const handleDialogKeyDown = (event: KeyboardEvent) => {
+      // Keep global Escape handlers from dismissing an independent overlay beneath the modal.
+      if (event.key === 'Escape') event.stopPropagation();
+    };
+    const handleBackdropClick = (event: MouseEvent) => {
+      if (event.target !== dialog) return;
 
-    if (event.shiftKey && document.activeElement === firstElement) {
-      event.preventDefault();
-      lastElement.focus();
-    } else if (!event.shiftKey && document.activeElement === lastElement) {
-      event.preventDefault();
-      firstElement.focus();
-    }
-  }, []);
+      const { bottom, left, right, top } = dialog.getBoundingClientRect();
+      const clickedInsideDialog =
+        event.clientX >= left &&
+        event.clientX <= right &&
+        event.clientY >= top &&
+        event.clientY <= bottom;
 
-  const modalRoot = document.getElementById('root');
+      if (!clickedInsideDialog) requestCloseRef.current();
+    };
 
-  useEffect(() => {
-    onCloseRef.current = onClose;
-  }, [onClose]);
+    dialog.addEventListener('cancel', handleCancel);
+    dialog.addEventListener('keydown', handleDialogKeyDown);
+    dialog.addEventListener('click', handleBackdropClick);
 
-  useEffect(() => {
-    openOverlay(() => onCloseRef.current());
-  }, [openOverlay]);
-
-  useEffect(() => {
-    const activeElement = document.activeElement;
-    previouslyFocusedElementRef.current =
-      activeElement instanceof HTMLElement ? activeElement : null;
-    dialogRef.current?.querySelector<HTMLButtonElement>('button:not([disabled])')?.focus();
+    dialog.showModal();
 
     return () => {
-      const previouslyFocusedElement = previouslyFocusedElementRef.current;
-      if (previouslyFocusedElement?.isConnected) {
-        previouslyFocusedElement.focus();
-      }
+      dialog.removeEventListener('cancel', handleCancel);
+      dialog.removeEventListener('keydown', handleDialogKeyDown);
+      dialog.removeEventListener('click', handleBackdropClick);
+      if (dialog.open) dialog.close();
     };
   }, []);
 
-  useEffect(() => {
-    if (isSubmitting) dialogRef.current?.focus();
-  }, [isSubmitting]);
-
-  if (!modalRoot) {
-    return null;
-  }
-
-  return createPortal(
-    <div className="z-modal min-[800px]:items:start pointer-events-none fixed inset-0 flex items-center justify-center min-[800px]:pt-[calc(50vh-12rem)]">
-      <dialog
-        ref={dialogRef}
-        open
-        aria-modal="true"
-        aria-label={ariaLabel}
-        aria-busy={isSubmitting}
-        tabIndex={-1}
-        onKeyDown={handleDialogKeyDown}
-        className="card-width color-base pointer-events-auto static m-0 gap-1 border-0 p-0 pt-4"
-      >
-        <div className="flex grow flex-col items-center gap-2 p-6 text-center">{children}</div>
-        <div className={`flex gap-1 ${actionsLayout === 'vertical' ? 'flex-col' : ''}`}>
-          <StyledButton
-            onClick={handleCancel}
-            disabled={isSubmitting}
-            className="h-button font-bold"
-          >
-            {cancelLabel}
-          </StyledButton>
-          <StyledButton
-            onClick={handleConfirm}
-            disabled={isSubmitting}
-            className="h-button font-bold"
-          >
-            {confirmLabel}
-          </StyledButton>
-        </div>
-      </dialog>
-    </div>,
-    modalRoot,
+  return (
+    <dialog
+      ref={dialogRef}
+      aria-modal="true"
+      aria-label={ariaLabel}
+      aria-busy={isSubmitting}
+      className="modal-dialog card-width color-base gap-1 border-0 p-0 pt-4"
+    >
+      <div className="flex grow flex-col items-center gap-2 p-6 text-center">{children}</div>
+      <div className={`flex gap-1 ${actionsLayout === 'vertical' ? 'flex-col' : ''}`}>
+        <StyledButton
+          onClick={requestClose}
+          aria-disabled={isSubmitting}
+          autoFocus
+          className="h-button font-bold"
+        >
+          {cancelLabel}
+        </StyledButton>
+        <StyledButton
+          onClick={handleConfirm}
+          aria-disabled={isSubmitting}
+          className="h-button font-bold"
+        >
+          {confirmLabel}
+        </StyledButton>
+      </div>
+    </dialog>
   );
 }
