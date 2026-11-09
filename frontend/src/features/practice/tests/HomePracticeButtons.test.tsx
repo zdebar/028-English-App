@@ -1,5 +1,8 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, within } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+
+type ReviewKind = 'grammar' | 'vocabulary';
+type ReviewDirection = 'cz_to_en' | 'en_to_cz';
 
 const mocks = vi.hoisted(() => ({
   navigationButtonRender: vi.fn(),
@@ -10,9 +13,12 @@ const mocks = vi.hoisted(() => ({
     vocabularyReviewReadyAt: null as string | null,
     grammarReviewDueCount: 0,
     vocabularyReviewDueCount: 0,
+    reviewDueCounts: {
+      grammar: { cz_to_en: 0, en_to_cz: 0 },
+      vocabulary: { cz_to_en: 0, en_to_cz: 0 },
+    },
     nextReviewAt: null as string | null,
     initialTrainingAvailable: true,
-    continuingInitialLessonToday: false,
   },
 }));
 
@@ -20,6 +26,9 @@ vi.mock('@/locales/cs', () => ({
   TEXTS: {
     grammarReviewButton: 'Grammar review',
     vocabularyReviewButton: 'Vocabulary review',
+    directionCzToEn: 'From Czech to English',
+    directionEnToCz: 'From English to Czech',
+    availableItems: 'Available items',
     newButton: 'New',
     pronunciationPractice: 'Pronunciation practice',
     loadingMessage: 'Loading',
@@ -52,7 +61,6 @@ vi.mock('@/routing/data-navigation', () => ({
 }));
 
 import PracticeButtons from '@/features/practice/PracticeButton';
-import config from '@/config/config';
 
 describe('Home practice buttons', () => {
   beforeEach(() => {
@@ -64,86 +72,90 @@ describe('Home practice buttons', () => {
       vocabularyReviewReadyAt: null,
       grammarReviewDueCount: 0,
       vocabularyReviewDueCount: 0,
+      reviewDueCounts: {
+        grammar: { cz_to_en: 0, en_to_cz: 0 },
+        vocabulary: { cz_to_en: 0, en_to_cz: 0 },
+      },
       nextReviewAt: null,
       initialTrainingAvailable: true,
-      continuingInitialLessonToday: false,
     };
   });
 
-  it('keeps review disabled when no item is due, even with a stored date', () => {
-    const readyAt = new Date().toISOString();
-    mocks.availability.grammarReviewReadyAt = readyAt;
+  it('keeps a direction disabled when no item is due, even with a stored date', () => {
+    mocks.availability.grammarReviewReadyAt = new Date().toISOString();
     render(<PracticeButtons />);
-    expect(button('Grammar review').disabled).toBe(true);
-    expect(screen.queryByText('2')).toBeNull();
+
+    const czToEnButton = reviewButton('grammar', 'cz_to_en');
+    expect(czToEnButton.disabled).toBe(true);
+    expect(within(czToEnButton).getByText('0')).toBeTruthy();
   });
 
-  it('shows the current due count in the matching badge', () => {
-    mocks.availability.grammarReviewDueCount = 2;
+  it('shows the matching direction count in its own badge', () => {
+    mocks.availability.reviewDueCounts.grammar.cz_to_en = 2;
     render(<PracticeButtons />);
-    expect(screen.getByText('2')).toBeTruthy();
+
+    expect(within(reviewButton('grammar', 'cz_to_en')).getByText('2')).toBeTruthy();
+    expect(within(reviewButton('grammar', 'en_to_cz')).getByText('0')).toBeTruthy();
   });
 
-  it('enables both reviews when each has one due item', () => {
+  it('enables only the review directions that have due items', () => {
     mocks.availability.grammarReviewDueCount = 1;
     mocks.availability.vocabularyReviewDueCount = 1;
+    mocks.availability.reviewDueCounts.grammar.cz_to_en = 1;
+    mocks.availability.reviewDueCounts.vocabulary.en_to_cz = 1;
     render(<PracticeButtons />);
-    expect(button('Grammar review').disabled).toBe(false);
-    expect(button('Vocabulary review').disabled).toBe(false);
+
+    expect(reviewButton('grammar', 'cz_to_en').disabled).toBe(false);
+    expect(reviewButton('grammar', 'en_to_cz').disabled).toBe(true);
+    expect(reviewButton('vocabulary', 'cz_to_en').disabled).toBe(true);
+    expect(reviewButton('vocabulary', 'en_to_cz').disabled).toBe(false);
     expect(button('New').disabled).toBe(false);
   });
 
   it('enables vocabulary review when grammar is not ready', () => {
     mocks.availability.grammarReviewReadyAt = new Date(Date.now() + 86_400_000).toISOString();
     mocks.availability.vocabularyReviewDueCount = 1;
+    mocks.availability.reviewDueCounts.vocabulary.cz_to_en = 1;
     render(<PracticeButtons />);
 
-    expect(button('Grammar review').disabled).toBe(true);
-    expect(button('Vocabulary review').disabled).toBe(false);
+    expect(reviewButton('grammar', 'cz_to_en').disabled).toBe(true);
+    expect(reviewButton('vocabulary', 'cz_to_en').disabled).toBe(false);
     expect(button('New').disabled).toBe(false);
   });
 
-  it('locks new at the review limit', () => {
-    mocks.availability.grammarReviewDueCount = config.practice.grammarReviewLimitSize;
+  it('does not lock the next lesson when reviews reach their limit', () => {
+    mocks.availability.grammarReviewDueCount = 20;
     mocks.availability.vocabularyReviewDueCount = 3;
-
+    mocks.availability.reviewDueCounts.grammar.cz_to_en = 20;
+    mocks.availability.reviewDueCounts.vocabulary.en_to_cz = 3;
     render(<PracticeButtons />);
 
-    expect(button('Grammar review').disabled).toBe(false);
-    expect(button('Vocabulary review').disabled).toBe(false);
-    expect(button('New').disabled).toBe(true);
-  });
-
-  it('keeps review available when a review count exceeds its limit', () => {
-    const grammarReviewCount = config.practice.grammarReviewLimitSize + 1;
-    mocks.availability.grammarReviewDueCount = grammarReviewCount;
-    mocks.availability.vocabularyReviewDueCount = 3;
-
-    render(<PracticeButtons />);
-
-    expect(button('Grammar review').disabled).toBe(false);
-    expect(button('Vocabulary review').disabled).toBe(false);
-    expect(button('New').disabled).toBe(true);
-    expect(screen.getByText(String(grammarReviewCount))).toBeTruthy();
-    expect(screen.getByText('3')).toBeTruthy();
-  });
-
-  it('enables new below the review boundary', () => {
-    render(<PracticeButtons />);
-    expect(button('Grammar review').disabled).toBe(true);
-    expect(button('Vocabulary review').disabled).toBe(true);
+    expect(reviewButton('grammar', 'cz_to_en').disabled).toBe(false);
+    expect(reviewButton('vocabulary', 'en_to_cz').disabled).toBe(false);
     expect(button('New').disabled).toBe(false);
   });
 
-  it('disables practice actions while the central data snapshot is loading', () => {
+  it('enables the next lesson when no reviews are due', () => {
+    render(<PracticeButtons />);
+
+    expect(reviewButton('grammar', 'cz_to_en').disabled).toBe(true);
+    expect(reviewButton('vocabulary', 'cz_to_en').disabled).toBe(true);
+    expect(button('New').disabled).toBe(false);
+  });
+
+  it('disables all practice actions while the central data snapshot is loading', () => {
     mocks.state.status = 'loading';
     render(<PracticeButtons />);
-    expect(button('Grammar review').disabled).toBe(true);
-    expect(button('Vocabulary review').disabled).toBe(true);
+
     expect(button('New').disabled).toBe(true);
+    expect(button('Pronunciation practice').disabled).toBe(true);
+    expect(reviewButton('grammar', 'cz_to_en').disabled).toBe(true);
+    expect(reviewButton('grammar', 'en_to_cz').disabled).toBe(true);
+    expect(reviewButton('vocabulary', 'cz_to_en').disabled).toBe(true);
+    expect(reviewButton('vocabulary', 'en_to_cz').disabled).toBe(true);
   });
 
-  it('places pronunciation practice directly below the next-lesson button', () => {
+  it('shows the two review groups after pronunciation and next-lesson actions', () => {
     const { container } = render(<PracticeButtons />);
     const buttonGroup = container.firstElementChild;
 
@@ -151,24 +163,34 @@ describe('Home practice buttons', () => {
     expect(buttonGroup?.className).toContain('gap-1');
     const buttons = screen.getAllByRole('button');
 
-    expect(buttons).toHaveLength(4);
-    expect(buttons[0]).toBe(button('New'));
-    expect(buttons[1]).toBe(button('Pronunciation practice'));
-    expect(buttons[2]).toBe(button('Grammar review'));
-    expect(buttons[3]).toBe(button('Vocabulary review'));
+    expect(buttons).toHaveLength(6);
+    expect(buttons[0]).toBe(button('Pronunciation practice'));
+    expect(buttons[1]).toBe(button('New'));
+    expect(buttons[2]).toBe(reviewButton('vocabulary', 'cz_to_en'));
+    expect(buttons[3]).toBe(reviewButton('vocabulary', 'en_to_cz'));
+    expect(buttons[4]).toBe(reviewButton('grammar', 'cz_to_en'));
+    expect(buttons[5]).toBe(reviewButton('grammar', 'en_to_cz'));
   });
 
-  it('keeps new visible but disabled when no unstarted lesson exists', () => {
+  it('keeps next lesson visible but disabled when no unstarted lesson exists', () => {
     mocks.availability.initialTrainingAvailable = false;
     render(<PracticeButtons />);
     const newButton = button('New');
+
     expect(newButton.disabled).toBe(true);
     expect(newButton.className).toContain('color-button');
     expect(newButton.className).not.toContain('preserve-disabled-text-color');
   });
-
 });
 
 function button(name: string): HTMLButtonElement {
   return screen.getByRole('button', { name }) as HTMLButtonElement;
+}
+
+function reviewButton(reviewKind: ReviewKind, direction: ReviewDirection): HTMLButtonElement {
+  const kindLabel = reviewKind === 'grammar' ? 'Grammar review' : 'Vocabulary review';
+  const directionLabel = direction === 'cz_to_en' ? 'From Czech to English' : 'From English to Czech';
+  const dueCount = mocks.availability.reviewDueCounts[reviewKind][direction];
+  const accessibleName = `${kindLabel}: ${directionLabel}. Available items: ${dueCount}`;
+  return button(accessibleName);
 }
