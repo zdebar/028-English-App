@@ -10,6 +10,8 @@ import pandas as pd
 from dotenv import load_dotenv
 import google.cloud.texttospeech as texttospeech
 
+DEFAULT_GOOGLE_TTS_VOICE_NAME = "en-US-Neural2-F"
+
 # Now the GOOGLE_APPLICATION_CREDENTIALS variable is available
 load_dotenv()
 credentials_path = os.getenv("GOOGLE_APPLICATION_CREDENTIALS")
@@ -76,6 +78,7 @@ async def generate_audio_with_google_cloud(
     audio_folder: str,
     suffix: str = "",
     language_code: str = "en-US",
+    voice_name: str | None = None,
 ) -> pd.DataFrame:
     if texttospeech is None:
         raise ImportError("Missing dependency: google-cloud-texttospeech. Install with 'pip install google-cloud-texttospeech'.")
@@ -85,7 +88,8 @@ async def generate_audio_with_google_cloud(
     audio_names: list[str] = []
 
     # Better defaults for language learning: clear female voice with slower pace.
-    voice_name = os.getenv("GCP_TTS_VOICE_NAME", "en-US-Neural2-F")
+    if voice_name is None:
+        voice_name = os.getenv("GCP_TTS_VOICE_NAME", DEFAULT_GOOGLE_TTS_VOICE_NAME)
     speaking_rate_raw = os.getenv("GCP_TTS_SPEAKING_RATE", "1")
     pitch_raw = os.getenv("GCP_TTS_PITCH", "0.0")
     try:
@@ -145,11 +149,13 @@ async def generate_audio_with_google_cloud(
                 ssml_gender=texttospeech.SsmlVoiceGender.FEMALE
             )
 
-            audio_config = texttospeech.AudioConfig(
-                audio_encoding=texttospeech.AudioEncoding.OGG_OPUS,
-                speaking_rate=speaking_rate,
-                pitch=pitch,
-            )
+            audio_config_options = {
+                "audio_encoding": texttospeech.AudioEncoding.OGG_OPUS,
+                "speaking_rate": speaking_rate,
+            }
+            if "Chirp" not in voice_name:
+                audio_config_options["pitch"] = pitch
+            audio_config = texttospeech.AudioConfig(**audio_config_options)
 
             response = client.synthesize_speech(
                 input=synthesis_input, voice=voice, audio_config=audio_config

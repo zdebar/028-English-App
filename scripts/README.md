@@ -5,7 +5,7 @@ The Python scripts under **scripts/** prepare vocabulary CSVs and audio files. T
 ## Vocabulary workflow
 
 1. Put source CSV files in **scripts/data/prepare/**. Filenames start with the lesson number, such as **05_plurals.csv**. The preparation scripts create the folder if it does not exist.
-2. Run **python scripts/prepare_words.py** to normalize the selected columns, fill missing vocabulary flags, derive lesson and sort order from the filename, generate eSpeak IPA, and prepare missing US-English audio.
+2. Run **python scripts/prepare_words.py** to normalize the selected columns, fill missing vocabulary flags, derive lesson and sort order from the filename, generate eSpeak IPA, and prepare missing US-English audio with the configured voice (`GCP_TTS_VOICE_NAME`, default `en-US-Neural2-F`). To use Chirp 3 HD instead, run **python scripts/prepare_words.py --voice-model chirp3-hd-f**; its audio filenames get the `_chirp_hd_f` suffix so they can coexist with the current voice's recordings.
 3. Review the timestamped CSV output and the audio files in **scripts/data/prepare/audio/**.
 4. Optionally run **python scripts/prepare_audio_from_IPA.py** to regenerate audio using the CSV pronunciation field.
 5. Optionally run **python scripts/trim_audio.py**. It reads audio from **scripts/data/prepare/audio/** and writes trimmed copies to **scripts/data/prepare/audio_trim/** without replacing the originals.
