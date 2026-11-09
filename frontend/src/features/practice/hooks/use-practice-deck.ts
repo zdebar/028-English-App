@@ -44,6 +44,7 @@ type ContinueAnsweredQueueOptions = {
   setTotalCount: StateSetter<number | null>;
   availableDueCount: number | null;
   reviewPackage: ReviewPracticePackage;
+  reviewDirection: ReviewDirection | undefined;
   setFinishedReview: StateSetter<boolean>;
   setRetryAction: StateSetter<ReviewRetryAction | null>;
   setQueueVersion: StateSetter<number>;
@@ -84,6 +85,7 @@ type PersistAndAdvanceReviewItemOptions = Readonly<{
   updatedItem: UserItemLocal;
   userId: string | null;
   reviewKind: ReviewKind;
+  reviewDirection: ReviewDirection | undefined;
   saveReviewItem: (item: UserItemLocal) => Promise<boolean>;
   pendingAnswerRef: MutableRef<UserItemLocal | null>;
   setSaveError: SaveErrorSetter;
@@ -122,6 +124,7 @@ export function usePracticeDeck(
   userId: string | null,
   reviewKind: ReviewKind = 'grammar',
   onComplete?: PracticeCompletionHandler,
+  reviewDirection?: ReviewDirection,
 ) {
   const [saveError, setSaveError] = useState<Error | null>(null);
   const saveReviewItem = useCallback(
@@ -136,7 +139,9 @@ export function usePracticeDeck(
     loading,
     error,
   } = useCurrentUserDataPackage(userId, { kind: 'review-practice', reviewKind });
-  const initialReviewDeck = reviewPackage?.initialDeck;
+  const initialReviewDeck = reviewDirection
+    ? reviewPackage?.decks[reviewDirection]
+    : reviewPackage?.initialDeck;
   const activeDirectionRef = useRef<ReviewDirection>(getInitialReviewDirection(initialReviewDeck));
   const reviewQueueRef = useRef<ReviewQueue | null>(null);
   const queueDataRef = useRef<ReviewDeckData | null>(null);
@@ -223,6 +228,7 @@ export function usePracticeDeck(
       updatedItem,
       userId,
       reviewKind,
+      reviewDirection,
       saveReviewItem,
       pendingAnswerRef,
       setSaveError,
@@ -238,7 +244,7 @@ export function usePracticeDeck(
       resetQuestionState,
       completePractice,
     }),
-    [completePractice, resetQuestionState, reviewKind, saveReviewItem, userId],
+    [completePractice, resetQuestionState, reviewDirection, reviewKind, saveReviewItem, userId],
   );
 
   const nextItem = useCallback(
@@ -303,12 +309,12 @@ export function usePracticeDeck(
 // -- Package and presentation helpers --
 type SaveErrorSetter = (error: Error | null) => void;
 
-function getInitialReviewDirection(deck: ReviewDeckData | undefined): ReviewDirection {
-  return deck?.reviewDirection ?? 'cz_to_en';
-}
-
 function getInitialProcessedDeck(deck: ReviewDeckData | undefined): ReviewDeckData | null {
   return deck ?? null;
+}
+
+function getInitialReviewDirection(deck: ReviewDeckData | undefined): ReviewDirection {
+  return deck?.reviewDirection ?? 'cz_to_en';
 }
 
 function getFetchedReviewDeck(dataReady: boolean, deck: ReviewDeckData | undefined): ReviewDeckData | null {
@@ -379,6 +385,7 @@ async function persistAndAdvanceReviewItem({
   updatedItem,
   userId,
   reviewKind,
+  reviewDirection,
   saveReviewItem,
   pendingAnswerRef,
   setSaveError,
@@ -416,7 +423,7 @@ async function persistAndAdvanceReviewItem({
   const answerResult = answerCurrentReviewItem(queue, updatedItem);
   if (!answerResult) return;
 
-  const availableDueCount = getAvailableDueCount(currentPackage.availability, reviewKind);
+  const availableDueCount = getAvailableDueCount(currentPackage.availability, reviewKind, reviewDirection);
   pendingAnswerRef.current = null;
   setRetryAction(null);
   await continueAnsweredQueue({
@@ -430,6 +437,7 @@ async function persistAndAdvanceReviewItem({
     setTotalCount,
     availableDueCount,
     reviewPackage: currentPackage,
+    reviewDirection,
     setFinishedReview,
     setRetryAction,
     setQueueVersion,
@@ -544,8 +552,10 @@ function getReviewPronunciation(
 function getAvailableDueCount(
   availability: ReviewAvailability | null,
   reviewKind: ReviewKind,
+  reviewDirection: ReviewDirection | undefined,
 ): number | null {
   if (!availability) return null;
+  if (reviewDirection) return availability.reviewDueCounts[reviewKind][reviewDirection];
   if (reviewKind === 'grammar') return availability.grammarReviewDueCount;
   return availability.vocabularyReviewDueCount;
 }
@@ -562,6 +572,7 @@ async function continueAnsweredQueue({
   setTotalCount,
   availableDueCount,
   reviewPackage,
+  reviewDirection,
   setFinishedReview,
   setRetryAction,
   setQueueVersion,
@@ -578,26 +589,28 @@ async function continueAnsweredQueue({
     return;
   }
 
-      const nextDeck = loadNextDirectionDeck(reviewPackage, activeDirectionRef.current);
-  if (!nextDeck) {
-    await completePractice();
-    return;
+  if (reviewDirection === undefined) {
+    const nextDeck = loadNextDirectionDeck(reviewPackage, activeDirectionRef.current);
+    if (nextDeck) {
+      completedOffsetRef.current += queue.completedCount;
+      startDirectionDeck({
+        deck: nextDeck,
+        queueRef: reviewQueueRef,
+        dataRef: queueDataRef,
+        directionRef: activeDirectionRef,
+        update: (nextQueue) => {
+          setCompletedCount(completedOffsetRef.current + nextQueue.completedCount);
+        },
+        setFinishedReview,
+        setRetryAction,
+        setQueueVersion,
+        resetQuestionState,
+      });
+      return;
+    }
   }
 
-  completedOffsetRef.current += queue.completedCount;
-  startDirectionDeck({
-    deck: nextDeck,
-    queueRef: reviewQueueRef,
-    dataRef: queueDataRef,
-    directionRef: activeDirectionRef,
-    update: (nextQueue) => {
-      setCompletedCount(completedOffsetRef.current + nextQueue.completedCount);
-    },
-    setFinishedReview,
-    setRetryAction,
-    setQueueVersion,
-    resetQuestionState,
-  });
+  await completePractice();
 }
 
 function loadNextDirectionDeck(

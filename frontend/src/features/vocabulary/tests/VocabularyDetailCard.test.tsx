@@ -120,6 +120,18 @@ import VocabularyDetailCard from '@/features/vocabulary/VocabularyDetailCard';
 
 describe('VocabularyDetailCard', () => {
   beforeEach(() => {
+    Object.defineProperty(HTMLDialogElement.prototype, 'showModal', {
+      configurable: true,
+      value(this: HTMLDialogElement) {
+        this.open = true;
+      },
+    });
+    Object.defineProperty(HTMLDialogElement.prototype, 'close', {
+      configurable: true,
+      value(this: HTMLDialogElement) {
+        this.open = false;
+      },
+    });
     vi.clearAllMocks();
     formatVocabularyDateTimeMock.mockImplementation((x: string | null | undefined) =>
       x ? `date:${x}` : '',

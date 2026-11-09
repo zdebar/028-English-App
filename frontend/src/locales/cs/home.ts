@@ -13,7 +13,8 @@ export const HOME_TEXTS = {
   installButtonTooltip: 'Nainstalovat PWA aplikaci.',
   grammarReviewButton: 'Opakování gramatiky',
   vocabularyReviewButton: 'Opakování slovíček',
-  newButton: 'Další lekce',
+  availableItems: 'Počet dostupných položek',
+  newButton: 'Nová lekce',
 
   // User
   authInitErrorToast: 'Nastala chyba při přihlašování.',

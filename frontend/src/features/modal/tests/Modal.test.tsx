@@ -1,20 +1,5 @@
-import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { act, fireEvent, render, screen } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-
-const mocks = vi.hoisted(() => ({
-  closeOverlay: vi.fn(),
-  openOverlay: vi.fn(),
-  setOverlayDismissible: vi.fn(),
-}));
-
-vi.mock('@/features/overlay/use-overlay-store', () => ({
-  useOverlayStore: (selector: (state: any) => unknown) =>
-    selector({
-      closeOverlay: mocks.closeOverlay,
-      openOverlay: mocks.openOverlay,
-      setOverlayDismissible: mocks.setOverlayDismissible,
-    }),
-}));
 
 vi.mock('@/locales/cs', () => ({
   TEXTS: {
@@ -23,49 +8,49 @@ vi.mock('@/locales/cs', () => ({
   },
 }));
 
-vi.mock('../../components/UI/buttons/BaseButton', () => ({
-  default: ({ onClick, children }: any) => <button onClick={onClick}>{children}</button>,
-}));
-
 import { Modal } from '@/features/modal/Modal';
 
 describe('Modal', () => {
   beforeEach(() => {
-    vi.clearAllMocks();
-    if (!document.getElementById('root')) {
-      const root = document.createElement('div');
-      root.id = 'root';
-      document.body.appendChild(root);
-    }
+    Object.defineProperty(HTMLDialogElement.prototype, 'showModal', {
+      configurable: true,
+      value(this: HTMLDialogElement) {
+        this.open = true;
+      },
+    });
+    Object.defineProperty(HTMLDialogElement.prototype, 'close', {
+      configurable: true,
+      value(this: HTMLDialogElement) {
+        this.open = false;
+      },
+    });
   });
 
-  it('opens overlay on mount with onClose callback', () => {
-    const onClose = vi.fn();
-
-    render(
-      <Modal onConfirm={vi.fn()} onClose={onClose} ariaLabel="Test dialog">
-        content
-      </Modal>,
-    );
-
-    const registeredClose = mocks.openOverlay.mock.calls[0]?.[0];
-    expect(registeredClose).toBeTypeOf('function');
-    registeredClose?.();
-    expect(onClose).toHaveBeenCalledTimes(1);
-  });
-
-  it('calls closeOverlay on cancel', () => {
-    render(
+  it('opens a native modal dialog on mount', () => {
+    const { container } = render(
       <Modal onConfirm={vi.fn()} onClose={vi.fn()} ariaLabel="Test dialog">
         content
       </Modal>,
     );
 
-    fireEvent.click(screen.getByRole('button', { name: 'Cancel' }));
-    expect(mocks.closeOverlay).toHaveBeenCalledTimes(1);
+    expect(container.querySelector('dialog')?.open).toBe(true);
   });
 
-  it('awaits confirmation before closing the overlay', async () => {
+  it('closes the dialog and calls onClose when canceled', () => {
+    const onClose = vi.fn();
+    const { container } = render(
+      <Modal onConfirm={vi.fn()} onClose={onClose} ariaLabel="Test dialog">
+        content
+      </Modal>,
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: 'Cancel' }));
+
+    expect(onClose).toHaveBeenCalledTimes(1);
+    expect(container.querySelector('dialog')?.open).toBe(false);
+  });
+
+  it('awaits confirmation before closing the dialog', async () => {
     let resolveConfirmation: (() => void) | undefined;
     const onConfirm = vi.fn(
       () =>
@@ -73,9 +58,10 @@ describe('Modal', () => {
           resolveConfirmation = resolve;
         }),
     );
+    const onClose = vi.fn();
 
     render(
-      <Modal onConfirm={onConfirm} onClose={vi.fn()} ariaLabel="Test dialog">
+      <Modal onConfirm={onConfirm} onClose={onClose} ariaLabel="Test dialog">
         content
       </Modal>,
     );
@@ -83,18 +69,15 @@ describe('Modal', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Confirm' }));
 
     expect(onConfirm).toHaveBeenCalledTimes(1);
-    expect(mocks.setOverlayDismissible).toHaveBeenCalledWith(false);
-    expect(mocks.closeOverlay).not.toHaveBeenCalled();
-    expect((screen.getByRole('button', { name: 'Cancel' }) as HTMLButtonElement).disabled).toBe(true);
-    expect((screen.getByRole('button', { name: 'Confirm' }) as HTMLButtonElement).disabled).toBe(true);
+    expect(onClose).not.toHaveBeenCalled();
+    expect(screen.getByRole('button', { name: 'Cancel' }).getAttribute('aria-disabled')).toBe('true');
+    expect(screen.getByRole('button', { name: 'Confirm' }).getAttribute('aria-disabled')).toBe('true');
 
     await act(async () => {
       resolveConfirmation?.();
     });
 
-    await waitFor(() => {
-      expect(mocks.closeOverlay).toHaveBeenCalledTimes(1);
-    });
+    expect(onClose).toHaveBeenCalledTimes(1);
   });
 
   it('prevents repeated confirmation before the component rerenders', () => {
@@ -112,5 +95,4 @@ describe('Modal', () => {
 
     expect(onConfirm).toHaveBeenCalledTimes(1);
   });
-
 });

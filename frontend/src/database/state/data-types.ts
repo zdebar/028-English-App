@@ -6,12 +6,11 @@ import type {
 } from '@/types/generic.types';
 import type { GroupItemType, GroupRelationType, GroupType } from '@/types/table.types';
 import type { PracticeDeckEntry, PracticeDeckItem, ResolvedPracticeEntry, UserItemLocal } from '@/types/user-item.types';
-import type { ReviewDirection, ReviewKind } from '@/types/practice.types';
+import type { ReviewDirection, ReviewDueCounts, ReviewKind } from '@/types/practice.types';
 import type { PronunciationGroupDetailType, PronunciationGroupOverviewType } from '@/types/pronunciation.types';
 
 export type PracticeAvailabilityData = ReviewAvailability & Readonly<{
   initialTrainingAvailable: boolean;
-  continuingInitialLessonToday: boolean;
 }>;
 
 export type OverviewAvailabilityData = Readonly<{
@@ -146,6 +145,7 @@ export type ReviewAvailability = Readonly<{
   vocabularyReviewReadyAt: string | null;
   grammarReviewDueCount: number;
   vocabularyReviewDueCount: number;
+  reviewDueCounts: ReviewDueCounts;
   nextReviewAt: string | null;
 }>;
 export type ReviewArrays = Readonly<Record<ReviewKind, readonly PracticeDeckItem[]>>;
