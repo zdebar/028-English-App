@@ -8,7 +8,7 @@ import { useToastStore } from '../toast/use-toast-store';
 import { useQueryErrorToast } from '@/features/logging/use-query-error-toast';
 import { useCallback, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import type { ReviewKind } from '@/types/practice.types';
+import type { ReviewDirection, ReviewKind } from '@/types/practice.types';
 import { usePracticeExitBlocker } from './hooks/use-practice-exit-blocker';
 import { formatProgress } from '@/utils/progress.utils';
 import { ROUTES } from '@/config/routes.config';
@@ -16,16 +16,17 @@ import type { UserItemLocal } from '@/types/user-item.types';
 
 type PracticeCardProps = Readonly<{
   reviewKind?: ReviewKind;
+  reviewDirection?: ReviewDirection;
 }>;
 
-export default function PracticeCard({ reviewKind = 'grammar' }: PracticeCardProps) {
+export default function PracticeCard({ reviewKind = 'grammar', reviewDirection }: PracticeCardProps) {
   const userId = useAuthStore((state) => state.userId);
   const showToast = useToastStore((state) => state.showToast);
   const navigate = useNavigate();
   const handlePracticeComplete = useCallback(() => {
     void navigate(ROUTES.home, { replace: true });
   }, [navigate]);
-  const deck = usePracticeDeck(userId, reviewKind, handlePracticeComplete);
+  const deck = usePracticeDeck(userId, reviewKind, handlePracticeComplete, reviewDirection);
 
   usePracticeExitBlocker(deck.finishPractice);
   const notifyDetailLoadFailure = usePracticeDetailFailureNotifier(

@@ -269,11 +269,22 @@ export function selectReviewAvailability(
   const arrays = data.reviewArrays ?? selectReviewArrays(data, userId);
   const grammarReviewDueCount = getDueCount(arrays.grammar, nowIso);
   const vocabularyReviewDueCount = getDueCount(arrays.vocabulary, nowIso);
+  const reviewDueCounts = {
+    grammar: {
+      cz_to_en: getDueCountByDirection(arrays.grammar, 'cz_to_en', nowIso),
+      en_to_cz: getDueCountByDirection(arrays.grammar, 'en_to_cz', nowIso),
+    },
+    vocabulary: {
+      cz_to_en: getDueCountByDirection(arrays.vocabulary, 'cz_to_en', nowIso),
+      en_to_cz: getDueCountByDirection(arrays.vocabulary, 'en_to_cz', nowIso),
+    },
+  };
   return {
     grammarReviewReadyAt: getReviewReadyAt(arrays.grammar, config.practice.grammarReviewLimitSize, nowIso),
     vocabularyReviewReadyAt: getReviewReadyAt(arrays.vocabulary, config.practice.vocabularyReviewLimitSize, nowIso),
     grammarReviewDueCount,
     vocabularyReviewDueCount,
+    reviewDueCounts,
     nextReviewAt: earlierDate(getNextReviewAt(arrays.grammar, nowIso), getNextReviewAt(arrays.vocabulary, nowIso)),
   };
 }
@@ -304,7 +315,7 @@ export function selectReviewDeck(
     abandoned: entries.length === 0,
     reviewKind,
     reviewDirection: direction,
-    availableCount: countDue(selected, other, now),
+    availableCount: allowFallback ? countDue(selected, other, now) : countDue(selected, [], now),
   };
 }
 
@@ -333,36 +344,20 @@ export function buildPreparedInitialLesson(data: AppDataSnapshot, userId: string
   return { lesson, items: lessonItems, entries, grammar: grammarContext.grammar, grammarGroup: grammarContext.grammarGroup };
 }
 
-export function selectHasStartedLessonToday(
-  data: AppDataSnapshot,
-  userId: string,
-  lessonId: number,
-  now = new Date(),
-): boolean {
-  const start = new Date(now.getFullYear(), now.getMonth(), now.getDate()).toISOString();
-  const end = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1).toISOString();
-  return data.user_lessons.some((entry) =>
-    entry.user_id === userId && entry.lesson_id === lessonId && entry.started_at >= start && entry.started_at < end,
-  );
-}
-
 export function selectPracticeAvailability(data: AppDataSource, userId: string, now = new Date()): {
   grammarReviewReadyAt: string | null;
   vocabularyReviewReadyAt: string | null;
   grammarReviewDueCount: number;
   vocabularyReviewDueCount: number;
+  reviewDueCounts: ReviewAvailability['reviewDueCounts'];
   nextReviewAt: string | null;
   initialTrainingAvailable: boolean;
-  continuingInitialLessonToday: boolean;
 } {
   const review = selectReviewAvailability(data, userId, now.toISOString());
   const initialLesson = selectPreparedInitialLesson(data, userId);
   return {
     ...review,
     initialTrainingAvailable: initialLesson !== null,
-    continuingInitialLessonToday: initialLesson?.lesson
-      ? selectHasStartedLessonToday(data, userId, initialLesson.lesson.id, now)
-      : false,
   };
 }
 
@@ -460,6 +455,17 @@ function sortReviewItems(items: readonly PracticeDeckItem[]): PracticeDeckItem[]
 
 function getDueCount(items: readonly PracticeDeckItem[], now: string): number {
   return items.filter((item) => isReviewItemReadyAt(item, now, item.review_direction)).length;
+}
+
+function getDueCountByDirection(
+  items: readonly PracticeDeckItem[],
+  direction: ReviewDirection,
+  now: string,
+): number {
+  return items
+    .filter((item) => item.review_direction === direction)
+    .filter((item) => isReviewItemReadyAt(item, now, direction))
+    .length;
 }
 
 function getReviewReadyAt(items: readonly PracticeDeckItem[], deckSize: number, now: string): string | null {

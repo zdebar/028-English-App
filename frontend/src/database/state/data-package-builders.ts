@@ -1,10 +1,8 @@
-import config from '@/config/config';
 import type { ReviewDirection, ReviewKind } from '@/types/practice.types';
 import type { GroupType } from '@/types/table.types';
 import type { PracticeDeckEntry } from '@/types/user-item.types';
 import {
   selectGrammarOverview,
-  selectHasStartedLessonToday,
   selectLevelOverview,
   selectPracticeAvailability,
   selectPracticeGrammarContext,
@@ -260,24 +258,12 @@ function buildInitialTrainingPackage(state: DataManagerState, userId: string): I
   const prepared = selectPreparedInitialLesson(state, userId);
   if (!prepared?.lesson) return { ...EMPTY_INITIAL_TRAINING, soundGroups: getSoundGroups(state) };
 
-  const now = new Date(state.nowIso);
-  const continuingLesson = selectHasStartedLessonToday(state, userId, prepared.lesson.id, now);
-  const availability = selectPracticeAvailability(state, userId, now);
-  if (!continuingLesson && hasReachedReviewLimit(availability.grammarReviewDueCount, availability.vocabularyReviewDueCount)) {
-    return { ...EMPTY_INITIAL_TRAINING, soundGroups: getSoundGroups(state) };
-  }
-
   const lessonGroup = state.groups.find((group) => group.id === prepared.lesson?.group_id);
   return {
     ...prepared,
     groupNote: lessonGroup?.note ?? null,
     soundGroups: getSoundGroups(state),
   };
-}
-
-function hasReachedReviewLimit(grammarDueCount: number, vocabularyDueCount: number): boolean {
-  return grammarDueCount >= config.practice.grammarReviewLimitSize ||
-    vocabularyDueCount >= config.practice.vocabularyReviewLimitSize;
 }
 
 function getSoundGroups(state: AppDataSnapshot): GroupType[] {

@@ -13,6 +13,7 @@ export const HOME_TEXTS = {
   installButtonTooltip: 'Nainstalovat PWA aplikaci.',
   grammarReviewButton: 'Opakování gramatiky',
   vocabularyReviewButton: 'Opakování slovíček',
+  availableItems: 'Počet dostupných položek',
   newButton: 'Další lekce',
 
   // User

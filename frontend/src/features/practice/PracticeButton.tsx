@@ -3,12 +3,16 @@ import { TEXTS } from '@/locales/cs';
 import { memo, type JSX } from 'react';
 import { NavigationButton } from '@/routing/data-navigation';
 import StyledButton from '@/components/UI/buttons/StyledButton';
-import { hasReachedReviewLimit } from './practice-availability';
+import ChevronRightIcon from '@/components/UI/icons/ChevronRightIcon';
 import { useAuthStore } from '@/features/auth/use-auth-store';
 import { useCurrentUserDataPackage } from '@/database/state/use-current-user-data-package';
-import type { PracticeAvailabilitySnapshot } from './practice-availability';
+import type { PracticeAvailabilityData } from '@/database/state/data-types';
+import type { ReviewDirection, ReviewKind } from '@/types/practice.types';
 
-type ReviewKind = 'grammar' | 'vocabulary';
+const REVIEW_SECTION_LABEL_CLASS_NAME =
+  'h-input border-disabled-light text-light dark:border-disabled-dark dark:text-dark flex w-full items-center justify-start border border-dashed px-4 text-left font-normal';
+
+type ReviewSectionProps = Readonly<{ reviewKind: ReviewKind }>;
 
 const NewPracticeButton = memo(function NewPracticeButton(): JSX.Element {
   const { availability, loading, error } = usePracticeStatus();
@@ -18,11 +22,7 @@ const NewPracticeButton = memo(function NewPracticeButton(): JSX.Element {
 
   if (!available && !loading) {
     return (
-      <StyledButton
-        className="h-button max-h-button w-full px-4"
-        disabled
-        title={title}
-      >
+      <StyledButton className="h-button max-h-button w-full px-4" disabled title={title}>
         <PracticeButtonLabel>{TEXTS.newButton}</PracticeButtonLabel>
       </StyledButton>
     );
@@ -41,17 +41,12 @@ const NewPracticeButton = memo(function NewPracticeButton(): JSX.Element {
 });
 
 type ReviewCountBadgeProps = Readonly<{
-  reviewKind: ReviewKind;
+  dueCount: number;
 }>;
 
 const ReviewCountBadge = memo(function ReviewCountBadge({
-  reviewKind,
-}: ReviewCountBadgeProps): JSX.Element | null {
-  const { availability } = usePracticeStatus();
-  const dueCount = selectReviewDueCount(availability, reviewKind);
-
-  if (dueCount <= 0) return null;
-
+  dueCount,
+}: ReviewCountBadgeProps): JSX.Element {
   return (
     <span
       aria-hidden="true"
@@ -64,28 +59,29 @@ const ReviewCountBadge = memo(function ReviewCountBadge({
 
 type ReviewPracticeButtonProps = Readonly<{
   reviewKind: ReviewKind;
-  to: string;
-  children: string;
+  direction: ReviewDirection;
 }>;
 
 const ReviewPracticeButton = memo(function ReviewPracticeButton({
   reviewKind,
-  to,
-  children,
+  direction,
 }: ReviewPracticeButtonProps): JSX.Element {
   const { availability, loading, error } = usePracticeStatus();
-  const disabled = selectReviewDisabled(availability, loading, error, reviewKind);
+  const dueCount = selectReviewDueCount(availability, reviewKind, direction);
+  const disabled = selectReviewDisabled(availability, loading, error, reviewKind, direction);
   const title = resolveButtonTitle(loading, error, disabled);
+  const to = `${getPracticeRoute(reviewKind)}?direction=${direction}`;
 
   return (
     <NavigationButton
       to={to}
-      className="h-button max-h-button relative w-full px-4"
+      className="h-button max-h-button relative w-full min-w-0 px-2 text-sm"
       disabled={disabled}
       title={title}
+      aria-label={getReviewButtonAccessibleLabel(reviewKind, direction, dueCount)}
     >
-      <ReviewCountBadge reviewKind={reviewKind} />
-      <PracticeButtonLabel>{children}</PracticeButtonLabel>
+      <ReviewCountBadge dueCount={dueCount} />
+      <ReviewDirectionLabel direction={direction} />
     </NavigationButton>
   );
 });
@@ -111,30 +107,56 @@ const PronunciationPracticeButton = memo(function PronunciationPracticeButton():
 export default function PracticeButtons(): JSX.Element {
   return (
     <div className="flex w-full flex-col gap-1">
-      <NewPracticeButton />
       <PronunciationPracticeButton />
-      <ReviewPracticeButton reviewKind="grammar" to={ROUTES.grammarPractice}>
-        {TEXTS.grammarReviewButton}
-      </ReviewPracticeButton>
-      <ReviewPracticeButton reviewKind="vocabulary" to={ROUTES.vocabularyPractice}>
-        {TEXTS.vocabularyReviewButton}
-      </ReviewPracticeButton>
+      <NewPracticeButton />
+      <ReviewPracticeSection reviewKind="vocabulary" />
+      <ReviewPracticeSection reviewKind="grammar" />
     </div>
+  );
+}
+
+function ReviewPracticeSection({ reviewKind }: ReviewSectionProps): JSX.Element {
+  const title =
+    reviewKind === 'vocabulary' ? TEXTS.vocabularyReviewButton : TEXTS.grammarReviewButton;
+
+  return (
+    <section aria-label={title} className="flex flex-col gap-1">
+      <div className={REVIEW_SECTION_LABEL_CLASS_NAME}>
+        <PracticeButtonLabel>{title}</PracticeButtonLabel>
+      </div>
+      <div className="grid grid-cols-2 gap-1">
+        <ReviewPracticeButton reviewKind={reviewKind} direction="cz_to_en" />
+        <ReviewPracticeButton reviewKind={reviewKind} direction="en_to_cz" />
+      </div>
+    </section>
+  );
+}
+
+function ReviewDirectionLabel({
+  direction,
+}: Readonly<{ direction: ReviewDirection }>): JSX.Element {
+  const [sourceLanguage, targetLanguage] = getDirectionLanguages(direction);
+
+  return (
+    <span className="grid w-full grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center">
+      <span className="overflow-hidden text-right text-ellipsis whitespace-nowrap">
+        {sourceLanguage}
+      </span>
+      <ChevronRightIcon className="mx-1 shrink-0" size={16} />
+      <span className="overflow-hidden text-left text-ellipsis whitespace-nowrap">
+        {targetLanguage}
+      </span>
+    </span>
   );
 }
 
 function PracticeButtonLabel({ children }: Readonly<{ children: string }>): JSX.Element {
   return (
     <span className="grid w-full grid-cols-[1fr_max-content_1fr]">
-      <span
-        aria-hidden="true"
-        className="invisible col-start-2 row-start-1 whitespace-nowrap"
-      >
+      <span aria-hidden="true" className="invisible col-start-2 row-start-1 whitespace-nowrap">
         {TEXTS.grammarReviewButton}
       </span>
-      <span
-        className="col-start-2 row-start-1 w-0 min-w-0 justify-self-start overflow-visible text-left whitespace-nowrap"
-      >
+      <span className="col-start-2 row-start-1 w-0 min-w-0 justify-self-start overflow-visible text-left whitespace-nowrap">
         {children}
       </span>
     </span>
@@ -142,7 +164,7 @@ function PracticeButtonLabel({ children }: Readonly<{ children: string }>): JSX.
 }
 
 function usePracticeStatus(): Readonly<{
-  availability: PracticeAvailabilitySnapshot | null;
+  availability: PracticeAvailabilityData | null;
   loading: boolean;
   error: Error | null;
 }> {
@@ -156,22 +178,23 @@ function usePracticeStatus(): Readonly<{
 }
 
 function selectReviewDueCount(
-  state: PracticeAvailabilitySnapshot | null,
+  state: PracticeAvailabilityData | null,
   reviewKind: ReviewKind,
+  direction: ReviewDirection,
 ): number {
   if (!state) return 0;
-  if (reviewKind === 'grammar') return state.grammarReviewDueCount;
-  return state.vocabularyReviewDueCount;
+  return state.reviewDueCounts[reviewKind][direction];
 }
 
 function selectReviewDisabled(
-  state: PracticeAvailabilitySnapshot | null,
+  state: PracticeAvailabilityData | null,
   loading: boolean,
   error: Error | null,
   reviewKind: ReviewKind,
+  direction: ReviewDirection,
 ): boolean {
   if (loading || error || !state) return true;
-  return selectReviewDueCount(state, reviewKind) === 0;
+  return selectReviewDueCount(state, reviewKind, direction) === 0;
 }
 
 function resolveButtonTitle(
@@ -186,14 +209,31 @@ function resolveButtonTitle(
 }
 
 function selectNewDisabled(
-  state: PracticeAvailabilitySnapshot | null,
+  state: PracticeAvailabilityData | null,
   loading: boolean,
   error: Error | null,
 ): boolean {
-  if (loading || error || !state) return true;
-  if (!state.initialTrainingAvailable) return true;
-  if (state.continuingInitialLessonToday) return false;
-  return hasReachedReviewLimit(state);
+  return loading || error !== null || !state?.initialTrainingAvailable;
+}
+
+function getPracticeRoute(reviewKind: ReviewKind): string {
+  return reviewKind === 'vocabulary' ? ROUTES.vocabularyPractice : ROUTES.grammarPractice;
+}
+
+function getDirectionLanguages(direction: ReviewDirection): readonly [string, string] {
+  if (direction === 'cz_to_en') return ['CZ', 'EN'];
+  return ['EN', 'CZ'];
+}
+
+function getReviewButtonAccessibleLabel(
+  reviewKind: ReviewKind,
+  direction: ReviewDirection,
+  dueCount: number,
+): string {
+  const kindLabel =
+    reviewKind === 'vocabulary' ? TEXTS.vocabularyReviewButton : TEXTS.grammarReviewButton;
+  const directionLabel = direction === 'cz_to_en' ? TEXTS.directionCzToEn : TEXTS.directionEnToCz;
+  return `${kindLabel}: ${directionLabel}. ${TEXTS.availableItems}: ${dueCount}`;
 }
 
 function getPronunciationPracticeButtonTitle(
