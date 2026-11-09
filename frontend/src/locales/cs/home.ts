@@ -14,7 +14,7 @@ export const HOME_TEXTS = {
   grammarReviewButton: 'Opakování gramatiky',
   vocabularyReviewButton: 'Opakování slovíček',
   availableItems: 'Počet dostupných položek',
-  newButton: 'Další lekce',
+  newButton: 'Nová lekce',
 
   // User
   authInitErrorToast: 'Nastala chyba při přihlašování.',

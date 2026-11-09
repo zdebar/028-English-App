@@ -50,8 +50,8 @@ export default function Home(): JSX.Element {
   return (
     <>
       {userId ? (
-        <div className="card-width relative flex h-full w-full grow flex-col justify-start gap-4 landscape:pt-4">
-          <div>
+        <div className="card-width relative flex h-full w-full grow flex-col justify-start gap-4">
+          <div className="landscape:pt-4">
             <HomeActionLinks />
             <p className="text-error-light dark:text-error-dark px-4 text-center text-sm">
               {TEXTS.testModeWarning}
@@ -63,9 +63,7 @@ export default function Home(): JSX.Element {
               <SimulateDataButton />
             </div>
           )}
-          <div className="flex w-full flex-col">
-            <PracticeButton />
-          </div>
+          <PracticeButton />
           <div className="relative">
             <p
               className={`text-error-light dark:text-error-dark px-4 py-2 text-center text-sm ${isSyncError ? 'visible' : 'hidden'}`}
