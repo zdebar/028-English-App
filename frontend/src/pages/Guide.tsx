@@ -13,19 +13,20 @@ export default function Guide(): JSX.Element {
         <h2>Úvod</h2>
         <p>
           Jednoduchá ale kompletní aplikace pro učení angličtiny. Zde v návodu se nachází pouze
-          klíčové aspekty aplikace. Vše ostatní lze pochopit prostým projetím aplikace.
+          klíčové aspekty aplikace. Vše ostatní lze pochopit prostým prozkoumáním aplikace.
         </p>
         <p>
           Prvotní lekce jsou zaměřené na správnou výslovnost. Po úvodním procvičení hlásek v lekcích
-          lze, a je doporučeno, procvičovat výslovnost v přehledech.
+          lze, a je doporučeno, procvičovat výslovnost v Cvičení výslovnosti.
         </p>
       </section>
       <section>
         <h2>Odhalená kartička</h2>
         <h3>Opakovat, znám, snadné</h3>
         <p>
-          Po odhalení vyberte, jak jste si vedli. Opakovat sníží postup o jeden krok, Znám jej posune
-          o jeden krok a Snadné o čtyři kroky. Aplikace podle postupu naplánuje další opakování.
+          Po odhalení vyberte, jak jste si vedli. Opakovat sníží postup o jeden krok, Znám jej
+          posune o jeden krok a Snadné o čtyři kroky. Aplikace podle postupu naplánuje další
+          opakování.
         </p>
       </section>
       <section>
