@@ -27,7 +27,7 @@ function InitialTrainingContent({
   if (deck.loading) return <DelayedNotification />;
   if (deck.isComplete) return null;
 
-  if (deck.lesson && (!deck.hasContent || (!deck.hasProgress && !introDismissed))) {
+  if (deck.lesson && (!deck.hasContent || !introDismissed)) {
     return (
       <LessonTrainingOverviewCard
         lesson={deck.lesson}
