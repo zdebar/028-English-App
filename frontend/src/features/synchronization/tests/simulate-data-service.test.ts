@@ -4,14 +4,19 @@ const mocks = vi.hoisted(() => ({
   transaction: vi.fn(),
   getItemCandidates: vi.fn(),
   simulateItems: vi.fn(),
-  putUserLessons: vi.fn(),
+  getUserLessons: vi.fn(),
+  addUserLessons: vi.fn(),
   publishDataChanges: vi.fn(),
 }));
 
 vi.mock('@/database/models/db', () => ({
   db: {
     user_items: { name: 'user_items' },
-    user_lessons: { name: 'user_lessons', bulkPut: (...args: unknown[]) => mocks.putUserLessons(...args) },
+    user_lessons: {
+      name: 'user_lessons',
+      where: () => ({ equals: () => ({ toArray: (...args: unknown[]) => mocks.getUserLessons(...args) }) }),
+      bulkAdd: (...args: unknown[]) => mocks.addUserLessons(...args),
+    },
     lessons: { name: 'lessons' },
     levels: { name: 'levels' },
     transaction: (...args: unknown[]) => mocks.transaction(...args),
@@ -40,6 +45,7 @@ describe('simulateUserProgress', () => {
     });
     mocks.getItemCandidates.mockResolvedValue([{ item_id: 1, lesson_id: 10 }]);
     mocks.simulateItems.mockResolvedValue({ count: 400, items: [{ item_id: 1, lesson_id: 10 }] });
+    mocks.getUserLessons.mockResolvedValue([]);
   });
 
   it('updates items atomically', async () => {
@@ -60,7 +66,7 @@ describe('simulateUserProgress', () => {
       [{ item_id: 1, lesson_id: 10 }],
       '2026-07-17T12:00:00.000Z',
     );
-    expect(mocks.putUserLessons).toHaveBeenCalledWith([
+    expect(mocks.addUserLessons).toHaveBeenCalledWith([
       { user_id: 'u1', lesson_id: 10, started_at: '2026-07-17T12:00:00.000Z' },
     ]);
     expect(mocks.publishDataChanges).toHaveBeenCalledWith('u1', {

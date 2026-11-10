@@ -5,7 +5,7 @@ import { getSyncTimestamps } from '@/database/sync/sync-helpers';
 import type { UserLessonType } from '@/types/generic.types';
 import { SupabaseError } from '@/types/error.types';
 import { TableName } from '@/types/table.types';
-import { Entity } from 'dexie';
+import Dexie, { Entity } from 'dexie';
 import type AppDB from './app-db';
 import config from '@/config/config';
 import type { AppDataSyncResult } from '@/database/state/data-types';
@@ -16,9 +16,9 @@ export default class UserLesson extends Entity<AppDB> implements UserLessonType 
   lesson_id!: number;
   started_at!: string;
 
-  /** Adds a lesson start to the local history. */
+  /** Adds the user's first start record for a lesson. */
   private static async recordStart(userId: string, lessonId: number, startedAt: string): Promise<void> {
-    await db.user_lessons.put({ user_id: userId, lesson_id: lessonId, started_at: startedAt });
+    await db.user_lessons.add({ user_id: userId, lesson_id: lessonId, started_at: startedAt });
   }
 
   /** Returns lesson start records for a user. */
@@ -27,8 +27,8 @@ export default class UserLesson extends Entity<AppDB> implements UserLessonType 
   }
 
   /**
-   * Records a lesson start once per local day when all supplied items are eligible.
-   * @returns True when eligible or already started today; otherwise false.
+   * Records a lesson start once per user when all supplied items are eligible.
+   * @returns True when eligible or already recorded; otherwise false.
    */
   static startIfEligible(
     userId: string,
@@ -65,8 +65,14 @@ export default class UserLesson extends Entity<AppDB> implements UserLessonType 
         return { started: false, row: null };
       }
 
-      const startedToday = await this.hasStartedToday(userId, lessonId, new Date(startedAt));
-      if (startedToday) return { started: true, row: null };
+      const existingStart = await db.user_lessons
+        .where('[user_id+lesson_id+started_at]')
+        .between(
+          [userId, lessonId, Dexie.minKey],
+          [userId, lessonId, Dexie.maxKey],
+        )
+        .first();
+      if (existingStart) return { started: true, row: null };
 
       const row = { user_id: userId, lesson_id: lessonId, started_at: startedAt };
       await this.recordStart(userId, lessonId, startedAt);
@@ -76,17 +82,6 @@ export default class UserLesson extends Entity<AppDB> implements UserLessonType 
       publishDataChanges(userId, { user_lessons: { upserted: [result.row] } });
     }
     return result.started;
-  }
-
-  /** Checks whether the user has a lesson start in the local calendar day of `now`. */
-  static async hasStartedToday(userId: string, lessonId: number, now: Date = new Date()): Promise<boolean> {
-    const start = new Date(now.getFullYear(), now.getMonth(), now.getDate()).toISOString();
-    const end = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1).toISOString();
-    const row = await db.user_lessons
-      .where('[user_id+lesson_id+started_at]')
-      .between([userId, lessonId, start], [userId, lessonId, end], true, false)
-      .first();
-    return row !== undefined;
   }
 
   /**
