@@ -70,8 +70,13 @@ CREATE TABLE IF NOT EXISTS user_lessons (
   user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   lesson_id INTEGER NOT NULL REFERENCES lessons(id) ON DELETE RESTRICT,
   started_at TIMESTAMPTZ NOT NULL,
+  completed_at TIMESTAMPTZ,
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   PRIMARY KEY (user_id, lesson_id, started_at)
 );
+
+CREATE INDEX IF NOT EXISTS idx_user_lessons_user_updated_at
+  ON user_lessons (user_id, updated_at);
 
 CREATE TABLE IF NOT EXISTS notes (
   id SERIAL PRIMARY KEY,

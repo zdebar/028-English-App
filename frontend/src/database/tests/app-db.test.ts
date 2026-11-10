@@ -44,10 +44,13 @@ describe('AppDB schema', () => {
   it('declares the complete schema and removes obsolete stores', () => {
     new AppDB();
 
-    expect(mocks.versions).toHaveLength(15);
+    expect(mocks.versions).toHaveLength(16);
     expect(mocks.versions[13]?.schema).toEqual({ users: null });
     expect(mocks.versions[14]?.schema).toEqual({
       user_lessons: '[user_id+lesson_id+started_at]',
+    });
+    expect(mocks.versions[15]?.schema).toEqual({
+      user_lessons: '[user_id+lesson_id+started_at], [user_id+started_at], [user_id+updated_at]',
     });
     expect(mocks.versions[0]).toMatchObject({
       number: 1,

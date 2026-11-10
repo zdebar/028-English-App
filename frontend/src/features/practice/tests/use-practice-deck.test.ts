@@ -16,6 +16,7 @@ const mocks = vi.hoisted(() => ({
     grammarReviewDueCount: 0,
     vocabularyReviewDueCount: 2,
     nextReviewAt: null,
+    initialTrainingStarted: false,
   },
   ensureDataPackage: vi.fn(),
   createReviewPackage: () => {

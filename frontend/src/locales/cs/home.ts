@@ -15,6 +15,7 @@ export const HOME_TEXTS = {
   vocabularyReviewButton: 'Opakování slovíček',
   availableItems: 'Počet dostupných položek',
   newButton: 'Nová lekce',
+  completeLesson: 'Dokončit lekci',
 
   // User
   authInitErrorToast: 'Nastala chyba při přihlašování.',

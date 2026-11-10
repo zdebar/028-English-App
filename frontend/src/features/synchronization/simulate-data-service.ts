@@ -35,6 +35,8 @@ export async function simulateUserProgress(
           user_id: userId,
           lesson_id: lessonId,
           started_at: dateTime,
+          completed_at: null,
+          updated_at: dateTime,
         }));
       if (startedLessons.length > 0) await db.user_lessons.bulkAdd(startedLessons);
       return { ...simulation, startedLessons };

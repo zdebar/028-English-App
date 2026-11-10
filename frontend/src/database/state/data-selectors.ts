@@ -325,8 +325,19 @@ export function selectPreparedInitialLesson(data: AppDataSource, userId: string)
 }
 
 export function buildPreparedInitialLesson(data: AppDataSnapshot, userId: string): PreparedInitialLesson | null {
-  const items = data.user_items
-    .filter((item) => item.user_id === userId)
+  const lessonProgress = getCanonicalLessonProgress(data, userId);
+  const levelSortOrders = new Map(data.levels.map((level) => [level.id, level.sort_order]));
+  const lessons = [...data.lessons]
+    .filter((lesson) => !lesson.deleted_at)
+    .sort((left, right) => compareLessonsByCurriculum(left, right, levelSortOrders));
+  const lesson = lessons.find((entry) => {
+    const progress = lessonProgress.get(entry.id);
+    return progress !== undefined && progress.completed_at == null;
+  }) ?? lessons.find((entry) => !lessonProgress.has(entry.id));
+  if (!lesson) return null;
+
+  const lessonItems = data.user_items
+    .filter((item) => item.user_id === userId && item.lesson_id === lesson.id)
     .filter((item) =>
       item.deleted_at === NULL_DATE &&
       item.is_cz_to_en_enabled !== false &&
@@ -334,14 +345,16 @@ export function buildPreparedInitialLesson(data: AppDataSnapshot, userId: string
       !isInitialTrainingSkipped(item),
     )
     .sort((left, right) => compareCurriculumPaths(left.curriculum_sort_path, right.curriculum_sort_path));
-  const firstItem = items[0];
-  if (!firstItem) return null;
-  const lesson = data.lessons.find((entry) => entry.id === firstItem.lesson_id && !entry.deleted_at);
-  if (!lesson) return null;
-  const lessonItems = items.filter((item) => item.lesson_id === firstItem.lesson_id);
   const entries = resolvePracticeEntriesFromSnapshot(data, lessonItems);
   const grammarContext = resolveGrammarContext(data, lesson.group_id, userId);
-  return { lesson, items: lessonItems, entries, grammar: grammarContext.grammar, grammarGroup: grammarContext.grammarGroup };
+  return {
+    lesson,
+    items: lessonItems,
+    entries,
+    grammar: grammarContext.grammar,
+    grammarGroup: grammarContext.grammarGroup,
+    started: lessonProgress.has(lesson.id),
+  };
 }
 
 export function selectPracticeAvailability(data: AppDataSource, userId: string, now = new Date()): {
@@ -352,12 +365,14 @@ export function selectPracticeAvailability(data: AppDataSource, userId: string, 
   reviewDueCounts: ReviewAvailability['reviewDueCounts'];
   nextReviewAt: string | null;
   initialTrainingAvailable: boolean;
+  initialTrainingStarted: boolean;
 } {
   const review = selectReviewAvailability(data, userId, now.toISOString());
   const initialLesson = selectPreparedInitialLesson(data, userId);
   return {
     ...review,
     initialTrainingAvailable: initialLesson !== null,
+    initialTrainingStarted: initialLesson?.started ?? false,
   };
 }
 
@@ -500,4 +515,29 @@ function countDue(
 
 function toPracticeEntry(item: UserItemLocal) {
   return { item, note: null, grammar: null };
+}
+
+function getCanonicalLessonProgress(data: AppDataSnapshot, userId: string) {
+  const progress = new Map<number, AppDataSnapshot['user_lessons'][number]>();
+  const rows = data.user_lessons
+    .filter((entry) => entry.user_id === userId)
+    .sort((left, right) => compareStartTimes(left.started_at, right.started_at));
+  for (const row of rows) {
+    if (!progress.has(row.lesson_id)) progress.set(row.lesson_id, row);
+  }
+  return progress;
+}
+
+function compareLessonsByCurriculum(
+  left: AppDataSnapshot['lessons'][number],
+  right: AppDataSnapshot['lessons'][number],
+  levelSortOrders: ReadonlyMap<number, number>,
+): number {
+  const leftLevelOrder = levelSortOrders.get(left.level_id) ?? Number.MAX_SAFE_INTEGER;
+  const rightLevelOrder = levelSortOrders.get(right.level_id) ?? Number.MAX_SAFE_INTEGER;
+  return leftLevelOrder - rightLevelOrder || left.sort_order - right.sort_order || left.id - right.id;
+}
+
+function compareStartTimes(left: string, right: string): number {
+  return Date.parse(left) - Date.parse(right) || left.localeCompare(right);
 }

@@ -67,11 +67,25 @@ describe('simulateUserProgress', () => {
       '2026-07-17T12:00:00.000Z',
     );
     expect(mocks.addUserLessons).toHaveBeenCalledWith([
-      { user_id: 'u1', lesson_id: 10, started_at: '2026-07-17T12:00:00.000Z' },
+      {
+        user_id: 'u1',
+        lesson_id: 10,
+        started_at: '2026-07-17T12:00:00.000Z',
+        completed_at: null,
+        updated_at: '2026-07-17T12:00:00.000Z',
+      },
     ]);
     expect(mocks.publishDataChanges).toHaveBeenCalledWith('u1', {
       user_items: { upserted: [{ item_id: 1, lesson_id: 10 }] },
-      user_lessons: { upserted: [{ user_id: 'u1', lesson_id: 10, started_at: '2026-07-17T12:00:00.000Z' }] },
+      user_lessons: {
+        upserted: [{
+          user_id: 'u1',
+          lesson_id: 10,
+          started_at: '2026-07-17T12:00:00.000Z',
+          completed_at: null,
+          updated_at: '2026-07-17T12:00:00.000Z',
+        }],
+      },
     });
   });
 });

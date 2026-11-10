@@ -22,7 +22,7 @@ type UserItemKey = [userId: string, itemId: number];
 type MetadataKey = [tableName: TableName, userId: string];
 type UserLessonKey = [userId: string, lessonId: number, startedAt: string];
 type MetadataRow = Pick<SyncMetadata, 'table_name' | 'synced_at' | 'user_id'>;
-type UserLessonRow = Pick<UserLesson, 'user_id' | 'lesson_id' | 'started_at'>;
+type UserLessonRow = Pick<UserLesson, 'user_id' | 'lesson_id' | 'started_at' | 'completed_at' | 'updated_at'>;
 
 /**
  * Application IndexedDB wrapper built on Dexie.
@@ -199,5 +199,17 @@ export default class AppDB extends Dexie {
     this.version(15).stores({
       user_lessons: '[user_id+lesson_id+started_at]',
     });
+
+    this.version(16)
+      .stores({
+        user_lessons: '[user_id+lesson_id+started_at], [user_id+started_at], [user_id+updated_at]',
+      })
+      .upgrade(async (transaction) => {
+        await transaction.table('user_lessons').toCollection().modify((lesson) => {
+          const userLesson = lesson as Record<string, unknown>;
+          userLesson.completed_at ??= null;
+          userLesson.updated_at ??= userLesson.started_at;
+        });
+      });
   }
 }

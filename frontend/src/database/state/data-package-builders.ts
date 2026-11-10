@@ -276,6 +276,7 @@ const EMPTY_INITIAL_TRAINING: Omit<InitialTrainingPackage, 'soundGroups'> = {
   entries: [],
   grammar: null,
   grammarGroup: null,
+  started: false,
   groupNote: null,
 };
 

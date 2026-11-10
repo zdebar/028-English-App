@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const mocks = vi.hoisted(() => ({
   startLesson: vi.fn(),
+  completeLesson: vi.fn(),
   saveInitialTrainingProgress: vi.fn(),
   applyPracticeProgress: vi.fn(),
   syncReviewItemToCache: vi.fn(),
@@ -22,7 +23,10 @@ vi.mock('@/config/config', () => ({
   },
 }));
 vi.mock('@/database/models/user-lessons', () => ({
-  default: { startIfEligible: (...args: unknown[]) => mocks.startLesson(...args) },
+  default: {
+    startIfEligible: (...args: unknown[]) => mocks.startLesson(...args),
+    completeLesson: (...args: unknown[]) => mocks.completeLesson(...args),
+  },
 }));
 vi.mock('@/database/models/lessons', () => ({ default: { getById: vi.fn() } }));
 vi.mock('@/database/models/user-items', () => ({
@@ -74,6 +78,7 @@ const lesson = {
 const items = [item(1), item(2)];
 const initialData = {
   lesson,
+  started: false,
   items,
   entries: items.map((value) => ({ item: value, note: null, grammar: null })),
   grammar: null,
@@ -95,6 +100,7 @@ describe('useInitialTrainingDeck', () => {
     mocks.dataState = { userId: 'u1', status: 'ready', groups: [] };
     mocks.packageData = initialData;
     mocks.startLesson.mockResolvedValue(true);
+    mocks.completeLesson.mockResolvedValue(undefined);
     mocks.saveInitialTrainingProgress.mockResolvedValue(undefined);
     mocks.syncReviewItemToCache.mockResolvedValue(undefined);
     mocks.refreshPracticeReviewAvailability.mockResolvedValue(null);

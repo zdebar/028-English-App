@@ -31,6 +31,7 @@ type PracticeCompletionHandler = () => void;
 
 type InitialTrainingLoadResult = Readonly<{
   lesson: LessonType | null;
+  started: boolean;
   items: UserItemLocal[];
   entries: Array<ResolvedPracticeEntry<UserItemLocal>>;
   grammar: GroupType | null;
@@ -84,6 +85,8 @@ type InitialTrainingSyncOptions = Readonly<{
 }>;
 
 type AdvanceInitialTrainingOptions = Readonly<{
+  userId: string | null;
+  lessonId: number | null;
   outcome: TrainingOutcome;
   queue: InitialTrainingQueue | null;
   currentItem: UserItemLocal | null;
@@ -196,6 +199,20 @@ export function useInitialTrainingDeck(
     await completeInitialTrainingOnce(completionHandledRef, finishPractice, onComplete);
   }, [finishPractice, onComplete]);
 
+  const completeEmptyLesson = useCallback(async () => {
+    if (!userId || !lesson || initialItemCount > 0 || isComplete) return;
+    try {
+      await trackPracticeWrite(UserLesson.completeLesson(userId, lesson.id));
+      setHasProgress(true);
+      setIsComplete(true);
+      setError(null);
+    } catch (caughtError) {
+      const normalizedError = toError(caughtError);
+      setError(normalizedError);
+      reportError('Failed to complete an empty lesson', normalizedError);
+    }
+  }, [initialItemCount, isComplete, lesson, trackPracticeWrite, userId]);
+
   useEffect(() => {
     completeIfReady(isComplete, completePractice);
   }, [completePractice, isComplete]);
@@ -205,6 +222,8 @@ export function useInitialTrainingDeck(
       await runInitialTrainingTransition({
         isTransitioningRef,
         trackPracticeWrite,
+        userId,
+        lessonId: lesson?.id ?? null,
         outcome,
         queue,
         currentItem,
@@ -221,9 +240,11 @@ export function useInitialTrainingDeck(
     [
       currentItem,
       isComplete,
+      lesson?.id,
       resetQuestionState,
       queue,
       trackPracticeWrite,
+      userId,
     ],
   );
 
@@ -257,6 +278,7 @@ export function useInitialTrainingDeck(
     nextRepeat: () => advance('incorrect'),
     nextKnown: () => advance('correct'),
     completeCurrent,
+    completeEmptyLesson,
     audioError: cardState.audioError,
     playAudio: cardState.playAudio,
     audioLoading: cardState.audioLoading,
@@ -438,7 +460,7 @@ function getEligibleInitialTrainingData(
   initialData: InitialTrainingData,
 ): EligibleInitialTrainingData | null {
   const prepared = initialData;
-  if (!prepared?.lesson || prepared.items.length === 0) return null;
+  if (!prepared?.lesson) return null;
   return { ...prepared, lesson: prepared.lesson };
 }
 
@@ -447,6 +469,7 @@ function createInitialTrainingLoadResult(
 ): InitialTrainingLoadResult {
   return {
     lesson: prepared.lesson,
+    started: prepared.started,
     items: prepared.items,
     entries: prepared.entries,
     grammar: prepared.grammar,
@@ -492,7 +515,7 @@ function startInitialTrainingLoad(
       setters.setGrammarGroup(result.grammarGroup);
       setters.setGroupNote(result.groupNote);
       setters.setQueue(result.queue);
-      setters.setHasProgress(false);
+      setters.setHasProgress(result.started);
     })
     .catch((caughtError) => {
       if (isCurrentRequest()) setters.setError(toError(caughtError));
@@ -533,6 +556,8 @@ function updateTrainingItem(items: UserItemLocal[], updatedItem: UserItemLocal):
 async function advanceInitialTraining(options: AdvanceInitialTrainingOptions): Promise<void> {
   const {
     outcome,
+    userId,
+    lessonId,
     queue,
     currentItem,
     isComplete,
@@ -544,7 +569,7 @@ async function advanceInitialTraining(options: AdvanceInitialTrainingOptions): P
     setError,
     resetQuestionState,
   } = options;
-  if (!queue || !currentItem || isComplete) return;
+  if (!queue || !currentItem || isComplete || !userId || lessonId == null) return;
 
   const dateTime = new Date(Date.now()).toISOString();
   const progressOptions = { initialTraining: true };
@@ -564,6 +589,7 @@ async function advanceInitialTraining(options: AdvanceInitialTrainingOptions): P
     await UserItem.saveInitialTrainingProgress(updatedItem);
 
     if (!nextQueue) {
+      await UserLesson.completeLesson(userId, lessonId, dateTime);
       setHasProgress(true);
       setIsComplete(true);
       setError(null);

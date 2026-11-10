@@ -26,18 +26,19 @@ function InitialTrainingContent({
 }>): JSX.Element | null {
   if (deck.loading) return <DelayedNotification />;
   if (deck.isComplete) return null;
-  if (!deck.currentItem) return <PracticeEmptyState />;
 
-  if (deck.lesson && !deck.hasProgress && !introDismissed) {
+  if (deck.lesson && (!deck.hasContent || (!deck.hasProgress && !introDismissed))) {
     return (
       <LessonTrainingOverviewCard
         lesson={deck.lesson}
         groupNote={deck.groupNote}
         items={deck.items}
-        onContinue={dismissIntro}
+        onContinue={deck.hasContent ? dismissIntro : () => void deck.completeEmptyLesson()}
       />
     );
   }
+
+  if (!deck.currentItem) return <PracticeEmptyState />;
 
   return (
     <PracticeSessionCard
