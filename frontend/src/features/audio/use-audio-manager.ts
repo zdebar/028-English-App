@@ -3,6 +3,7 @@ import AudioRecord from '@/database/models/audio-records';
 import { reportError } from '@/features/logging/logging-handler';
 import { useAudioStore } from './use-audio-store';
 import { AudioFileNotFoundError } from '@/types/error.types';
+import type { AudioRecordLocal } from '@/types/audio.types';
 
 type AudioInput = string | string[] | null;
 type ManagedAudio = {
@@ -10,11 +11,14 @@ type ManagedAudio = {
   onEnded: () => void;
 };
 type AudioLoadPromise = Promise<boolean>;
+type AudioLoadResolver = (loaded: boolean) => void;
 type PlaybackStateSetters = Readonly<{
   setIsPlaying: (isPlaying: boolean) => void;
   setFailedFilenames: (update: (previous: Set<string>) => Set<string>) => void;
   setAudioError: (audioError: boolean) => void;
 }>;
+
+const AUDIO_DOWNLOAD_CONCURRENCY = 6;
 
 /**
  * Hook to manage preloading and playback of audio files stored in the local
@@ -70,41 +74,98 @@ export function useAudioManager(audio: AudioInput) {
     const handleAudioEnded = () => {
       setIsPlaying(false);
     };
-
-    const loadPromises = files.map((filename) => {
-      const loadPromise = loadSingleAudio(filename, handleAudioEnded).then((managedAudio) => {
-        const isCurrentLoad =
-          !isDisposed && loadGenerationRef.current === loadGeneration && managedAudio !== null;
-        if (!isCurrentLoad) {
-          if (managedAudio) disposeManagedAudio(managedAudio);
-          return false;
-        }
-
-        audioMapRef.current.set(filename, managedAudio);
-        return true;
-      });
-      loadPromisesRef.current.set(filename, loadPromise);
-      return loadPromise;
+    const resolveLoads = new Map<string, AudioLoadResolver>();
+    files.forEach((filename) => {
+      const deferredLoad = createDeferredAudioLoad();
+      loadPromisesRef.current.set(filename, deferredLoad.promise);
+      resolveLoads.set(filename, deferredLoad.resolve);
     });
 
+    const isCurrentLoad = () => !isDisposed && loadGenerationRef.current === loadGeneration;
+    const resolveLoad = (filename: string, loaded: boolean) => {
+      resolveLoads.get(filename)?.(loaded);
+    };
+    const failedFiles = new Set<string>();
+    const downloadedRecords: AudioRecordLocal[] = [];
+
     const loadAllAudio = async () => {
-      const loadResults = await Promise.all(loadPromises);
-      const failedFiles = files.filter((_, index) => !loadResults[index]);
+      const cachedRecords = await AudioRecord.getCachedByFilenames(files);
+      const missingFiles: string[] = [];
 
-      const hasFailure = failedFiles.length > 0;
+      cachedRecords.forEach((record, index) => {
+        const filename = files[index];
+        if (!filename) return;
+        if (!record) {
+          missingFiles.push(filename);
+          return;
+        }
 
-      if (!isDisposed && hasFailure) {
-        setFailedFilenames(new Set(failedFiles));
-        setAudioError(true);
+        const didLoad = loadAudioRecord(
+          filename,
+          record,
+          handleAudioEnded,
+          isCurrentLoad,
+          audioMapRef.current,
+        );
+        if (!didLoad) failedFiles.add(filename);
+        resolveLoad(filename, didLoad);
+      });
+
+      await runWithConcurrency(missingFiles, AUDIO_DOWNLOAD_CONCURRENCY, async (filename) => {
+        try {
+          const audioRecord = await AudioRecord.downloadByFilename(filename);
+          downloadedRecords.push(audioRecord);
+          const didLoad = loadAudioRecord(
+            filename,
+            audioRecord,
+            handleAudioEnded,
+            isCurrentLoad,
+            audioMapRef.current,
+          );
+          if (!didLoad) failedFiles.add(filename);
+          resolveLoad(filename, didLoad);
+        } catch (error) {
+          if (!(error instanceof AudioFileNotFoundError)) {
+            reportError('Audio Manager Error', error);
+          }
+          failedFiles.add(filename);
+          resolveLoad(filename, false);
+        }
+      });
+
+      if (downloadedRecords.length > 0) {
+        try {
+          await AudioRecord.cacheAudioRecords(downloadedRecords);
+        } catch (error) {
+          reportError('Audio Cache Error', error);
+        }
       }
 
-      if (!isDisposed) setLoading(false);
+      if (isCurrentLoad()) {
+        setFailedFilenames(new Set(failedFiles));
+        setAudioError(failedFiles.size > 0);
+      }
     };
 
-    void loadAllAudio();
+    void loadAllAudio()
+      .catch((error: unknown) => {
+        reportError('Audio Manager Error', error);
+        files.forEach((filename) => {
+          failedFiles.add(filename);
+          resolveLoad(filename, false);
+        });
+        if (isCurrentLoad()) {
+          setFailedFilenames(new Set(failedFiles));
+          setAudioError(true);
+        }
+      })
+      .finally(() => {
+        if (isCurrentLoad()) setLoading(false);
+      });
 
     return () => {
       isDisposed = true;
+      resolveLoads.forEach((resolve) => resolve(false));
       if (loadGenerationRef.current === loadGeneration) {
         loadGenerationRef.current += 1;
       }
@@ -288,22 +349,56 @@ function handlePlaybackError(
   setters.setAudioError(true);
 }
 
-async function loadSingleAudio(
+function loadAudioRecord(
   filename: string,
+  audioRecord: AudioRecordLocal,
   onEnded: () => void,
-): Promise<ManagedAudio | null> {
+  isCurrentLoad: () => boolean,
+  audioMap: Map<string, ManagedAudio>,
+): boolean {
+  if (!isCurrentLoad()) return false;
+
   try {
-    const audioRecord = await AudioRecord.getByFilename(filename);
     if (!audioRecord?.audioBlob) throw new Error('Audio not found');
 
     const objectUrl = URL.createObjectURL(audioRecord.audioBlob);
     const audioElement = new Audio(objectUrl);
     audioElement.addEventListener('ended', onEnded);
-    return { element: audioElement, onEnded };
+    audioMap.set(filename, { element: audioElement, onEnded });
+    return true;
   } catch (error) {
-    if (!(error instanceof AudioFileNotFoundError)) {
-      reportError('Audio Manager Error', error);
-    }
-    return null;
+    reportError('Audio Manager Error', error);
+    return false;
   }
+}
+
+function createDeferredAudioLoad(): Readonly<{
+  promise: AudioLoadPromise;
+  resolve: AudioLoadResolver;
+}> {
+  let resolvePromise!: AudioLoadResolver;
+  const promise = new Promise<boolean>((resolve) => {
+    resolvePromise = resolve;
+  });
+  return { promise, resolve: resolvePromise };
+}
+
+async function runWithConcurrency<T>(
+  values: readonly T[],
+  concurrency: number,
+  operation: (value: T) => Promise<void>,
+): Promise<void> {
+  let nextIndex = 0;
+  const workerCount = Math.min(values.length, concurrency);
+  const processNext = async (): Promise<void> => {
+    const currentIndex = nextIndex;
+    if (currentIndex >= values.length) return;
+
+    nextIndex += 1;
+    const value = values[currentIndex];
+    if (value !== undefined) await operation(value);
+    return processNext();
+  };
+  const workers = Array.from({ length: workerCount }, () => processNext());
+  await Promise.all(workers);
 }

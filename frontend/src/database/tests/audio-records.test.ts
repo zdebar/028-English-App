@@ -2,9 +2,11 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const mocks = vi.hoisted(() => ({
   audioGet: vi.fn(),
+  audioBulkGet: vi.fn(),
   audioPut: vi.fn(),
   audioBulkPut: vi.fn(),
   audioDelete: vi.fn(),
+  audioBulkDelete: vi.fn(),
   audioPrimaryKeys: vi.fn(),
   userItemsToArray: vi.fn(),
   dbTransaction: vi.fn(),
@@ -52,9 +54,11 @@ vi.mock('@/database/models/db', () => ({
   db: {
     audio_records: {
       get: (...args: unknown[]) => mocks.audioGet(...args),
+      bulkGet: (...args: unknown[]) => mocks.audioBulkGet(...args),
       put: (...args: unknown[]) => mocks.audioPut(...args),
       bulkPut: (...args: unknown[]) => mocks.audioBulkPut(...args),
       delete: (...args: unknown[]) => mocks.audioDelete(...args),
+      bulkDelete: (...args: unknown[]) => mocks.audioBulkDelete(...args),
       toCollection: () => ({
         primaryKeys: () => mocks.audioPrimaryKeys(),
       }),
@@ -169,6 +173,45 @@ describe('AudioRecord', () => {
       expect(mocks.downloadStorageObject).toHaveBeenCalledTimes(2);
       expect(mocks.audioPut).toHaveBeenCalledWith({ filename: 'retry.opus', audioBlob: freshBlob });
       expect(result).toEqual({ filename: 'retry.opus', audioBlob: freshBlob });
+    });
+  });
+
+  describe('batch audio cache access', () => {
+    it('reads unique filenames once and preserves the requested order', async () => {
+      const cached = { filename: 'a.opus', audioBlob: new Blob(['cached']) };
+      mocks.audioBulkGet.mockResolvedValue([cached, undefined]);
+
+      const records = await AudioRecord.getCachedByFilenames(['a.opus', 'missing.opus', 'a.opus']);
+
+      expect(mocks.audioBulkGet).toHaveBeenCalledOnce();
+      expect(mocks.audioBulkGet).toHaveBeenCalledWith(['a.opus', 'missing.opus']);
+      expect(records).toEqual([cached, undefined, cached]);
+      expect(mocks.downloadStorageObject).not.toHaveBeenCalled();
+    });
+
+    it('treats invalid cached blobs as misses and removes them in one batch', async () => {
+      mocks.audioBulkGet.mockResolvedValue([
+        { filename: 'stale.opus', audioBlob: new Blob() },
+        undefined,
+      ]);
+
+      const records = await AudioRecord.getCachedByFilenames(['stale.opus', 'missing.opus']);
+
+      expect(records).toEqual([undefined, undefined]);
+      expect(mocks.audioBulkDelete).toHaveBeenCalledWith(['stale.opus']);
+    });
+
+    it('downloads without writing and caches successful records in one batch', async () => {
+      const audioRecord = { filename: 'fresh.opus', audioBlob: new Blob(['fresh']) };
+      mocks.downloadStorageObject.mockResolvedValue(audioRecord.audioBlob);
+
+      const downloaded = await AudioRecord.downloadByFilename('fresh.opus');
+      await AudioRecord.cacheAudioRecords([downloaded]);
+
+      expect(downloaded).toEqual(audioRecord);
+      expect(mocks.audioPut).not.toHaveBeenCalled();
+      expect(mocks.audioBulkPut).toHaveBeenCalledOnce();
+      expect(mocks.audioBulkPut).toHaveBeenCalledWith([audioRecord]);
     });
   });
 

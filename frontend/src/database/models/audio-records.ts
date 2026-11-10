@@ -57,6 +57,40 @@ export default class AudioRecord extends Entity<AppDB> implements AudioRecordLoc
     return this.fetchAudioRecord(audioName);
   }
 
+  /** Reads unique audio cache entries with one IndexedDB request, preserving input order. */
+  static async getCachedByFilenames(
+    audioNames: readonly string[],
+  ): Promise<Array<AudioRecordLocal | undefined>> {
+    const uniqueNames = [...new Set(audioNames)];
+    const localRecords = await db.audio_records.bulkGet(uniqueNames);
+    const invalidNames = uniqueNames.filter((_, index) => {
+      const record = localRecords[index];
+      return record != null && !isValidAudioRecord(record);
+    });
+    if (invalidNames.length > 0) await db.audio_records.bulkDelete(invalidNames);
+
+    const recordByName = new Map<string, AudioRecordLocal>();
+    uniqueNames.forEach((filename, index) => {
+      const record = localRecords[index];
+      if (isValidAudioRecord(record)) recordByName.set(filename, record);
+    });
+    return audioNames.map((filename) => recordByName.get(filename));
+  }
+
+  /** Downloads one audio file without writing it, for a caller that batches cache writes. */
+  static async downloadByFilename(audioName: string): Promise<AudioRecordLocal> {
+    return {
+      filename: audioName,
+      audioBlob: await this.downloadAudioWithRetry(audioName),
+    };
+  }
+
+  /** Stores a batch of downloaded audio files with one IndexedDB write operation. */
+  static async cacheAudioRecords(records: readonly AudioRecordLocal[]): Promise<void> {
+    if (records.length === 0) return;
+    await db.audio_records.bulkPut([...records]);
+  }
+
   /**
    * Synchronizes audio archives from remote storage to IndexedDB.
    *
@@ -177,8 +211,7 @@ export default class AudioRecord extends Entity<AppDB> implements AudioRecordLoc
    * @throws SupabaseError when storage download fails for another reason.
    */
   private static async fetchAudioRecord(audioName: string): Promise<AudioRecordLocal> {
-    const audioBlob = await this.downloadAudioWithRetry(audioName);
-    const audioRecord = { filename: audioName, audioBlob };
+    const audioRecord = await this.downloadByFilename(audioName);
     await db.audio_records.put(audioRecord);
 
     return audioRecord;
