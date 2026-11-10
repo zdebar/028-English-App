@@ -19,6 +19,7 @@ const mocks = vi.hoisted(() => ({
     },
     nextReviewAt: null as string | null,
     initialTrainingAvailable: true,
+    initialTrainingStarted: false,
   },
 }));
 
@@ -30,6 +31,7 @@ vi.mock('@/locales/cs', () => ({
     directionEnToCz: 'From English to Czech',
     availableItems: 'Available items',
     newButton: 'New',
+    completeLesson: 'Continue lesson',
     pronunciationPractice: 'Pronunciation practice',
     loadingMessage: 'Loading',
     loadingError: 'Loading error',
@@ -78,6 +80,7 @@ describe('Home practice buttons', () => {
       },
       nextReviewAt: null,
       initialTrainingAvailable: true,
+      initialTrainingStarted: false,
     };
   });
 

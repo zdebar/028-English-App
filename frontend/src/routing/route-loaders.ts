@@ -32,7 +32,7 @@ export const loadInitialTrainingRoute = () =>
   loadProtectedDetail(
     'initial training',
     loadInitialTrainingData,
-    (data) => data.items.length === 0,
+    (data) => !data.lesson,
     ROUTES.home,
   );
 

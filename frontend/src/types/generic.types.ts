@@ -55,6 +55,8 @@ export interface UserLessonType {
   user_id: string;
   lesson_id: number;
   started_at: string;
+  completed_at?: string | null;
+  updated_at?: string;
 }
 
 export interface MetadataType {

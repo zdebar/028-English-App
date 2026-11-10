@@ -90,3 +90,9 @@ BEFORE UPDATE ON public.user_items
 FOR EACH ROW
 EXECUTE FUNCTION public.set_updated_at();
 
+DROP TRIGGER IF EXISTS trg_set_updated_at__user_lessons ON public.user_lessons;
+CREATE TRIGGER trg_set_updated_at__user_lessons
+BEFORE UPDATE ON public.user_lessons
+FOR EACH ROW
+EXECUTE FUNCTION public.set_updated_at();
+

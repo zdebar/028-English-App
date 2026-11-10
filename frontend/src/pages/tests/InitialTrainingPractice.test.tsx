@@ -15,6 +15,7 @@ const mocks = vi.hoisted(() => ({
     grammarGroup: null as { note: string | null } | null,
     isComplete: false,
     hasProgress: false,
+    hasContent: true,
     currentItem: null as { item_id: number; progress_cz_to_en: number } | null,
     note: null,
     practiceGrammar: null,
@@ -29,6 +30,7 @@ const mocks = vi.hoisted(() => ({
     nextRepeat: vi.fn(),
     nextKnown: vi.fn(),
     completeCurrent: vi.fn(),
+    completeEmptyLesson: vi.fn(),
     audioError: false,
     playAudio: vi.fn(),
     audioLoading: false,
@@ -125,6 +127,7 @@ describe('InitialTrainingPractice', () => {
     mocks.deck.grammarGroup = null;
     mocks.deck.isComplete = false;
     mocks.deck.hasProgress = false;
+    mocks.deck.hasContent = true;
     mocks.deck.currentItem = null;
   });
 

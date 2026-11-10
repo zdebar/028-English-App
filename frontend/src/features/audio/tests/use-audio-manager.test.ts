@@ -2,6 +2,9 @@ import { act, renderHook, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const getAudioMock = vi.fn();
+const getCachedAudioMock = vi.fn();
+const downloadAudioMock = vi.fn();
+const cacheAudioRecordsMock = vi.fn();
 const errorHandlerMock = vi.fn();
 
 class MockAudio {
@@ -34,7 +37,9 @@ const audioInstances: MockAudio[] = [];
 
 vi.mock('@/database/models/audio-records', () => ({
   default: {
-    getByFilename: (...args: unknown[]) => getAudioMock(...args),
+    getCachedByFilenames: (...args: unknown[]) => getCachedAudioMock(...args),
+    downloadByFilename: (...args: unknown[]) => downloadAudioMock(...args),
+    cacheAudioRecords: (...args: unknown[]) => cacheAudioRecordsMock(...args),
   },
 }));
 
@@ -49,6 +54,11 @@ describe('useAudioManager', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     audioInstances.length = 0;
+    getCachedAudioMock.mockImplementation(async (filenames: string[]) =>
+      Promise.all(filenames.map((filename) => getAudioMock(filename))),
+    );
+    downloadAudioMock.mockImplementation((filename: string) => getAudioMock(filename));
+    cacheAudioRecordsMock.mockResolvedValue(undefined);
 
     class MockAudioCtor extends MockAudio {
       constructor(src?: string) {
@@ -147,6 +157,71 @@ describe('useAudioManager', () => {
 
     expect(getAudioMock).toHaveBeenCalledTimes(1);
     expect(result.current.filenames).toEqual(['file.opus']);
+  });
+
+  it('downloads only cache misses, makes each success playable, and batch-caches successes', async () => {
+    const cachedRecord = { filename: 'cached.opus', audioBlob: new Blob(['cached']) };
+    const downloadedRecord = { filename: 'downloaded.opus', audioBlob: new Blob(['downloaded']) };
+    getCachedAudioMock.mockResolvedValue([cachedRecord, undefined, undefined]);
+    downloadAudioMock.mockImplementation((filename: string) => {
+      if (filename === 'downloaded.opus') return Promise.resolve(downloadedRecord);
+      return Promise.reject(new Error('remote failure'));
+    });
+
+    const { result } = renderHook(() =>
+      useAudioManager(['cached.opus', 'downloaded.opus', 'failed.opus']),
+    );
+
+    await waitFor(() => expect(result.current.isAudioReady('cached.opus')).toBe(true));
+    expect(downloadAudioMock).toHaveBeenCalledTimes(2);
+    expect(downloadAudioMock).toHaveBeenCalledWith('downloaded.opus');
+    expect(downloadAudioMock).toHaveBeenCalledWith('failed.opus');
+
+    await waitFor(() => {
+      expect(result.current.loading).toBe(false);
+      expect(result.current.isAudioReady('downloaded.opus')).toBe(true);
+    });
+
+    expect(result.current.isAudioReady('failed.opus')).toBe(false);
+    expect(result.current.audioError).toBe(true);
+    expect(cacheAudioRecordsMock).toHaveBeenCalledOnce();
+    expect(cacheAudioRecordsMock).toHaveBeenCalledWith([downloadedRecord]);
+  });
+
+  it('limits remote audio downloads to six concurrent requests', async () => {
+    const filenames = Array.from({ length: 7 }, (_, index) => `file-${index}.opus`);
+    const releases: Array<() => void> = [];
+    let activeDownloads = 0;
+    let maxActiveDownloads = 0;
+    getCachedAudioMock.mockResolvedValue(filenames.map(() => undefined));
+    downloadAudioMock.mockImplementation((filename: string) => {
+      activeDownloads += 1;
+      maxActiveDownloads = Math.max(maxActiveDownloads, activeDownloads);
+      return new Promise((resolve) => {
+        releases.push(() => {
+          activeDownloads -= 1;
+          resolve({ filename, audioBlob: new Blob([filename]) });
+        });
+      });
+    });
+
+    const { result } = renderHook(() => useAudioManager(filenames));
+
+    await waitFor(() => expect(downloadAudioMock).toHaveBeenCalledTimes(6));
+    expect(maxActiveDownloads).toBe(6);
+
+    await act(async () => {
+      releases[0]?.();
+      await Promise.resolve();
+    });
+    await waitFor(() => expect(downloadAudioMock).toHaveBeenCalledTimes(7));
+    expect(maxActiveDownloads).toBe(6);
+
+    await act(async () => {
+      releases.slice(1).forEach((release) => release());
+      await Promise.resolve();
+    });
+    await waitFor(() => expect(result.current.loading).toBe(false));
   });
 
   it('playAudio ignores non-string arg and still plays current audio', async () => {
@@ -307,7 +382,7 @@ describe('useAudioManager', () => {
     expect(URL.revokeObjectURL).toHaveBeenCalledWith('blob://audio-url');
   });
 
-  it('disposes an in-flight load that finishes after unmount', async () => {
+  it('does not create an audio element when the cache read finishes after unmount', async () => {
     let resolveAudio: ((value: { audioBlob: Blob }) => void) | undefined;
     getAudioMock.mockReturnValue(
       new Promise<{ audioBlob: Blob }>((resolve) => {
@@ -322,9 +397,8 @@ describe('useAudioManager', () => {
       await Promise.resolve();
     });
 
-    expect(audioInstances).toHaveLength(1);
-    expect(audioInstances[0].play).not.toHaveBeenCalled();
-    expect(URL.revokeObjectURL).toHaveBeenCalledWith('blob://audio-url');
+    expect(audioInstances).toHaveLength(0);
+    expect(URL.createObjectURL).not.toHaveBeenCalled();
   });
 
   it('disposes a stale in-flight load after the requested filename changes', async () => {
@@ -350,6 +424,6 @@ describe('useAudioManager', () => {
 
     expect(result.current.isAudioReady('old.opus')).toBe(false);
     expect(result.current.isAudioReady('new.opus')).toBe(true);
-    expect(URL.revokeObjectURL).toHaveBeenCalledWith('blob://audio-url');
+    expect(URL.revokeObjectURL).not.toHaveBeenCalled();
   });
 });

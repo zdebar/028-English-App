@@ -11,6 +11,7 @@ import type { PronunciationGroupDetailType, PronunciationGroupOverviewType } fro
 
 export type PracticeAvailabilityData = ReviewAvailability & Readonly<{
   initialTrainingAvailable: boolean;
+  initialTrainingStarted: boolean;
 }>;
 
 export type OverviewAvailabilityData = Readonly<{
@@ -155,6 +156,7 @@ export type PreparedInitialLesson = Readonly<{
   entries: Array<ResolvedPracticeEntry<UserItemLocal>>;
   grammar: GrammarChunkWithExamples | null;
   grammarGroup: GroupType | null;
+  started: boolean;
 }>;
 export type ReviewDeckData = Readonly<{
   entries: PracticeDeckEntry[];

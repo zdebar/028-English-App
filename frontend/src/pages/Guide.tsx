@@ -7,7 +7,7 @@ import type { JSX } from 'react';
  */
 export default function Guide(): JSX.Element {
   return (
-    <div className="guide card-width mt-8 overflow-x-hidden">
+    <div className="guide card-width overflow-x-hidden landscape:mt-8">
       <h1 className="text-center">Návod</h1>
       <section>
         <h2>Úvod</h2>

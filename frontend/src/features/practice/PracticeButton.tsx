@@ -17,13 +17,14 @@ type ReviewSectionProps = Readonly<{ reviewKind: ReviewKind }>;
 const NewPracticeButton = memo(function NewPracticeButton(): JSX.Element {
   const { availability, loading, error } = usePracticeStatus();
   const available = availability?.initialTrainingAvailable ?? false;
+  const label = availability?.initialTrainingStarted ? TEXTS.completeLesson : TEXTS.newButton;
   const disabled = selectNewDisabled(availability, loading, error);
   const title = resolveButtonTitle(loading, error, disabled);
 
   if (!available && !loading) {
     return (
       <StyledButton className="h-button max-h-button w-full px-4" disabled title={title}>
-        <PracticeButtonLabel>{TEXTS.newButton}</PracticeButtonLabel>
+        <PracticeButtonLabel>{label}</PracticeButtonLabel>
       </StyledButton>
     );
   }
@@ -35,7 +36,7 @@ const NewPracticeButton = memo(function NewPracticeButton(): JSX.Element {
       disabled={disabled}
       title={title}
     >
-      <PracticeButtonLabel>{TEXTS.newButton}</PracticeButtonLabel>
+      <PracticeButtonLabel>{label}</PracticeButtonLabel>
     </NavigationButton>
   );
 });
