@@ -44,7 +44,7 @@
 
   /** progress bar colors **/
   --color-progress-bg: #f3f4f6; /** uninitialized items **/
-  --color-new-progress-light: #87d5e8;
+  --color-new-progress-light: white;
   --color-old-progress-light: #64c4ed;
   --color-old-progress-dark: #e3a60a;
   --color-new-progress-dark: #f7d565;
