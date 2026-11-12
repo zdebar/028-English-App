@@ -4,14 +4,14 @@ The Python scripts under **scripts/** prepare vocabulary CSVs and audio files. T
 
 ## Vocabulary workflow
 
-1. Put source CSV files in **scripts/data/prepare/**. Filenames start with the lesson number, such as **05_plurals.csv**. The preparation scripts create the folder if it does not exist.
-2. Run **python scripts/prepare_words.py** to normalize the selected columns, fill missing vocabulary flags, derive lesson and sort order from the filename, generate eSpeak IPA, and prepare missing US-English audio with the configured voice (`GCP_TTS_VOICE_NAME`, default `en-US-Neural2-F`). To use Chirp 3 HD instead, run **python scripts/prepare_words.py --voice-model chirp3-hd-f**; its audio filenames get the `_chirp_hd_f` suffix so they can coexist with the current voice's recordings.
-3. Review the timestamped CSV output and the audio files in **scripts/data/prepare/audio/**.
-4. Optionally run **python scripts/prepare_audio_from_IPA.py** to regenerate audio using the CSV pronunciation field.
+1. Put source CSV files in **scripts/data/prepare/**. Filenames start with the lesson number, such as **05_plurals.csv**. The scripts create the folder if it does not exist.
+2. Run **python scripts/01_prepare_data.py** to normalize the selected columns, fill missing vocabulary flags, derive lesson and sort order from the filename, and generate British English IPA with eSpeak NG. It writes a timestamped CSV beside each source file and does not generate audio.
+3. Review or edit the IPA in the timestamped CSV output.
+4. Run **python scripts/02_generate_audio.py** to generate audio from the `english` column using `en-US-Neural2-F`. Pass **--ipa** to generate from the `pronunciation` column instead. Both modes fill the `audio` column in the timestamped CSVs and save recordings under **scripts/data/prepare/audio/**.
 5. Optionally run **python scripts/trim_audio.py**. It reads audio from **scripts/data/prepare/audio/** and writes trimmed copies to **scripts/data/prepare/audio_trim/** without replacing the originals.
 6. Only after choosing which words should be marked as used, run **python scripts/mark_words.py**.
 
-The preparation scripts ignore CSV files with a trailing date/timestamp when choosing their inputs. They write a timestamped result beside each source CSV.
+The first script ignores timestamped CSVs, so it will not prepare its own outputs again. The second script processes timestamped CSVs produced by the first script and updates them in place.
 
 ## CSV fields
 

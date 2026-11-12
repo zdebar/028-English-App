@@ -177,34 +177,34 @@ async def generate_audio_with_google_cloud_from_ipa(
     suffix: str = "",
     language_code: str = "en-US",
     overwrite_existing: bool = False,
+    voice_name: str | None = None,
 ) -> pd.DataFrame:
     if texttospeech is None:
         raise ImportError("Missing dependency: google-cloud-texttospeech. Install with 'pip install google-cloud-texttospeech'.")
 
     client = texttospeech.TextToSpeechClient()
     audio_tasks: list[Awaitable[None]] = []
-    audio_names: list[str] = []
 
-    voice_name = os.getenv("GCP_TTS_IPA_VOICE_NAME", "en-US-Neural2-F")
+    if voice_name is None:
+        voice_name = os.getenv("GCP_TTS_IPA_VOICE_NAME", "en-US-Neural2-F")
     speaking_rate = _get_float_env("GCP_TTS_SPEAKING_RATE", 1)
     pitch = _get_float_env("GCP_TTS_PITCH", 0.0)
 
     os.makedirs(audio_folder, exist_ok=True)
+    audio_names = [""] * len(df)
 
-    for _, row in df.iterrows():
+    for position, (_, row) in enumerate(df.iterrows()):
         english, ipa_pronunciation = _get_ipa_values(row)
         extension_word = _get_audio_filename(english, suffix)
-        if not extension_word:
+        if not extension_word or not ipa_pronunciation:
+            if english and not ipa_pronunciation:
+                print(f"Skipping (missing IPA pronunciation): {english}")
             continue
 
-        audio_names.append(extension_word)
+        audio_names[position] = extension_word
         audio_path = os.path.join(audio_folder, extension_word)
         if os.path.exists(audio_path) and not overwrite_existing:
             print(f"Skipping (audio already exists): {audio_path}")
-            continue
-
-        if not ipa_pronunciation:
-            print(f"Skipping (missing IPA pronunciation): {english}")
             continue
 
         audio_task = _create_ipa_audio_task(
@@ -222,6 +222,7 @@ async def generate_audio_with_google_cloud_from_ipa(
             audio_tasks.append(audio_task)
 
     await asyncio.gather(*audio_tasks)
+    df = df.copy()
     df["audio"] = audio_names
     return df
 
@@ -251,7 +252,8 @@ def _get_audio_filename(english: str, suffix: str) -> str:
 
 
 def _get_ipa_values(row) -> tuple[str, str]:
-    english = str(row.get("english", ""))
+    english_value = row.get("english", "")
+    english = "" if pd.isna(english_value) else str(english_value).strip()
     pronunciation_value = row.get("pronunciation", "")
     ipa_pronunciation = "" if pd.isna(pronunciation_value) else str(pronunciation_value).strip()
     if ipa_pronunciation.startswith("/") and ipa_pronunciation.endswith("/"):
