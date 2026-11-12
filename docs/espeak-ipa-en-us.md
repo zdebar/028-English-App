@@ -102,11 +102,12 @@ version 1.52.0 returns `bˈɜːd` for *bird*. To check a specific installation, 
 ## Use in the project
 
 The `fill_pronunciation_espeak_ng` function in `scripts/utils/pronunciation.py`
-runs eSpeak NG with the arguments `-q --ipa -v en-us`, removes commas from the input,
+accepts an accent argument (default `en-us`), removes commas from the input,
 and saves the trimmed standard output text in the `pronunciation` column. For English
 voices, it also normalizes `ɐ` to `ə`. Therefore, the stored value may differ in this
 character from the direct output of the eSpeak command shown above. Word preparation
-uses this function in `scripts/prepare_words.py`.
+uses this function with `en-gb` in `scripts/01_prepare_data.py` to align IPA with the
+British voice used by `scripts/02_generate_audio.py`.
 
 Verified command in PowerShell:
 
