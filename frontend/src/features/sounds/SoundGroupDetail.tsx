@@ -28,7 +28,7 @@ export default function SoundGroupDetail() {
   });
   const data = packageData ?? null;
   const audios = useMemo(() => getItemAudioSources(data?.items ?? []), [data]);
-  const { playAudio, isAudioReady, loading: audioLoading } = useAudioManager(audios);
+  const { playAudio, isAudioReady } = useAudioManager(audios);
 
   useEffect(() => {
     if (groupId) return;
@@ -58,7 +58,6 @@ export default function SoundGroupDetail() {
         )}
         <AudioItemList
           items={items}
-          audioLoading={audioLoading}
           isAudioReady={isAudioReady}
           playAudio={playAudio}
           showToast={showToast}

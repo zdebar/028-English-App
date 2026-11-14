@@ -48,7 +48,7 @@ export default function TopicItemsOverview() {
 
   const itemAudios = useMemo(() => getItemAudioSources(items), [items]);
 
-  const { playAudio, isAudioReady, loading: audioLoading } = useAudioManager(itemAudios);
+  const { playAudio, isAudioReady } = useAudioManager(itemAudios);
 
   // -- Handlers --
   const handleReset = useCallback(async () => {
@@ -74,7 +74,6 @@ export default function TopicItemsOverview() {
       <DataState loading={topicLoading} hasData={hasItems} noDataMessage={TEXTS.noTopicItems}>
         <AudioItemList
           items={items}
-          audioLoading={audioLoading}
           isAudioReady={isAudioReady}
           playAudio={playAudio}
           showToast={showToast}

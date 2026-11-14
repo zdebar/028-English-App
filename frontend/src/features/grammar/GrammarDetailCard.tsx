@@ -44,7 +44,7 @@ export default function GrammarDetailCard({
   const chunks = useMemo(() => getGrammarChunks(grammar), [grammar]);
   const items = useMemo(() => chunks.flatMap((chunk) => chunk.items ?? []), [chunks]);
   const audios = useMemo(() => getItemAudioSources(items), [items]);
-  const { playAudio, isAudioReady, loading: audioLoading } = useAudioManager(audios);
+  const { playAudio, isAudioReady } = useAudioManager(audios);
 
   const hasContent = hasGrammarContent(grammar, chunks);
   const hasBottomControls = items.length > 0;
@@ -58,7 +58,7 @@ export default function GrammarDetailCard({
     >
       <GrammarContent
         grammar={grammar}
-        itemsProps={{ audioLoading, isAudioReady, playAudio, showToast }}
+        itemsProps={{ isAudioReady, playAudio, showToast }}
         onReset={onReset}
       />
       {!hasContent && TEXTS.noNotesToDisplay}

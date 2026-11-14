@@ -10,6 +10,7 @@ import {
 import type { UserItemLocal } from '@/types/user-item.types';
 import { useAudioManager } from '@/features/audio/use-audio-manager';
 import { isAudioPlayable, playAudioWithToast } from '@/features/audio/audio.utils';
+import type { AudioPlaybackResult } from '@/features/audio/use-audio-playback';
 import PlayButton from '@/features/audio/PlayButton';
 import VolumeSlider from '../audio/VolumeSlider';
 import InfoButton from '@/features/notes/InfoButton';
@@ -83,12 +84,10 @@ export default function VocabularyDetailCard({
   const {
     playAudio,
     isAudioReady,
-    loading: audioLoading,
   } = useAudioManager(cardValues.audio);
   const showToast = useToastStore((state) => state.showToast);
   const audioControlsDisabled = isVocabularyAudioDisabled(
     selectedWord,
-    audioLoading,
     isAudioReady,
   );
 
@@ -187,15 +186,14 @@ function getDirectionSections(
 
 function isVocabularyAudioDisabled(
   selectedWord: UserItemLocal | null,
-  audioLoading: boolean,
-  isAudioReady: (audio: string) => boolean,
+  isAudioReady: (audio: string) => boolean | null,
 ): boolean {
-  return !isAudioPlayable(selectedWord?.audio, audioLoading, isAudioReady);
+  return !isAudioPlayable(selectedWord?.audio, isAudioReady);
 }
 
 async function playVocabularyAudio(
   selectedWord: UserItemLocal | null,
-  playAudio: (audio: string) => Promise<boolean>,
+  playAudio: (audio: string) => Promise<AudioPlaybackResult>,
   showToast: (message: string, type: 'error') => void,
 ): Promise<void> {
   await playAudioWithToast(selectedWord?.audio, playAudio, showToast);
@@ -274,7 +272,7 @@ function VocabularyAudioControls({
   audioControlsDisabled: boolean;
   pronunciationSounds: readonly GroupType[];
   onOpenPronunciation: () => void;
-  playAudio: (audio: string) => Promise<boolean>;
+  playAudio: (audio: string) => Promise<AudioPlaybackResult>;
   showToast: (message: string, type: 'error') => void;
 }>) {
   return (
@@ -368,7 +366,7 @@ function VocabularyDetailContent({
   selectedWord: UserItemLocal | null;
   audioControlsDisabled: boolean;
   onOpenPronunciation: () => void;
-  playAudio: (audio: string) => Promise<boolean>;
+  playAudio: (audio: string) => Promise<AudioPlaybackResult>;
   showToast: (message: string, type: 'error') => void;
   noteId: number | null | undefined;
   openNote: (noteId: number) => void;

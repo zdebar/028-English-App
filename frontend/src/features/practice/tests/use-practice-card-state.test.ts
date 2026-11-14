@@ -37,7 +37,7 @@ function useTestCard(currentItem: UserItemLocal | null = item, isCompletion = fa
 describe('usePracticeCardState', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    playAudioMock.mockResolvedValue(true);
+    playAudioMock.mockResolvedValue(null);
     audioStateMock.loading = false;
     audioStateMock.error = false;
     audioStateMock.isAudioReady.mockReturnValue(true);

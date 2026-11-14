@@ -1,13 +1,13 @@
 import type { UserItemLocal } from '@/types/user-item.types';
 import { TEXTS } from '@/locales/cs';
+import type { AudioPlaybackResult } from './use-audio-playback';
 
 export function isAudioPlayable(
   audio: string | null | undefined,
-  audioLoading: boolean,
-  isAudioReady: (audio: string) => boolean,
+  isAudioReady: (audio: string) => boolean | null,
 ): boolean {
   if (!audio?.trim()) return false;
-  return audioLoading || isAudioReady(audio);
+  return isAudioReady(audio) !== false;
 }
 
 export function getItemAudioSources(
@@ -18,10 +18,10 @@ export function getItemAudioSources(
 
 export async function playAudioWithToast(
   audio: string | null | undefined,
-  playAudio: (audio: string) => Promise<boolean>,
+  playAudio: (audio: string) => Promise<AudioPlaybackResult>,
   showToast: (message: string, type: 'error') => void,
 ): Promise<void> {
   if (!audio?.trim()) return;
-  const didPlay = await playAudio(audio);
-  if (!didPlay) showToast(TEXTS.noAudio, 'error');
+  const error = await playAudio(audio);
+  if (error) showToast(TEXTS.noAudio, 'error');
 }

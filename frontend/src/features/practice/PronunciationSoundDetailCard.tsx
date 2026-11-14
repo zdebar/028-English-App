@@ -30,8 +30,8 @@ export default function PronunciationSoundDetailCard({
 }: PronunciationSoundDetailCardProps) {
   const sound = sounds[index];
   const showToast = useToastStore((state) => state.showToast);
-  const { playAudio, isAudioReady, loading: audioLoading } = useAudioManager(audio);
-  const audioDisabled = !isAudioPlayable(audio, audioLoading, isAudioReady);
+  const { playAudio, isAudioReady } = useAudioManager(audio);
+  const audioDisabled = !isAudioPlayable(audio, isAudioReady);
   if (!sound) return null;
 
   const isFirstSound = index === 0;

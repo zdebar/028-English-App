@@ -4,6 +4,7 @@ import { reportError } from '@/features/logging/logging-handler';
 import type { UserItemLocal } from '@/types/user-item.types';
 import { useCallback, useEffect, useRef, type Dispatch, type SetStateAction } from 'react';
 import { NBSP, useHint } from './use-hint';
+import type { AudioPlaybackResult } from '@/features/audio/use-audio-playback';
 
 type UsePracticeCardStateOptions = {
   currentItem: UserItemLocal | null;
@@ -18,7 +19,7 @@ type PracticeAudioPhasesOptions = {
   revealed: boolean;
   audioLoading: boolean;
   audioError: boolean;
-  playAudio: () => Promise<boolean>;
+  playAudio: () => Promise<AudioPlaybackResult>;
   attemptedAudioItem: { current: UserItemLocal | null };
   isCompletion: boolean;
   stopAudio: () => void;
@@ -37,19 +38,22 @@ export function usePracticeCardState({
     currentItem?.english,
   );
   const {
-    playAudio: playAudioInternal,
+    playAudio: playAudioForFilename,
     stopAudio,
     audioError,
     loading: audioLoading,
     isAudioReady,
     isPlaying,
   } = useAudioManager(currentItem?.audio ?? null);
+  const playAudioInternal = useCallback(
+    () => playAudioForFilename(currentItem?.audio ?? ''),
+    [currentItem?.audio, playAudioForFilename],
+  );
 
   const audioDisabled = isPracticeAudioDisabled(
     revealed,
     isEnToCz,
     currentItem,
-    audioLoading,
     isAudioReady,
   );
   usePracticeAudioPhases({
@@ -114,11 +118,10 @@ function isPracticeAudioDisabled(
   revealed: boolean,
   isEnToCz: boolean,
   currentItem: UserItemLocal | null,
-  audioLoading: boolean,
-  isAudioReady: (audio: string) => boolean,
+  isAudioReady: (audio: string) => boolean | null,
 ): boolean {
   const shouldHideAudio = !revealed && !isEnToCz;
-  const audioUnavailable = !isAudioPlayable(currentItem?.audio, audioLoading, isAudioReady);
+  const audioUnavailable = !isAudioPlayable(currentItem?.audio, isAudioReady);
   return shouldHideAudio || audioUnavailable;
 }
 
@@ -157,7 +160,7 @@ function revealPracticeCard(
   isEnToCz: boolean,
   revealed: boolean,
   audioError: boolean,
-  playAudio: () => Promise<boolean>,
+  playAudio: () => Promise<AudioPlaybackResult>,
   setRevealed: Dispatch<SetStateAction<boolean>>,
 ): void {
   if (revealed) return;

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import AudioRecord from '@/database/models/audio-records';
 import config from '@/config/config';
 import { reportError } from '@/features/logging/logging-handler';
@@ -15,8 +15,8 @@ export type ManagedAudio = Readonly<{
   errorMessage: string | null;
 }>;
 
-/** Loads requested audio files and returns their current per-file states. */
-export function useAudioLoader(audio: AudioInput): Map<string, ManagedAudio> {
+/** Loads requested files and exposes the map update needed after a playback failure. */
+export function useAudioLoader(audio: AudioInput) {
   const requestedFilesKey = JSON.stringify(normalizeAudioInput(audio));
   const filenames = useMemo(
     () => JSON.parse(requestedFilesKey) as string[],
@@ -35,6 +35,25 @@ export function useAudioLoader(audio: AudioInput): Map<string, ManagedAudio> {
   const audioMap = audioMapState.requestedFilesKey === requestedFilesKey
     ? audioMapState.audioMap
     : initialAudioMap;
+  const updateAudioEntry = useCallback((filename: string, entry: ManagedAudio) => {
+    if (requestedFilesKeyRef.current !== requestedFilesKey) return;
+    setAudioMapState((current) => {
+      if (current.requestedFilesKey !== requestedFilesKey || !current.audioMap.has(filename)) {
+        return current;
+      }
+
+      const nextMap = new Map(current.audioMap);
+      nextMap.set(filename, entry);
+      return { requestedFilesKey, audioMap: nextMap };
+    });
+  }, [requestedFilesKey]);
+  const markAudioFailed = useCallback((filename: string, errorMessage: string) => {
+    updateAudioEntry(filename, {
+      isLoading: false,
+      audio: null,
+      errorMessage,
+    });
+  }, [updateAudioEntry]);
 
   useEffect(() => {
     let isDisposed = false;
@@ -50,15 +69,7 @@ export function useAudioLoader(audio: AudioInput): Map<string, ManagedAudio> {
       !isDisposed && requestedFilesKeyRef.current === requestedFilesKey;
     const updateEntry = (filename: string, entry: ManagedAudio) => {
       if (!isCurrentLoad()) return;
-      setAudioMapState((current) => {
-        if (!isCurrentLoad() || current.requestedFilesKey !== requestedFilesKey) {
-          return current;
-        }
-
-        const nextMap = new Map(current.audioMap);
-        nextMap.set(filename, entry);
-        return { requestedFilesKey, audioMap: nextMap };
-      });
+      updateAudioEntry(filename, entry);
     };
     const setFailure = (filename: string, error: unknown) => {
       if (!isCurrentLoad()) return;
@@ -103,9 +114,9 @@ export function useAudioLoader(audio: AudioInput): Map<string, ManagedAudio> {
       isDisposed = true;
       disposeAudioElements(createdAudioElements);
     };
-  }, [filenames, initialAudioMap, requestedFilesKey]);
+  }, [filenames, initialAudioMap, requestedFilesKey, updateAudioEntry]);
 
-  return audioMap;
+  return { audioMap, markAudioFailed };
 }
 
 function createLoadingAudioMap(filenames: readonly string[]): Map<string, ManagedAudio> {

@@ -31,7 +31,7 @@ export default function LessonTrainingOverviewCard({
   const closeRoute = useRouteClose(ROUTES.practice);
   const showToast = useToastStore((state) => state.showToast);
   const audios = useMemo(() => getItemAudioSources(items), [items]);
-  const { playAudio, isAudioReady, loading } = useAudioManager(audios);
+  const { playAudio, isAudioReady } = useAudioManager(audios);
   const title = lesson.name;
 
   return (
@@ -43,7 +43,6 @@ export default function LessonTrainingOverviewCard({
       {groupNote ? <Note note={groupNote} /> : <div className="h-4" aria-hidden="true" />}
       <AudioItemList
         items={items}
-        audioLoading={loading}
         isAudioReady={isAudioReady}
         playAudio={playAudio}
         showToast={showToast}
