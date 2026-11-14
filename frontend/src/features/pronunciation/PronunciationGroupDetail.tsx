@@ -19,9 +19,12 @@ import type { PronunciationGroupDetailType } from '@/types/pronunciation.types';
 import { useRouteClose } from '@/routing/use-route-close';
 import type { UserItemLocal } from '@/types/user-item.types';
 import { useCurrentUserDataPackage } from '@/database/state/use-current-user-data-package';
+import type { AudioCacheSnapshot } from '@/features/audio/use-audio-loader';
 
 // -- Pronunciation detail route --
-export default function PronunciationGroupDetail() {
+export default function PronunciationGroupDetail({
+  audioCacheSnapshot,
+}: Readonly<{ audioCacheSnapshot?: AudioCacheSnapshot }>) {
   const userId = useAuthStore((state) => state.userId);
   const showToast = useToastStore((state) => state.showToast);
   const navigate = useNavigate();
@@ -40,7 +43,7 @@ export default function PronunciationGroupDetail() {
     playAudio,
     stopAudio,
     isAudioReady,
-  } = useAudioManager(audios);
+  } = useAudioManager(audios, audioCacheSnapshot);
   usePronunciationGroupNavigation(validGroupId, loading, userId, data, navigate);
 
   useQueryErrorToast(error, 'Failed to fetch pronunciation group detail');

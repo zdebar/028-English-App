@@ -11,6 +11,7 @@ import VolumeSlider from '@/features/audio/VolumeSlider';
 import DirectionResetButton from '@/features/practice/DirectionResetButton';
 import { getEnabledReviewDirections } from '@/features/practice/review-directions.utils';
 import type { ReviewDirection } from '@/types/practice.types';
+import type { AudioCacheSnapshot } from '@/features/audio/use-audio-loader';
 
 type GrammarChunkDetail = Readonly<{
   id: number;
@@ -31,12 +32,14 @@ export type GrammarDetail =
 
 type GrammarDetailCardProps = Readonly<{
   grammar?: GrammarDetail | null;
+  audioCacheSnapshot?: AudioCacheSnapshot;
   onClose: () => void;
   onReset?: (grammarGroupId: number, direction: ReviewDirection) => Promise<void>;
 }>;
 
 export default function GrammarDetailCard({
   grammar,
+  audioCacheSnapshot,
   onClose,
   onReset,
 }: GrammarDetailCardProps) {
@@ -44,7 +47,7 @@ export default function GrammarDetailCard({
   const chunks = useMemo(() => getGrammarChunks(grammar), [grammar]);
   const items = useMemo(() => chunks.flatMap((chunk) => chunk.items ?? []), [chunks]);
   const audios = useMemo(() => getItemAudioSources(items), [items]);
-  const { playAudio, isAudioReady } = useAudioManager(audios);
+  const { playAudio, isAudioReady } = useAudioManager(audios, audioCacheSnapshot);
 
   const hasContent = hasGrammarContent(grammar, chunks);
   const hasBottomControls = items.length > 0;

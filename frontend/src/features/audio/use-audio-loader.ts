@@ -240,10 +240,14 @@ function getPrefetchedRecords(
   filenames: readonly string[],
   snapshot: AudioCacheSnapshot | undefined,
 ): readonly (AudioRecordLocal | undefined)[] | null {
-  if (snapshot?.filenames.length !== filenames.length) return null;
-  if (snapshot.records.length !== filenames.length) return null;
-  if (snapshot.filenames.some((filename, index) => filename !== filenames[index])) return null;
-  return snapshot.records;
+  if (!snapshot || snapshot.records.length !== snapshot.filenames.length) return null;
+
+  const recordsByFilename = new Map(
+    snapshot.filenames.map((filename, index) => [filename, snapshot.records[index]] as const),
+  );
+  if (filenames.some((filename) => !recordsByFilename.has(filename))) return null;
+
+  return filenames.map((filename) => recordsByFilename.get(filename));
 }
 
 function downloadAndCacheAudio(filename: string): Promise<AudioRecordLocal> {

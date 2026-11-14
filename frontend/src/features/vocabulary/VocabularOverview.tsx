@@ -8,13 +8,16 @@ import VocabularyList from './VocabularyList';
 import { ROUTES } from '@/config/routes.config';
 import { useRouteClose } from '@/routing/use-route-close';
 import { useQueryErrorToast } from '@/features/logging/use-query-error-toast';
+import type { AudioCacheSnapshot } from '@/features/audio/use-audio-loader';
 
 /**
  * VocabularyOverview component
  *
  * @returns The vocabulary overview UI with list and detail card functionality.
  */
-export default function VocabularyOverview() {
+export default function VocabularyOverview({
+  audioCacheSnapshot,
+}: Readonly<{ audioCacheSnapshot?: AudioCacheSnapshot }> = {}) {
   const userId = useAuthStore((state) => state.userId);
   const closeRoute = useRouteClose(ROUTES.overviews);
 
@@ -83,6 +86,7 @@ export default function VocabularyOverview() {
   return (
     <VocabularyDetailCard
       selectedWord={selectedWord}
+      audioCacheSnapshot={audioCacheSnapshot}
       notes={notes}
       soundGroups={soundGroups}
       onClose={() => setSelectedWord(null)}

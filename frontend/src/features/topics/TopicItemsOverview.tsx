@@ -16,8 +16,11 @@ import { AudioItemListControls } from '@/features/audio/AudioItemListControls';
 import { useRouteClose } from '@/routing/use-route-close';
 import { useQueryErrorToast } from '@/features/logging/use-query-error-toast';
 import { useCurrentUserDataPackage } from '@/database/state/use-current-user-data-package';
+import type { AudioCacheSnapshot } from '@/features/audio/use-audio-loader';
 
-export default function TopicItemsOverview() {
+export default function TopicItemsOverview({
+  audioCacheSnapshot,
+}: Readonly<{ audioCacheSnapshot?: AudioCacheSnapshot }>) {
   const navigate = useNavigate();
   const closeRoute = useRouteClose(ROUTES.topics);
   const userId = useAuthStore((state) => state.userId);
@@ -48,7 +51,7 @@ export default function TopicItemsOverview() {
 
   const itemAudios = useMemo(() => getItemAudioSources(items), [items]);
 
-  const { playAudio, isAudioReady } = useAudioManager(itemAudios);
+  const { playAudio, isAudioReady } = useAudioManager(itemAudios, audioCacheSnapshot);
 
   // -- Handlers --
   const handleReset = useCallback(async () => {

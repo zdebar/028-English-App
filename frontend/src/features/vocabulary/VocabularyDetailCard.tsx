@@ -33,11 +33,13 @@ import {
 import type { GroupType } from '@/types/table.types';
 import type { NoteType } from '@/types/generic.types';
 import { useState } from 'react';
+import type { AudioCacheSnapshot } from '@/features/audio/use-audio-loader';
 
 const NOT_AVAILABLE = TEXTS.notAvailable;
 
 type VocabularyDetailCardProps = Readonly<{
   selectedWord: UserItemLocal | null;
+  audioCacheSnapshot?: AudioCacheSnapshot;
   notes?: readonly NoteType[];
   soundGroups?: readonly GroupType[];
   onClose: () => void;
@@ -67,6 +69,7 @@ type VocabularyDirectionSection = Readonly<{
 // -- Vocabulary detail card --
 export default function VocabularyDetailCard({
   selectedWord,
+  audioCacheSnapshot,
   notes = [],
   soundGroups = [],
   onClose,
@@ -84,7 +87,7 @@ export default function VocabularyDetailCard({
   const {
     playAudio,
     isAudioReady,
-  } = useAudioManager(cardValues.audio);
+  } = useAudioManager(cardValues.audio, audioCacheSnapshot);
   const showToast = useToastStore((state) => state.showToast);
   const audioControlsDisabled = isVocabularyAudioDisabled(
     selectedWord,

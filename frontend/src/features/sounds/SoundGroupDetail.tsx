@@ -14,8 +14,11 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { useRouteClose } from '@/routing/use-route-close';
 import { useCurrentUserDataPackage } from '@/database/state/use-current-user-data-package';
 import type { SoundGroupDetail } from '@/database/state/data-types';
+import type { AudioCacheSnapshot } from '@/features/audio/use-audio-loader';
 
-export default function SoundGroupDetail() {
+export default function SoundGroupDetail({
+  audioCacheSnapshot,
+}: Readonly<{ audioCacheSnapshot?: AudioCacheSnapshot }>) {
   const userId = useAuthStore((state) => state.userId);
   const showToast = useToastStore((state) => state.showToast);
   const navigate = useNavigate();
@@ -28,7 +31,7 @@ export default function SoundGroupDetail() {
   });
   const data = packageData ?? null;
   const audios = useMemo(() => getItemAudioSources(data?.items ?? []), [data]);
-  const { playAudio, isAudioReady } = useAudioManager(audios);
+  const { playAudio, isAudioReady } = useAudioManager(audios, audioCacheSnapshot);
 
   useEffect(() => {
     if (groupId) return;
