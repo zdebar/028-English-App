@@ -188,8 +188,8 @@ describe('useAudioManager', () => {
     expect(cacheAudioRecordsMock).toHaveBeenCalledWith([downloadedRecord]);
   });
 
-  it('limits remote audio downloads to six concurrent requests', async () => {
-    const filenames = Array.from({ length: 7 }, (_, index) => `file-${index}.opus`);
+  it('limits remote audio downloads to eight concurrent requests', async () => {
+    const filenames = Array.from({ length: 9 }, (_, index) => `file-${index}.opus`);
     const releases: Array<() => void> = [];
     let activeDownloads = 0;
     let maxActiveDownloads = 0;
@@ -207,15 +207,15 @@ describe('useAudioManager', () => {
 
     const { result } = renderHook(() => useAudioManager(filenames));
 
-    await waitFor(() => expect(downloadAudioMock).toHaveBeenCalledTimes(6));
-    expect(maxActiveDownloads).toBe(6);
+    await waitFor(() => expect(downloadAudioMock).toHaveBeenCalledTimes(8));
+    expect(maxActiveDownloads).toBe(8);
 
     await act(async () => {
       releases[0]?.();
       await Promise.resolve();
     });
-    await waitFor(() => expect(downloadAudioMock).toHaveBeenCalledTimes(7));
-    expect(maxActiveDownloads).toBe(6);
+    await waitFor(() => expect(downloadAudioMock).toHaveBeenCalledTimes(9));
+    expect(maxActiveDownloads).toBe(8);
 
     await act(async () => {
       releases.slice(1).forEach((release) => release());

@@ -1,303 +1,190 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import AudioRecord from '@/database/models/audio-records';
+import config from '@/config/config';
 import { reportError } from '@/features/logging/logging-handler';
 import { AudioFileNotFoundError } from '@/types/error.types';
 import type { AudioRecordLocal } from '@/types/audio.types';
+import { runWithConcurrency } from '@/utils/async.utils';
+import { normalizeAudioInput } from '@/utils/audio.utils';
 
-export type AudioInput = string | string[] | null;
+export type AudioInput = string | string[];
 
 export type ManagedAudio = Readonly<{
-  element: HTMLAudioElement;
-  onEnded: () => void;
+  isLoading: boolean;
+  audio: HTMLAudioElement | null;
+  errorMessage: string | null;
 }>;
 
-type AudioLoadPromise = Promise<boolean>;
-type AudioLoadResolver = (loaded: boolean) => void;
-
-export type AudioLoaderState = Readonly<{
-  audioInputKey: string;
-  audioInputKeyRef: { current: string };
-  audioMapRef: { current: Map<string, ManagedAudio> };
-  loadPromisesRef: { current: Map<string, AudioLoadPromise> };
-  audioEndedRef: { current: () => void };
-  audioStateMatchesInput: boolean;
-  audioError: boolean;
-  isAudioReady: (filename?: string) => boolean;
-  loading: boolean;
-  filenames: string[];
-  firstRequestedFilename: string | null;
-  markAudioFailure: (filename: string) => void;
-}>;
-
-const AUDIO_DOWNLOAD_CONCURRENCY = 6;
-
-/** Loads audio records and owns their HTMLAudioElement lifecycle. */
-export function useAudioLoader(audio: AudioInput): AudioLoaderState {
-  const audioMapRef = useRef<Map<string, ManagedAudio>>(new Map());
-  const loadPromisesRef = useRef<Map<string, AudioLoadPromise>>(new Map());
-  const audioEndedRef = useRef<() => void>(() => undefined);
-  const loadGenerationRef = useRef(0);
-  const audioInputKey = getAudioInputKey(audio);
-  const requestedFilenames = getAudioFilesFromInputKey(audioInputKey);
-  const audioInputKeyRef = useRef(audioInputKey);
-  audioInputKeyRef.current = audioInputKey;
-  const [audioStateInputKey, setAudioStateInputKey] = useState(audioInputKey);
-  const [audioError, setAudioError] = useState(false);
-  const [loading, setLoading] = useState(true);
-  const [filenames, setFilenames] = useState<string[]>([]);
-  const [failedFilenames, setFailedFilenames] = useState<Set<string>>(new Set());
-  const audioStateMatchesInput = audioStateInputKey === audioInputKey;
+/** Loads requested audio files and returns their current per-file states. */
+export function useAudioLoader(audio: AudioInput): Map<string, ManagedAudio> {
+  const requestedFilesKey = JSON.stringify(normalizeAudioInput(audio));
+  const filenames = useMemo(
+    () => JSON.parse(requestedFilesKey) as string[],
+    [requestedFilesKey],
+  );
+  const initialAudioMap = useMemo(
+    () => createLoadingAudioMap(filenames),
+    [filenames],
+  );
+  const [audioMapState, setAudioMapState] = useState(() => ({
+    requestedFilesKey,
+    audioMap: initialAudioMap,
+  }));
+  const requestedFilesKeyRef = useRef(requestedFilesKey);
+  requestedFilesKeyRef.current = requestedFilesKey;
+  const audioMap = audioMapState.requestedFilesKey === requestedFilesKey
+    ? audioMapState.audioMap
+    : initialAudioMap;
 
   useEffect(() => {
     let isDisposed = false;
-    const files = getAudioFilesFromInputKey(audioInputKey);
-    const loadGeneration = loadGenerationRef.current + 1;
-    loadGenerationRef.current = loadGeneration;
-    setAudioStateInputKey(audioInputKey);
-    setLoading(true);
-    setAudioError(false);
-    setFailedFilenames(new Set());
-    disposeAudioMap(audioMapRef.current);
-    loadPromisesRef.current.clear();
-
-    setFilenames(files);
-
-    if (!files.length) {
-      setAudioError(false);
-      setLoading(false);
-      return;
-    }
-
-    const handleAudioEnded = () => {
-      audioEndedRef.current();
-    };
-    const resolveLoads = new Map<string, AudioLoadResolver>();
-    files.forEach((filename) => {
-      const deferredLoad = createDeferredAudioLoad();
-      loadPromisesRef.current.set(filename, deferredLoad.promise);
-      resolveLoads.set(filename, deferredLoad.resolve);
+    const createdAudioElements = new Set<HTMLAudioElement>();
+    setAudioMapState((current) => {
+      if (current.requestedFilesKey === requestedFilesKey && current.audioMap === initialAudioMap) {
+        return current;
+      }
+      return { requestedFilesKey, audioMap: initialAudioMap };
     });
 
-    const isCurrentLoad = () => !isDisposed && loadGenerationRef.current === loadGeneration;
-    const resolveLoad = (filename: string, loaded: boolean) => {
-      resolveLoads.get(filename)?.(loaded);
-    };
-    const failedFiles = new Set<string>();
-    const downloadedRecords: AudioRecordLocal[] = [];
-
-    const loadAllAudio = async () => {
-      const cachedRecords = await AudioRecord.getCachedByFilenames(files);
-      const missingFiles: string[] = [];
-
-      cachedRecords.forEach((record, index) => {
-        const filename = files[index];
-        if (!filename) return;
-        if (!record) {
-          missingFiles.push(filename);
-          return;
+    const isCurrentLoad = () =>
+      !isDisposed && requestedFilesKeyRef.current === requestedFilesKey;
+    const updateEntry = (filename: string, entry: ManagedAudio) => {
+      if (!isCurrentLoad()) return;
+      setAudioMapState((current) => {
+        if (!isCurrentLoad() || current.requestedFilesKey !== requestedFilesKey) {
+          return current;
         }
 
-        const didLoad = loadAudioRecord(
-          filename,
-          record,
-          handleAudioEnded,
-          isCurrentLoad,
-          audioMapRef.current,
-        );
-        if (!didLoad) failedFiles.add(filename);
-        resolveLoad(filename, didLoad);
+        const nextMap = new Map(current.audioMap);
+        nextMap.set(filename, entry);
+        return { requestedFilesKey, audioMap: nextMap };
       });
-
-      await runWithConcurrency(missingFiles, AUDIO_DOWNLOAD_CONCURRENCY, async (filename) => {
-        try {
-          const audioRecord = await AudioRecord.downloadByFilename(filename);
-          downloadedRecords.push(audioRecord);
-          const didLoad = loadAudioRecord(
-            filename,
-            audioRecord,
-            handleAudioEnded,
-            isCurrentLoad,
-            audioMapRef.current,
-          );
-          if (!didLoad) failedFiles.add(filename);
-          resolveLoad(filename, didLoad);
-        } catch (error) {
-          if (!(error instanceof AudioFileNotFoundError)) {
-            reportError('Audio Manager Error', error);
-          }
-          failedFiles.add(filename);
-          resolveLoad(filename, false);
-        }
-      });
-
-      if (downloadedRecords.length > 0) {
-        try {
-          await AudioRecord.cacheAudioRecords(downloadedRecords);
-        } catch (error) {
-          reportError('Audio Cache Error', error);
-        }
-      }
-
-      if (isCurrentLoad()) {
-        setFailedFilenames(new Set(failedFiles));
-        setAudioError(failedFiles.size > 0);
-      }
     };
-
-    void loadAllAudio()
-      .catch((error: unknown) => {
+    const setFailure = (filename: string, error: unknown) => {
+      if (!isCurrentLoad()) return;
+      if (!(error instanceof AudioFileNotFoundError)) {
         reportError('Audio Manager Error', error);
-        files.forEach((filename) => {
-          failedFiles.add(filename);
-          resolveLoad(filename, false);
-        });
-        if (isCurrentLoad()) {
-          setFailedFilenames(new Set(failedFiles));
-          setAudioError(true);
-        }
-      })
-      .finally(() => {
-        if (isCurrentLoad()) setLoading(false);
+      }
+      updateEntry(filename, {
+        isLoading: false,
+        audio: null,
+        errorMessage: getErrorMessage(error),
       });
+    };
+    const setLoadedAudio = (filename: string, audioRecord: AudioRecordLocal) => {
+      if (!isCurrentLoad()) return;
+
+      try {
+        const audioElement = createAudioElement(audioRecord);
+        createdAudioElements.add(audioElement);
+        updateEntry(filename, {
+          isLoading: false,
+          audio: audioElement,
+          errorMessage: null,
+        });
+      } catch (error) {
+        reportError('Audio Manager Error', error);
+        updateEntry(filename, {
+          isLoading: false,
+          audio: null,
+          errorMessage: getErrorMessage(error),
+        });
+      }
+    };
+
+    void loadAudioFiles(filenames, isCurrentLoad, setLoadedAudio, setFailure).catch(
+      (error: unknown) => {
+        reportError('Audio Manager Error', error);
+        filenames.forEach((filename) => setFailure(filename, error));
+      },
+    );
 
     return () => {
       isDisposed = true;
-      resolveLoads.forEach((resolve) => resolve(false));
-      if (loadGenerationRef.current === loadGeneration) {
-        loadGenerationRef.current += 1;
-      }
-      loadPromisesRef.current.clear();
-      disposeAudioMap(audioMapRef.current);
+      disposeAudioElements(createdAudioElements);
     };
-  }, [audioInputKey]);
+  }, [filenames, initialAudioMap, requestedFilesKey]);
 
-  const isAudioReady = useCallback(
-    (filename?: string) => {
-      if (audioInputKeyRef.current !== audioInputKey || !audioStateMatchesInput) {
-        return false;
-      }
+  return audioMap;
+}
 
-      if (filename) {
-        return audioMapRef.current.has(filename) && !failedFilenames.has(filename);
-      }
-
-      return audioMapRef.current.size > 0;
-    },
-    [audioInputKey, audioStateMatchesInput, failedFilenames],
+function createLoadingAudioMap(filenames: readonly string[]): Map<string, ManagedAudio> {
+  return new Map(
+    filenames.map((filename) => [
+      filename,
+      { isLoading: true, audio: null, errorMessage: null },
+    ]),
   );
-
-  const markAudioFailure = useCallback(
-    (filename: string) => {
-      if (audioInputKeyRef.current !== audioInputKey) return;
-      setFailedFilenames((previous) => new Set(previous).add(filename));
-      setAudioError(true);
-    },
-    [audioInputKey],
-  );
-
-  return {
-    audioInputKey,
-    audioInputKeyRef,
-    audioMapRef,
-    loadPromisesRef,
-    audioEndedRef,
-    audioStateMatchesInput,
-    audioError: audioStateMatchesInput ? audioError : false,
-    isAudioReady,
-    loading: audioStateMatchesInput ? loading : requestedFilenames.length > 0,
-    filenames: audioStateMatchesInput ? filenames : [],
-    firstRequestedFilename: requestedFilenames[0] ?? null,
-    markAudioFailure,
-  };
 }
 
-function createDeferredAudioLoad(): Readonly<{
-  promise: AudioLoadPromise;
-  resolve: AudioLoadResolver;
-}> {
-  let resolvePromise!: AudioLoadResolver;
-  const promise = new Promise<boolean>((resolve) => {
-    resolvePromise = resolve;
-  });
-  return { promise, resolve: resolvePromise };
-}
-
-/** Disposes all managed audio elements and revokes their object URLs. */
-function disposeAudioMap(audioMap: Map<string, ManagedAudio>): void {
-  audioMap.forEach(disposeManagedAudio);
-  audioMap.clear();
-}
-
-function disposeManagedAudio({ element, onEnded }: ManagedAudio): void {
-  stopAndReset(element);
-  element.removeEventListener('ended', onEnded);
-  const objectUrl = element.src;
-  if (!objectUrl.startsWith('blob:')) return;
-  element.removeAttribute('src');
-  element.load();
-  URL.revokeObjectURL(objectUrl);
-}
-
-/** Normalizes audio input to a deduplicated list of filenames. */
-function normalizeAudioInput(audio: AudioInput): string[] {
-  if (typeof audio === 'string' && audio) return [audio];
-  if (!Array.isArray(audio)) return [];
-  return [...new Set(audio.filter(Boolean))];
-}
-
-function getAudioInputKey(audio: AudioInput): string {
-  return JSON.stringify(normalizeAudioInput(audio));
-}
-
-function getAudioFilesFromInputKey(inputKey: string): string[] {
-  return JSON.parse(inputKey) as string[];
-}
-
-function loadAudioRecord(
-  filename: string,
-  audioRecord: AudioRecordLocal,
-  onEnded: () => void,
+async function loadAudioFiles(
+  filenames: readonly string[],
   isCurrentLoad: () => boolean,
-  audioMap: Map<string, ManagedAudio>,
-): boolean {
-  if (!isCurrentLoad()) return false;
+  setLoadedAudio: (filename: string, record: AudioRecordLocal) => void,
+  setFailure: (filename: string, error: unknown) => void,
+): Promise<void> {
+  const cachedRecords = await AudioRecord.getCachedByFilenames(filenames);
+  if (!isCurrentLoad()) return;
 
+  const missingFiles: string[] = [];
+  cachedRecords.forEach((record, index) => {
+    const filename = filenames[index];
+    if (!filename) return;
+    if (!record) {
+      missingFiles.push(filename);
+      return;
+    }
+
+    setLoadedAudio(filename, record);
+  });
+
+  await runWithConcurrency(
+    missingFiles,
+    config.audio.downloadConcurrency,
+    async (filename) => {
+      if (!isCurrentLoad()) return;
+
+      try {
+        const audioRecord = await AudioRecord.downloadByFilename(filename);
+        try {
+          await AudioRecord.cacheAudioRecords([audioRecord]);
+        } catch (error) {
+          reportError('Audio Cache Error', error);
+        }
+
+        setLoadedAudio(filename, audioRecord);
+      } catch (error) {
+        setFailure(filename, error);
+      }
+    },
+  );
+}
+
+function createAudioElement(audioRecord: AudioRecordLocal): HTMLAudioElement {
+  if (!audioRecord.audioBlob) throw new Error('Audio not found');
+
+  const objectUrl = URL.createObjectURL(audioRecord.audioBlob);
   try {
-    if (!audioRecord?.audioBlob) throw new Error('Audio not found');
-
-    const objectUrl = URL.createObjectURL(audioRecord.audioBlob);
-    const audioElement = new Audio(objectUrl);
-    audioElement.addEventListener('ended', onEnded);
-    audioMap.set(filename, { element: audioElement, onEnded });
-    return true;
+    return new Audio(objectUrl);
   } catch (error) {
-    reportError('Audio Manager Error', error);
-    return false;
+    URL.revokeObjectURL(objectUrl);
+    throw error;
   }
 }
 
-/** Stops and resets one audio element to the start. */
-function stopAndReset(element: HTMLAudioElement): void {
-  element.pause();
-  element.currentTime = 0;
+function disposeAudioElements(audioElements: ReadonlySet<HTMLAudioElement>): void {
+  audioElements.forEach((element) => {
+    element.pause();
+    element.currentTime = 0;
+    const objectUrl = element.src;
+    if (!objectUrl.startsWith('blob:')) return;
+    element.removeAttribute('src');
+    element.load();
+    URL.revokeObjectURL(objectUrl);
+  });
 }
 
-async function runWithConcurrency<T>(
-  values: readonly T[],
-  concurrency: number,
-  operation: (value: T) => Promise<void>,
-): Promise<void> {
-  let nextIndex = 0;
-  const workerCount = Math.min(values.length, concurrency);
-  const processNext = async (): Promise<void> => {
-    const currentIndex = nextIndex;
-    if (currentIndex >= values.length) return;
-
-    nextIndex += 1;
-    const value = values[currentIndex];
-    if (value !== undefined) await operation(value);
-    return processNext();
-  };
-  const workers = Array.from({ length: workerCount }, () => processNext());
-  await Promise.all(workers);
+function getErrorMessage(error: unknown): string {
+  if (error instanceof Error) return error.message;
+  return String(error);
 }
