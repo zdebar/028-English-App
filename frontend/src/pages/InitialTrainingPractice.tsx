@@ -10,8 +10,9 @@ import { usePracticeExitBlocker } from '@/features/practice/hooks/use-practice-e
 import { TEXTS } from '@/locales/cs';
 import { formatProgress } from '@/utils/progress.utils';
 import { useCallback, useState, type JSX } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLoaderData, useNavigate } from 'react-router-dom';
 import { ROUTES } from '@/config/routes.config';
+import type { AudioCacheSnapshot } from '@/features/audio/use-audio-loader';
 
 type InitialTrainingDeck = ReturnType<typeof useInitialTrainingDeck>;
 
@@ -77,7 +78,8 @@ export default function InitialTrainingPractice(): JSX.Element {
   const handlePracticeComplete = useCallback(() => {
     void navigate(ROUTES.home, { replace: true });
   }, [navigate]);
-  const deck = useInitialTrainingDeck(userId, handlePracticeComplete);
+  const audioCacheSnapshot = useLoaderData() as AudioCacheSnapshot;
+  const deck = useInitialTrainingDeck(userId, handlePracticeComplete, audioCacheSnapshot);
   usePracticeExitBlocker(deck.finishPractice);
   useQueryErrorToast(deck.error, 'Failed to fetch initial training deck');
 

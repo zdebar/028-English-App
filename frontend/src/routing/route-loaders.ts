@@ -1,7 +1,11 @@
 import { ROUTES } from '@/config/routes.config';
+import AudioRecord from '@/database/models/audio-records';
 import { waitForAuthReady } from '@/features/auth/auth-lifecycle';
 import { useAuthStore } from '@/features/auth/use-auth-store';
 import { reportError } from '@/features/logging/logging-handler';
+import { getItemAudioSources } from '@/features/audio/audio.utils';
+import type { AudioCacheSnapshot } from '@/features/audio/use-audio-loader';
+import { normalizeAudioInput } from '@/utils/audio.utils';
 import {
   loadGrammarOverviewData,
   loadInitialTrainingData,
@@ -28,13 +32,23 @@ export const loadGrammarReviewRoute = () =>
 export const loadVocabularyReviewRoute = () =>
   loadProtectedData('vocabulary review', (userId) => loadReviewPracticeData(userId, 'vocabulary'));
 
-export const loadInitialTrainingRoute = () =>
-  loadProtectedDetail(
+export async function loadInitialTrainingRoute(): Promise<AudioCacheSnapshot> {
+  const loaded = await loadProtectedDetailData(
     'initial training',
-    loadInitialTrainingData,
-    (data) => !data.lesson,
+    async (userId) => {
+      const data = await loadInitialTrainingData(userId);
+      const filenames = normalizeAudioInput(getItemAudioSources(data.items));
+      const records = await readCachedInitialTrainingAudio(filenames);
+      return {
+        data,
+        audioCacheSnapshot: { filenames, records },
+      };
+    },
+    (result) => !result.data.lesson,
     ROUTES.home,
   );
+  return loaded.audioCacheSnapshot;
+}
 
 export const loadOverviewsRoute = () =>
   loadProtectedData('overviews', loadOverviewAvailabilityData);
@@ -90,15 +104,36 @@ async function loadProtectedDetail<T>(
   isMissing: (data: T) => boolean,
   fallbackRoute: string,
 ): Promise<null> {
+  await loadProtectedDetailData(routeName, loadData, isMissing, fallbackRoute);
+  return null;
+}
+
+async function loadProtectedDetailData<T>(
+  routeName: string,
+  loadData: (userId: string) => Promise<T>,
+  isMissing: (data: T) => boolean,
+  fallbackRoute: string,
+): Promise<T> {
   const userId = await requireUserId();
   try {
     const data = await loadData(userId);
     if (isMissing(data)) throw redirect(fallbackRoute);
-    return null;
+    return data;
   } catch (error) {
     if (error instanceof Response) throw error;
     reportRouteLoaderError(routeName, error);
     throw error;
+  }
+}
+
+async function readCachedInitialTrainingAudio(
+  filenames: readonly string[],
+): Promise<AudioCacheSnapshot['records']> {
+  try {
+    return await AudioRecord.getCachedByFilenames(filenames);
+  } catch (error) {
+    reportError('Initial Training Audio Cache Error', error);
+    return filenames.map(() => undefined);
   }
 }
 

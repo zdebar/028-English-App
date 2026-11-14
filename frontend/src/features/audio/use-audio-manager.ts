@@ -1,18 +1,28 @@
 import { useCallback, useMemo } from 'react';
 import { normalizeAudioInput } from '@/utils/audio.utils';
-import { useAudioLoader, type ManagedAudio } from './use-audio-loader';
+import {
+  useAudioLoader,
+  type AudioCacheSnapshot,
+  type ManagedAudio,
+} from './use-audio-loader';
 import { useAudioPlayback } from './use-audio-playback';
 
 type AudioInput = string | string[] | null;
 
 /** Composes audio loading and playback controls for existing audio consumers. */
-export function useAudioManager(audio: AudioInput) {
+export function useAudioManager(
+  audio: AudioInput,
+  audioCacheSnapshot?: AudioCacheSnapshot,
+) {
   const requestedFilesKey = JSON.stringify(normalizeAudioInput(audio));
   const filenames = useMemo(
     () => JSON.parse(requestedFilesKey) as string[],
     [requestedFilesKey],
   );
-  const { audioMap, cacheLookupComplete, markAudioFailed } = useAudioLoader(filenames);
+  const { audioMap, cacheLookupComplete, markAudioFailed } = useAudioLoader(
+    filenames,
+    audioCacheSnapshot,
+  );
   const audioPlayback = useAudioPlayback(audioMap, markAudioFailed);
   const entries = [...audioMap.values()];
   const audioReadiness = useMemo(() => new Map<string, boolean | null>(
@@ -24,13 +34,17 @@ export function useAudioManager(audio: AudioInput) {
   const isAudioReady = useCallback((filename: string) => {
     return audioReadiness.get(filename) ?? null;
   }, [audioReadiness]);
+  const isAudioLoading = useCallback((filename: string) => {
+    return audioMap.get(filename)?.isLoading ?? false;
+  }, [audioMap]);
 
   return {
     playAudio: audioPlayback.playAudio,
     stopAudio: audioPlayback.stopAudio,
     audioError: entries.some((entry) => entry.errorMessage !== null),
     isAudioReady,
-    loading: entries.some((entry) => !entry.audio && entry.errorMessage === null),
+    isAudioLoading,
+    loading: entries.some((entry) => entry.isLoading),
     cacheLookupComplete,
     isPlaying: audioPlayback.isPlaying,
     filenames,
