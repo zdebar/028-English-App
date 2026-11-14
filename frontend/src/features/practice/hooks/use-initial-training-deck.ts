@@ -192,8 +192,8 @@ export function useInitialTrainingDeck(
     [activeItems, initialItemCount, isComplete, itemById, queue, resolvedEntries, revealed],
   );
   const audioFiles = useMemo(
-    () => getInitialTrainingAudioFiles(initialData, items),
-    [initialData, items],
+    () => getItemAudioSources(items),
+    [items],
   );
   const cardState = usePracticeCardState({
     currentItem,
@@ -296,13 +296,6 @@ export function useInitialTrainingDeck(
     audioLoading: cardState.audioLoading,
     isPlaying: cardState.isPlaying,
   };
-}
-
-function getInitialTrainingAudioFiles(
-  initialData: InitialTrainingData | undefined,
-  items: UserItemLocal[],
-): string[] {
-  return getItemAudioSources(initialData?.items ?? items);
 }
 
 // -- Package synchronization and completion --
