@@ -26,8 +26,8 @@ from scripts.utils.audio import (
 )
 
 
-VOICE_NAME = "en-GB-Neural2-F"
-VOICE_LANGUAGE = "en-GB"
+VOICE_NAME = "en-US-Neural2-F"
+VOICE_LANGUAGE = "en-US"
 PREPARED_FILE_PATTERN = re.compile(r"_\d{8}(?:T\d{6}Z)?$")
 
 

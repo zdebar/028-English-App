@@ -28,7 +28,7 @@ PRONUNCIATION_LANGUAGE = "en-us"
 
 
 async def prepare_csv(file_path: str, output_file: str) -> None:
-    """Normalize a source CSV and add British English IPA pronunciations."""
+    """Normalize a source CSV and add American English IPA pronunciations."""
     df = read_vocab_csv(file_path, columns=INPUT_COLUMNS)
     if df is None:
         print(f"Error: DataFrame is None after reading CSV: {file_path}")
