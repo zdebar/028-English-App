@@ -13,6 +13,7 @@ vi.mock('@/features/audio/use-audio-manager', () => ({
     playAudio: playAudioMock,
     stopAudio: stopAudioMock,
     isAudioReady: audioStateMock.isAudioReady,
+    isAudioLoading: () => audioStateMock.loading,
     audioError: audioStateMock.error,
     loading: audioStateMock.loading,
     isPlaying: false,
