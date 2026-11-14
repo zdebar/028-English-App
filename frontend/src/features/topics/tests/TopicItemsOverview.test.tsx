@@ -7,8 +7,7 @@ const mocks = vi.hoisted(() => ({
   showToast: vi.fn(),
   reportInfo: vi.fn(),
   reportError: vi.fn(),
-  audioLoading: false,
-  readyAudio: new Set<string>(),
+  audioReadiness: new Map<string, boolean | null>(),
   userId: 'u1',
   topicId: '2',
   state: {
@@ -51,8 +50,7 @@ vi.mock('@/database/state/data-store', () => ({
 vi.mock('@/features/audio/use-audio-manager', () => ({
   useAudioManager: () => ({
     playAudio: mocks.playAudio,
-    loading: mocks.audioLoading,
-    isAudioReady: (filename?: string) => Boolean(filename && mocks.readyAudio.has(filename)),
+    isAudioReady: (filename: string) => mocks.audioReadiness.get(filename) ?? null,
   }),
 }));
 
@@ -150,9 +148,8 @@ describe('TopicItemsOverview', () => {
     mocks.state.topic = { id: 2, name: 'Topic 2' };
     mocks.state.topicLoading = false;
     mocks.playAudio.mockReset();
-    mocks.playAudio.mockResolvedValue(true);
-    mocks.audioLoading = false;
-    mocks.readyAudio = new Set<string>();
+    mocks.playAudio.mockResolvedValue(null);
+    mocks.audioReadiness = new Map<string, boolean | null>();
   });
 
   it('renders not found state for invalid topic id', () => {
@@ -179,7 +176,7 @@ describe('TopicItemsOverview', () => {
         audio: 'a.opus',
       },
     ];
-    mocks.readyAudio = new Set(['a.opus']);
+    mocks.audioReadiness = new Map([['a.opus', true]]);
 
     render(<TopicItemsOverview />);
 
@@ -197,6 +194,7 @@ describe('TopicItemsOverview', () => {
         audio: 'a.opus',
       },
     ];
+    mocks.audioReadiness = new Map([['a.opus', false]]);
 
     render(<TopicItemsOverview />);
 
@@ -212,7 +210,7 @@ describe('TopicItemsOverview', () => {
         audio: 'a.opus',
       },
     ];
-    mocks.audioLoading = true;
+    mocks.audioReadiness = new Map([['a.opus', null]]);
 
     render(<TopicItemsOverview />);
 
@@ -228,8 +226,8 @@ describe('TopicItemsOverview', () => {
         audio: 'a.opus',
       },
     ];
-    mocks.readyAudio = new Set(['a.opus']);
-    mocks.playAudio.mockResolvedValue(false);
+    mocks.audioReadiness = new Map([['a.opus', true]]);
+    mocks.playAudio.mockResolvedValue(new Error('play failed'));
 
     render(<TopicItemsOverview />);
 

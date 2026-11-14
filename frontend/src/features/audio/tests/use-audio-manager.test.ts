@@ -84,7 +84,7 @@ describe('useAudioManager', () => {
     });
 
     expect(result.current.audioError).toBe(false);
-    expect(result.current.isAudioReady('missing.opus')).toBe(false);
+    expect(result.current.isAudioReady('missing.opus')).toBeNull();
   });
 
   it('loads audio successfully and exposes ready state', async () => {
@@ -320,7 +320,7 @@ describe('useAudioManager', () => {
       loading: true,
       isPlaying: false,
     });
-    expect(result.current.isAudioReady('missing.opus')).toBe(false);
+    expect(result.current.isAudioReady('missing.opus')).toBeNull();
 
     let playbackError: Error | null = null;
     await act(async () => {
@@ -354,7 +354,7 @@ describe('useAudioManager', () => {
     expect(result.current.audioError).toBe(false);
     expect(result.current.loading).toBe(false);
     expect(result.current.isPlaying).toBe(false);
-    expect(result.current.isAudioReady('missing.opus')).toBe(false);
+    expect(result.current.isAudioReady('missing.opus')).toBeNull();
   });
 
   it('marks audio as failed when playback rejects', async () => {
@@ -428,7 +428,7 @@ describe('useAudioManager', () => {
       await Promise.resolve();
     });
 
-    expect(result.current.isAudioReady('old.opus')).toBe(false);
+    expect(result.current.isAudioReady('old.opus')).toBeNull();
     expect(result.current.isAudioReady('new.opus')).toBe(true);
     expect(URL.revokeObjectURL).not.toHaveBeenCalled();
   });

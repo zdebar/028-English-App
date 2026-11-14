@@ -103,7 +103,7 @@ describe('Pronunciation overview screens', () => {
     mocks.overviewLoading = false;
     mocks.overviewError = null;
     mocks.detailData = null;
-    mocks.playAudio.mockResolvedValue(true);
+    mocks.playAudio.mockResolvedValue(null);
   });
 
   it('lists visible groups with examples and unlocked/total counts', () => {
