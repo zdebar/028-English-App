@@ -8,6 +8,7 @@ import type { AudioPlaybackResult } from '@/features/audio/use-audio-playback';
 
 type UsePracticeCardStateOptions = {
   currentItem: UserItemLocal | null;
+  audioFiles?: string[];
   revealed: boolean;
   isCompletion?: boolean;
   setRevealed: Dispatch<SetStateAction<boolean>>;
@@ -27,6 +28,7 @@ type PracticeAudioPhasesOptions = {
 
 export function usePracticeCardState({
   currentItem,
+  audioFiles,
   revealed,
   isCompletion = false,
   setRevealed,
@@ -40,11 +42,11 @@ export function usePracticeCardState({
   const {
     playAudio: playAudioForFilename,
     stopAudio,
-    audioError,
-    loading: audioLoading,
+    cacheLookupComplete,
     isAudioReady,
     isPlaying,
-  } = useAudioManager(currentItem?.audio ?? null);
+  } = useAudioManager(getAudioInput(audioFiles, currentItem));
+  const { audioError, audioLoading } = getCurrentAudioStatus(currentItem, isAudioReady);
   const playAudioInternal = useCallback(
     () => playAudioForFilename(currentItem?.audio ?? ''),
     [currentItem?.audio, playAudioForFilename],
@@ -89,6 +91,7 @@ export function usePracticeCardState({
 
   return {
     audioDisabled,
+    cacheLookupComplete,
     audioError,
     audioLoading,
     czech,
@@ -97,11 +100,35 @@ export function usePracticeCardState({
     handleReveal,
     isPlaying,
     playAudio: playAudioInternal,
+    playAudioByFilename: playAudioForFilename,
+    isAudioReady,
     plusHint,
     pronunciation: getPronunciationText(currentItem, revealed),
     resetHint,
     resetQuestionState,
   };
+}
+
+function getCurrentAudioStatus(
+  currentItem: UserItemLocal | null,
+  isAudioReady: (audio: string) => boolean | null,
+): Readonly<{ audioError: boolean; audioLoading: boolean }> {
+  if (!currentItem?.audio) return { audioError: false, audioLoading: false };
+
+  const readiness = isAudioReady(currentItem.audio);
+  return {
+    audioError: readiness === false,
+    audioLoading: readiness === null,
+  };
+}
+
+function getAudioInput(
+  audioFiles: string[] | undefined,
+  currentItem: UserItemLocal | null,
+): string | string[] | null {
+  if (!audioFiles) return currentItem?.audio ?? null;
+  if (!currentItem?.audio || audioFiles.includes(currentItem.audio)) return audioFiles;
+  return [...audioFiles, currentItem.audio];
 }
 
 function getPracticeEnglish(

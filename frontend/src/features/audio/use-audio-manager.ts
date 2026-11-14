@@ -12,7 +12,7 @@ export function useAudioManager(audio: AudioInput) {
     () => JSON.parse(requestedFilesKey) as string[],
     [requestedFilesKey],
   );
-  const { audioMap, markAudioFailed } = useAudioLoader(filenames);
+  const { audioMap, cacheLookupComplete, markAudioFailed } = useAudioLoader(filenames);
   const audioPlayback = useAudioPlayback(audioMap, markAudioFailed);
   const entries = [...audioMap.values()];
   const audioReadiness = useMemo(() => new Map<string, boolean | null>(
@@ -30,13 +30,16 @@ export function useAudioManager(audio: AudioInput) {
     stopAudio: audioPlayback.stopAudio,
     audioError: entries.some((entry) => entry.errorMessage !== null),
     isAudioReady,
-    loading: entries.some((entry) => entry.isLoading),
+    loading: entries.some((entry) => !entry.audio && entry.errorMessage === null),
+    cacheLookupComplete,
     isPlaying: audioPlayback.isPlaying,
     filenames,
   };
 }
 
 function getAudioReadiness(entry: ManagedAudio | undefined): boolean | null {
-  if (!entry || entry.isLoading) return null;
-  return Boolean(entry.audio) && entry.errorMessage === null;
+  if (!entry) return null;
+  if (entry.errorMessage !== null) return false;
+  if (entry.audio) return true;
+  return null;
 }

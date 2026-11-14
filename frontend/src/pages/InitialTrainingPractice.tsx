@@ -33,11 +33,14 @@ function InitialTrainingContent({
         lesson={deck.lesson}
         groupNote={deck.groupNote}
         items={deck.items}
+        playAudio={deck.playAudioByFilename}
+        isAudioReady={deck.isAudioReady}
         onContinue={deck.hasContent ? dismissIntro : () => void deck.completeEmptyLesson()}
       />
     );
   }
 
+  if (deck.cacheLookupComplete === false) return <DelayedNotification />;
   if (!deck.currentItem) return <PracticeEmptyState />;
 
   return (

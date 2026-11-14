@@ -23,6 +23,7 @@ import {
 import { NBSP } from './use-hint';
 import { usePracticeCardState } from './use-practice-card-state';
 import type { InitialTrainingData } from '../initial-training-data';
+import { getItemAudioSources } from '@/features/audio/audio.utils';
 
 // -- Training queue and view types --
 type TrainingOutcome = 'correct' | 'incorrect' | 'skip';
@@ -188,8 +189,13 @@ export function useInitialTrainingDeck(
       ),
     [activeItems, initialItemCount, isComplete, itemById, queue, resolvedEntries, revealed],
   );
+  const audioFiles = useMemo(
+    () => getInitialTrainingAudioFiles(initialData, items),
+    [initialData, items],
+  );
   const cardState = usePracticeCardState({
     currentItem,
+    audioFiles,
     revealed,
     isCompletion: isComplete,
     setRevealed,
@@ -281,9 +287,19 @@ export function useInitialTrainingDeck(
     completeEmptyLesson,
     audioError: cardState.audioError,
     playAudio: cardState.playAudio,
+    playAudioByFilename: cardState.playAudioByFilename,
+    isAudioReady: cardState.isAudioReady,
+    cacheLookupComplete: cardState.cacheLookupComplete,
     audioLoading: cardState.audioLoading,
     isPlaying: cardState.isPlaying,
   };
+}
+
+function getInitialTrainingAudioFiles(
+  initialData: InitialTrainingData | undefined,
+  items: UserItemLocal[],
+): string[] {
+  return getItemAudioSources(initialData?.items ?? items);
 }
 
 // -- Package synchronization and completion --

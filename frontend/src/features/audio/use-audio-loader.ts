@@ -10,7 +10,6 @@ import { normalizeAudioInput } from '@/utils/audio.utils';
 export type AudioInput = string | string[];
 
 export type ManagedAudio = Readonly<{
-  isLoading: boolean;
   audio: HTMLAudioElement | null;
   errorMessage: string | null;
 }>;
@@ -29,12 +28,16 @@ export function useAudioLoader(audio: AudioInput) {
   const [audioMapState, setAudioMapState] = useState(() => ({
     requestedFilesKey,
     audioMap: initialAudioMap,
+    cacheLookupComplete: filenames.length === 0,
   }));
   const requestedFilesKeyRef = useRef(requestedFilesKey);
   requestedFilesKeyRef.current = requestedFilesKey;
   const audioMap = audioMapState.requestedFilesKey === requestedFilesKey
     ? audioMapState.audioMap
     : initialAudioMap;
+  const cacheLookupComplete = audioMapState.requestedFilesKey === requestedFilesKey
+    ? audioMapState.cacheLookupComplete
+    : filenames.length === 0;
   const updateAudioEntry = useCallback((filename: string, entry: ManagedAudio) => {
     if (requestedFilesKeyRef.current !== requestedFilesKey) return;
     setAudioMapState((current) => {
@@ -44,12 +47,11 @@ export function useAudioLoader(audio: AudioInput) {
 
       const nextMap = new Map(current.audioMap);
       nextMap.set(filename, entry);
-      return { requestedFilesKey, audioMap: nextMap };
+      return { ...current, audioMap: nextMap };
     });
   }, [requestedFilesKey]);
   const markAudioFailed = useCallback((filename: string, errorMessage: string) => {
     updateAudioEntry(filename, {
-      isLoading: false,
       audio: null,
       errorMessage,
     });
@@ -62,7 +64,11 @@ export function useAudioLoader(audio: AudioInput) {
       if (current.requestedFilesKey === requestedFilesKey && current.audioMap === initialAudioMap) {
         return current;
       }
-      return { requestedFilesKey, audioMap: initialAudioMap };
+      return {
+        requestedFilesKey,
+        audioMap: initialAudioMap,
+        cacheLookupComplete: filenames.length === 0,
+      };
     });
 
     const isCurrentLoad = () =>
@@ -77,7 +83,6 @@ export function useAudioLoader(audio: AudioInput) {
         reportError('Audio Manager Error', error);
       }
       updateEntry(filename, {
-        isLoading: false,
         audio: null,
         errorMessage: getErrorMessage(error),
       });
@@ -89,24 +94,37 @@ export function useAudioLoader(audio: AudioInput) {
         const audioElement = createAudioElement(audioRecord);
         createdAudioElements.add(audioElement);
         updateEntry(filename, {
-          isLoading: false,
           audio: audioElement,
           errorMessage: null,
         });
       } catch (error) {
         reportError('Audio Manager Error', error);
         updateEntry(filename, {
-          isLoading: false,
           audio: null,
           errorMessage: getErrorMessage(error),
         });
       }
     };
 
-    void loadAudioFiles(filenames, isCurrentLoad, setLoadedAudio, setFailure).catch(
+    const setCacheLookupComplete = () => {
+      if (!isCurrentLoad()) return;
+      setAudioMapState((current) => {
+        if (current.requestedFilesKey !== requestedFilesKey) return current;
+        return { ...current, cacheLookupComplete: true };
+      });
+    };
+
+    void loadAudioFiles(
+      filenames,
+      isCurrentLoad,
+      setLoadedAudio,
+      setFailure,
+      setCacheLookupComplete,
+    ).catch(
       (error: unknown) => {
         reportError('Audio Manager Error', error);
         filenames.forEach((filename) => setFailure(filename, error));
+        setCacheLookupComplete();
       },
     );
 
@@ -116,14 +134,14 @@ export function useAudioLoader(audio: AudioInput) {
     };
   }, [filenames, initialAudioMap, requestedFilesKey, updateAudioEntry]);
 
-  return { audioMap, markAudioFailed };
+  return { audioMap, cacheLookupComplete, markAudioFailed };
 }
 
 function createLoadingAudioMap(filenames: readonly string[]): Map<string, ManagedAudio> {
   return new Map(
     filenames.map((filename) => [
       filename,
-      { isLoading: true, audio: null, errorMessage: null },
+      { audio: null, errorMessage: null },
     ]),
   );
 }
@@ -133,6 +151,7 @@ async function loadAudioFiles(
   isCurrentLoad: () => boolean,
   setLoadedAudio: (filename: string, record: AudioRecordLocal) => void,
   setFailure: (filename: string, error: unknown) => void,
+  setCacheLookupComplete: () => void,
 ): Promise<void> {
   const cachedRecords = await AudioRecord.getCachedByFilenames(filenames);
   if (!isCurrentLoad()) return;
@@ -148,6 +167,8 @@ async function loadAudioFiles(
 
     setLoadedAudio(filename, record);
   });
+
+  setCacheLookupComplete();
 
   await runWithConcurrency(
     missingFiles,
