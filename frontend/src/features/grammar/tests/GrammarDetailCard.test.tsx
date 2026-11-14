@@ -5,7 +5,7 @@ import type { UserItemLocal } from '@/types/user-item.types';
 const sanitizeMock = vi.fn();
 const audioMocks = vi.hoisted(() => ({
   playAudio: vi.fn(),
-  isAudioReady: vi.fn(() => true),
+  isAudioReady: vi.fn((): boolean | null => true),
   loading: false,
   audios: [] as string[],
 }));
@@ -96,7 +96,7 @@ describe('GrammarDetailCard', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     sanitizeMock.mockImplementation((value: string) => value);
-    audioMocks.playAudio.mockResolvedValue(true);
+    audioMocks.playAudio.mockResolvedValue(null);
     audioMocks.isAudioReady.mockReturnValue(true);
     audioMocks.loading = false;
     audioMocks.audios = [];
@@ -166,7 +166,7 @@ describe('GrammarDetailCard', () => {
 
   it('keeps audio-backed examples enabled while audio is loading', () => {
     audioMocks.loading = true;
-    audioMocks.isAudioReady.mockReturnValue(false);
+    audioMocks.isAudioReady.mockReturnValue(null);
 
     render(
       <GrammarDetailCard

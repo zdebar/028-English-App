@@ -1,12 +1,16 @@
 import { useAudioManager } from '@/features/audio/use-audio-manager';
+import type { AudioCacheSnapshot } from '@/features/audio/use-audio-loader';
 import { isAudioPlayable } from '@/features/audio/audio.utils';
 import { reportError } from '@/features/logging/logging-handler';
 import type { UserItemLocal } from '@/types/user-item.types';
 import { useCallback, useEffect, useRef, type Dispatch, type SetStateAction } from 'react';
 import { NBSP, useHint } from './use-hint';
+import type { AudioPlaybackResult } from '@/features/audio/use-audio-playback';
 
 type UsePracticeCardStateOptions = {
   currentItem: UserItemLocal | null;
+  audioFiles?: string[];
+  audioCacheSnapshot?: AudioCacheSnapshot;
   revealed: boolean;
   isCompletion?: boolean;
   setRevealed: Dispatch<SetStateAction<boolean>>;
@@ -18,7 +22,7 @@ type PracticeAudioPhasesOptions = {
   revealed: boolean;
   audioLoading: boolean;
   audioError: boolean;
-  playAudio: () => Promise<boolean>;
+  playAudio: () => Promise<AudioPlaybackResult>;
   attemptedAudioItem: { current: UserItemLocal | null };
   isCompletion: boolean;
   stopAudio: () => void;
@@ -26,6 +30,8 @@ type PracticeAudioPhasesOptions = {
 
 export function usePracticeCardState({
   currentItem,
+  audioFiles,
+  audioCacheSnapshot,
   revealed,
   isCompletion = false,
   setRevealed,
@@ -37,19 +43,27 @@ export function usePracticeCardState({
     currentItem?.english,
   );
   const {
-    playAudio: playAudioInternal,
+    playAudio: playAudioForFilename,
     stopAudio,
-    audioError,
-    loading: audioLoading,
+    cacheLookupComplete,
     isAudioReady,
+    isAudioLoading,
     isPlaying,
-  } = useAudioManager(currentItem?.audio ?? null);
+  } = useAudioManager(getAudioInput(audioFiles, currentItem), audioCacheSnapshot);
+  const { audioError, audioLoading } = getCurrentAudioStatus(
+    currentItem,
+    isAudioReady,
+    isAudioLoading,
+  );
+  const playAudioInternal = useCallback(
+    () => playAudioForFilename(currentItem?.audio ?? ''),
+    [currentItem?.audio, playAudioForFilename],
+  );
 
   const audioDisabled = isPracticeAudioDisabled(
     revealed,
     isEnToCz,
     currentItem,
-    audioLoading,
     isAudioReady,
   );
   usePracticeAudioPhases({
@@ -85,6 +99,7 @@ export function usePracticeCardState({
 
   return {
     audioDisabled,
+    cacheLookupComplete,
     audioError,
     audioLoading,
     czech,
@@ -93,11 +108,36 @@ export function usePracticeCardState({
     handleReveal,
     isPlaying,
     playAudio: playAudioInternal,
+    playAudioByFilename: playAudioForFilename,
+    isAudioReady,
     plusHint,
     pronunciation: getPronunciationText(currentItem, revealed),
     resetHint,
     resetQuestionState,
   };
+}
+
+function getCurrentAudioStatus(
+  currentItem: UserItemLocal | null,
+  isAudioReady: (audio: string) => boolean | null,
+  isAudioLoading: (audio: string) => boolean,
+): Readonly<{ audioError: boolean; audioLoading: boolean }> {
+  if (!currentItem?.audio) return { audioError: false, audioLoading: false };
+
+  const readiness = isAudioReady(currentItem.audio);
+  return {
+    audioError: readiness === false,
+    audioLoading: isAudioLoading(currentItem.audio),
+  };
+}
+
+function getAudioInput(
+  audioFiles: string[] | undefined,
+  currentItem: UserItemLocal | null,
+): string | string[] | null {
+  if (!audioFiles) return currentItem?.audio ?? null;
+  if (!currentItem?.audio || audioFiles.includes(currentItem.audio)) return audioFiles;
+  return [...audioFiles, currentItem.audio];
 }
 
 function getPracticeEnglish(
@@ -114,11 +154,10 @@ function isPracticeAudioDisabled(
   revealed: boolean,
   isEnToCz: boolean,
   currentItem: UserItemLocal | null,
-  audioLoading: boolean,
-  isAudioReady: (audio: string) => boolean,
+  isAudioReady: (audio: string) => boolean | null,
 ): boolean {
   const shouldHideAudio = !revealed && !isEnToCz;
-  const audioUnavailable = !isAudioPlayable(currentItem?.audio, audioLoading, isAudioReady);
+  const audioUnavailable = !isAudioPlayable(currentItem?.audio, isAudioReady);
   return shouldHideAudio || audioUnavailable;
 }
 
@@ -157,7 +196,7 @@ function revealPracticeCard(
   isEnToCz: boolean,
   revealed: boolean,
   audioError: boolean,
-  playAudio: () => Promise<boolean>,
+  playAudio: () => Promise<AudioPlaybackResult>,
   setRevealed: Dispatch<SetStateAction<boolean>>,
 ): void {
   if (revealed) return;

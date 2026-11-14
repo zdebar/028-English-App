@@ -6,6 +6,7 @@ import { ListButton } from '@/components/UI/buttons/ListButton';
 import { ROUTES } from '@/config/routes.config';
 import { useAudioManager } from '@/features/audio/use-audio-manager';
 import { getItemAudioSources, isAudioPlayable, playAudioWithToast } from '@/features/audio/audio.utils';
+import type { AudioPlaybackResult } from '@/features/audio/use-audio-playback';
 import { AudioItemListControls } from '@/features/audio/AudioItemListControls';
 import { useQueryErrorToast } from '@/features/logging/use-query-error-toast';
 import { useAuthStore } from '@/features/auth/use-auth-store';
@@ -18,9 +19,12 @@ import type { PronunciationGroupDetailType } from '@/types/pronunciation.types';
 import { useRouteClose } from '@/routing/use-route-close';
 import type { UserItemLocal } from '@/types/user-item.types';
 import { useCurrentUserDataPackage } from '@/database/state/use-current-user-data-package';
+import type { AudioCacheSnapshot } from '@/features/audio/use-audio-loader';
 
 // -- Pronunciation detail route --
-export default function PronunciationGroupDetail() {
+export default function PronunciationGroupDetail({
+  audioCacheSnapshot,
+}: Readonly<{ audioCacheSnapshot?: AudioCacheSnapshot }>) {
   const userId = useAuthStore((state) => state.userId);
   const showToast = useToastStore((state) => state.showToast);
   const navigate = useNavigate();
@@ -39,8 +43,7 @@ export default function PronunciationGroupDetail() {
     playAudio,
     stopAudio,
     isAudioReady,
-    loading: audioLoading,
-  } = useAudioManager(audios);
+  } = useAudioManager(audios, audioCacheSnapshot);
   usePronunciationGroupNavigation(validGroupId, loading, userId, data, navigate);
 
   useQueryErrorToast(error, 'Failed to fetch pronunciation group detail');
@@ -51,7 +54,6 @@ export default function PronunciationGroupDetail() {
       selectionStorageKey={selectionStorageKey}
       loading={loading}
       closeRoute={closeRoute}
-      audioLoading={audioLoading}
       isAudioReady={isAudioReady}
       playAudio={playAudio}
       stopAudio={stopAudio}
@@ -109,7 +111,6 @@ function RandomPronunciationPractice({
   initialLabel,
   minimumPlayableItems = 1,
   reserveTrailingSpace = false,
-  audioLoading,
   isAudioReady,
   playAudio,
   showToast,
@@ -118,16 +119,15 @@ function RandomPronunciationPractice({
   initialLabel: string;
   minimumPlayableItems?: number;
   reserveTrailingSpace?: boolean;
-  audioLoading: boolean;
-  isAudioReady: (audio: string) => boolean;
-  playAudio: (audio: string) => Promise<boolean>;
+  isAudioReady: (audio: string) => boolean | null;
+  playAudio: (audio: string) => Promise<AudioPlaybackResult>;
   showToast: (message: string, type: 'error') => void;
 }>) {
   const [phase, setPhase] = useState<RandomWordPhase>('initial');
   const [selectedItem, setSelectedItem] = useState<UserItemLocal | null>(null);
   const itemSetKey = items.map((item) => item.item_id).join(',');
   const playableItems = items.filter((item) =>
-    isAudioPlayable(item.audio, audioLoading, isAudioReady),
+    isAudioPlayable(item.audio, isAudioReady),
   );
 
   useEffect(() => {
@@ -231,7 +231,6 @@ function hasItemAudio(item: UserItemLocal): boolean {
 function PronunciationGroupItems({
   items,
   selectionStorageKey,
-  audioLoading,
   isAudioReady,
   playAudio,
   stopAudio,
@@ -239,9 +238,8 @@ function PronunciationGroupItems({
 }: Readonly<{
   items: PronunciationGroupDetailType['items'];
   selectionStorageKey: string;
-  audioLoading: boolean;
-  isAudioReady: (audio: string) => boolean;
-  playAudio: (audio: string) => Promise<boolean>;
+  isAudioReady: (audio: string) => boolean | null;
+  playAudio: (audio: string) => Promise<AudioPlaybackResult>;
   stopAudio: () => void;
   showToast: (message: string, type: 'error') => void;
 }>) {
@@ -294,7 +292,6 @@ function PronunciationGroupItems({
           items={items}
           initialLabel={TEXTS.playAllRandomly}
           reserveTrailingSpace
-          audioLoading={audioLoading}
           isAudioReady={isAudioReady}
           playAudio={playAudio}
           showToast={showToast}
@@ -305,7 +302,6 @@ function PronunciationGroupItems({
             initialLabel={`${TEXTS.playSelectedRandomly} (${selectedItems.length})`}
             minimumPlayableItems={2}
             reserveTrailingSpace
-            audioLoading={audioLoading}
             isAudioReady={isAudioReady}
             playAudio={playAudio}
             showToast={showToast}
@@ -320,7 +316,6 @@ function PronunciationGroupItems({
       </div>
       <AudioItemList
         items={items}
-        audioLoading={audioLoading}
         isAudioReady={isAudioReady}
         playAudio={playAudio}
         showToast={showToast}
@@ -373,7 +368,6 @@ function PronunciationGroupOverviewCard({
   selectionStorageKey,
   loading,
   closeRoute,
-  audioLoading,
   isAudioReady,
   playAudio,
   stopAudio,
@@ -383,9 +377,8 @@ function PronunciationGroupOverviewCard({
   selectionStorageKey: string;
   loading: boolean;
   closeRoute: () => void;
-  audioLoading: boolean;
-  isAudioReady: (audio: string) => boolean;
-  playAudio: (audio: string) => Promise<boolean>;
+  isAudioReady: (audio: string) => boolean | null;
+  playAudio: (audio: string) => Promise<AudioPlaybackResult>;
   stopAudio: () => void;
   showToast: (message: string, type: 'error') => void;
 }>) {
@@ -410,7 +403,6 @@ function PronunciationGroupOverviewCard({
           key={selectionStorageKey}
           items={items}
           selectionStorageKey={selectionStorageKey}
-          audioLoading={audioLoading}
           isAudioReady={isAudioReady}
           playAudio={playAudio}
           stopAudio={stopAudio}

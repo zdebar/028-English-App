@@ -43,6 +43,7 @@ const config = {
   audio: {
     audioBucketName: 'audio-files',
     archiveBucketName: 'audio-archive',
+    downloadConcurrency: 8,
   },
 
   practice: {

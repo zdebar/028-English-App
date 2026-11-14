@@ -23,6 +23,8 @@ import {
 import { NBSP } from './use-hint';
 import { usePracticeCardState } from './use-practice-card-state';
 import type { InitialTrainingData } from '../initial-training-data';
+import { getItemAudioSources } from '@/features/audio/audio.utils';
+import type { AudioCacheSnapshot } from '@/features/audio/use-audio-loader';
 
 // -- Training queue and view types --
 type TrainingOutcome = 'correct' | 'incorrect' | 'skip';
@@ -104,6 +106,7 @@ type AdvanceInitialTrainingOptions = Readonly<{
 export function useInitialTrainingDeck(
   userId: string | null,
   onComplete?: PracticeCompletionHandler,
+  audioCacheSnapshot?: AudioCacheSnapshot,
 ) {
   const { trackPracticeWrite, finishPractice } = usePracticeAvailabilityBoundary(userId);
   const packageState = useCurrentUserDataPackage(userId, { kind: 'initial-training' });
@@ -188,8 +191,14 @@ export function useInitialTrainingDeck(
       ),
     [activeItems, initialItemCount, isComplete, itemById, queue, resolvedEntries, revealed],
   );
+  const audioFiles = useMemo(
+    () => getItemAudioSources(items),
+    [items],
+  );
   const cardState = usePracticeCardState({
     currentItem,
+    audioFiles,
+    audioCacheSnapshot,
     revealed,
     isCompletion: isComplete,
     setRevealed,
@@ -281,6 +290,9 @@ export function useInitialTrainingDeck(
     completeEmptyLesson,
     audioError: cardState.audioError,
     playAudio: cardState.playAudio,
+    playAudioByFilename: cardState.playAudioByFilename,
+    isAudioReady: cardState.isAudioReady,
+    cacheLookupComplete: cardState.cacheLookupComplete,
     audioLoading: cardState.audioLoading,
     isPlaying: cardState.isPlaying,
   };

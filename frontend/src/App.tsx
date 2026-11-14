@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import Footer from '@/components/Layout/Footer';
 import Header from '@/components/Layout/Header';
 import { usePeriodicSync } from '@/features/synchronization/use-periodic-sync';
@@ -8,7 +9,7 @@ import { useThemeLoader } from '@/features/theme/use-theme-loader';
 import ToastContainer from '@/features/toast/ToastContainer';
 import { Outlet, useLocation } from 'react-router-dom';
 import './styles/index.css';
-import { useAudioLoader } from './features/audio/use-audio-loader';
+import { useAudioStore } from '@/features/audio/use-audio-store';
 import { useResponsiveLayout } from './components/Layout/use-responsive-layout';
 import { useSideHeaderOrientation } from './components/Layout/use-side-header-orientation';
 import { useViewportSize } from './components/Layout/use-viewport-size';
@@ -19,11 +20,14 @@ import { ROUTES } from '@/config/routes.config';
 export default function App() {
   const userId = useAuthStore((state) => state.userId);
   const authLoading = useAuthStore((state) => state.loading);
+  const initAudio = useAudioStore((state) => state.init);
   const isHomeRoute = useLocation().pathname === ROUTES.home;
 
   useDataManagerLifecycle(userId, isHomeRoute);
   useInAppRouteHistory();
-  useAudioLoader(userId);
+  useEffect(() => {
+    initAudio(userId);
+  }, [initAudio, userId]);
   useThemeLoader(userId, authLoading);
   usePeriodicSync(userId);
   const viewportSize = useViewportSize();

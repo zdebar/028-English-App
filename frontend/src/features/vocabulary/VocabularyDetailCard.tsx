@@ -10,6 +10,7 @@ import {
 import type { UserItemLocal } from '@/types/user-item.types';
 import { useAudioManager } from '@/features/audio/use-audio-manager';
 import { isAudioPlayable, playAudioWithToast } from '@/features/audio/audio.utils';
+import type { AudioPlaybackResult } from '@/features/audio/use-audio-playback';
 import PlayButton from '@/features/audio/PlayButton';
 import VolumeSlider from '../audio/VolumeSlider';
 import InfoButton from '@/features/notes/InfoButton';
@@ -32,11 +33,13 @@ import {
 import type { GroupType } from '@/types/table.types';
 import type { NoteType } from '@/types/generic.types';
 import { useState } from 'react';
+import type { AudioCacheSnapshot } from '@/features/audio/use-audio-loader';
 
 const NOT_AVAILABLE = TEXTS.notAvailable;
 
 type VocabularyDetailCardProps = Readonly<{
   selectedWord: UserItemLocal | null;
+  audioCacheSnapshot?: AudioCacheSnapshot;
   notes?: readonly NoteType[];
   soundGroups?: readonly GroupType[];
   onClose: () => void;
@@ -66,6 +69,7 @@ type VocabularyDirectionSection = Readonly<{
 // -- Vocabulary detail card --
 export default function VocabularyDetailCard({
   selectedWord,
+  audioCacheSnapshot,
   notes = [],
   soundGroups = [],
   onClose,
@@ -83,12 +87,10 @@ export default function VocabularyDetailCard({
   const {
     playAudio,
     isAudioReady,
-    loading: audioLoading,
-  } = useAudioManager(cardValues.audio);
+  } = useAudioManager(cardValues.audio, audioCacheSnapshot);
   const showToast = useToastStore((state) => state.showToast);
   const audioControlsDisabled = isVocabularyAudioDisabled(
     selectedWord,
-    audioLoading,
     isAudioReady,
   );
 
@@ -187,15 +189,14 @@ function getDirectionSections(
 
 function isVocabularyAudioDisabled(
   selectedWord: UserItemLocal | null,
-  audioLoading: boolean,
-  isAudioReady: (audio: string) => boolean,
+  isAudioReady: (audio: string) => boolean | null,
 ): boolean {
-  return !isAudioPlayable(selectedWord?.audio, audioLoading, isAudioReady);
+  return !isAudioPlayable(selectedWord?.audio, isAudioReady);
 }
 
 async function playVocabularyAudio(
   selectedWord: UserItemLocal | null,
-  playAudio: (audio: string) => Promise<boolean>,
+  playAudio: (audio: string) => Promise<AudioPlaybackResult>,
   showToast: (message: string, type: 'error') => void,
 ): Promise<void> {
   await playAudioWithToast(selectedWord?.audio, playAudio, showToast);
@@ -274,7 +275,7 @@ function VocabularyAudioControls({
   audioControlsDisabled: boolean;
   pronunciationSounds: readonly GroupType[];
   onOpenPronunciation: () => void;
-  playAudio: (audio: string) => Promise<boolean>;
+  playAudio: (audio: string) => Promise<AudioPlaybackResult>;
   showToast: (message: string, type: 'error') => void;
 }>) {
   return (
@@ -368,7 +369,7 @@ function VocabularyDetailContent({
   selectedWord: UserItemLocal | null;
   audioControlsDisabled: boolean;
   onOpenPronunciation: () => void;
-  playAudio: (audio: string) => Promise<boolean>;
+  playAudio: (audio: string) => Promise<AudioPlaybackResult>;
   showToast: (message: string, type: 'error') => void;
   noteId: number | null | undefined;
   openNote: (noteId: number) => void;

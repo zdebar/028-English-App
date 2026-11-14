@@ -7,9 +7,7 @@ import { TEXTS } from '@/locales/cs';
 import SanitizedNote from '@/components/UI/SanitizedNote';
 import type { JSX } from 'react';
 import type { UserItemLocal } from '@/types/user-item.types';
-import { useAudioManager } from '@/features/audio/use-audio-manager';
-import { getItemAudioSources } from '@/features/audio/audio.utils';
-import { useMemo } from 'react';
+import type { AudioPlaybackResult } from '@/features/audio/use-audio-playback';
 import { useToastStore } from '@/features/toast/use-toast-store';
 import VolumeSlider from '@/features/audio/VolumeSlider';
 import { useRouteClose } from '@/routing/use-route-close';
@@ -18,6 +16,8 @@ type LessonTrainingOverviewCardProps = Readonly<{
   lesson: Pick<LessonType, 'name'>;
   groupNote: string | null;
   items?: readonly UserItemLocal[];
+  playAudio: (audio: string) => Promise<AudioPlaybackResult>;
+  isAudioReady: (audio: string) => boolean | null;
   onContinue: () => void;
 }>;
 
@@ -26,12 +26,12 @@ export default function LessonTrainingOverviewCard({
   lesson,
   groupNote,
   items = [],
+  playAudio,
+  isAudioReady,
   onContinue,
 }: LessonTrainingOverviewCardProps): JSX.Element {
   const closeRoute = useRouteClose(ROUTES.practice);
   const showToast = useToastStore((state) => state.showToast);
-  const audios = useMemo(() => getItemAudioSources(items), [items]);
-  const { playAudio, isAudioReady, loading } = useAudioManager(audios);
   const title = lesson.name;
 
   return (
@@ -43,7 +43,6 @@ export default function LessonTrainingOverviewCard({
       {groupNote ? <Note note={groupNote} /> : <div className="h-4" aria-hidden="true" />}
       <AudioItemList
         items={items}
-        audioLoading={loading}
         isAudioReady={isAudioReady}
         playAudio={playAudio}
         showToast={showToast}

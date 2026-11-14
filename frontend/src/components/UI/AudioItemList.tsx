@@ -1,13 +1,13 @@
 import BilingualItemButton from '@/components/UI/buttons/BilingualItemButton';
 import type { UserItemLocal } from '@/types/user-item.types';
 import { isAudioPlayable, playAudioWithToast } from '@/features/audio/audio.utils';
+import type { AudioPlaybackResult } from '@/features/audio/use-audio-playback';
 import type { ReactNode } from 'react';
 
 type AudioItemListProps = Readonly<{
   items: readonly UserItemLocal[];
-  audioLoading: boolean;
-  isAudioReady: (audio: string) => boolean;
-  playAudio: (audio: string) => Promise<boolean>;
+  isAudioReady: (audio: string) => boolean | null;
+  playAudio: (audio: string) => Promise<AudioPlaybackResult>;
   showToast: (message: string, type: 'error') => void;
   showPronunciation?: boolean;
   hideCzechOnNarrow?: boolean;
@@ -20,7 +20,6 @@ type AudioItemListProps = Readonly<{
 /** Shared playable list for item collections. */
 export default function AudioItemList({
   items,
-  audioLoading,
   isAudioReady,
   playAudio,
   showToast,
@@ -44,7 +43,7 @@ export default function AudioItemList({
           hideCzechOnNarrow,
           forceSingleLine,
           className: itemClassName,
-          disabled: !isAudioPlayable(item.audio, audioLoading, isAudioReady),
+          disabled: !isAudioPlayable(item.audio, isAudioReady),
           onClick: () => playAudioWithToast(item.audio, playAudio, showToast),
         };
 

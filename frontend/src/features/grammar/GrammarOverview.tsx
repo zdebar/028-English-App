@@ -15,10 +15,13 @@ import { ROUTES } from '@/config/routes.config';
 import { useRouteClose } from '@/routing/use-route-close';
 import type { ReviewDirection } from '@/types/practice.types';
 import { useCurrentUserDataPackage } from '@/database/state/use-current-user-data-package';
+import type { AudioCacheSnapshot } from '@/features/audio/use-audio-loader';
 
 type GrammarSelection = Readonly<Pick<GrammarGroupWithChunks, 'id'>>;
 
-export default function GrammarOverview(): JSX.Element {
+export default function GrammarOverview({
+  audioCacheSnapshot,
+}: Readonly<{ audioCacheSnapshot?: AudioCacheSnapshot }> = {}): JSX.Element {
   const userId = useAuthStore((state) => state.userId);
   const { data, loading, error } = useCurrentUserDataPackage(userId, { kind: 'grammar-overview' });
   const closeRoute = useRouteClose(ROUTES.overviews);
@@ -119,6 +122,7 @@ export default function GrammarOverview(): JSX.Element {
   return (
     <GrammarDetailCard
       grammar={currentItem}
+      audioCacheSnapshot={audioCacheSnapshot}
       onClose={() => setSelection(null)}
       onReset={handleReset}
     />

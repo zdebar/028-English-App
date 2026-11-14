@@ -137,7 +137,7 @@ describe('VocabularyDetailCard', () => {
       x ? `date:${x}` : '',
     );
     hasVocabularyDateMock.mockImplementation((x: string | null | undefined) => Boolean(x));
-    audioMocks.playAudio.mockResolvedValue(true);
+    audioMocks.playAudio.mockResolvedValue(null);
     audioMocks.audioError = false;
     audioMocks.audioLoading = false;
     audioMocks.audioReady = true;
@@ -254,7 +254,7 @@ describe('VocabularyDetailCard', () => {
   });
 
   it('shows error toast when playback fails', async () => {
-    audioMocks.playAudio.mockResolvedValue(false);
+    audioMocks.playAudio.mockResolvedValue(new Error('play failed'));
 
     render(
       <VocabularyDetailCard

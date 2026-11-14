@@ -13,6 +13,7 @@ vi.mock('@/features/audio/use-audio-manager', () => ({
     playAudio: playAudioMock,
     stopAudio: stopAudioMock,
     isAudioReady: audioStateMock.isAudioReady,
+    isAudioLoading: () => audioStateMock.loading,
     audioError: audioStateMock.error,
     loading: audioStateMock.loading,
     isPlaying: false,
@@ -37,7 +38,7 @@ function useTestCard(currentItem: UserItemLocal | null = item, isCompletion = fa
 describe('usePracticeCardState', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    playAudioMock.mockResolvedValue(true);
+    playAudioMock.mockResolvedValue(null);
     audioStateMock.loading = false;
     audioStateMock.error = false;
     audioStateMock.isAudioReady.mockReturnValue(true);
