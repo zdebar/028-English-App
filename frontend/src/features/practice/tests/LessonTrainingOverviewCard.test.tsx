@@ -31,6 +31,8 @@ describe('LessonTrainingOverviewCard', () => {
         <LessonTrainingOverviewCard
           lesson={{ name: 'Lesson A' }}
           groupNote={null}
+          playAudio={async () => null}
+          isAudioReady={() => true}
           onContinue={onContinue}
         />
         <LocationProbe />

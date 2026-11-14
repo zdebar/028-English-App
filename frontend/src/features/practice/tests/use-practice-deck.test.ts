@@ -124,6 +124,7 @@ describe('usePracticeDeck', () => {
       grammarReviewDueCount: 2,
       vocabularyReviewDueCount: 2,
       nextReviewAt: null,
+      initialTrainingStarted: false,
     };
     mocks.reload.mockResolvedValue(undefined);
     mocks.applyPracticeProgress.mockImplementation((item) => ({ ...item, updated_at: 'now' }));
