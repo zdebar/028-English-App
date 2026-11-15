@@ -237,15 +237,15 @@ export function selectPronunciationDetail(
 }
 
 export function selectLevelOverview(data: AppDataSnapshot, userId: string, today: string): ReturnType<typeof aggregateLevels> {
-  const startedLessonIds = new Set(data.user_lessons
-    .filter((lesson) => lesson.user_id === userId)
+  const completedLessonIds = new Set(data.user_lessons
+    .filter((lesson) => lesson.user_id === userId && lesson.completed_at != null)
     .map((lesson) => lesson.lesson_id));
   return aggregateLevels(
     data.user_items.filter((item) => item.user_id === userId),
     [...data.lessons],
     [...data.levels],
     today,
-    startedLessonIds,
+    completedLessonIds,
   );
 }
 

@@ -80,9 +80,9 @@ function DashboardLesson({
   levelName,
   lesson,
 }: Readonly<{ levelName: string; lesson: ReturnType<typeof aggregateLevels>[number]['lessons'][number] }>) {
-  const stateLabel = lesson.isStarted ? TEXTS.lessonStarted : TEXTS.lessonNotStarted;
+  const stateLabel = lesson.isCompleted ? TEXTS.lessonCompleted : TEXTS.lessonNotCompleted;
   const label = `${levelName}, ${TEXTS.lessonOrder} ${lesson.sort_order}, ${lesson.name}: ${stateLabel}`;
-  const fillClass = lesson.isStarted
+  const fillClass = lesson.isCompleted
     ? 'bg-old-progress-light dark:bg-old-progress-dark'
     : 'bg-transparent';
 

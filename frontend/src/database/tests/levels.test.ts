@@ -52,7 +52,7 @@ describe('level overview aggregation', () => {
       startedCount: 1,
       startedTodayCount: 1,
       totalCount: 3,
-      isStarted: true,
+      isCompleted: true,
     });
     expect(result[0]).not.toHaveProperty('masteredCount');
     expect(result[0].lessons[0]).not.toHaveProperty('masteredTodayCount');
