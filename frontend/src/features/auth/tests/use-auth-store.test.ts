@@ -62,6 +62,7 @@ describe('useAuthStore', () => {
       userId: null,
       userEmail: null,
       userFullName: null,
+      userPicture: null,
       isAnonymousUser: false,
       hasIdentityLinkConflict: false,
       loading: true,
@@ -99,7 +100,10 @@ describe('useAuthStore', () => {
           user: {
             id: 'u1',
             email: 'u1@example.com',
-            user_metadata: { full_name: 'User One' },
+            user_metadata: {
+              full_name: 'User One',
+              picture: 'https://profiles.example/user-one.jpg',
+            },
           },
         },
       },
@@ -113,13 +117,17 @@ describe('useAuthStore', () => {
     expect(state.userId).toBe('u1');
     expect(state.userEmail).toBe('u1@example.com');
     expect(state.userFullName).toBe('User One');
+    expect(state.userPicture).toBe('https://profiles.example/user-one.jpg');
     expect(state.loading).toBe(false);
 
     mocks.authCallback?.('SIGNED_IN', {
       user: {
         id: 'u1',
         email: 'u1@example.com',
-        user_metadata: { full_name: 'User One' },
+        user_metadata: {
+          full_name: 'User One',
+          picture: 'https://profiles.example/user-one.jpg',
+        },
       },
     });
     await flushMicrotasks();

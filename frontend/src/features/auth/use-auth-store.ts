@@ -17,6 +17,7 @@ interface AuthState {
   userId: string | null;
   userEmail: string | null;
   userFullName: string | null;
+  userPicture: string | null;
   isAnonymousUser: boolean;
   hasIdentityLinkConflict: boolean;
   loading: boolean;
@@ -32,6 +33,7 @@ const INITIAL_AUTH_STATE = {
   userId: null,
   userEmail: null,
   userFullName: null,
+  userPicture: null,
   isAnonymousUser: false,
   hasIdentityLinkConflict: false,
 };
@@ -61,6 +63,41 @@ function getSessionFullName(session: Session | null): string | null {
 
   const name = metadata?.name;
   return typeof name === 'string' && name.length > 0 ? name : null;
+}
+
+function getSessionPicture(session: Session | null): string | null {
+  const user = session?.user;
+  if (!user) return null;
+  if ((user as { is_anonymous?: boolean }).is_anonymous) return null;
+
+  const metadataPicture = getMetadataPicture(user.user_metadata);
+  if (metadataPicture) return metadataPicture;
+
+  return getGoogleIdentityPicture(session);
+}
+
+function getGoogleIdentityPicture(session: Session): string | null {
+  const identityData = session.user.identities?.find(
+    (identity) => identity.provider === 'google',
+  )?.identity_data;
+  return getMetadataPicture(identityData);
+}
+
+function getMetadataPicture(
+  metadata: Readonly<{ picture?: unknown; avatar_url?: unknown }> | null | undefined,
+): string | null {
+  return getHttpsImageUrl(metadata?.picture) ?? getHttpsImageUrl(metadata?.avatar_url);
+}
+
+function getHttpsImageUrl(value: unknown): string | null {
+  if (typeof value !== 'string' || value.trim().length === 0) return null;
+
+  try {
+    const imageUrl = new URL(value);
+    return imageUrl.protocol === 'https:' ? imageUrl.href : null;
+  } catch {
+    return null;
+  }
 }
 
 function isAuthRejectedError(error: unknown): boolean {
@@ -200,6 +237,7 @@ async function resolveAuthRedirect(initializationError: unknown): Promise<AuthRe
  * - `userId`: The ID of the authenticated user, or null if not authenticated.
  * - `userEmail`: The email of the authenticated user, or null if not authenticated.
  * - `userFullName`: The full name of the authenticated user, or null if not available.
+ * - `userPicture`: The Google profile picture URL, or null if not available.
  * - `loading`: A boolean indicating if the authentication state is being initialized.
  * - `initializeAuth`: A function that sets up authentication listeners and fetches the initial session.
  *   Returns a cleanup function to unsubscribe from listeners.
@@ -215,6 +253,7 @@ export const useAuthStore = create<AuthState>((set) => {
       userId: nextUserId,
       userEmail: session?.user?.email ?? null,
       userFullName: getSessionFullName(session),
+      userPicture: getSessionPicture(session),
       isAnonymousUser: anonymous,
       hasIdentityLinkConflict: anonymous ? useAuthStore.getState().hasIdentityLinkConflict : false,
       loading: false,
