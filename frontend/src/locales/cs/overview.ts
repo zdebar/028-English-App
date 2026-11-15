@@ -1,9 +1,9 @@
 export const OVERVIEW_TEXTS = {
   // Home lesson progress grid
-  lessonOverview: 'přehled započatých lekcí',
+  lessonOverview: 'přehled dokončených lekcí',
   noLessons: 'Nejsou dostupné žádné lekce.',
-  lessonStarted: 'zahájena',
-  lessonNotStarted: 'nezahájena',
+  lessonCompleted: 'dokončena',
+  lessonNotCompleted: 'nedokončena',
 
   // Grammar Overview Page
   noGrammar: 'Žádná započatá gramatika.',

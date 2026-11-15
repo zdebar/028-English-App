@@ -29,7 +29,7 @@ export interface ProgressCountsType {
 }
 
 export interface LessonOverviewType extends LessonType, ProgressCountsType {
-  isStarted: boolean;
+  isCompleted: boolean;
 }
 
 export interface LevelOverviewType extends LevelType, ProgressCountsType {

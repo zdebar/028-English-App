@@ -21,7 +21,7 @@ const NULL_DATE = config.database.nullReplacementDate;
  * Shared level lookup model.
  *
  * Public API:
- * - `getOverview` combines local levels, lessons, user items, and started lesson records.
+ * - `getOverview` combines local levels, lessons, user items, and completed lesson records.
  * - `syncFromRemote` is inherited from `SyncEntityModel`.
  */
 export default class Levels extends SyncEntityModel implements LevelType {
@@ -41,7 +41,7 @@ export default class Levels extends SyncEntityModel implements LevelType {
    *
    * @param userId User id whose practice items should be aggregated.
    * @param localDate Local date used for started-today counts.
-   * @returns Level summaries with nested lessons and their started state.
+   * @returns Level summaries with nested lessons and their completion state.
    */
   static getOverview(userId: string, localDate: string): Promise<LevelOverviewType[]> {
     return db.transaction('r', db.user_items, db.user_lessons, db.lessons, db.levels, async () => {
@@ -51,8 +51,12 @@ export default class Levels extends SyncEntityModel implements LevelType {
         Lessons.getAll(),
         db.levels.toArray(),
       ]);
-      const startedLessonIds = new Set(userLessons.map((userLesson) => userLesson.lesson_id));
-      return aggregateLevels(items, lessons, levels, localDate, startedLessonIds);
+      const completedLessonIds = new Set(
+        userLessons
+          .filter((userLesson) => userLesson.completed_at != null)
+          .map((userLesson) => userLesson.lesson_id),
+      );
+      return aggregateLevels(items, lessons, levels, localDate, completedLessonIds);
     });
   }
 }
@@ -63,6 +67,7 @@ export default class Levels extends SyncEntityModel implements LevelType {
  * @param items User items already filtered for the target user.
  * @param lessons Lesson records used as aggregation buckets.
  * @param levels Level records used to group lesson summaries.
+ * @param completedLessonIds Lesson ids with a recorded completion.
  * @returns All non-deleted levels, sorted by level sort_order, including levels without lessons.
  * Each level contains its non-deleted lessons, including lessons without items. Lesson summaries
  * include total, initiated, started, and started-today counts. Initial-training skips are initiated
@@ -73,7 +78,7 @@ export function aggregateLevels(
   lessons: LessonType[],
   levels: LevelType[],
   today: string = getTodayLocalDateKey(),
-  startedLessonIds: ReadonlySet<number> = new Set(),
+  completedLessonIds: ReadonlySet<number> = new Set(),
 ): LevelOverviewType[] {
   const countKeys: (keyof ProgressCountsType)[] = [
     'initiatedCount',
@@ -111,7 +116,7 @@ export function aggregateLevels(
     .map((lesson, index) => ({
       ...lesson,
       ...lessonCounts[index],
-      isStarted: startedLessonIds.has(lesson.id),
+      isCompleted: completedLessonIds.has(lesson.id),
     }))
     .filter((lesson) => !lesson.deleted_at)
     .sort((left, right) => (left.sort_order ?? 0) - (right.sort_order ?? 0));
