@@ -109,17 +109,19 @@ describe('usePracticeCardState', () => {
     expect(result.current.czech).toBe('ahoj');
   });
 
-  it('keeps EN-to-CZ hints available when audio is missing', () => {
+  it('shows English and keeps Czech hints available when audio is missing', () => {
     const enToCzItem = { ...item, item_id: 2, audio: null, review_direction: 'en_to_cz' } as UserItemLocal;
     const { result } = renderHook(() => useTestCard(enToCzItem));
 
-    expect(result.current.english).toBe(NBSP);
+    expect(result.current.english).toBe('hello');
     expect(result.current.czech).toBe(NBSP);
     expect(playAudioMock).not.toHaveBeenCalled();
 
-    act(() => result.current.plusHint());
-    expect(result.current.english).toBe('h');
-    expect(result.current.czech).toBe(NBSP);
+    act(() => {
+      for (let index = 0; index < 6; index += 1) result.current.plusHint();
+    });
+    expect(result.current.english).toBe('hello');
+    expect(result.current.czech).toBe('a');
     expect(result.current.pronunciation).toBe(NBSP);
 
     act(() => result.current.handleReveal());
