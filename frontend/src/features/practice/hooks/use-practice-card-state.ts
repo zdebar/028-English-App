@@ -79,7 +79,13 @@ export function usePracticeCardState({
   });
 
   const czech = getPracticeCzech(currentItem, isEnToCz, revealed, czechHinted);
-  const english = getPracticeEnglish(currentItem, isEnToCz, revealed, englishHinted);
+  const english = getPracticeEnglish(
+    currentItem,
+    isEnToCz,
+    revealed,
+    audioError,
+    englishHinted,
+  );
   const czechHintVisible = isEnToCz && !revealed && czechHinted !== NBSP;
 
   const resetQuestionState = useCallback(() => {
@@ -144,10 +150,12 @@ function getPracticeEnglish(
   item: UserItemLocal | null,
   isEnToCz: boolean,
   revealed: boolean,
+  audioError: boolean,
   englishHinted: string,
 ): string | undefined {
   if (!isEnToCz) return getEnglishText(item, revealed, englishHinted);
-  return revealed ? item?.english : englishHinted;
+  if (revealed || !item?.audio?.trim() || audioError) return item?.english;
+  return englishHinted;
 }
 
 function isPracticeAudioDisabled(
